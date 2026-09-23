@@ -14,6 +14,256 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_blackouts: {
+        Row: {
+          branch_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          night: string
+          reason: string | null
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          night: string
+          reason?: string | null
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          night?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_blackouts_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_blackouts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_settings: {
+        Row: {
+          advance_days: number
+          auto_confirm: boolean
+          branch_id: string
+          closed_weekdays: number[]
+          customer_cancel_hours: number
+          cutoff_time: string
+          line_enabled: boolean
+          max_bookings_per_night: number | null
+          no_show_minutes: number
+          party_max: number
+          party_min: number
+          slot_end: string
+          slot_minutes: number
+          slot_start: string
+          updated_at: string
+        }
+        Insert: {
+          advance_days?: number
+          auto_confirm?: boolean
+          branch_id: string
+          closed_weekdays?: number[]
+          customer_cancel_hours?: number
+          cutoff_time?: string
+          line_enabled?: boolean
+          max_bookings_per_night?: number | null
+          no_show_minutes?: number
+          party_max?: number
+          party_min?: number
+          slot_end?: string
+          slot_minutes?: number
+          slot_start?: string
+          updated_at?: string
+        }
+        Update: {
+          advance_days?: number
+          auto_confirm?: boolean
+          branch_id?: string
+          closed_weekdays?: number[]
+          customer_cancel_hours?: number
+          cutoff_time?: string
+          line_enabled?: boolean
+          max_bookings_per_night?: number | null
+          no_show_minutes?: number
+          party_max?: number
+          party_min?: number
+          slot_end?: string
+          slot_minutes?: number
+          slot_start?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_settings_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: true
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          arrived_at: string | null
+          branch_id: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by_customer: boolean
+          checked_in_by: string | null
+          code: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          name: string
+          night: string
+          no_show_at: string | null
+          note: string | null
+          party_size: number
+          phone: string | null
+          qr_token: string
+          reject_reason: string | null
+          rejected_at: string | null
+          reminder_sent_at: string | null
+          slot_time: string
+          source: Database["public"]["Enums"]["booking_source"]
+          status: Database["public"]["Enums"]["booking_status"]
+          table_id: string | null
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          arrived_at?: string | null
+          branch_id: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by_customer?: boolean
+          checked_in_by?: string | null
+          code: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          name: string
+          night: string
+          no_show_at?: string | null
+          note?: string | null
+          party_size: number
+          phone?: string | null
+          qr_token?: string
+          reject_reason?: string | null
+          rejected_at?: string | null
+          reminder_sent_at?: string | null
+          slot_time: string
+          source: Database["public"]["Enums"]["booking_source"]
+          status: Database["public"]["Enums"]["booking_status"]
+          table_id?: string | null
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          arrived_at?: string | null
+          branch_id?: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by_customer?: boolean
+          checked_in_by?: string | null
+          code?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          name?: string
+          night?: string
+          no_show_at?: string | null
+          note?: string | null
+          party_size?: number
+          phone?: string | null
+          qr_token?: string
+          reject_reason?: string | null
+          rejected_at?: string | null
+          reminder_sent_at?: string | null
+          slot_time?: string
+          source?: Database["public"]["Enums"]["booking_source"]
+          status?: Database["public"]["Enums"]["booking_status"]
+          table_id?: string | null
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "tables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "table_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branch_line_secrets: {
         Row: {
           branch_id: string
@@ -548,6 +798,104 @@ export type Database = {
         }
         Relationships: []
       }
+      table_zones: {
+        Row: {
+          active: boolean
+          branch_id: string
+          created_at: string
+          customer_bookable: boolean
+          id: string
+          name: string
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          branch_id: string
+          created_at?: string
+          customer_bookable?: boolean
+          id?: string
+          name: string
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          branch_id?: string
+          created_at?: string
+          customer_bookable?: boolean
+          id?: string
+          name?: string
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_zones_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tables: {
+        Row: {
+          active: boolean
+          branch_id: string
+          created_at: string
+          id: string
+          label: string
+          seats_max: number
+          seats_min: number
+          shape: string
+          sort: number
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          active?: boolean
+          branch_id: string
+          created_at?: string
+          id?: string
+          label: string
+          seats_max?: number
+          seats_min?: number
+          shape?: string
+          sort?: number
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          active?: boolean
+          branch_id?: string
+          created_at?: string
+          id?: string
+          label?: string
+          seats_max?: number
+          seats_min?: number
+          shape?: string
+          sort?: number
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tables_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tables_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "table_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_branches: {
         Row: {
           branch_id: string
@@ -689,6 +1037,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_table: {
+        Args: { p_booking: string; p_table: string }
+        Returns: Json
+      }
+      booking_availability: {
+        Args: { p_branch: string; p_from: string; p_to: string }
+        Returns: Json
+      }
+      cancel_booking: {
+        Args: { p_booking: string; p_customer_id?: string; p_reason?: string }
+        Returns: Json
+      }
+      check_in_booking: {
+        Args: { p_branch: string; p_ref: string }
+        Returns: Json
+      }
       complete_withdrawals: {
         Args: {
           p_notes?: string
@@ -697,8 +1061,27 @@ export type Database = {
         }
         Returns: Json
       }
+      confirm_booking: {
+        Args: { p_booking: string; p_table?: string }
+        Returns: Json
+      }
       confirm_deposit: {
         Args: { p_deposit: string; p_levels: number[]; p_photo_paths: string[] }
+        Returns: Json
+      }
+      create_booking: {
+        Args: {
+          p_branch: string
+          p_customer_id?: string
+          p_name: string
+          p_night: string
+          p_note?: string
+          p_party: number
+          p_phone?: string
+          p_slot: string
+          p_table?: string
+          p_zone?: string
+        }
         Returns: Json
       }
       create_deposit: {
@@ -754,6 +1137,11 @@ export type Database = {
         Args: { p_identifier: string; p_ip: string }
         Returns: boolean
       }
+      mark_no_shows: { Args: never; Returns: number }
+      reject_booking: {
+        Args: { p_booking: string; p_reason: string }
+        Returns: Json
+      }
       reject_deposit: {
         Args: { p_deposit: string; p_reason: string }
         Returns: Json
@@ -790,6 +1178,14 @@ export type Database = {
     }
     Enums: {
       app_locale: "th" | "en" | "zh" | "ko"
+      booking_source: "line" | "staff"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "arrived"
+        | "no_show"
+        | "cancelled"
+        | "rejected"
       bottle_status: "sealed" | "opened" | "consumed"
       deposit_status:
         | "requested"
@@ -932,6 +1328,15 @@ export const Constants = {
   public: {
     Enums: {
       app_locale: ["th", "en", "zh", "ko"],
+      booking_source: ["line", "staff"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "arrived",
+        "no_show",
+        "cancelled",
+        "rejected",
+      ],
       bottle_status: ["sealed", "opened", "consumed"],
       deposit_status: [
         "requested",

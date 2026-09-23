@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 7,
+    "iteration": 8,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -64,7 +64,7 @@
         {
           "id": "P1-03",
           "name": "Bookings + RPCs",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P1-04",
