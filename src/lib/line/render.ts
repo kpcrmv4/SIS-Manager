@@ -1,6 +1,7 @@
 import { SHOP_NAME } from '../constants'
 import { customerLine, isLineLocale, staffLine, type CustomerLine, type LineLocale } from './catalog'
-import { bubble, text, type LineMessage } from './flex'
+import { bubble, type BubbleButton, type LineMessage } from './flex'
+import { KEYWORD_KINDS } from './keywords'
 import { clip, int, interpolate, lineDate, lineDateTime, lineTime, slotTime } from './format'
 
 export type { LineMessage } from './flex'
@@ -27,13 +28,13 @@ export const CUSTOMER_KINDS = [
   'booking_reminder',
 ] as const
 export const STAFF_KINDS = ['deposit_requested', 'withdrawal_requested', 'booking_new', 'test'] as const
-export const REPLY_KINDS = ['linked', 'welcome', 'link_not_found', 'use_receipt_code', 'throttled', 'group_bound'] as const
+export const REPLY_KINDS = ['linked', 'welcome', 'link_not_found', 'use_receipt_code', 'throttled', 'group_bound', ...KEYWORD_KINDS] as const
 export type LineKind = (typeof CUSTOMER_KINDS)[number] | (typeof STAFF_KINDS)[number] | (typeof REPLY_KINDS)[number]
 
 export type RenderContext = {
   /** the branch's LIFF id — customer messages get an "open the app" button when set */
   liffId?: string | null
-  /** APP_BASE_URL — staff-group messages get a deep-link button when set */
+  /** APP_BASE_URL — staff-group messages get a deep-link button, and every bubble the logo, when set */
   appBaseUrl?: string | null
   branchName?: string | null
 }
@@ -56,6 +57,12 @@ function appUrl(base: string | null | undefined, path: string): string | null {
   } catch {
     return null
   }
+}
+
+/** The shop logo for the bubble header — LINE only loads https images. */
+function logoUrl(ctx: RenderContext): string | null {
+  const u = appUrl(ctx.appBaseUrl, '/apple-touch-icon.png')
+  return u && u.startsWith('https://') ? u : null
 }
 
 function eyebrow(ctx: RenderContext): string {
@@ -135,6 +142,7 @@ function renderCustomer(kind: (typeof CUSTOMER_KINDS)[number], loc: LineLocale, 
     lines: [{ text: sentence }],
     altText: `${title} · ${sentence}`,
     button: customerButton(spec.button, p, l, ctx),
+    logoUrl: logoUrl(ctx),
   })
 }
 
@@ -174,46 +182,73 @@ function renderStaff(kind: (typeof STAFF_KINDS)[number], p: Payload, ctx: Render
     lines,
     altText: [title, ...lines.map((l) => l.text)].join(' · '),
     button: uri ? { label: s.open, uri } : null,
+    logoUrl: logoUrl(ctx),
   })
 }
 
+const link = (label: string, uri: string | null): BubbleButton | null => (uri ? { label, uri } : null)
+
 function renderReply(kind: (typeof REPLY_KINDS)[number], loc: LineLocale, p: Payload, ctx: RenderContext): LineMessage {
   const l = customerLine(loc)
+  const base = { theme: 'customer' as const, eyebrow: eyebrow(ctx), logoUrl: logoUrl(ctx) }
+  const app = (path = '') => liffUrl(ctx.liffId, path)
+  // a customer reply with one sentence; the sentence becomes "ask the staff" when the LIFF app is not set up
+  const simple = (title: string, sentence: string, button: BubbleButton | null, extra: { more?: (BubbleButton | null)[]; hint?: string; badge?: string } = {}) => {
+    const lines = [{ text: sentence }, ...(button ? [] : [{ text: l.kwNoApp, muted: true }])]
+    return bubble({ ...base, title, lines, altText: `${title} · ${sentence}`, button, ...extra })
+  }
+
   switch (kind) {
     case 'linked': {
       const title = l.titles.linked
       const head = interpolate(l.linked, { code: code(p) })
       const detail = interpolate(l.linkedDetail, { item: item(p), left: int(p.remaining), count: int(p.quantity) })
       const expiry = p.is_vip === true || !p.expires_at ? l.noExpiry : interpolate(l.expiresOn, { date: lineDate(p.expires_at, loc) })
-      const uri = liffUrl(ctx.liffId)
       return bubble({
-        theme: 'customer',
-        eyebrow: eyebrow(ctx),
+        ...base,
         title,
         lines: [{ text: head }, { text: detail, strong: true }, { text: expiry, muted: true }],
         altText: `${title} · ${head} · ${detail}`,
-        button: uri ? { label: l.viewBottles, uri } : null,
+        button: link(l.viewBottles, app()),
+        hint: l.hint,
       })
     }
-    case 'welcome': {
-      const uri = liffUrl(ctx.liffId)
+    case 'welcome':
       return bubble({
-        theme: 'customer',
-        eyebrow: eyebrow(ctx),
+        ...base,
         title: l.titles.welcome,
         lines: [{ text: l.welcome }],
         altText: `${l.titles.welcome} · ${l.welcome}`,
-        button: uri ? { label: l.openApp, uri } : null,
+        button: link(l.openApp, app()),
+        more: [link(l.btnBook, app('/book')), link(l.btnDeposit, app('/deposit'))],
+        hint: l.hint,
       })
-    }
     case 'link_not_found':
-      return text(l.linkNotFound)
+      return bubble({ ...base, title: l.titles.linkNotFound, lines: [{ text: l.linkNotFound }], altText: l.linkNotFound, hint: l.hint })
     case 'use_receipt_code':
-      return text(l.useReceiptCode)
+      return bubble({ ...base, title: l.titles.useReceiptCode, lines: [{ text: l.useReceiptCode }], altText: l.useReceiptCode })
     case 'throttled':
-      return text(l.throttled)
-    case 'group_bound':
-      return text(interpolate(staffLine().groupBound, { branch: clip(ctx.branchName, 40) }))
+      return bubble({ ...base, title: l.titles.throttled, lines: [{ text: l.throttled }], altText: l.throttled })
+    case 'group_bound': {
+      const s = staffLine()
+      const body = interpolate(s.groupBound, { branch: clip(ctx.branchName, 40) })
+      return bubble({ theme: 'staff', eyebrow: eyebrow(ctx), title: s.groupBoundTitle, lines: [{ text: body }], altText: `${s.groupBoundTitle} · ${body}`, logoUrl: logoUrl(ctx) })
+    }
+    case 'kw_deposit':
+      return simple(l.titles.kwDeposit, l.kwDeposit, link(l.btnDeposit, app('/deposit')), { more: [link(l.viewBottles, app())], hint: l.hint })
+    case 'kw_withdraw':
+      return simple(l.titles.kwWithdraw, l.kwWithdraw, link(l.btnWithdraw, app()), { hint: l.hint })
+    case 'kw_bottles':
+      return simple(l.titles.kwBottles, l.kwBottles, link(l.viewBottles, app()), { more: [link(l.btnDeposit, app('/deposit'))], hint: l.hint })
+    case 'kw_book':
+      return simple(l.titles.kwBook, l.kwBook, link(l.btnBook, app('/book')), { more: [link(l.btnTickets, app('/tickets'))], hint: l.hint })
+    case 'kw_tickets':
+      return simple(l.titles.kwTickets, l.kwTickets, link(l.btnTickets, app('/tickets')), { more: [link(l.btnBook, app('/book'))], hint: l.hint })
+    case 'kw_menu':
+      return simple(l.titles.kwMenu, l.kwMenu, link(l.viewBottles, app()), {
+        more: [link(l.btnDeposit, app('/deposit')), link(l.btnBook, app('/book')), link(l.btnTickets, app('/tickets'))],
+        hint: l.hint,
+      })
   }
 }
 

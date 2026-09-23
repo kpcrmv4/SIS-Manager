@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { customerLocaleFrom } from '@/lib/i18n/config'
 import { getBotProfile, replyMessage } from './client'
 import { renderMessage, type RenderContext } from './render'
+import { matchKeyword } from './keywords'
 
 /**
  * LINE webhook events for one branch OA (P3-A3). Runs only after the route verified the
@@ -89,7 +90,7 @@ async function reply(token: string, replyToken: string | undefined, kind: string
 }
 
 async function handleEvent(branch: WebhookBranch, token: string, ev: LineEvent) {
-  const ctx: RenderContext = { liffId: branch.liff_id, branchName: branch.name }
+  const ctx: RenderContext = { liffId: branch.liff_id, branchName: branch.name, appBaseUrl: process.env.APP_BASE_URL || null }
   const src = ev.source ?? {}
   const admin = getSupabaseAdmin()
 
@@ -112,6 +113,15 @@ async function handleEvent(branch: WebhookBranch, token: string, ev: LineEvent) 
   }
 
   if (src.type !== 'user' || !src.userId || !USER_ID.test(src.userId)) return
+
+  // ฝาก / เบิก / จองโต๊ะ / เมนู … → a card with the matching LIFF page
+  const keyword = matchKeyword(ev.message.text)
+  if (keyword) {
+    const customer = await ensureCustomer(token, src.userId, false)
+    await reply(token, ev.replyToken, keyword, customer?.locale ?? 'th', {}, ctx)
+    return
+  }
+
   const isDep = DEP_CODE.test(text)
   const isRef = LINK_CODE.test(text) || LINK_TOKEN.test(text)
   if (!isDep && !isRef) return // ordinary chat — no reply

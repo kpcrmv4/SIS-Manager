@@ -106,7 +106,7 @@ test('P3-A3-04 the DEP code from the bottle tag does not link; reply says use th
   const d = await inStoreDeposit()
   const ev = textEvent(src, d.code.toLowerCase())
   await postWebhook(request, A_CODE, { destination: 'x', events: [ev] }, SECRET)
-  expect(replyOf(ev.replyToken)).toEqual({ type: 'text', text: cxTh.line.useReceiptCode })
+  expect(replyOf(ev.replyToken)).toMatchObject({ type: 'flex', altText: cxTh.line.useReceiptCode })
   expect((await deposit(d.id)).customer_id).toBeNull()
   expect(await linkedEvents(d.id)).toBe(0)
 })
@@ -126,7 +126,7 @@ test('P3-A3-05 a code already linked to another customer → the same generic no
   await postWebhook(request, A_CODE, { destination: 'x', events: [missing] }, SECRET)
   const a = replyOf(steal.replyToken)
   const b = replyOf(missing.replyToken)
-  expect(a).toEqual({ type: 'text', text: cxTh.line.linkNotFound })
+  expect(a).toMatchObject({ type: 'flex', altText: cxTh.line.linkNotFound })
   expect(b).toEqual(a)
   expect((await deposit(d.id)).customer_id).toBe(ownerRow!.id)
   expect(await linkedEvents(d.id)).toBe(1)
@@ -138,11 +138,11 @@ test('P3-A3-06 five wrong codes, then the right one → "try again later", depos
   for (const wrong of ['ZZZZ23', 'ZZZZ24', 'ZZZZ25', 'ZZZZ26', 'ZZZZ27']) {
     const ev = textEvent(src, wrong)
     await postWebhook(request, A_CODE, { destination: 'x', events: [ev] }, SECRET)
-    expect(replyOf(ev.replyToken)).toEqual({ type: 'text', text: cxTh.line.linkNotFound })
+    expect(replyOf(ev.replyToken)).toMatchObject({ type: 'flex', altText: cxTh.line.linkNotFound })
   }
   const right = textEvent(src, d.link_code)
   await postWebhook(request, A_CODE, { destination: 'x', events: [right] }, SECRET)
-  expect(replyOf(right.replyToken)).toEqual({ type: 'text', text: cxTh.line.throttled })
+  expect(replyOf(right.replyToken)).toMatchObject({ type: 'flex', altText: cxTh.line.throttled })
   expect((await deposit(d.id)).customer_id).toBeNull()
 })
 
@@ -175,4 +175,26 @@ test('P3-A3-08 the same webhook event delivered twice (redelivery) is processed 
   expect(await linkedEvents(d.id)).toBe(1)
   const { count } = await adminDb().from('customers').select('id', { count: 'exact', head: true }).eq('line_user_id', src.userId)
   expect(count).toBe(1)
+})
+
+test('P3-A3-10 a customer typing ฝาก / เบิกเหล้า / จองโต๊ะ gets a flex card with the matching LIFF page; other chat gets nothing', async ({ request }) => {
+  const src = user()
+  const cases = [
+    ['ฝากเหล้า', cxTh.line.titles.kwDeposit, `https://liff.line.me/${LIFF_ID}/deposit`],
+    ['เบิกเหล้า', cxTh.line.titles.kwWithdraw, `https://liff.line.me/${LIFF_ID}`],
+    [' จองโต๊ะ ', cxTh.line.titles.kwBook, `https://liff.line.me/${LIFF_ID}/book`],
+  ] as const
+  for (const [typed, title, uri] of cases) {
+    const ev = textEvent(src, typed)
+    expect((await postWebhook(request, A_CODE, { destination: 'x', events: [ev] }, SECRET)).status()).toBe(200)
+    const msg = replyOf(ev.replyToken) as { type: string; altText: string; contents: { footer: { contents: { action?: { uri: string } }[] } } }
+    expect(msg.type).toBe('flex')
+    expect(msg.altText).toContain(title)
+    expect(msg.contents.footer.contents[0].action?.uri).toBe(uri)
+  }
+  // the customer row exists (locale for the reply) — keywords never link anything
+  expect(await customerByLine(src.userId)).not.toBeNull()
+  const chat = textEvent(src, 'สวัสดีครับ พรุ่งนี้เปิดกี่โมง')
+  await postWebhook(request, A_CODE, { destination: 'x', events: [chat] }, SECRET)
+  expect(mock.repliesTo(chat.replyToken)).toHaveLength(0)
 })

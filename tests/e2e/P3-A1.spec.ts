@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CUSTOMER_KINDS, STAFF_KINDS, renderMessage } from '../../src/lib/line/render'
-import type { FlexMessage, LineMessage } from '../../src/lib/line/flex'
+import type { FlexComponent, FlexMessage, LineMessage } from '../../src/lib/line/flex'
+import { KEYWORD_KINDS, matchKeyword } from '../../src/lib/line/keywords'
 import cxTh from '../../messages/customer/th.json'
 import cxEn from '../../messages/customer/en.json'
 import cxZh from '../../messages/customer/zh.json'
@@ -42,10 +43,17 @@ function flex(m: LineMessage | null): FlexMessage {
 
 function texts(m: FlexMessage): string[] {
   const out: string[] = []
-  for (const box of [m.contents.header, m.contents.body, m.contents.footer]) {
-    for (const c of box?.contents ?? []) if (c.type === 'text') out.push(c.text)
+  const walk = (c: FlexComponent) => {
+    if (c.type === 'text') out.push(c.text)
+    else if (c.type === 'box') c.contents.forEach(walk)
   }
+  for (const box of [m.contents.header, m.contents.body, m.contents.footer]) if (box) walk(box)
   return out
+}
+
+/** every uri button in the footer, in order */
+function buttons(m: FlexMessage) {
+  return (m.contents.footer?.contents ?? []).flatMap((c) => (c.type === 'button' ? [c.action] : []))
 }
 
 /** a template placeholder the renderer failed to fill: {word} */
@@ -183,4 +191,58 @@ test('P3-A1-04 long / odd payload text is capped and never re-expanded', () => {
   expect(texts(flex(renderMessage('withdraw_rejected', 'en', { item: 'x' }, {}))).join(' ')).toContain(cxEn.line.noReason)
   // a round-trip through JSON (what goes on the wire) is lossless
   expect(JSON.parse(JSON.stringify(m))).toEqual(m)
+})
+
+test('P3-A1-05 chat keywords (ฝาก / เบิก / จองโต๊ะ / เมนู …) match in every language, whole message only', () => {
+  const cases: [string, string | null][] = [
+    ['ฝาก', 'kw_deposit'], ['ฝากเหล้า', 'kw_deposit'], [' ฝาก เหล้า ', 'kw_deposit'], ['Deposit', 'kw_deposit'], ['寄存', 'kw_deposit'],
+    ['เบิก', 'kw_withdraw'], ['เบิกเหล้า', 'kw_withdraw'], ['เบิกเหล้าครับ', 'kw_withdraw'], ['withdraw', 'kw_withdraw'],
+    ['ขวดของฉัน', 'kw_bottles'], ['My Bottles', 'kw_bottles'],
+    ['จอง', 'kw_book'], ['จองโต๊ะ', 'kw_book'], ['จองโต๊ะค่ะ', 'kw_book'], ['BOOK!', 'kw_book'], ['예약', 'kw_book'], ['预约', 'kw_book'],
+    ['ตั๋วจอง', 'kw_tickets'], ['my booking', 'kw_tickets'],
+    ['เมนู', 'kw_menu'], ['help', 'kw_menu'],
+    ['อยากจองโต๊ะพรุ่งนี้', null], ['สวัสดี', null], ['K7M2QX', null], ['DEP-SRC-ABC23', null], ['', null],
+  ]
+  for (const [typed, kind] of cases) expect(matchKeyword(typed), JSON.stringify(typed)).toBe(kind)
+})
+
+test('P3-A1-06 every reply is a flex bubble; keyword cards open the matching LIFF page in 4 languages', () => {
+  const page: Record<(typeof KEYWORD_KINDS)[number], string> = {
+    kw_deposit: '/deposit',
+    kw_withdraw: '',
+    kw_bottles: '',
+    kw_book: '/book',
+    kw_tickets: '/tickets',
+    kw_menu: '',
+  }
+  for (const kind of KEYWORD_KINDS) {
+    for (const loc of LOCALES) {
+      const m = flex(renderMessage(kind, loc, {}, { liffId: LIFF }))
+      expect(JSON.stringify(m), `${kind}/${loc}`).not.toMatch(UNFILLED)
+      expect(m.altText.length).toBeGreaterThan(0)
+      const [first] = buttons(m)
+      expect(first, `${kind}/${loc}`).toMatchObject({ type: 'uri', uri: `https://liff.line.me/${LIFF}${page[kind]}` })
+      expect(texts(m).join(' ')).toContain(CATALOG[loc].hint)
+    }
+  }
+  // the menu card offers every page
+  const menu = buttons(flex(renderMessage('kw_menu', 'th', {}, { liffId: LIFF }))).map((a) => a.uri)
+  for (const path of ['', '/deposit', '/book', '/tickets']) expect(menu).toContain(`https://liff.line.me/${LIFF}${path}`)
+  // no LIFF app yet: no buttons, and the card says to ask the staff
+  const bare = flex(renderMessage('kw_book', 'en', {}, {}))
+  expect(buttons(bare)).toHaveLength(0)
+  expect(texts(bare)).toContain(cxEn.line.kwNoApp)
+
+  // the former plain-text replies are bubbles too
+  for (const kind of ['link_not_found', 'use_receipt_code', 'throttled', 'welcome', 'linked'] as const) {
+    for (const loc of LOCALES) expect(flex(renderMessage(kind, loc, PAYLOAD, { liffId: LIFF })).contents.type).toBe('bubble')
+  }
+  expect(texts(flex(renderMessage('throttled', 'th', {}, {})))).toContain(cxTh.line.throttled)
+  const bound = flex(renderMessage('group_bound', 'th', {}, { branchName: 'ศรีราชา' }))
+  expect(texts(bound)).toContain(staffTh.settingsLine.messages.groupBoundTitle)
+  expect(texts(bound).join(' ')).toContain('ศรีราชา')
+
+  // logo in the header only over https
+  expect(JSON.stringify(flex(renderMessage('kw_menu', 'th', {}, { appBaseUrl: 'https://sis.example.com' })))).toContain('https://sis.example.com/apple-touch-icon.png')
+  expect(JSON.stringify(flex(renderMessage('kw_menu', 'th', {}, { appBaseUrl: 'http://localhost:3000' })))).not.toContain('apple-touch-icon')
 })

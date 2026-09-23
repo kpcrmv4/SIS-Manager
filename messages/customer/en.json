@@ -105,7 +105,15 @@
     "full": "Full",
     "lineDisabled": "This branch isn't taking LINE bookings yet — please call the shop",
     "noSlots": "No free slots that day",
-    "weekdays": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+    "weekdays": [
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa",
+      "Su"
+    ]
   },
   "ticket": {
     "title": "Your booking",
@@ -200,7 +208,16 @@
       "bookingCancelled": "Booking cancelled",
       "bookingReminder": "Your booking today",
       "linked": "LINE linked",
-      "welcome": "Welcome"
+      "welcome": "Welcome",
+      "kwDeposit": "Deposit a bottle",
+      "kwWithdraw": "Withdraw a bottle",
+      "kwBottles": "My bottles",
+      "kwBook": "Book a table",
+      "kwTickets": "My bookings",
+      "kwMenu": "How can we help?",
+      "linkNotFound": "Code not found",
+      "useReceiptCode": "Use the 6-character code",
+      "throttled": "Please try again later"
     },
     "noExpiry": "No expiry (VIP)",
     "noReason": "Please ask our staff for details",
@@ -210,6 +227,18 @@
     "linkNotFound": "Code not found · check the 6-character code on your receipt and try again",
     "useReceiptCode": "The DEP code on the bottle tag can't link LINE · type the 6-character code on your receipt instead",
     "throttled": "Too many wrong codes · try again in 15 minutes",
-    "openApp": "Open the shop app"
+    "openApp": "Open the shop app",
+    "kwDeposit": "Fill in the bottles you want to deposit, then hand them to our staff · they confirm it and send you the receipt",
+    "kwWithdraw": "Pick the bottles to withdraw from your list · enjoy them here or take them home",
+    "kwBottles": "See the bottles you deposited, how much is left and when they expire",
+    "kwBook": "Choose the date, time and party size · the shop confirms on LINE",
+    "kwTickets": "See all your bookings and the QR ticket to show at the door",
+    "kwMenu": "Pick what you need",
+    "kwNoApp": "The shop's LINE app isn't set up yet · please ask our staff",
+    "btnDeposit": "Deposit",
+    "btnWithdraw": "Choose bottles to withdraw",
+    "btnBook": "Book a table",
+    "btnTickets": "View my bookings",
+    "hint": "Type deposit · withdraw · book · menu any time"
   }
 }

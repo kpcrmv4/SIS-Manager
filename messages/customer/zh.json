@@ -105,7 +105,15 @@
     "full": "已满",
     "lineDisabled": "本店暂不接受 LINE 订位，请致电本店",
     "noSlots": "当天没有空位",
-    "weekdays": ["一", "二", "三", "四", "五", "六", "日"]
+    "weekdays": [
+      "一",
+      "二",
+      "三",
+      "四",
+      "五",
+      "六",
+      "日"
+    ]
   },
   "ticket": {
     "title": "您的订位券",
@@ -200,7 +208,16 @@
       "bookingCancelled": "订位已取消",
       "bookingReminder": "今日订位提醒",
       "linked": "LINE 已绑定",
-      "welcome": "欢迎"
+      "welcome": "欢迎",
+      "kwDeposit": "寄存酒",
+      "kwWithdraw": "取酒",
+      "kwBottles": "我的酒",
+      "kwBook": "订位",
+      "kwTickets": "我的预约",
+      "kwMenu": "需要什么帮助？",
+      "linkNotFound": "找不到此代码",
+      "useReceiptCode": "请使用 6 位代码",
+      "throttled": "请稍后再试"
     },
     "noExpiry": "无到期日（VIP）",
     "noReason": "详情请咨询店员",
@@ -210,6 +227,18 @@
     "linkNotFound": "找不到此代码 · 请核对寄存单上的 6 位代码后重试",
     "useReceiptCode": "酒瓶标签上的 DEP 编号无法绑定 LINE · 请改为输入寄存单上的 6 位代码",
     "throttled": "输入错误次数过多 · 请 15 分钟后再试",
-    "openApp": "打开店铺应用"
+    "openApp": "打开店铺应用",
+    "kwDeposit": "可先填写要寄存的酒，再把酒交给店员 · 店员确认后会发送寄存单给您",
+    "kwWithdraw": "从您的酒单中选择要取的酒 · 可在店内享用或带回家",
+    "kwBottles": "查看寄存的酒、剩余量和到期日",
+    "kwBook": "选择日期、时间和人数 · 店家会通过 LINE 确认",
+    "kwTickets": "查看所有预约及到店出示的 QR 预约券",
+    "kwMenu": "请选择您需要的服务",
+    "kwNoApp": "店家尚未开通 LINE 应用 · 请询问店员",
+    "btnDeposit": "寄存酒",
+    "btnWithdraw": "选择要取的酒",
+    "btnBook": "订位",
+    "btnTickets": "查看我的预约",
+    "hint": "随时输入 寄存 · 取酒 · 订位 · 菜单"
   }
 }
