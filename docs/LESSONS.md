@@ -35,3 +35,10 @@
 -->
 
 ---
+
+## L-001 · 2026-09-23 · thai-admin-page-kit · contrast-resolve-var
+- อาการ: verify-contrast ของ kit อ่าน globals.css ที่ map token ด้วย var()/color-mix() ไม่ได้ และบังคับ WHITE บน brand-solid
+- สาเหตุ: dark theme ของเดโม่ใช้ brand ชมพูอ่อน + --on-brand สีเข้ม · hover แบบผสมดำ (DESIGN mapping) ทำให้ on-brand เหลือ 3.91:1
+- หลักฐาน: scripts/verify-contrast.mjs STAFF DARK on-brand on brand-solid-active 3.91
+- กฎ: ตัวตรวจ contrast ต้องคำนวณสีจริงของ token ที่ map ด้วย var()/color-mix() โดยใช้ --on-brand ของโปรเจกต์เป็นตัวอักษรบน brand-solid
+- status: new

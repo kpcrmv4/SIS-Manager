@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "verify": "node scripts/verify-route-guards.mjs && node scripts/verify-red-tested.mjs scripts && node scripts/verify-portability.mjs",
+    "verify": "node scripts/verify-route-guards.mjs && node scripts/verify-red-tested.mjs scripts && node scripts/verify-portability.mjs && node scripts/verify-contrast.mjs",
     "db:mcp-smoke": "node scripts/supabase-mcp-smoke.mjs",
     "test:e2e": "playwright test"
   },

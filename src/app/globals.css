@@ -1,1 +1,275 @@
+/* ════════════════════════════════════════════════════════════════════════
+   SIS Manager — design tokens (Tailwind v4, CSS-first)
+
+   The page kit (thai-admin-page-kit/tokens.css) supplies the token NAMES and
+   component classes; every colour VALUE comes from docs/design/demo.html,
+   copied verbatim per docs/design/DESIGN.md. Kit-only tokens are mapped per
+   DESIGN.md "Token mapping". Check after any edit:
+     node scripts/verify-contrast.mjs src/app/globals.css
+   ════════════════════════════════════════════════════════════════════════ */
+
 @import 'tailwindcss';
+@import './ui.css';
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Staff app "Minimal" — light (demo values) ─────────────────────────── */
+:root {
+  color-scheme: light;
+  --canvas: #F6F4F3;
+  --card: #FFFFFF;
+  --ink: #1E1718;
+  --line: #E6E1E0;
+  --muted: #6E6466;
+  --brand: #9A1F2A;
+  --on-brand: #FFFFFF;
+  --brand-soft: #F6E4E6;
+  --brand-sidebar: #221619;
+  --accent: #D9A94E;
+  --status-pending: #5E5A5B;
+  --status-pending-bg: #EFECEC;
+  --status-progress: #9A5705;
+  --status-progress-bg: #FCF0DD;
+  --status-done: #17703F;
+  --status-done-bg: #E3F3EA;
+  --on-done: #FFFFFF;
+  --urgent: #B42318;
+  --urgent-bg: #FDECEA;
+  --info: #1D5FA8;
+  --info-bg: #E6EFFA;
+  --gold-ink: #7D5A12;
+  --gold-bg: #F8EFD9;
+  --placeholder: #786E70;
+  --disabled-fg: #9A9091;
+  --disabled-bg: #EDEAEA;
+  --selection: #F3D9DC;
+  --focus: #9A1F2A;
+  --sidebar-title: #FFFFFF;
+  --sidebar-fg: #E6DADB;
+  --sidebar-fg-dim: #A8999B;
+
+  /* ── Kit names → demo values (DESIGN.md "Token mapping") ── */
+  --surface: var(--card);
+  --surface-2: color-mix(in srgb, var(--canvas) 55%, var(--card));
+  --surface-3: var(--disabled-bg);
+  --ink-2: color-mix(in srgb, var(--ink) 78%, var(--muted));
+  --line-soft: color-mix(in srgb, var(--line) 60%, var(--card));
+  --line-strong: color-mix(in srgb, var(--line) 65%, var(--muted));
+  --brand-solid: var(--brand);
+  --brand-solid-hover: color-mix(in srgb, var(--brand) 88%, #000);
+  --brand-solid-active: color-mix(in srgb, var(--brand) 78%, #000);
+  --brand-tint: var(--brand-soft);
+  --brand-on-tint: var(--brand);
+  --brand-tint-strong: color-mix(in srgb, var(--brand) 25%, var(--brand-soft));
+  --sidebar: var(--brand-sidebar);
+  --sidebar-hover: rgb(255 255 255 / 0.06);
+  --sidebar-active-bg: rgb(255 255 255 / 0.10);
+  --sidebar-active-fg: var(--sidebar-title);
+  --sidebar-line: rgb(255 255 255 / 0.08);
+  --status-info: var(--info);
+  --status-info-bg: var(--info-bg);
+  --status-pending-ring: color-mix(in srgb, var(--status-pending) 28%, var(--status-pending-bg));
+  --status-progress-ring: color-mix(in srgb, var(--status-progress) 28%, var(--status-progress-bg));
+  --status-done-ring: color-mix(in srgb, var(--status-done) 28%, var(--status-done-bg));
+  --status-info-ring: color-mix(in srgb, var(--info) 28%, var(--info-bg));
+  --urgent-ring: color-mix(in srgb, var(--urgent) 28%, var(--urgent-bg));
+  --gold-ring: color-mix(in srgb, var(--gold-ink) 28%, var(--gold-bg));
+  --brand-ring: color-mix(in srgb, var(--brand) 28%, var(--brand-soft));
+  --urgent-solid: #B42318;
+  --chart-brand: var(--brand);
+  --chart-info: var(--info);
+  --chart-done: var(--status-done);
+  --chart-progress: var(--status-progress);
+  --chart-urgent: var(--urgent);
+  --ring: color-mix(in srgb, var(--focus) 45%, transparent);
+
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  --sh-1: 0 1px 2px rgb(30 23 24 / 0.05), 0 1px 1px rgb(30 23 24 / 0.04);
+  --sh-2: 0 2px 4px rgb(30 23 24 / 0.05), 0 6px 16px rgb(30 23 24 / 0.07);
+  --sh-3: 0 8px 16px rgb(30 23 24 / 0.08), 0 24px 48px rgb(30 23 24 / 0.14);
+}
+
+/* ── Staff app "Minimal" — dark (demo values) ──────────────────────────── */
+.dark {
+  color-scheme: dark;
+  --canvas: #141011;
+  --card: #1E191A;
+  --ink: #EEE8E7;
+  --line: #332B2C;
+  --muted: #A99EA0;
+  --brand: #E0717C;
+  --on-brand: #230A0E;
+  --brand-soft: #3A1C20;
+  --brand-sidebar: #0D0A0B;
+  --accent: #E2B865;
+  --status-pending: #B9B0B1;
+  --status-pending-bg: #2A2425;
+  --status-progress: #F0B060;
+  --status-progress-bg: #36281A;
+  --status-done: #6BD49A;
+  --status-done-bg: #17301F;
+  --on-done: #0B2416;
+  --urgent: #F28B82;
+  --urgent-bg: #3A1E1C;
+  --info: #8AB8F2;
+  --info-bg: #1A2638;
+  --gold-ink: #E2B865;
+  --gold-bg: #33291A;
+  --placeholder: #958A8C;
+  --disabled-fg: #6F6567;
+  --disabled-bg: #262021;
+  --selection: #4A2429;
+  --focus: #E0717C;
+  --sidebar-title: #FFFFFF;
+  --sidebar-fg: #D6CBCC;
+  --sidebar-fg-dim: #8C8082;
+
+  /* dark brand is a light fill under DARK text — hover/active lighten instead of
+     darken, or on-brand drops to 3.91:1 (RULINGS R-004) */
+  --brand-solid-hover: color-mix(in srgb, var(--brand) 88%, #FFFFFF);
+  --brand-solid-active: color-mix(in srgb, var(--brand) 78%, #FFFFFF);
+
+  --sh-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --sh-2: 0 2px 4px rgb(0 0 0 / 0.4), 0 6px 16px rgb(0 0 0 / 0.5);
+  --sh-3: 0 8px 16px rgb(0 0 0 / 0.5), 0 24px 48px rgb(0 0 0 / 0.6);
+}
+
+/* ── Customer LIFF "Night Bar" (dark-first) — scoped under .cx ─────────── */
+.cx {
+  color-scheme: dark;
+  --cx-bg: #120C0D;
+  --cx-card: #1F1517;
+  --cx-card-2: #2A1D20;
+  --cx-ink: #F6EEE6;
+  --cx-muted: #B8A8A2;
+  --cx-line: #3A2B2D;
+  --cx-wine: #B3262F;
+  --cx-on-wine: #FFFFFF;
+  --cx-gold: #D9B26A;
+  --cx-warn: #F0A07F;
+  --cx-warn-line: #E07B53;
+}
+
+/* ── Customer LIFF "cream" — only when the customer picks light ────────── */
+.cx[data-cx-theme='light'] {
+  color-scheme: light;
+  --cx-bg: #FBF6EE;
+  --cx-card: #FFFFFF;
+  --cx-card-2: #F4ECE1;
+  --cx-ink: #2A1A15;
+  --cx-muted: #6E5A53;
+  --cx-line: #EADFD3;
+  --cx-wine: #8E1B22;
+  --cx-on-wine: #FFFFFF;
+  --cx-gold: #80591A;
+  --cx-warn: #A6431C;
+  --cx-warn-line: #A6431C;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted-token: var(--muted);
+  --color-placeholder: var(--placeholder);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-on-brand: var(--on-brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-tint-strong: var(--brand-tint-strong);
+  --color-brand-on-tint: var(--brand-on-tint);
+  --color-brand-solid: var(--brand-solid);
+  --color-brand-solid-hover: var(--brand-solid-hover);
+  --color-brand-solid-active: var(--brand-solid-active);
+  --color-brand-ring: var(--brand-ring);
+  --color-accent: var(--accent);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-bg: var(--gold-bg);
+  --color-gold-ring: var(--gold-ring);
+  --color-disabled-fg: var(--disabled-fg);
+  --color-disabled-bg: var(--disabled-bg);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-title: var(--sidebar-title);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-fg-dim: var(--sidebar-fg-dim);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+  --color-sidebar-line: var(--sidebar-line);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-ring: var(--status-pending-ring);
+  --color-status-progress: var(--status-progress);
+  --color-status-progress-bg: var(--status-progress-bg);
+  --color-status-progress-ring: var(--status-progress-ring);
+  --color-status-done: var(--status-done);
+  --color-status-done-bg: var(--status-done-bg);
+  --color-status-done-ring: var(--status-done-ring);
+  --color-on-done: var(--on-done);
+  --color-status-info: var(--status-info);
+  --color-status-info-bg: var(--status-info-bg);
+  --color-status-info-ring: var(--status-info-ring);
+  --color-urgent: var(--urgent);
+  --color-urgent-bg: var(--urgent-bg);
+  --color-urgent-ring: var(--urgent-ring);
+  --color-urgent-solid: var(--urgent-solid);
+
+  --color-cx-bg: var(--cx-bg);
+  --color-cx-card: var(--cx-card);
+  --color-cx-card-2: var(--cx-card-2);
+  --color-cx-ink: var(--cx-ink);
+  --color-cx-muted: var(--cx-muted);
+  --color-cx-line: var(--cx-line);
+  --color-cx-wine: var(--cx-wine);
+  --color-cx-on-wine: var(--cx-on-wine);
+  --color-cx-gold: var(--cx-gold);
+  --color-cx-warn: var(--cx-warn);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+
+  --shadow-e1: var(--sh-1);
+  --shadow-e2: var(--sh-2);
+  --shadow-e3: var(--sh-3);
+
+  --font-sans: var(--font-thai), 'IBM Plex Sans Thai', system-ui, sans-serif;
+  --font-serif: var(--font-serif-thai), 'Noto Serif Thai', serif;
+}
+
+@layer base {
+  /* clip, not hidden — hidden creates a scroll container and breaks sticky */
+  html, body { overflow-x: clip; }
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  ::selection { background: var(--selection); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  input::placeholder, textarea::placeholder { color: var(--placeholder); opacity: 1; }
+  button:not(:disabled), [role='button']:not([aria-disabled='true']) { cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+}
+
+@media print {
+  :root { color-scheme: light; }
+  .no-print { display: none !important; }
+}
