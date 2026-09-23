@@ -98,19 +98,21 @@ test.describe('owner', () => {
     }).toPass({ timeout: 20_000 })
 
     await page.goto('/overview')
-    const row = page.getByTestId('overview-branch-row').and(page.locator(`[data-branch="${BRANCH_A_CODE}"]`))
-    await expect(row).toBeVisible()
-    await expect(row.locator('td').nth(1)).toHaveText(String(truth.in_store_bottles))
-    await expect(row.locator('td').nth(2)).toHaveText(String(truth.to_confirm))
+    // ≤ 3 active branches → a card each; more → a table row each (R-030) — both carry the figures as data-*
+    const branch = page.locator(`[data-testid="overview-branch-card"], [data-testid="overview-branch-row"]`).and(page.locator(`[data-branch="${BRANCH_A_CODE}"]:visible`))
+    await expect(branch).toBeVisible()
+    await expect(branch).toHaveAttribute('data-in-store', String(truth.in_store_bottles))
+    await expect(branch).toHaveAttribute('data-to-confirm', String(truth.to_confirm))
 
-    // the four KPI cells show what the RPC returns at render time
+    // the KPI cells show what the RPC returns at render time
     await expect(async () => {
       await page.reload()
       const k = (await ownerOverview(from, to)).kpi
-      const metrics = page.locator('main .tnum.text-3xl')
-      await expect(metrics.nth(0)).toHaveText(String(k.in_store_bottles))
-      await expect(metrics.nth(1)).toHaveText(String(k.new_deposits))
-      await expect(metrics.nth(2)).toHaveText(String(k.disposed))
+      const kpi = (key: string) => page.locator(`[data-testid="kpi-value"][data-kpi="${key}"]`)
+      await expect(kpi('in_store')).toHaveText(String(k.in_store_bottles))
+      await expect(kpi('new_deposits')).toHaveText(String(k.new_deposits))
+      await expect(kpi('bottles_withdrawn')).toHaveText(String(k.bottles_withdrawn))
+      await expect(kpi('disposed')).toHaveText(String(k.disposed))
     }).toPass({ timeout: 30_000 })
   })
 
@@ -139,7 +141,7 @@ test.describe('owner', () => {
     await expect(page).toHaveURL(/period=last/)
     await expect(async () => {
       const k = (await ownerOverview(last.from, last.to)).kpi
-      await expect(page.locator('main .tnum.text-3xl').nth(1)).toHaveText(String(k.new_deposits))
+      await expect(page.locator('[data-testid="kpi-value"][data-kpi="new_deposits"]')).toHaveText(String(k.new_deposits))
     }).toPass({ timeout: 20_000 })
   })
 

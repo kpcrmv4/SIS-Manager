@@ -94,12 +94,19 @@ async function guard() {
 
 // ── 1. branches ─────────────────────────────────────────────────────────
 async function upsertBranches() {
+  // L-010: the owner may have set the receipt (header, LINE QR) on the demo branch since — keep
+  // what is there and only make sure the demo marker stays
+  const existing = must('branches', await admin.from('branches').select('code, receipt_settings').in('code', DEMO_CODES))
+  const receipt = (code) => {
+    const now = existing.find((r) => r.code === code)?.receipt_settings
+    return now && typeof now === 'object' ? { ...DEMO_MARK, ...now, demo: true } : DEMO_MARK
+  }
   const rows = must(
     'branches',
     await admin
       .from('branches')
       .upsert(
-        BRANCHES.map((b) => ({ ...b, active: true, deposit_days: 30, expiry_notice_days: 7, withdrawal_blocked_days: ['Fri', 'Sat'], opens_at: '19:00', closes_at: '02:00', receipt_settings: DEMO_MARK })),
+        BRANCHES.map((b) => ({ ...b, active: true, deposit_days: 30, expiry_notice_days: 7, withdrawal_blocked_days: ['Fri', 'Sat'], opens_at: '19:00', closes_at: '02:00', receipt_settings: receipt(b.code) })),
         { onConflict: 'code' },
       )
       .select('id, code'),

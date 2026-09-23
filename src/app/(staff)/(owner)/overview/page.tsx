@@ -1,183 +1,235 @@
 import { getTranslations } from 'next-intl/server'
-import { CalendarDays, Download, FileText, Wine } from 'lucide-react'
+import { GlassWater, Martini, PackagePlus, Trash2, UserCheck, Users, Wine } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
-import { MetricBar, Metric } from '@/components/ui/metric'
-import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/states'
-import { ListRow } from '@/components/ui/list-row'
 import { SegmentedFilter } from '@/components/ui/filter-bar'
+import { ActionStrip } from '@/components/overview/action-strip'
+import { ActivityFeed } from '@/components/overview/activity-feed'
+import { BranchOverview } from '@/components/overview/branch-overview'
+import { DisposalList } from '@/components/overview/disposal-list'
+import { ExpiringList } from '@/components/overview/expiring-list'
+import { ExportMenu } from '@/components/overview/export-menu'
+import { KpiStrip, type KpiCell } from '@/components/overview/kpi-strip'
+import { OverviewLive } from '@/components/overview/overview-live'
+import { SetupChecklist } from '@/components/overview/setup-checklist'
+import { TonightPanel } from '@/components/overview/tonight-panel'
+import { TopList } from '@/components/overview/top-list'
+import { WeekdayChart } from '@/components/overview/weekday-chart'
 import { getActorState } from '@/lib/auth/actor'
 import { formatLongDate, formatShortDate, formatTime } from '@/lib/date'
-import { getOverview, parsePeriod, periodRange, showRate, type OverviewBranch } from '@/lib/reports/overview'
+import { getDashboard, getTrends } from '@/lib/reports/dashboard'
+import { ACTION_KEYS, SETUP_KEYS, actionItems, delta, pointsDelta, setupItems, weeklyShowRate, type Delta, type TrendWeek } from '@/lib/reports/dashboard-view'
+import { getOverview, parsePeriod, periodRange, previousRange, showRate } from '@/lib/reports/overview'
 
 type Search = Promise<{ period?: string }>
 
-/** Owner landing (P4-01): KPIs across every branch, a per-branch table, latest disposals. */
+/**
+ * Owner landing (P4-01, redesigned R-030): what needs doing → tonight → the business.
+ * Setup checklist (until done) · ต้องจัดการ · five figures with trend · tonight + activity (live) ·
+ * branches · expiring / disposals · busy weekdays · top customers / liquor.
+ */
 export default async function OverviewPage({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams
   const period = parsePeriod(sp.period)
   const { from, to } = periodRange(period)
-  const [t, tc, ts, state, data] = await Promise.all([
+  const prevRange = previousRange(from, to)
+  const [t, tRoot, tc, ts, tb, state, data, dash, trends] = await Promise.all([
     getTranslations('overview'),
+    getTranslations(),
     getTranslations('common'),
     getTranslations('status'),
+    getTranslations('settingsBooking'),
     getActorState(),
     getOverview(from, to),
+    getDashboard(),
+    getTrends(from, to, prevRange),
   ])
-  const locale = state.status === 'ok' ? state.actor.locale : 'th'
-  const now = new Date()
+  const actor = state.status === 'ok' ? state.actor : null
+  const locale = actor?.locale ?? 'th'
+  const working = actor?.branch?.id ?? null
+  const branches = dash.branches
+  const multi = branches.length > 1
+  const weekdays = tb.raw('weekdays') as string[]
   const k = data.kpi
+  const prev = trends.prev
+  const weeks = trends.weeks
+
+  // ── figures ──
+  const deltaText = (d: Delta, points = false) =>
+    !d ? null : d.pct === null ? t('delta.new') : d.dir === 'same' ? t('delta.same') : points ? t('delta.points', { pts: d.pct }) : t('delta.pct', { pct: d.pct })
+  const vsPrev = t('delta.vsPrev', { from: formatShortDate(prev.from, locale), to: formatShortDate(prev.to, locale) })
+  const spark = (values: (number | null)[]) => t('spark', { values: values.map((v) => v ?? '–').join(', ') })
+  const series = (key: keyof Omit<TrendWeek, 'start'>) => weeks.map((w) => w[key])
+  const reports = `/reports?from=${from}&to=${to}`
   const rate = showRate(k.arrived, k.no_shows)
-  const exportHref = (format: 'xlsx' | 'pdf') => `/api/reports/export?format=${format}&from=${from}&to=${to}`
+  const prevRate = showRate(prev.arrived, prev.no_shows)
+  const lastWeekStock = weeks.length >= 2 ? weeks[weeks.length - 2].in_store_end : null
+  const stockDelta = lastWeekStock === null ? null : delta(k.in_store_bottles, lastWeekStock)
+  const newDelta = delta(k.new_deposits, prev.new_deposits)
+  const outDelta = delta(k.bottles_withdrawn, prev.bottles_withdrawn)
+  const disposedDelta = delta(k.disposed, prev.disposed)
+  const rateDelta = pointsDelta(rate, prevRate)
+  const rates = weeklyShowRate(weeks)
+
+  const cells: KpiCell[] = [
+    {
+      key: 'in_store',
+      label: t('kpiInStore'),
+      icon: Wine,
+      value: String(k.in_store_bottles),
+      unit: t('bottlesUnit'),
+      hint: t('kpiInStoreHint', { branches: k.branches, customers: k.in_store_customers }),
+      tone: 'default',
+      delta: stockDelta,
+      good: 'none',
+      deltaText: deltaText(stockDelta),
+      deltaTitle: t('delta.vsLastWeek'),
+      series: series('in_store_end'),
+      seriesLabel: spark(series('in_store_end')),
+      href: '/deposits',
+    },
+    {
+      key: 'new_deposits',
+      label: t('kpiNew'),
+      icon: PackagePlus,
+      value: String(k.new_deposits),
+      hint: t('prevHint', { value: prev.new_deposits }),
+      tone: 'default',
+      delta: newDelta,
+      good: 'up',
+      deltaText: deltaText(newDelta),
+      deltaTitle: vsPrev,
+      series: series('new_deposits'),
+      seriesLabel: spark(series('new_deposits')),
+      href: reports,
+    },
+    {
+      key: 'bottles_withdrawn',
+      label: t('kpiWithdrawn'),
+      icon: GlassWater,
+      value: String(k.bottles_withdrawn),
+      unit: t('bottlesUnit'),
+      hint: t('prevHint', { value: prev.bottles_withdrawn }),
+      tone: 'info',
+      delta: outDelta,
+      good: 'none',
+      deltaText: deltaText(outDelta),
+      deltaTitle: vsPrev,
+      series: series('bottles_withdrawn'),
+      seriesLabel: spark(series('bottles_withdrawn')),
+      href: reports,
+    },
+    {
+      key: 'disposed',
+      label: t('kpiDisposed'),
+      icon: Trash2,
+      value: String(k.disposed),
+      hint: t('kpiDisposedHint', { count: k.awaiting_disposal }),
+      tone: 'urgent',
+      delta: disposedDelta,
+      good: 'down',
+      deltaText: deltaText(disposedDelta),
+      deltaTitle: vsPrev,
+      series: series('disposed'),
+      seriesLabel: spark(series('disposed')),
+      href: reports,
+    },
+    {
+      key: 'show_rate',
+      label: t('kpiShowRate'),
+      icon: UserCheck,
+      value: rate === null ? '—' : `${rate}%`,
+      hint: t('kpiShowRateHint', { bookings: k.bookings, noShows: k.no_shows }),
+      tone: 'done',
+      delta: rateDelta,
+      good: 'up',
+      deltaText: deltaText(rateDelta, true),
+      deltaTitle: vsPrev,
+      series: rates,
+      seriesLabel: spark(rates),
+      seriesMax: 100,
+      href: reports,
+    },
+  ]
+
+  // ── what needs doing ──
+  const actions = actionItems(branches, working)
+  const setup = setupItems(branches, working)
+  const setupOpen = setup.some((s) => !s.done)
+  const expiringTotal = branches.reduce((n, b) => n + b.expiring, 0)
+  const actionLabels = Object.fromEntries(ACTION_KEYS.map((key) => [key, t(`action.${key}`)])) as Record<(typeof ACTION_KEYS)[number], string>
+  const setupLabels = Object.fromEntries(SETUP_KEYS.map((key) => [key, t(`setup.${key}`)])) as Record<(typeof SETUP_KEYS)[number], string>
+  const setupHints = Object.fromEntries(SETUP_KEYS.map((key) => [key, t(`setupHint.${key}`)])) as Record<(typeof SETUP_KEYS)[number], string>
 
   return (
     <>
+      <OverviewLive branchIds={branches.map((b) => b.id)} working={working} />
       <PageHeader
         title={t('title')}
-        subtitle={t('subtitle', { date: formatLongDate(now, locale), time: formatTime(now, locale) })}
+        subtitle={t('nightLine', { date: formatLongDate(dash.night, locale), time: formatTime(dash.generated_at, locale) })}
         action={
           <>
-            <a className="btn-ghost" href={exportHref('xlsx')} data-testid="overview-export-xlsx">
-              <Download className="size-4" aria-hidden />
-              {t('exportExcel')}
-            </a>
-            <a className="btn-ghost" href={exportHref('pdf')} data-testid="overview-export-pdf">
-              <FileText className="size-4" aria-hidden />
-              {t('exportPdf')}
-            </a>
+            <SegmentedFilter
+              basePath="/overview"
+              params={{ period: sp.period }}
+              name="period"
+              value={period}
+              label={t('periodLabel')}
+              options={[
+                { value: 'month', label: t('periodThisMonth') },
+                { value: 'last', label: t('periodLastMonth') },
+                { value: '30', label: t('period30') },
+              ]}
+            />
+            <ExportMenu
+              label={t('export')}
+              excel={t('exportExcel')}
+              pdf={t('exportPdf')}
+              excelHref={`/api/reports/export?format=xlsx&from=${from}&to=${to}`}
+              pdfHref={`/api/reports/export?format=pdf&from=${from}&to=${to}`}
+            />
           </>
         }
       />
 
-      <div className="mb-4 max-w-md">
-        <SegmentedFilter
-          basePath="/overview"
-          params={{ period: sp.period }}
-          name="period"
-          value={period}
-          label={t('periodLabel')}
-          options={[
-            { value: 'month', label: t('periodThisMonth') },
-            { value: 'last', label: t('periodLastMonth') },
-            { value: '30', label: t('period30') },
-          ]}
+      {setupOpen && (
+        <SetupChecklist
+          title={t('setupTitle')}
+          progress={t('setupProgress', { done: setup.filter((s) => s.done).length, total: setup.length })}
+          go={t('setupGo')}
+          items={setup}
+          labels={setupLabels}
+          hints={setupHints}
+          missing={(names) => (multi && names.length ? t('setupMissing', { branches: names.join(', ') }) : null)}
         />
-      </div>
+      )}
 
-      <MetricBar>
-        <Metric label={t('kpiInStore')} value={k.in_store_bottles} hint={t('kpiInStoreHint', { branches: k.branches, customers: k.in_store_customers })} />
-        <Metric label={t('kpiNew')} value={k.new_deposits} hint={t('kpiNewHint', { count: k.bottles_withdrawn })} />
-        <Metric label={t('kpiDisposed')} value={k.disposed} hint={t('kpiDisposedHint', { count: k.awaiting_disposal })} tone="urgent" />
-        <Metric label={t('kpiShowRate')} value={rate === null ? '—' : `${rate}%`} hint={t('kpiShowRateHint', { bookings: k.bookings, noShows: k.no_shows })} tone="done" />
-      </MetricBar>
+      <ActionStrip title={t('actionsTitle')} none={t('actionsNone')} items={actions} labels={actionLabels} />
+
+      <KpiStrip cells={cells} />
+
+      {/* left: tonight and the bottles at risk · right: what just happened — two columns of similar height */}
+      <div className="grid items-start gap-4 xl:grid-cols-12">
+        <div className="flex min-w-0 flex-col gap-4 xl:col-span-7">
+          <TonightPanel tonight={dash.tonight} t={t} nightLabel={formatShortDate(dash.night, locale)} planHref="/bookings" />
+          <ExpiringList items={dash.expiring} total={expiringTotal} t={t} locale={locale} working={working} showBranch={multi} now={new Date(dash.generated_at)} />
+          <DisposalList items={data.recent_disposals} t={t} disposedLabel={ts('deposit.disposed')} locale={locale} working={working} showBranch={multi} />
+        </div>
+        <ActivityFeed className="min-w-0 xl:col-span-5" items={dash.activity} t={t} tRoot={tRoot} locale={locale} working={working} showBranch={multi} />
+      </div>
 
       <h2 className="sec-head">{t('byBranch')}</h2>
-      {data.branches.length === 0 ? (
+      {branches.length === 0 ? (
         <EmptyState message={t('noBranches')} />
       ) : (
-        <>
-          <div className="panel hidden overflow-x-auto nav:block" data-testid="overview-branches-desktop">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>{t('colBranch')}</th>
-                  <th>{t('colInStore')}</th>
-                  <th>{t('colToConfirm')}</th>
-                  <th>{t('colExpiring')}</th>
-                  <th>{t('colToDispose')}</th>
-                  <th>{t('colBookingsTonight')}</th>
-                  <th>{t('colArrived')}</th>
-                </tr>
-              </thead>
-              <tbody className="tnum">
-                {data.branches.map((b) => (
-                  <tr key={b.id} data-testid="overview-branch-row" data-branch={b.code}>
-                    <td className="font-semibold">{b.name}</td>
-                    <td>{b.in_store_bottles}</td>
-                    <td>{b.to_confirm > 0 ? <Badge tone="progress">{b.to_confirm}</Badge> : 0}</td>
-                    <td>{b.expiring}</td>
-                    <td>{b.to_dispose > 0 ? <Badge tone="urgent">{b.to_dispose}</Badge> : 0}</td>
-                    <td>{tc('tables', { count: b.bookings_tonight })}</td>
-                    <td>{b.arrived_tonight}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex flex-col gap-3 nav:hidden" data-testid="overview-branches-mobile">
-            {data.branches.map((b) => (
-              <BranchCard key={b.id} b={b} t={t} tc={tc} />
-            ))}
-          </div>
-        </>
+        <BranchOverview branches={branches} t={t} tc={tc} weekdays={weekdays} locale={locale} working={working} />
       )}
 
-      <h2 className="sec-head">{t('recentDisposals')}</h2>
-      {data.recent_disposals.length === 0 ? (
-        <EmptyState message={t('noDisposals')} />
-      ) : (
-        <div className="panel" data-testid="overview-disposals">
-          {data.recent_disposals.map((d) => (
-            <ListRow
-              key={d.id}
-              href={`/deposits/${d.id}`}
-              title={`${d.item} · ${d.customer} · ${d.branch}`}
-              meta={
-                <span className="tnum">
-                  {t('disposalMeta', {
-                    expired: d.expires_at ? formatShortDate(d.expires_at, locale) : '—',
-                    disposed: d.disposed_at ? formatShortDate(d.disposed_at, locale) : '—',
-                    by: d.by ?? '—',
-                  })}
-                  {d.notified && ` · ${t('lineNotified')}`}
-                </span>
-              }
-              aside={<Badge tone="urgent">{ts('deposit.disposed')}</Badge>}
-            />
-          ))}
-        </div>
-      )}
+      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <WeekdayChart days={trends.weekdays} weekdays={weekdays} t={t} className="md:col-span-2 xl:col-span-1" />
+        <TopList title={t('topCustomersTitle')} rows={trends.top_customers} t={t} icon={Users} testId="overview-top-customers" />
+        <TopList title={t('topItemsTitle')} rows={trends.top_items} t={t} icon={Martini} testId="overview-top-items" />
+      </div>
     </>
-  )
-}
-
-/** Phone card: row 1 = liquor (deposits), row 2 = table bookings. */
-function BranchCard({
-  b,
-  t,
-  tc,
-}: {
-  b: OverviewBranch
-  t: Awaited<ReturnType<typeof getTranslations>>
-  tc: Awaited<ReturnType<typeof getTranslations>>
-}) {
-  return (
-    <div className="panel p-3.5" data-testid="overview-branch-card" data-branch={b.code}>
-      <div className="mb-2.5 font-semibold text-ink">{b.name}</div>
-      <div className="flex items-start gap-2.5 border-b border-line pb-2.5" data-testid="overview-card-liquor">
-        <Wine className="mt-0.5 size-4 flex-none text-muted-token" aria-hidden />
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm tnum">
-          <span>
-            {t('colInStore')} <b>{b.in_store_bottles}</b>
-          </span>
-          <span>
-            {t('colExpiring')} <b>{b.expiring}</b>
-          </span>
-          {b.to_confirm > 0 && <Badge tone="progress">{`${t('colToConfirm')} ${b.to_confirm}`}</Badge>}
-          {b.to_dispose > 0 && <Badge tone="urgent">{`${t('colToDispose')} ${b.to_dispose}`}</Badge>}
-        </div>
-      </div>
-      <div className="flex items-start gap-2.5 pt-2.5" data-testid="overview-card-bookings">
-        <CalendarDays className="mt-0.5 size-4 flex-none text-muted-token" aria-hidden />
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm tnum">
-          <span>
-            {t('colBookingsTonight')} <b>{tc('tables', { count: b.bookings_tonight })}</b>
-          </span>
-          <span>
-            {t('colArrived')} <b>{b.arrived_tonight}</b>
-          </span>
-        </div>
-      </div>
-    </div>
   )
 }

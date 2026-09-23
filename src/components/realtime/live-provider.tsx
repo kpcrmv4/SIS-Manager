@@ -13,8 +13,8 @@ import { getSupabaseBrowser } from '@/lib/supabase/browser'
  *  - `user:<id>` (private): a notification row for me → bump the bell.
  * The realtime.messages policy decides who may join each topic (P1 migrations).
  */
-type LiveCtx = { unread: number; refreshUnread: () => void; notificationTick: number }
-const Ctx = createContext<LiveCtx>({ unread: 0, refreshUnread: () => undefined, notificationTick: 0 })
+type LiveCtx = { unread: number; refreshUnread: () => void; notificationTick: number; joined: boolean }
+const Ctx = createContext<LiveCtx>({ unread: 0, refreshUnread: () => undefined, notificationTick: 0, joined: false })
 export const useLive = () => useContext(Ctx)
 
 const REFRESH_DEBOUNCE_MS = 800
@@ -107,7 +107,7 @@ export function LiveProvider({ userId, branchId, children }: { userId: string; b
   }, [branchId, userId, scheduleRefresh, refreshUnread])
 
   return (
-    <Ctx.Provider value={{ unread, refreshUnread, notificationTick }}>
+    <Ctx.Provider value={{ unread, refreshUnread, notificationTick, joined }}>
       {/* data-live: specs wait for the branch channel before changing data */}
       <div data-live={joined ? 'joined' : 'connecting'} className="contents">
         {children}

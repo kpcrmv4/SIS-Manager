@@ -22,6 +22,11 @@ function reset() {
   execFileSync(process.execPath, [join(ROOT, 'scripts', 'demo-reset.mjs')], { cwd: ROOT, stdio: 'pipe', timeout: 240_000 })
 }
 
+// L-010 / R-030: the demo branch now also carries the owner's real LINE setup, and a reset re-seeds
+// its data — so the specs that run the reset (or read what it seeded) are opt-in: E2E_DEMO_RESET=1
+const RESET_ON = process.env.E2E_DEMO_RESET === '1'
+const RESET_SKIP = 'runs demo:reset on the shared project — opt-in with E2E_DEMO_RESET=1'
+
 async function demoBranchIds(): Promise<Record<string, string>> {
   const { data, error } = await adminDb().from('branches').select('id, code, active').in('code', [...DEMO])
   expect(error, error?.message).toBeNull()
@@ -48,6 +53,7 @@ async function fixtureCounts() {
 }
 
 test('P5-01-01 P5-01-02 P5-01-05 reset seeds the demo set, is idempotent, and leaves fixture branches alone', async () => {
+  test.skip(!RESET_ON, RESET_SKIP)
   const before = await fixtureCounts()
   reset()
   const ids = await demoBranchIds()
@@ -70,6 +76,7 @@ test('P5-01-01 P5-01-02 P5-01-05 reset seeds the demo set, is idempotent, and le
 })
 
 test('P5-01-03 P5-01-04 every deposit and booking display state exists at SRC', async () => {
+  test.skip(!RESET_ON, RESET_SKIP)
   const ids = await demoBranchIds()
   const dep = await statusCounts('deposits', [ids.SRC])
   for (const s of DEP_STATUSES) expect(dep[s], `deposit ${s}`).toBeGreaterThan(0)
@@ -94,6 +101,7 @@ test('P5-01-03 P5-01-04 every deposit and booking display state exists at SRC', 
 })
 
 test('P5-01-09 the reset refuses to run next to a real branch, and never adopts an unmarked demo code', async () => {
+  test.skip(!RESET_ON, RESET_SKIP)
   const run = () => spawnSync(process.execPath, [join(ROOT, 'scripts', 'demo-reset.mjs')], { cwd: ROOT, encoding: 'utf8', timeout: 240_000 })
   const db = adminDb()
   // a real-looking active branch (not demo, not an E2E fixture)

@@ -1461,9 +1461,19 @@ export type Database = {
       }
       mark_no_shows: { Args: never; Returns: number }
       new_group_bind_code: { Args: { p_branch: string }; Returns: Json }
+      owner_dashboard: { Args: never; Returns: Json }
       owner_overview: { Args: { p_from: string; p_to: string }; Returns: Json }
       owner_report: {
         Args: { p_branch?: string; p_from: string; p_to: string }
+        Returns: Json
+      }
+      owner_trends: {
+        Args: {
+          p_from: string
+          p_prev_from: string
+          p_prev_to: string
+          p_to: string
+        }
         Returns: Json
       }
       queue_print: {

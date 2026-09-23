@@ -4,7 +4,7 @@ import { dbErrorCode } from '@/lib/errors'
 
 /** Owner overview + report aggregates (P4-01). Numbers come from the owner-only RPCs. */
 
-export { isYmd, parsePeriod, periodRange, showRate, reportTotals, REPORT_TOTAL_KEYS, type Period } from './period'
+export { isYmd, parsePeriod, periodRange, previousRange, showRate, reportTotals, REPORT_TOTAL_KEYS, type Period } from './period'
 
 export type OverviewKpi = {
   branches: number
@@ -36,6 +36,7 @@ export type RecentDisposal = {
   item: string
   customer: string
   branch: string
+  branch_id: string
   expires_at: string | null
   disposed_at: string | null
   by: string | null

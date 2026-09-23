@@ -22,6 +22,32 @@ export function periodRange(period: Period, today = bangkokDate()): { from: stri
   return { from: `${today.slice(0, 7)}-01`, to: today }
 }
 
+const lastDayOfMonth = (ymd: string) => {
+  const [y, m] = ymd.split('-').map(Number)
+  return addDays(`${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}-01`, -1)
+}
+
+/**
+ * The period a figure is compared with (R-030):
+ *   month-to-date (1st … day N)  → the 1st … day N of the month before (clamped to its last day)
+ *   a whole month                → the whole month before
+ *   any other range              → the same number of days right before it
+ */
+export function previousRange(from: string, to: string): { from: string; to: string } {
+  if (from.endsWith('-01') && from.slice(0, 7) === to.slice(0, 7)) {
+    const prevLast = addDays(from, -1)
+    const prevFrom = `${prevLast.slice(0, 7)}-01`
+    if (to === lastDayOfMonth(to)) return { from: prevFrom, to: prevLast }
+    const sameDay = `${prevLast.slice(0, 7)}-${to.slice(8)}`
+    return { from: prevFrom, to: sameDay < prevLast ? sameDay : prevLast }
+  }
+  const [y1, m1, d1] = from.split('-').map(Number)
+  const [y2, m2, d2] = to.split('-').map(Number)
+  const span = Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000)
+  const prevTo = addDays(from, -1)
+  return { from: addDays(prevTo, -span), to: prevTo }
+}
+
 /** arrived ÷ (arrived + no-show), whole percent; null when nothing was decided yet. */
 export function showRate(arrived: number, noShows: number): number | null {
   const decided = arrived + noShows
