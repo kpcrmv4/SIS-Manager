@@ -139,6 +139,341 @@ export type Database = {
         }
         Relationships: []
       }
+      deposit_bottles: {
+        Row: {
+          bottle_no: number
+          consumed_at: string | null
+          consumed_by: string | null
+          deposit_id: string
+          id: string
+          remaining_percent: number
+          status: Database["public"]["Enums"]["bottle_status"]
+          updated_at: string
+        }
+        Insert: {
+          bottle_no: number
+          consumed_at?: string | null
+          consumed_by?: string | null
+          deposit_id: string
+          id?: string
+          remaining_percent?: number
+          status?: Database["public"]["Enums"]["bottle_status"]
+          updated_at?: string
+        }
+        Update: {
+          bottle_no?: number
+          consumed_at?: string | null
+          consumed_by?: string | null
+          deposit_id?: string
+          id?: string
+          remaining_percent?: number
+          status?: Database["public"]["Enums"]["bottle_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_bottles_consumed_by_fkey"
+            columns: ["consumed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_bottles_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposit_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_kind: string
+          branch_id: string
+          created_at: string
+          deposit_id: string
+          id: number
+          payload: Json
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_kind?: string
+          branch_id: string
+          created_at?: string
+          deposit_id: string
+          id?: never
+          payload?: Json
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_kind?: string
+          branch_id?: string
+          created_at?: string
+          deposit_id?: string
+          id?: never
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_events_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_events_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposits: {
+        Row: {
+          branch_id: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          category: string
+          code: string
+          collect_deadline_at: string | null
+          confirm_photo_paths: string[]
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          dispose_reason: string | null
+          disposed_at: string | null
+          disposed_by: string | null
+          expired_notice_sent_at: string | null
+          expires_at: string | null
+          expiry_notice_sent_at: string | null
+          id: string
+          is_vip: boolean
+          item_id: string | null
+          item_name: string
+          notes: string | null
+          photo_paths: string[]
+          quantity: number
+          received_at: string | null
+          received_by: string | null
+          remaining_percent: number
+          remaining_qty: number
+          source: string
+          status: Database["public"]["Enums"]["deposit_status"]
+          table_label: string | null
+          terms_accepted_at: string | null
+          terms_locale: Database["public"]["Enums"]["app_locale"] | null
+          terms_version: string | null
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          category?: string
+          code: string
+          collect_deadline_at?: string | null
+          confirm_photo_paths?: string[]
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          dispose_reason?: string | null
+          disposed_at?: string | null
+          disposed_by?: string | null
+          expired_notice_sent_at?: string | null
+          expires_at?: string | null
+          expiry_notice_sent_at?: string | null
+          id?: string
+          is_vip?: boolean
+          item_id?: string | null
+          item_name: string
+          notes?: string | null
+          photo_paths?: string[]
+          quantity: number
+          received_at?: string | null
+          received_by?: string | null
+          remaining_percent?: number
+          remaining_qty?: number
+          source?: string
+          status: Database["public"]["Enums"]["deposit_status"]
+          table_label?: string | null
+          terms_accepted_at?: string | null
+          terms_locale?: Database["public"]["Enums"]["app_locale"] | null
+          terms_version?: string | null
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          category?: string
+          code?: string
+          collect_deadline_at?: string | null
+          confirm_photo_paths?: string[]
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          dispose_reason?: string | null
+          disposed_at?: string | null
+          disposed_by?: string | null
+          expired_notice_sent_at?: string | null
+          expires_at?: string | null
+          expiry_notice_sent_at?: string | null
+          id?: string
+          is_vip?: boolean
+          item_id?: string | null
+          item_name?: string
+          notes?: string | null
+          photo_paths?: string[]
+          quantity?: number
+          received_at?: string | null
+          received_by?: string | null
+          remaining_percent?: number
+          remaining_qty?: number
+          source?: string
+          status?: Database["public"]["Enums"]["deposit_status"]
+          table_label?: string | null
+          terms_accepted_at?: string | null
+          terms_locale?: Database["public"]["Enums"]["app_locale"] | null
+          terms_version?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposits_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_disposed_by_fkey"
+            columns: ["disposed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "liquor_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_outbox: {
+        Row: {
+          attempts: number
+          branch_id: string
+          created_at: string
+          dedupe_key: string
+          error: string | null
+          id: string
+          kind: string
+          locale: Database["public"]["Enums"]["app_locale"]
+          next_attempt_at: string
+          payload: Json
+          sent_at: string | null
+          status: Database["public"]["Enums"]["outbox_status"]
+          target: string
+          target_kind: string
+        }
+        Insert: {
+          attempts?: number
+          branch_id: string
+          created_at?: string
+          dedupe_key: string
+          error?: string | null
+          id?: string
+          kind: string
+          locale?: Database["public"]["Enums"]["app_locale"]
+          next_attempt_at?: string
+          payload?: Json
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["outbox_status"]
+          target: string
+          target_kind: string
+        }
+        Update: {
+          attempts?: number
+          branch_id?: string
+          created_at?: string
+          dedupe_key?: string
+          error?: string | null
+          id?: string
+          kind?: string
+          locale?: Database["public"]["Enums"]["app_locale"]
+          next_attempt_at?: string
+          payload?: Json
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["outbox_status"]
+          target?: string
+          target_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_outbox_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       liquor_items: {
         Row: {
           active: boolean
@@ -246,11 +581,171 @@ export type Database = {
           },
         ]
       }
+      withdrawals: {
+        Row: {
+          bottle_id: string | null
+          branch_id: string
+          by_customer: boolean
+          created_at: string
+          customer_id: string | null
+          deposit_id: string
+          id: string
+          notes: string | null
+          photo_path: string | null
+          processed_at: string | null
+          processed_by: string | null
+          qty: number
+          reject_reason: string | null
+          requested_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          table_label: string | null
+          type: Database["public"]["Enums"]["withdrawal_type"]
+        }
+        Insert: {
+          bottle_id?: string | null
+          branch_id: string
+          by_customer?: boolean
+          created_at?: string
+          customer_id?: string | null
+          deposit_id: string
+          id?: string
+          notes?: string | null
+          photo_path?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          qty?: number
+          reject_reason?: string | null
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          table_label?: string | null
+          type?: Database["public"]["Enums"]["withdrawal_type"]
+        }
+        Update: {
+          bottle_id?: string | null
+          branch_id?: string
+          by_customer?: boolean
+          created_at?: string
+          customer_id?: string | null
+          deposit_id?: string
+          id?: string
+          notes?: string | null
+          photo_path?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          qty?: number
+          reject_reason?: string | null
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          table_label?: string | null
+          type?: Database["public"]["Enums"]["withdrawal_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawals_bottle_id_fkey"
+            columns: ["bottle_id"]
+            isOneToOne: false
+            referencedRelation: "deposit_bottles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      complete_withdrawals: {
+        Args: {
+          p_notes?: string
+          p_photo_path?: string
+          p_withdrawal_ids: string[]
+        }
+        Returns: Json
+      }
+      confirm_deposit: {
+        Args: { p_deposit: string; p_levels: number[]; p_photo_paths: string[] }
+        Returns: Json
+      }
+      create_deposit: {
+        Args: {
+          p_branch: string
+          p_category?: string
+          p_customer_id?: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_expires_at?: string
+          p_item_id?: string
+          p_item_name: string
+          p_notes?: string
+          p_photo_paths: string[]
+          p_quantity: number
+          p_table?: string
+        }
+        Returns: Json
+      }
+      customer_request_deposit: {
+        Args: {
+          p_branch: string
+          p_customer_id: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_item_name: string
+          p_notes?: string
+          p_quantity: number
+          p_table?: string
+          p_terms_locale: Database["public"]["Enums"]["app_locale"]
+          p_terms_version: string
+        }
+        Returns: Json
+      }
+      dispose_deposits: {
+        Args: { p_deposit_ids: string[]; p_reason?: string }
+        Returns: Json
+      }
+      expire_due_deposits: { Args: never; Returns: number }
+      extend_deposit: {
+        Args: { p_days: number; p_deposit: string }
+        Returns: Json
+      }
+      link_deposit_customer: {
+        Args: { p_code: string; p_customer_id: string }
+        Returns: Json
+      }
       login_record: {
         Args: { p_identifier: string; p_ip: string; p_ok: boolean }
         Returns: undefined
@@ -259,10 +754,56 @@ export type Database = {
         Args: { p_identifier: string; p_ip: string }
         Returns: boolean
       }
+      reject_deposit: {
+        Args: { p_deposit: string; p_reason: string }
+        Returns: Json
+      }
+      reject_withdrawal: {
+        Args: { p_reason: string; p_withdrawal_ids: string[] }
+        Returns: Json
+      }
+      request_withdrawal: {
+        Args: {
+          p_bottle_ids: string[]
+          p_customer_id?: string
+          p_deposit: string
+          p_notes?: string
+          p_table?: string
+          p_type: Database["public"]["Enums"]["withdrawal_type"]
+        }
+        Returns: Json
+      }
+      send_expiry_notices: { Args: never; Returns: number }
+      set_vip: { Args: { p_deposit: string; p_vip: boolean }; Returns: Json }
+      staff_receive_request: {
+        Args: {
+          p_customer_phone?: string
+          p_deposit: string
+          p_item_id?: string
+          p_item_name?: string
+          p_photo_paths: string[]
+          p_quantity: number
+          p_table?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_locale: "th" | "en" | "zh" | "ko"
+      bottle_status: "sealed" | "opened" | "consumed"
+      deposit_status:
+        | "requested"
+        | "pending_confirm"
+        | "in_store"
+        | "pending_withdrawal"
+        | "withdrawn"
+        | "expired"
+        | "disposed"
+        | "cancelled"
+      outbox_status: "queued" | "sending" | "sent" | "failed" | "skipped"
       user_role: "staff" | "bar" | "owner"
+      withdrawal_status: "pending" | "completed" | "rejected" | "cancelled"
+      withdrawal_type: "in_store" | "take_home"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -391,7 +932,21 @@ export const Constants = {
   public: {
     Enums: {
       app_locale: ["th", "en", "zh", "ko"],
+      bottle_status: ["sealed", "opened", "consumed"],
+      deposit_status: [
+        "requested",
+        "pending_confirm",
+        "in_store",
+        "pending_withdrawal",
+        "withdrawn",
+        "expired",
+        "disposed",
+        "cancelled",
+      ],
+      outbox_status: ["queued", "sending", "sent", "failed", "skipped"],
       user_role: ["staff", "bar", "owner"],
+      withdrawal_status: ["pending", "completed", "rejected", "cancelled"],
+      withdrawal_type: ["in_store", "take_home"],
     },
   },
 } as const
