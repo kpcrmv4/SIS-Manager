@@ -2,7 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { callRpc, cleanText, isUuid } from '@/lib/action'
-import type { ActionResult } from '@/lib/errors'
+import { getSupabaseServer } from '@/lib/supabase/server'
+import { getActorState, isBarOrOwner } from '@/lib/auth/actor'
+import { dbErrorCode, type ActionResult } from '@/lib/errors'
+import type { BookingStatus } from './format'
 
 /** Booking state changes — one server action per RPC (P1-05 contract). */
 
@@ -106,4 +109,90 @@ export type Availability = {
 export async function bookingAvailability(branchId: string, from: string, to: string): Promise<ActionResult<Availability>> {
   if (!isUuid(branchId) || !isDate(from) || !isDate(to)) return { ok: false, error: 'invalid' }
   return callRpc<Availability>((sb) => sb.rpc('booking_availability', { p_branch: branchId, p_from: from, p_to: to }))
+}
+
+/**
+ * P2-B2: the booking sheet's data — the booking itself, the branch's tables (for
+ * "เปลี่ยนโต๊ะ"), and the customer's in-store deposits at this branch (matched by
+ * customer_id, else by phone) for the gold "มีขวดฝาก…" box.
+ */
+export type BookingDetail = {
+  id: string
+  code: string
+  status: BookingStatus
+  name: string
+  phone: string | null
+  note: string | null
+  night: string
+  slotTime: string
+  party: number
+  source: 'line' | 'staff'
+  createdAt: string
+  zoneId: string | null
+  zoneName: string | null
+  tableId: string | null
+  tableLabel: string | null
+  qrToken: string
+  customerId: string | null
+  /** bar/owner only — the scan result has no separate role prop, so it reads this. */
+  canChangeTable: boolean
+  tables: { id: string; label: string }[]
+  deposits: { itemName: string; remainingPercent: number; expiresAt: string | null }[]
+}
+
+export async function getBookingDetail(branchId: string, bookingId: string): Promise<ActionResult<BookingDetail>> {
+  if (!isUuid(branchId) || !isUuid(bookingId)) return { ok: false, error: 'invalid' }
+  const sb = await getSupabaseServer()
+  const { data: claims } = await sb.auth.getClaims()
+  if (!claims?.claims?.sub) return { ok: false, error: 'unauthenticated' }
+
+  const { data: booking, error } = await sb
+    .from('bookings')
+    .select(
+      'id, code, status, name, phone, note, night, slot_time, party_size, source, zone_id, table_id, qr_token, customer_id, created_at, zone:table_zones(name), table:tables(label)',
+    )
+    .eq('id', bookingId)
+    .eq('branch_id', branchId)
+    .maybeSingle()
+  if (error) return { ok: false, error: dbErrorCode(error) }
+  if (!booking) return { ok: false, error: 'NOT_FOUND' }
+
+  const actorState = await getActorState()
+  const canChangeTable = actorState.status === 'ok' && isBarOrOwner(actorState.actor.role)
+
+  const { data: tables } = await sb.from('tables').select('id, label').eq('branch_id', branchId).eq('active', true).order('sort').range(0, 999)
+
+  let deposits: { item_name: string; remaining_percent: number; expires_at: string | null }[] = []
+  if (booking.customer_id || booking.phone) {
+    let q = sb.from('deposits').select('item_name, remaining_percent, expires_at').eq('branch_id', branchId).in('status', ['in_store', 'pending_withdrawal'])
+    q = booking.customer_id ? q.eq('customer_id', booking.customer_id) : q.eq('customer_phone', booking.phone as string)
+    const { data } = await q.range(0, 49)
+    deposits = data ?? []
+  }
+
+  return {
+    ok: true,
+    data: {
+      id: booking.id,
+      code: booking.code,
+      status: booking.status,
+      name: booking.name,
+      phone: booking.phone,
+      note: booking.note,
+      night: booking.night,
+      slotTime: booking.slot_time,
+      party: booking.party_size,
+      source: booking.source,
+      createdAt: booking.created_at,
+      zoneId: booking.zone_id,
+      zoneName: (booking.zone as { name: string } | null)?.name ?? null,
+      tableId: booking.table_id,
+      tableLabel: (booking.table as { label: string } | null)?.label ?? null,
+      qrToken: booking.qr_token,
+      customerId: booking.customer_id,
+      canChangeTable,
+      tables: (tables ?? []).map((t) => ({ id: t.id, label: t.label })),
+      deposits: deposits.map((d) => ({ itemName: d.item_name, remainingPercent: d.remaining_percent, expiresAt: d.expires_at })),
+    },
+  }
 }

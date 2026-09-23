@@ -80,7 +80,16 @@ export async function BookingsContent({
           </span>
         </div>
       )}
-      <BookingsBoard view={view} night={night} locale={locale} zones={zones} bookings={bookings} isBarOrOwner={isBarOrOwner(role)} emptyZones={emptyZones} />
+      <BookingsBoard
+        branchId={branchId}
+        view={view}
+        night={night}
+        locale={locale}
+        zones={zones}
+        bookings={bookings}
+        isBarOrOwner={isBarOrOwner(role)}
+        emptyZones={emptyZones}
+      />
     </>
   )
 }

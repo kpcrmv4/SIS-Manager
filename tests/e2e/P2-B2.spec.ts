@@ -1,0 +1,180 @@
+import { join } from 'node:path'
+import { expect, test } from '@playwright/test'
+import { addDays, businessNight } from '../../src/lib/date'
+import { adminDb, fixtureIds } from './fixtures/db'
+import { AUTH_DIR } from './fixtures/env'
+import { clearBookings, resetSettings, setupZonesAndTables, teardownZonesAndTables, type ZoneTableSet } from './fixtures/p2b-bookings'
+
+test.describe.configure({ mode: 'serial' })
+
+const as = (role: string) => join(AUTH_DIR, `${role}.json`)
+const admin = () => adminDb()
+const NIGHT = addDays(businessNight(), 6)
+const LINE_USER = `U${'2b2'.repeat(10)}2b`
+let branchA = ''
+let zt: ZoneTableSet
+let customerId = ''
+let seq = 0
+
+async function insertBooking(over: {
+  night: string
+  slotTime: string
+  status?: 'pending' | 'confirmed' | 'arrived'
+  tableId?: string | null
+  zoneId?: string | null
+  name?: string
+  phone?: string | null
+  customerId?: string | null
+  party?: number
+  source?: 'line' | 'staff'
+}) {
+  seq += 1
+  const mmdd = over.night.slice(5, 7) + over.night.slice(8, 10)
+  const { data, error } = await admin()
+    .from('bookings')
+    .insert({
+      branch_id: branchA,
+      code: `BK-${mmdd}-${String(800 + seq).slice(0, 3)}`,
+      night: over.night,
+      slot_time: over.slotTime,
+      party_size: over.party ?? 4,
+      zone_id: over.zoneId ?? null,
+      table_id: over.tableId ?? null,
+      customer_id: over.customerId === undefined ? customerId : over.customerId,
+      name: over.name ?? 'P2B2 ลูกค้า',
+      phone: over.phone ?? null,
+      source: over.source ?? 'line',
+      status: over.status ?? 'confirmed',
+    })
+    .select('id, code, qr_token')
+    .single()
+  if (error) throw new Error(`insertBooking: ${error.message}`)
+  return data
+}
+
+test.beforeAll(async () => {
+  const ids = fixtureIds()
+  branchA = ids.branchA
+  await clearBookings(admin(), [branchA])
+  await resetSettings(admin(), branchA)
+  zt = await setupZonesAndTables(admin(), branchA)
+  const c = await admin().from('customers').upsert({ line_user_id: LINE_USER, display_name: 'P2B2 LINE', locale: 'th' }, { onConflict: 'line_user_id' }).select('id').single()
+  if (c.error || !c.data) throw new Error(`customer fixture: ${c.error?.message}`)
+  customerId = c.data.id
+})
+
+test.afterAll(async () => {
+  await clearBookings(admin(), [branchA])
+  await resetSettings(admin(), branchA)
+  await teardownZonesAndTables(admin(), branchA)
+  await admin().from('customers').delete().eq('line_user_id', LINE_USER)
+})
+
+test.describe('scan + sheet', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P2-B2-01 P2-B2-03 scan by code shows the sheet with the gold deposits box', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    await admin().from('deposits').delete().eq('branch_id', branchA).eq('customer_id', customerId)
+    const dep = await admin()
+      .from('deposits')
+      .insert({
+        branch_id: branchA, code: 'DEP-ZZQ-P2B2A', customer_id: customerId, customer_name: 'P2B2 ลูกค้า',
+        item_name: 'P2B2 Whisky', quantity: 1, remaining_qty: 1, remaining_percent: 65, status: 'in_store', source: 'staff',
+        // deposits.link_code defaults to private.new_link_code(), which service_role
+        // currently has no EXECUTE grant on — supply it explicitly to sidestep that
+        // (unrelated DB grant, outside this worker's write set; see final report)
+        link_code: 'P2B2AA',
+      } as never)
+      .select('id, code')
+      .single()
+    expect(dep.error, dep.error?.message).toBeNull()
+
+    const b = await insertBooking({ night: NIGHT, slotTime: '20:00', status: 'confirmed', phone: '081-234-5678' })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(b.code)
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+
+    const sheet = page.getByTestId('booking-sheet')
+    await expect(sheet).toBeVisible()
+    await expect(sheet).toContainText(b.code)
+    await expect(sheet).toContainText('P2B2 ลูกค้า')
+    await expect(sheet).toContainText('081-234-5678')
+    await expect(page.getByTestId('booking-deposits-box')).toContainText('มีขวดฝาก 1 รายการ')
+    await expect(page.getByTestId('booking-deposits-box')).toContainText('P2B2 Whisky')
+    await admin().from('deposits').delete().eq('id', dep.data!.id)
+  })
+
+  test('P2-B2-02 ลูกค้ามาแล้ว checks the booking in', async ({ page }) => {
+    // check_in_booking only accepts tonight's business night (WRONG_NIGHT otherwise, see P2-B2-05)
+    const tonight = businessNight()
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: tonight, slotTime: '20:30', status: 'confirmed', tableId: zt.tableA1, zoneId: zt.zoneStage })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(b.code)
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+    const checkInBtn = page.getByTestId('check-in-button')
+    await expect(checkInBtn).toHaveText('ลูกค้ามาแล้ว')
+    await checkInBtn.click()
+    await expect(checkInBtn).toHaveText('เช็กอินแล้ว')
+    await expect(checkInBtn).toBeDisabled()
+    const { data } = await admin().from('bookings').select('status').eq('id', b.id).single()
+    expect(data?.status).toBe('arrived')
+
+    await page.goto(`/bookings?night=${tonight}&view=plan`)
+    await expect(page.locator('.t-cell[data-state="arrived"]')).toHaveCount(1)
+  })
+
+  test('P2-B2-04 typing a table label with a live booking tonight opens its sheet', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: businessNight(), slotTime: '21:00', status: 'confirmed', tableId: zt.tableA2, zoneId: zt.zoneStage })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill('PA2')
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+    await expect(page.getByTestId('scan-result-booking')).toContainText(b.code)
+  })
+
+  test('P2-B2-05 checking in a booking of another night is refused', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const other = addDays(NIGHT, 1)
+    const b = await insertBooking({ night: other, slotTime: '20:00', status: 'confirmed' })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(b.code)
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+    await page.getByTestId('check-in-button').click()
+    await expect(page.getByText('การจองนี้ไม่ใช่ของคืนนี้')).toBeVisible()
+    const { data } = await admin().from('bookings').select('status').eq('id', b.id).single()
+    expect(data?.status).toBe('confirmed')
+  })
+
+  test('P2-B2-06 from the plan: tapping a booked cell opens the same sheet (dialog)', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: NIGHT, slotTime: '19:30', status: 'confirmed', tableId: zt.tableA1, zoneId: zt.zoneStage })
+    await page.goto(`/bookings?night=${NIGHT}&view=plan`)
+    await page.getByTestId('table-cell').first().click()
+    const sheet = page.getByTestId('booking-sheet')
+    await expect(sheet).toBeVisible()
+    await expect(sheet).toContainText(b.code)
+    await expect(page.getByRole('dialog')).toBeVisible()
+    // bar can change the table from the sheet too
+    await page.getByTestId('change-table-trigger').click()
+    await page.getByTestId('change-table-select').selectOption(zt.tableA2)
+    await expect(page.getByText('จัดโต๊ะแล้ว')).toBeVisible()
+    const { data } = await admin().from('bookings').select('table_id').eq('id', b.id).single()
+    expect(data?.table_id).toBe(zt.tableA2)
+  })
+})
+
+test.describe('staff cannot change table', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P2-B2-staff no เปลี่ยนโต๊ะ control in the sheet', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: NIGHT, slotTime: '22:00', status: 'confirmed', tableId: zt.tableV1, zoneId: zt.zoneVip })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(b.code)
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+    await expect(page.getByTestId('booking-sheet')).toBeVisible()
+    await expect(page.getByTestId('change-table-trigger')).toHaveCount(0)
+  })
+})

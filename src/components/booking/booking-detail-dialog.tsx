@@ -1,24 +1,30 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
+import { ResponsiveDialog } from './responsive-dialog'
+import { BookingSheetContent } from './booking-sheet-content'
 import { getBookingDetail } from '@/lib/booking/actions'
 import type { BookingDetail } from '@/lib/booking/actions'
-import { BookingSheetContent } from './booking-sheet-content'
 import { ListSkeleton } from '@/components/ui/states'
 import { ErrorRetry } from '@/components/ui/error-retry'
 import type { AppLocale } from '@/lib/date'
 
-/**
- * Scan result for a booking ticket QR / booking number / table (P2-B2). The
- * scan page renders this inline (no dialog chrome) — /bookings reuses the
- * same BookingSheetContent inside a dialog (booking-detail-dialog.tsx).
- */
-export function ScanResultBooking({ bookingId, branchId, onDone }: { bookingId: string; branchId: string; onDone: () => void }) {
-  const t = useTranslations('scan')
-  const locale = useLocale() as AppLocale
-  const router = useRouter()
+/** The same booking sheet as the scan result, reached by tapping a booked cell or a list row on /bookings. */
+export function BookingDetailDialog({
+  bookingId,
+  branchId,
+  locale,
+  onOpenChange,
+  onChanged,
+}: {
+  bookingId: string
+  branchId: string
+  locale: AppLocale
+  onOpenChange: (v: boolean) => void
+  onChanged: () => void
+}) {
+  const t = useTranslations('booking')
   const [state, setState] = useState<{ status: 'loading' } | { status: 'error' } | { status: 'ok'; detail: BookingDetail }>({ status: 'loading' })
 
   async function load() {
@@ -32,9 +38,10 @@ export function ScanResultBooking({ bookingId, branchId, onDone }: { bookingId: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId, branchId])
 
+  const title = state.status === 'ok' ? state.detail.code : t('time')
+
   return (
-    <div className="card-surface p-4" data-testid="scan-result-booking">
-      <div className="mb-2 text-sm font-semibold text-muted-token">{t('resultBooking')}</div>
+    <ResponsiveDialog open onOpenChange={onOpenChange} title={title}>
       {state.status === 'loading' && <ListSkeleton rows={1} />}
       {state.status === 'error' && <ErrorRetry onRetry={() => void load()} />}
       {state.status === 'ok' && (
@@ -43,12 +50,10 @@ export function ScanResultBooking({ bookingId, branchId, onDone }: { bookingId: 
           branchId={branchId}
           locale={locale}
           canChangeTable={state.detail.canChangeTable}
-          // check-in updates the card in place (the button becomes "เช็กอินแล้ว");
-          // only "ปิด" clears the result back to the search box (onDone)
-          onCheckedIn={() => router.refresh()}
-          onClose={onDone}
+          onCheckedIn={onChanged}
+          onClose={() => onOpenChange(false)}
         />
       )}
-    </div>
+    </ResponsiveDialog>
   )
 }
