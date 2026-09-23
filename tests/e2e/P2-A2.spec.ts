@@ -66,7 +66,7 @@ test.describe('new deposit form', () => {
       await page.getByTestId('deposit-item').fill(`${RUN} Johnnie Walker Black Label`)
       await page.getByTestId('deposit-quantity').fill('1')
       await page.getByTestId('deposit-submit').click()
-      await expect(page.getByTestId('deposit-photo-error')).toHaveText('ต้องมีรูปขวดอย่างน้อย 1 รูป')
+      await expect(page.getByTestId('deposit-photo-error')).toHaveText('ต้องมีรูปเหล้าอย่างน้อย 1 รูป')
       await expect(page).toHaveURL(/\/deposits\/new$/)
       const { count: after } = await adminDb().from('deposits').select('id', { count: 'exact', head: true }).like('customer_name', `${RUN}%`)
       expect(after).toBe(before)
@@ -145,7 +145,7 @@ test.describe('detail dialogs', () => {
       await page.getByTestId('confirm-level-3').fill('0')
       await attachPhoto(page, 'confirm-photo-add')
       await page.getByRole('button', { name: 'ยืนยันเก็บเข้าชั้น', exact: true }).click()
-      await expect(page.getByText('ยืนยันขวดแล้ว', { exact: true })).toBeVisible()
+      await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
       const row = await deposit(dep.id)
       expect(row.status).toBe('in_store')
       const { data: bottles } = await adminDb().from('deposit_bottles').select('status').eq('deposit_id', dep.id).order('bottle_no')
@@ -301,7 +301,7 @@ test.describe('detail dialogs', () => {
       }
     })
 
-    test('P2-A2-14 LINE request → รับขวด (qty + photo) → pending_confirm with bottles', async ({ page }) => {
+    test('P2-A2-14 LINE request → รับเหล้า (qty + photo) → pending_confirm with bottles', async ({ page }) => {
       const { branchA } = fixtureIds()
       const req = await createLineRequest(branchA, { qty: 2 })
       await page.goto(`/deposits/${req.id}`)

@@ -100,7 +100,7 @@ test.describe('scan + sheet', () => {
     await expect(sheet).toContainText(b.code)
     await expect(sheet).toContainText('P2B2 ลูกค้า')
     await expect(sheet).toContainText('081-234-5678')
-    await expect(page.getByTestId('booking-deposits-box')).toContainText('มีขวดฝาก 1 รายการ')
+    await expect(page.getByTestId('booking-deposits-box')).toContainText('มีเหล้าฝาก 1 รายการ')
     await expect(page.getByTestId('booking-deposits-box')).toContainText('P2B2 Whisky')
     await admin().from('deposits').delete().eq('id', dep.data!.id)
   })

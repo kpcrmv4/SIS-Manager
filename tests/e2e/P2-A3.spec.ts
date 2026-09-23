@@ -64,7 +64,7 @@ test.afterAll(async () => {
 test.describe('bar', () => {
   test.use({ storageState: as('bar') })
 
-  test('P2-A3-01 KPIs: bookings, รอ bar ยืนยันขวด, คำขอเบิก, ใกล้หมดอายุ', async ({ page }) => {
+  test('P2-A3-01 KPIs: bookings, รอ bar ยืนยันเหล้า, คำขอเบิก, ใกล้หมดอายุ', async ({ page }) => {
     const { branchA } = fixtureIds()
     const admin = adminDb()
     await page.goto('/tonight')
@@ -85,7 +85,7 @@ test.describe('bar', () => {
     await expect(bookingsCell).toContainText(String(expectedBookings))
     await expect(bookingsCell).toContainText(`${expectedPeople} คน · มาแล้ว ${expectedArrived} โต๊ะ`)
 
-    const toConfirmCell = page.locator('a', { hasText: 'รอ bar ยืนยันขวด' })
+    const toConfirmCell = page.locator('a', { hasText: 'รอ bar ยืนยันเหล้า' })
     await expect(toConfirmCell).toContainText(String(toConfirm ?? 0))
 
     const withdrawCell = page.locator('a', { hasText: 'คำขอเบิก' })
@@ -118,9 +118,9 @@ test.describe('bar', () => {
 test.describe('staff', () => {
   test.use({ storageState: as('staff') })
 
-  test('P2-A3-02 staff: the รอ bar ยืนยันขวด KPI is hidden', async ({ page }) => {
+  test('P2-A3-02 staff: the รอ bar ยืนยันเหล้า KPI is hidden', async ({ page }) => {
     await page.goto('/tonight')
-    await expect(page.getByText('รอ bar ยืนยันขวด', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('รอ bar ยืนยันเหล้า', { exact: true })).toHaveCount(0)
     await expect(page.getByText('คำขอเบิก', { exact: true })).toBeVisible()
   })
 

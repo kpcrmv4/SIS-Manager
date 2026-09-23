@@ -124,7 +124,7 @@ test.describe('owner', () => {
     const liquor = await card.getByTestId('overview-card-liquor').boundingBox()
     const bookings = await card.getByTestId('overview-card-bookings').boundingBox()
     expect(bookings!.y).toBeGreaterThanOrEqual(liquor!.y + liquor!.height - 1)
-    await expect(card.getByTestId('overview-card-liquor')).toContainText('ขวดในร้าน')
+    await expect(card.getByTestId('overview-card-liquor')).toContainText('เหล้าในร้าน')
     await expect(card.getByTestId('overview-card-bookings')).toContainText('จองคืนนี้')
   })
 

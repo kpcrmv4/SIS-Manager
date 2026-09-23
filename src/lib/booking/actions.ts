@@ -134,7 +134,7 @@ export async function bookingAvailability(branchId: string, from: string, to: st
 /**
  * P2-B2: the booking sheet's data — the booking itself, the branch's tables (for
  * "เปลี่ยนโต๊ะ"), and the customer's in-store deposits at this branch (matched by
- * customer_id, else by phone) for the gold "มีขวดฝาก…" box.
+ * customer_id, else by phone) for the gold "มีเหล้าฝาก…" box.
  */
 export type BookingDetail = {
   id: string

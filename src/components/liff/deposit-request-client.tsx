@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import type { CustomerLocale } from '@/lib/i18n/config'
 import { Minus, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { errorText } from './error-text'
@@ -13,9 +14,11 @@ import { blockedDaysText } from './weekday-names'
 
 type Policy = { depositDays: number; blockedDays: string[] }
 
-/** "ฝากขวดเพิ่ม" (P2-C2): form + the 6-item terms, then customer_request_deposit. */
+/** "ฝากเหล้าเพิ่ม" (P2-C2): form + the 6-item terms, then customer_request_deposit. */
 export function DepositRequestClient() {
   const t = useTranslations('cx')
+  // the language on screen: the terms the customer reads and accepts, the weekday names
+  const locale = useLocale() as CustomerLocale
   const router = useRouter()
   const session = useCxSession()
 
@@ -76,7 +79,7 @@ export function DepositRequestClient() {
           notes: notes.trim() || undefined,
           accepted,
           terms_version: TERMS_VERSION,
-          locale: session.customer.locale,
+          locale,
         }),
       })
       if (!res.ok) {
@@ -95,7 +98,7 @@ export function DepositRequestClient() {
     }
   }
 
-  const blocked = blockedDaysText(policy.blockedDays, session.customer.locale)
+  const blocked = blockedDaysText(policy.blockedDays, locale)
 
   return (
     <div className="flex flex-col gap-3">

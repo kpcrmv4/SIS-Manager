@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import type { CustomerLocale } from '@/lib/i18n/config'
 import { daysUntil, formatShortDate } from '@/lib/date'
 import { CxEmpty, CxErrorRetry, CxSkeleton } from './cx-states'
@@ -29,9 +29,11 @@ type DepositsResponse = { deposits: Deposit[]; blockedToday: boolean; branch: { 
 const ACTIVE = new Set(['requested', 'pending_confirm', 'in_store', 'pending_withdrawal'])
 const METERED = new Set(['in_store', 'pending_withdrawal'])
 
-/** "ขวดของฉัน" (P2-C2): active/history tabs, one card per deposit, "ขอเบิกเหล้า" opens the sheet. */
+/** "เหล้าของฉัน" (P2-C2): active/history tabs, one card per deposit, "ขอเบิกเหล้า" opens the sheet. */
 export function MyBottlesClient() {
   const t = useTranslations('cx')
+  // dates follow the language on screen (the session's locale is only the one at sign-in)
+  const locale = useLocale() as CustomerLocale
   const session = useCxSession()
   const [state, setState] = useState<'loading' | 'error' | 'ready'>('loading')
   const [data, setData] = useState<DepositsResponse | null>(null)
@@ -82,7 +84,7 @@ export function MyBottlesClient() {
         <CxEmpty title={t(tab === 'active' ? 'bottles.empty' : 'bottles.historyEmpty')} body={tab === 'active' ? t('bottles.emptyBody') : undefined} />
       ) : (
         list.map((d) => (
-          <DepositCard key={d.id} deposit={d} locale={session.customer.locale} onWithdraw={() => setWithdrawFor(d)} />
+          <DepositCard key={d.id} deposit={d} locale={locale} onWithdraw={() => setWithdrawFor(d)} />
         ))
       )}
 

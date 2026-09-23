@@ -10,7 +10,7 @@ const YMD = /^\d{4}-\d{2}-\d{2}$/
 /**
  * Booking dates/slots for the LIFF date strip + slot grid (P2-C3): booking_availability, plus
  * the customer-bookable zones and how many in-store deposits this customer already has here
- * (the "คุณมีขวดฝากที่สาขานี้ N รายการ" hint) — both cheap to fetch alongside.
+ * (the "คุณมีเหล้าฝากที่สาขานี้ N รายการ" hint) — both cheap to fetch alongside.
  */
 export async function GET(req: NextRequest) {
   const branchCode = req.nextUrl.searchParams.get('branch') ?? ''

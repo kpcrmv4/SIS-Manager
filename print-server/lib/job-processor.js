@@ -69,7 +69,7 @@ class JobProcessor {
       this.lastResetDate = today;
     }
 
-    const docType = jobType === 'receipt' ? 'ใบฝากเหล้า' : 'ใบแปะขวด';
+    const docType = jobType === 'receipt' ? 'ใบฝากเหล้า' : 'ป้ายเหล้าฝาก';
     console.log(`  [*] ${docType} (${jobId.slice(0, 8)}...)`);
 
     const htmlFile = path.join(this.tempDir, `print_${jobId}.html`);

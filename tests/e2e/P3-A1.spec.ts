@@ -197,7 +197,7 @@ test('P3-A1-05 chat keywords (ฝาก / เบิก / จองโต๊ะ /
   const cases: [string, string | null][] = [
     ['ฝาก', 'kw_deposit'], ['ฝากเหล้า', 'kw_deposit'], [' ฝาก เหล้า ', 'kw_deposit'], ['Deposit', 'kw_deposit'], ['寄存', 'kw_deposit'],
     ['เบิก', 'kw_withdraw'], ['เบิกเหล้า', 'kw_withdraw'], ['เบิกเหล้าครับ', 'kw_withdraw'], ['withdraw', 'kw_withdraw'],
-    ['ขวดของฉัน', 'kw_bottles'], ['My Bottles', 'kw_bottles'],
+    ['ขวดของฉัน', 'kw_bottles'], ['เหล้าของฉัน', 'kw_bottles'], ['My Bottles', 'kw_bottles'],
     ['จอง', 'kw_book'], ['จองโต๊ะ', 'kw_book'], ['จองโต๊ะค่ะ', 'kw_book'], ['BOOK!', 'kw_book'], ['예약', 'kw_book'], ['预约', 'kw_book'],
     ['ตั๋วจอง', 'kw_tickets'], ['my booking', 'kw_tickets'],
     ['เมนู', 'kw_menu'], ['help', 'kw_menu'],

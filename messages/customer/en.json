@@ -1,7 +1,6 @@
 {
   "shell": {
     "shop": "SIS Music Bar",
-    "shopBranch": "SIS Music Bar · {branch}",
     "language": "Language",
     "theme": "Theme",
     "themeNight": "Night",

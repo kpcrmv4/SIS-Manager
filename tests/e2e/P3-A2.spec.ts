@@ -154,7 +154,7 @@ test.describe('bar', () => {
     await (await chooser).setFiles(PHOTO_PATH)
     await expect(page.getByTestId('photo-chip').first()).toBeVisible()
     await page.getByRole('button', { name: 'ยืนยันเก็บเข้าชั้น', exact: true }).click()
-    await expect(page.getByText('ยืนยันขวดแล้ว', { exact: true })).toBeVisible()
+    await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
     expect((await deposit(dep.id)).status).toBe('in_store')
     await expect.poll(() => mock.pushesTo(line).length, { timeout: 30_000 }).toBe(1)
     const { data: row } = await adminDb().from('line_outbox').select('status, sent_at').eq('dedupe_key', `deposit_confirmed:${dep.id}`).single()

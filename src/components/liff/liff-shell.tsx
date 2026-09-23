@@ -179,11 +179,15 @@ export function LiffShell({
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="cx-serif truncate text-[17px] font-semibold leading-tight">{t(title)}</h1>
-            <p className="truncate text-xs text-cx-muted">{t('shell.shopBranch', { branch: branch.name })}</p>
+            {/* the branch name alone — it already carries the shop's name */}
+            <p className="truncate text-xs text-cx-muted" data-testid="cx-branch-name">
+              {branch.name}
+            </p>
           </div>
           {status === 'ready' && session && (
             <div className="flex flex-none items-center gap-1">
-              <LocaleSheet session={session} current={session.customer.locale} />
+              {/* the language on screen, not the session's copy — that one is fixed at sign-in */}
+              <LocaleSheet session={session} current={locale} />
               <button
                 type="button"
                 onClick={toggleTheme}

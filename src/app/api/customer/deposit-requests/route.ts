@@ -11,7 +11,7 @@ export const runtime = 'nodejs'
 type Body = { name?: string; phone?: string; item_name?: string; quantity?: number; table?: string; notes?: string; accepted?: boolean }
 
 /**
- * "ฝากขวดเพิ่ม" from the LIFF app (P2-C2) → customer_request_deposit. The terms version is
+ * "ฝากเหล้าเพิ่ม" from the LIFF app (P2-C2) → customer_request_deposit. The terms version is
  * always OUR constant, never whatever the client sends — a stale client cannot backdate the
  * version it agreed to. `accepted` is enforced here too, ahead of the RPC's own TERMS_REQUIRED
  * check, so the UI error matches the exact field the customer skipped.

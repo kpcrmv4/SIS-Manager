@@ -25,7 +25,8 @@ test('P2-C1-01 a test LIFF double establishes a session and shows the branch hea
   await withCustomerDouble(page, token)
 
   await page.goto(`/liff/${BRANCH_A_CODE.toLowerCase()}`)
-  await expect(page.getByText(`SIS Music Bar · ${BRANCH_A_NAME}`)).toBeVisible()
+  // the header names the branch alone — its name already carries the shop's
+  await expect(page.getByTestId('cx-branch-name')).toHaveText(BRANCH_A_NAME)
   // the bottom nav only renders once the session status is 'ready' — the real proof, not just the header text
   await expect(page.getByTestId('cx-bottom-nav')).toBeVisible()
   await expect(page.getByTestId('cx-loading')).toHaveCount(0)
@@ -47,7 +48,7 @@ test('P2-C1-03 the locale picker switches UI strings and saves customers.locale'
   await withCustomerDouble(page, token)
 
   await page.goto(`/liff/${BRANCH_A_CODE.toLowerCase()}`)
-  await expect(page.getByText(`SIS Music Bar · ${BRANCH_A_NAME}`)).toBeVisible()
+  await expect(page.getByTestId('cx-branch-name')).toHaveText(BRANCH_A_NAME)
 
   await page.getByTestId('cx-locale-trigger').click()
   await page.getByTestId('cx-locale-en').click()
@@ -109,4 +110,39 @@ test('P2-C1-06 a branch-A customer token is refused on branch B', async ({ reque
     data: {},
   })
   expect(res.status()).toBe(401)
+})
+
+test('P2-C1-08 after switching to Thai, dates on the bookings list and the ticket are Thai (month + พ.ศ.)', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const customer = await makeCustomer({ locale: 'en' })
+  const { adminDb } = await import('./fixtures/db')
+  const { addDays, businessNight, formatLongDate, formatShortDate } = await import('../../src/lib/date')
+  const night = addDays(businessNight(), 6)
+  const { data: booking, error } = await adminDb().rpc('create_booking', {
+    p_branch: branchA,
+    p_night: night,
+    p_slot: '19:30:00',
+    p_party: 2,
+    p_name: 'E2EC date locale',
+    p_customer_id: customer.id,
+  } as never)
+  expect(error, error?.message).toBeNull()
+  const code = (booking as { code: string }).code
+  await withCustomerDouble(page, signCustomerToken(customer.id, branchA))
+
+  const row = page.locator(`[data-testid="cx-booking-row"][data-code="${code}"]`)
+  await page.goto(`/liff/${BRANCH_A_CODE.toLowerCase()}/tickets`)
+  await expect(row).toContainText(formatShortDate(night, 'en'))
+
+  // switch to Thai in the sheet — no new sign-in, the session's locale is still 'en'
+  await page.getByTestId('cx-locale-trigger').click()
+  await page.getByTestId('cx-locale-th').click()
+  await expect(row).toContainText(formatShortDate(night, 'th'))
+  // a Thai month name, and not the English rendering the session started with
+  expect(formatShortDate(night, 'th')).toMatch(/[฀-๿]/)
+  await expect(row).not.toContainText(formatShortDate(night, 'en'))
+
+  await row.click()
+  await expect(page.getByTestId('cx-ticket-date')).toHaveText(formatLongDate(night, 'th'))
+  await adminDb().from('bookings').delete().eq('branch_id', branchA).eq('code', code)
 })

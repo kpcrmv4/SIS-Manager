@@ -46,7 +46,7 @@ test.beforeAll(async () => {
 
   branchBDep = await mustCreate('staffB', { qty: 1, branch: 'B' })
 
-  // A second page's worth of rows (25/page) — all land in "รอยืนยันขวด" (pending_confirm).
+  // A second page's worth of rows (25/page) — all land in "รอยืนยันเหล้า" (pending_confirm).
   const created = await Promise.all(Array.from({ length: 26 }, () => createDeposit('staff', { qty: 1 })))
   for (const c of created) expect(c.error, c.error?.message).toBeNull()
   paginationCount = created.length + 1 // + toConfirmDep itself

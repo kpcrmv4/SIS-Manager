@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import type { CustomerLocale } from '@/lib/i18n/config'
 import { daysUntil, formatShortDate } from '@/lib/date'
 import { CxEmpty, CxErrorRetry, CxSkeleton } from './cx-states'
 import { customerFetch, useCxSession } from './session-context'
@@ -27,6 +28,8 @@ function Row({ b, branchCode, locale }: { b: Booking; branchCode: string; locale
 /** "การจองของฉัน" (P2-C3): upcoming (soonest first) + past (most recent first), each links to its ticket. */
 export function TicketsListClient() {
   const t = useTranslations('cx')
+  // dates follow the language on screen (the session's locale is only the one at sign-in)
+  const locale = useLocale() as CustomerLocale
   const session = useCxSession()
   const [state, setState] = useState<'loading' | 'error' | 'ready'>('loading')
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -60,13 +63,13 @@ export function TicketsListClient() {
   return (
     <div className="flex flex-col gap-3">
       {upcoming.map((b) => (
-        <Row key={b.id} b={b} branchCode={session.branch.code} locale={session.customer.locale} />
+        <Row key={b.id} b={b} branchCode={session.branch.code} locale={locale} />
       ))}
       {past.length > 0 && (
         <>
           <p className="cx-label mt-2">{t('bottles.tabHistory')}</p>
           {past.map((b) => (
-            <Row key={b.id} b={b} branchCode={session.branch.code} locale={session.customer.locale} />
+            <Row key={b.id} b={b} branchCode={session.branch.code} locale={locale} />
           ))}
         </>
       )}

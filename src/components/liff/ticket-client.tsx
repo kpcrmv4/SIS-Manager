@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import type { CustomerLocale } from '@/lib/i18n/config'
 import QRCode from 'qrcode'
 import { toast } from 'sonner'
 import { formatLongDate } from '@/lib/date'
@@ -41,6 +42,8 @@ const CANCELLABLE_STATUS = new Set(['pending', 'confirmed'])
 /** "บัตรจองของคุณ" (P2-C3): code, QR of the token (never the code), rows, cancel. */
 export function TicketClient({ code }: { code: string }) {
   const t = useTranslations('cx')
+  // dates follow the language on screen (the session's locale is only the one at sign-in)
+  const locale = useLocale() as CustomerLocale
   const session = useCxSession()
   const [state, setState] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')
   const [booking, setBooking] = useState<Booking | null>(null)
@@ -134,7 +137,7 @@ export function TicketClient({ code }: { code: string }) {
         <div className="tear" />
         <div className="rows num">
           <span>{t('ticket.date')}</span>
-          <span>{formatLongDate(b.night, session.customer.locale)}</span>
+          <span data-testid="cx-ticket-date">{formatLongDate(b.night, locale)}</span>
           <span>{t('ticket.time')}</span>
           <span>{b.arriveBy ? t('ticket.timeValue', { time: b.slotTime, until: b.arriveBy }) : b.slotTime}</span>
           <span>{t('ticket.party')}</span>

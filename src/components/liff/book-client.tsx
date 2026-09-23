@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Minus, Plus } from 'lucide-react'
@@ -40,7 +40,11 @@ export function BookClient() {
   const [note, setNote] = useState('')
   const [pending, setPending] = useState(false)
 
+  // only the newest request may set state: a late answer from an earlier one (dev double-run
+  // effect, a retry) would otherwise reset the slot the customer has just picked
+  const loadSeq = useRef(0)
   const load = useCallback(() => {
+    const seq = ++loadSeq.current
     setState('loading')
     const from = bangkokDate()
     const to = addDays(from, DAYS_SHOWN - 1)
@@ -50,6 +54,7 @@ export function BookClient() {
         return res.json() as Promise<Availability>
       })
       .then((d) => {
+        if (seq !== loadSeq.current) return
         setData(d)
         setParty(Math.min(Math.max(2, d.party_min), d.party_max))
         const firstOpen = d.nights.findIndex((n) => !n.closed)
@@ -57,7 +62,9 @@ export function BookClient() {
         setSlot(null)
         setState('ready')
       })
-      .catch(() => setState('error'))
+      .catch(() => {
+        if (seq === loadSeq.current) setState('error')
+      })
   }, [session])
 
   useEffect(() => {
