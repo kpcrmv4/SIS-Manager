@@ -8,13 +8,15 @@ import { MoreHorizontal } from 'lucide-react'
 import type { BranchRef, Role } from '@/lib/auth/actor'
 import { isActive, navFor } from './nav'
 import { MoreSheet } from './more-sheet'
+import { useLive } from '@/components/realtime/live-provider'
 
 /**
  * Phones: 5 slots — home · ฝากเหล้า · [scan, raised, icon only] · จองโต๊ะ · เพิ่มเติม.
  * Everything else lives in the เพิ่มเติม bottom sheet.
  */
-export function BottomNav({ role, branches, branch }: { role: Role; branches: BranchRef[]; branch: BranchRef | null }) {
+export function BottomNav({ role, branches, branch, userId }: { role: Role; branches: BranchRef[]; branch: BranchRef | null; userId: string }) {
   const t = useTranslations('nav')
+  const { unread } = useLive()
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const items = navFor(role)
@@ -70,11 +72,14 @@ export function BottomNav({ role, branches, branch }: { role: Role; branches: Br
           aria-haspopup="dialog"
           className={`flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${overflowActive ? 'font-semibold text-brand' : 'text-muted-token'}`}
         >
-          <MoreHorizontal className="size-5" aria-hidden />
+          <span className="relative">
+            <MoreHorizontal className="size-5" aria-hidden />
+            {unread > 0 && <span className="absolute -right-1 -top-0.5 size-2 rounded-full bg-urgent" data-testid="more-unread-dot" aria-hidden />}
+          </span>
           <span>{t('more')}</span>
         </button>
       </nav>
-      <MoreSheet open={open} onOpenChange={setOpen} items={overflow} branches={branches} branch={branch} />
+      <MoreSheet open={open} onOpenChange={setOpen} items={overflow} branches={branches} branch={branch} userId={userId} />
     </>
   )
 }

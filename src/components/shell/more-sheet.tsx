@@ -9,6 +9,7 @@ import { BranchSwitcher } from './branch-switcher'
 import { logout } from './logout'
 import type { NavItem, NavSection } from './nav'
 import { ThemeToggle } from './theme-toggle'
+import { BellButton } from './bell'
 
 const ROW = 'flex w-full items-center gap-3 border-b border-line px-1 py-3.25 text-[15px] text-ink last:border-b-0'
 
@@ -25,12 +26,14 @@ export function MoreSheet({
   items,
   branches,
   branch,
+  userId,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   items: NavItem[]
   branches: BranchRef[]
   branch: BranchRef | null
+  userId: string
 }) {
   const t = useTranslations('nav')
   const groups = (['catReports', 'catSettings', 'catAccount'] as const).map((s) => ({
@@ -67,6 +70,7 @@ export function MoreSheet({
                 ))}
                 {account && (
                   <>
+                    <BellButton userId={userId} className={ROW} />
                     <ThemeToggle className={ROW} />
                     <button type="button" className={ROW} onClick={() => void logout()}>
                       <LogOut className="size-5 text-muted-token" aria-hidden />

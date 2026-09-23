@@ -684,7 +684,15 @@
   "bell": {
     "title": "การแจ้งเตือน",
     "empty": "ยังไม่มีการแจ้งเตือน",
-    "markAllRead": "อ่านทั้งหมดแล้ว"
+    "markAllRead": "อ่านทั้งหมดแล้ว",
+    "openWithCount": "การแจ้งเตือน ยังไม่อ่าน {count} รายการ",
+    "kinds": {
+      "deposit_received": "ขวดรอยืนยัน · {item} · โต๊ะ {table}",
+      "deposit_withdrawal_requested": "ลูกค้าขอเบิก · {item} · {customer}",
+      "deposit_requested": "ลูกค้าขอฝากผ่าน LINE · {customer}",
+      "booking_pending": "จองใหม่รอยืนยัน · {name} · {party} คน · {time}",
+      "other": "มีรายการใหม่รอคุณอยู่"
+    }
   },
   "print": {
     "receiptTitle": "ใบรับฝากเหล้า",

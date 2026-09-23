@@ -684,7 +684,15 @@
   "bell": {
     "title": "Notifications",
     "empty": "No notifications yet",
-    "markAllRead": "Mark all read"
+    "markAllRead": "Mark all read",
+    "openWithCount": "Notifications, {count} unread",
+    "kinds": {
+      "deposit_received": "Bottles to confirm · {item} · table {table}",
+      "deposit_withdrawal_requested": "Withdrawal requested · {item} · {customer}",
+      "deposit_requested": "Deposit request from LINE · {customer}",
+      "booking_pending": "New booking to confirm · {name} · {party} people · {time}",
+      "other": "Something new needs you"
+    }
   },
   "print": {
     "receiptTitle": "Liquor deposit receipt",
