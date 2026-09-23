@@ -332,7 +332,8 @@
     "submit": "Create request",
     "complete": "Withdraw now",
     "done": "Withdrawal requested",
-    "completed": "Withdrawn"
+    "completed": "Withdrawn",
+    "rejected": "Withdrawal rejected"
   },
   "extendDialog": {
     "title": "Extend",

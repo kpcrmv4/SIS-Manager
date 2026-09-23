@@ -1,0 +1,172 @@
+import { join } from 'node:path'
+import { expect, test } from '@playwright/test'
+import { adminDb, dbAs, fixtureIds } from './fixtures/db'
+import { AUTH_DIR } from './fixtures/env'
+import { RUN, cleanupRun, confirmAll, createDeposit, mustCreate } from './fixtures/deposits'
+import { bottleIds, createLineRequest, requestWithdrawal } from './fixtures/p2a-flows'
+import { addDays, bangkokDate, businessNight } from '../../src/lib/date'
+
+const as = (role: string) => join(AUTH_DIR, `${role}.json`)
+
+test.describe.configure({ mode: 'serial' })
+
+let confirmedBookingId = ''
+let confirmedBookingCode = ''
+let toConfirmDep: { id: string; code: string }
+let withdrawDep: { id: string; code: string }
+let lineRequestDep: { id: string; code: string }
+let expiringDep: { id: string; code: string }
+let scanDep: { id: string; code: string }
+let branchBDep: { id: string; code: string }
+
+test.beforeAll(async () => {
+  const { branchA } = fixtureIds()
+  const night = businessNight()
+
+  const { data: booking, error: bookingError } = await dbAs('staff').rpc('create_booking', {
+    p_branch: branchA,
+    p_night: night,
+    p_slot: '20:00:00',
+    p_party: 4,
+    p_name: `${RUN} คุณจอง`,
+  })
+  expect(bookingError, bookingError?.message).toBeNull()
+  const b = booking as { id: string; code: string }
+  confirmedBookingId = b.id
+  confirmedBookingCode = b.code
+
+  toConfirmDep = await mustCreate('staff', { qty: 1 })
+
+  withdrawDep = await mustCreate('staff', { qty: 1 })
+  await confirmAll(withdrawDep.id, [100])
+  const ids = await bottleIds(withdrawDep.id)
+  await requestWithdrawal(withdrawDep.id, ids, 'take_home', 'staff')
+
+  lineRequestDep = await createLineRequest(branchA, { qty: 1 })
+
+  const { data: expiringData, error: expiringError } = await createDeposit('bar', { qty: 1, expiresAt: `${addDays(bangkokDate(), 4)}T12:00:00+07:00` })
+  expect(expiringError, expiringError?.message).toBeNull()
+  expiringDep = expiringData!
+  await confirmAll(expiringDep.id, [100])
+
+  scanDep = await mustCreate('staff', { qty: 2 })
+  await confirmAll(scanDep.id, [100, 50])
+
+  branchBDep = await mustCreate('staffB', { qty: 1, branch: 'B' })
+})
+
+test.afterAll(async () => {
+  await cleanupRun()
+  const { branchA } = fixtureIds()
+  await adminDb().from('bookings').delete().eq('branch_id', branchA).like('name', `${RUN}%`)
+})
+
+test.describe('bar', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P2-A3-01 KPIs: bookings, รอ bar ยืนยันขวด, คำขอเบิก, ใกล้หมดอายุ', async ({ page }) => {
+    const { branchA } = fixtureIds()
+    const admin = adminDb()
+    await page.goto('/tonight')
+
+    const night = businessNight()
+    const { data: bookings } = await admin.from('bookings').select('party_size, status').eq('branch_id', branchA).eq('night', night)
+    const expectedBookings = bookings?.length ?? 0
+    const expectedPeople = (bookings ?? []).reduce((s, b) => s + b.party_size, 0)
+    const expectedArrived = (bookings ?? []).filter((b) => b.status === 'arrived').length
+
+    const { count: toConfirm } = await admin.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', branchA).eq('status', 'pending_confirm')
+    const { data: pendingW } = await admin.from('withdrawals').select('deposit_id').eq('branch_id', branchA).eq('status', 'pending')
+    const expectedWithdraw = new Set((pendingW ?? []).map((w) => w.deposit_id)).size
+
+    // each KPI cell is one <a> (Metric has an href) — scope the value check to its own cell
+    // so metrics that happen to share a number never satisfy the wrong assertion.
+    const bookingsCell = page.locator('a', { hasText: 'จองคืนนี้' })
+    await expect(bookingsCell).toContainText(String(expectedBookings))
+    await expect(bookingsCell).toContainText(`${expectedPeople} คน · มาแล้ว ${expectedArrived} โต๊ะ`)
+
+    const toConfirmCell = page.locator('a', { hasText: 'รอ bar ยืนยันขวด' })
+    await expect(toConfirmCell).toContainText(String(toConfirm ?? 0))
+
+    const withdrawCell = page.locator('a', { hasText: 'คำขอเบิก' })
+    await expect(withdrawCell).toContainText(String(expectedWithdraw))
+
+    await expect(page.getByText('ใกล้หมดอายุ 7 วัน', { exact: true })).toBeVisible()
+  })
+
+  test('P2-A3-04 pending work: confirm/withdraw/LINE-request rows link to the deposit', async ({ page }) => {
+    await page.goto('/tonight')
+    const confirmRow = page.getByTestId('tonight-task-confirm').first()
+    await expect(confirmRow).toBeVisible()
+    await confirmRow.click()
+    await expect(page).toHaveURL(new RegExp(`/deposits/${toConfirmDep.id}`))
+
+    await page.goto('/tonight')
+    const withdrawRow = page.getByTestId('tonight-task-withdraw').first()
+    await expect(withdrawRow).toBeVisible()
+    await withdrawRow.click()
+    await expect(page).toHaveURL(new RegExp(`/deposits/${withdrawDep.id}`))
+
+    await page.goto('/tonight')
+    const requestRow = page.getByTestId('tonight-task-request').first()
+    await expect(requestRow).toBeVisible()
+    await requestRow.click()
+    await expect(page).toHaveURL(new RegExp(`/deposits/${lineRequestDep.id}`))
+  })
+})
+
+test.describe('staff', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P2-A3-02 staff: the รอ bar ยืนยันขวด KPI is hidden', async ({ page }) => {
+    await page.goto('/tonight')
+    await expect(page.getByText('รอ bar ยืนยันขวด', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('คำขอเบิก', { exact: true })).toBeVisible()
+  })
+
+  test('P2-A3-03 tonight bookings list: time, unassigned table, name/party, code, มาแล้ว check-in', async ({ page }) => {
+    await page.goto('/tonight')
+    const row = page.locator('[data-testid="tonight-booking-row"]', { hasText: confirmedBookingCode })
+    await expect(row).toBeVisible()
+    await expect(row.getByText('20:00', { exact: true })).toBeVisible()
+    await expect(row.getByText('ยังไม่จัดโต๊ะ', { exact: false })).toBeVisible()
+    await expect(row.getByText(`${RUN} คุณจอง`, { exact: false })).toBeVisible()
+    await expect(row.getByText('4 คน', { exact: false })).toBeVisible()
+
+    const checkin = page.getByTestId(`checkin-${confirmedBookingId}`)
+    await expect(checkin).toBeVisible()
+    await checkin.click()
+    await expect(checkin).toHaveCount(0, { timeout: 15000 })
+    const { data } = await adminDb().from('bookings').select('status').eq('id', confirmedBookingId).single()
+    expect(data?.status).toBe('arrived')
+  })
+
+  test('P2-A3-05 expiring soon: ≤7 days with a badge อีก N วัน', async ({ page }) => {
+    await page.goto('/tonight')
+    await expect(page.getByText('ใกล้หมดอายุ', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('อีก 4 วัน', { exact: true })).toBeVisible()
+  })
+
+  test('P2-A3-06 scan: type a DEP code → item, customer, remaining, expiry, status + open/withdraw', async ({ page }) => {
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(scanDep.code)
+    await page.getByRole('button', { name: 'ค้นหา', exact: true }).click()
+    const card = page.getByTestId('scan-result-deposit')
+    await expect(card).toBeVisible()
+    await expect(card.getByText('Johnnie Walker Black Label', { exact: false })).toBeVisible()
+    await expect(card.getByText('ลูกค้า', { exact: true })).toBeVisible()
+    await expect(card.getByText('75%', { exact: false })).toBeVisible() // avg of 100/50
+    await expect(page.getByTestId('scan-deposit-open')).toBeVisible()
+    await expect(page.getByTestId('scan-deposit-withdraw')).toBeVisible()
+    await page.getByTestId('scan-deposit-withdraw').click()
+    await expect(page).toHaveURL(new RegExp(`/deposits/${scanDep.id}\\?open=withdraw`))
+    await expect(page.getByRole('dialog')).toBeVisible()
+  })
+
+  test('P2-A3-07 scan a branch-B deposit code shows "not found"', async ({ page }) => {
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(branchBDep.code)
+    await page.getByRole('button', { name: 'ค้นหา', exact: true }).click()
+    await expect(page.getByText(`ไม่พบการจองหรือรายการฝากที่ตรงกับ "${branchBDep.code}"`, { exact: true })).toBeVisible()
+  })
+})
