@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 5,
+    "iteration": 6,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -43,7 +43,7 @@
         {
           "id": "P0-06",
           "name": "Playwright harness + storageState",
-          "status": "todo"
+          "status": "written"
         }
       ]
     },
