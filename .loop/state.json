@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 1,
+    "iteration": 2,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -28,7 +28,7 @@
         {
           "id": "P0-03",
           "name": "i18n staff th/en, customer th/en/zh/ko",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P0-04",

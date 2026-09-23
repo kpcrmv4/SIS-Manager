@@ -1,6 +1,7 @@
-import { APP_NAME } from '@/lib/constants'
+import { getTranslations } from 'next-intl/server'
 
 // Replaced in P0-05 by the role-aware landing redirect.
-export default function Home() {
-  return <main className="p-8">{APP_NAME}</main>
+export default async function Home() {
+  const t = await getTranslations('common')
+  return <main className="p-8">{t('appName')}</main>
 }

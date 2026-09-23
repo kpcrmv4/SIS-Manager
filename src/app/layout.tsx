@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import { IBM_Plex_Sans_Thai, Noto_Serif_Thai } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale } from 'next-intl/server'
 import { APP_NAME } from '@/lib/constants'
 import './globals.css'
 
@@ -29,10 +31,13 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale()
   return (
-    <html lang="th" suppressHydrationWarning className={`${sans.variable} ${serif.variable}`}>
-      <body>{children}</body>
+    <html lang={locale} suppressHydrationWarning className={`${sans.variable} ${serif.variable}`}>
+      <body>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      </body>
     </html>
   )
 }
