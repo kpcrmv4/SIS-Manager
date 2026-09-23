@@ -26,7 +26,8 @@ export default defineConfig({
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
   ],
   webServer: {
-    command: `npx next dev -p ${PORT}`,
+    // with-env adds SIS_ENV_FILE's variables (worker worktrees have no .env.local of their own)
+    command: `node scripts/with-env.mjs npx next dev -p ${PORT}`,
     url: `${BASE_URL}/login`,
     reuseExistingServer: true,
     timeout: 180_000,

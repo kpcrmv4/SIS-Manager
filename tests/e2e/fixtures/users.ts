@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import type { Db } from './db'
+import { FIXTURE } from './env'
 
 /**
  * The permanent E2E fixture: two branches the demo seed never uses and one
@@ -7,20 +8,28 @@ import type { Db } from './db'
  * so runs cost no Auth sign-ups. Passwords are rotated each run (admin API,
  * not the sign-in rate limit) and live only in tests/e2e/.auth (gitignored).
  */
+const L = FIXTURE === 'T' ? '' : FIXTURE.toLowerCase()
+const N = FIXTURE === 'T' ? '' : FIXTURE
+
+/** Branch codes / display names of this run's fixture set (default ZTA "E2E-A", ZTB "E2E-B"). */
 export const E2E_BRANCHES = [
-  { key: 'branchA', code: 'ZTA', name: 'E2E-A' },
-  { key: 'branchB', code: 'ZTB', name: 'E2E-B' },
+  { key: 'branchA', code: `Z${FIXTURE}A`, name: `E2E${N}-A` },
+  { key: 'branchB', code: `Z${FIXTURE}B`, name: `E2E${N}-B` },
 ] as const
+export const BRANCH_A_NAME = E2E_BRANCHES[0].name
+export const BRANCH_B_NAME = E2E_BRANCHES[1].name
+export const BRANCH_A_CODE = E2E_BRANCHES[0].code
+export const BRANCH_B_CODE = E2E_BRANCHES[1].code
 
 export type FixtureRole = 'staff' | 'bar' | 'owner' | 'staffB' | 'multi' | 'inactive'
 
 export const E2E_USERS: Record<FixtureRole, { username: string; role: 'staff' | 'bar' | 'owner'; branches: ('branchA' | 'branchB')[]; active: boolean }> = {
-  staff: { username: 'e2e.staff', role: 'staff', branches: ['branchA'], active: true },
-  bar: { username: 'e2e.bar', role: 'bar', branches: ['branchA'], active: true },
-  owner: { username: 'e2e.owner', role: 'owner', branches: [], active: true },
-  staffB: { username: 'e2e.staffb', role: 'staff', branches: ['branchB'], active: true },
-  multi: { username: 'e2e.multi', role: 'staff', branches: ['branchA', 'branchB'], active: true },
-  inactive: { username: 'e2e.inactive', role: 'staff', branches: ['branchA'], active: false },
+  staff: { username: `e2e${L}.staff`, role: 'staff', branches: ['branchA'], active: true },
+  bar: { username: `e2e${L}.bar`, role: 'bar', branches: ['branchA'], active: true },
+  owner: { username: `e2e${L}.owner`, role: 'owner', branches: [], active: true },
+  staffB: { username: `e2e${L}.staffb`, role: 'staff', branches: ['branchB'], active: true },
+  multi: { username: `e2e${L}.multi`, role: 'staff', branches: ['branchA', 'branchB'], active: true },
+  inactive: { username: `e2e${L}.inactive`, role: 'staff', branches: ['branchA'], active: false },
 }
 
 export const SIGNED_IN_ROLES: FixtureRole[] = ['staff', 'bar', 'owner', 'staffB', 'multi']
