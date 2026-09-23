@@ -5,6 +5,7 @@ import { getActorState } from '@/lib/auth/actor'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { RefreshRetry } from '@/components/booking/refresh-retry'
 import { BranchForm, type BranchFormValue } from '@/components/settings/branch-form'
+import { PrintSettingsSection } from '@/components/settings/print-settings-section'
 
 // Built in P2-B3.
 export default async function SettingsBranchPage() {
@@ -56,6 +57,7 @@ export default async function SettingsBranchPage() {
     <>
       <PageHeader title={t('title')} subtitle={branch.name} />
       <BranchForm branchId={branch.id} initial={initial} />
+      <PrintSettingsSection branchId={branch.id} branchCode={branch.code} />
     </>
   )
 }
