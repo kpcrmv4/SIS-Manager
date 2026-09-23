@@ -5,6 +5,8 @@ const withNextIntl = createNextIntlPlugin('./src/lib/i18n/request.ts')
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // the dev badge sits on top of the bottom nav in every phone screenshot
+  devIndicators: false,
   // Next 16 dev blocks cross-origin chunk requests; without this, 127.0.0.1 never hydrates.
   allowedDevOrigins: ['localhost', '127.0.0.1', '*.localhost'],
   outputFileTracingIncludes: {

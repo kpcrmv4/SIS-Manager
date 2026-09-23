@@ -1,7 +1,10 @@
-import { getTranslations } from 'next-intl/server'
+import { redirect } from 'next/navigation'
+import { getActorState, landingFor } from '@/lib/auth/actor'
 
-// Replaced in P0-05 by the role-aware landing redirect.
+/** Role-aware landing: staff/bar → /tonight, owner → /overview. */
 export default async function Home() {
-  const t = await getTranslations('common')
-  return <main className="p-8">{t('appName')}</main>
+  const state = await getActorState()
+  if (state.status === 'anonymous') redirect('/login')
+  if (state.status === 'inactive') redirect('/api/auth/logout?reason=inactive')
+  redirect(landingFor(state.actor.role))
 }

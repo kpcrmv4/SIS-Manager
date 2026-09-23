@@ -22,6 +22,11 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
         </div>
         <div className="card-surface p-5 shadow-e1">
           <h2 className="mb-4 text-base font-semibold text-ink">{t('title')}</h2>
+          {sp.reason === 'inactive' && (
+            <p role="alert" className="mb-3 rounded-md bg-urgent-bg px-3 py-2 text-sm text-urgent">
+              {t('inactive')}
+            </p>
+          )}
           <LoginForm next={next} demo={demoLoginEnabled()} />
         </div>
         <p className="mt-4 text-center text-xs text-muted-token">{t('noAccount')}</p>

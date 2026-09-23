@@ -4,6 +4,7 @@ import { IBM_Plex_Sans_Thai, Noto_Serif_Thai } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale } from 'next-intl/server'
 import { APP_NAME } from '@/lib/constants'
+import { Providers } from './providers'
 import './globals.css'
 
 const sans = IBM_Plex_Sans_Thai({
@@ -36,7 +37,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale} suppressHydrationWarning className={`${sans.variable} ${serif.variable}`}>
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

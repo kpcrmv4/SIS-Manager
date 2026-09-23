@@ -42,3 +42,17 @@
 - หลักฐาน: scripts/verify-contrast.mjs STAFF DARK on-brand on brand-solid-active 3.91
 - กฎ: ตัวตรวจ contrast ต้องคำนวณสีจริงของ token ที่ map ด้วย var()/color-mix() โดยใช้ --on-brand ของโปรเจกต์เป็นตัวอักษรบน brand-solid
 - status: new
+
+## L-002 · 2026-09-23 · kp-e2e-playwright-real-db · port-pid
+- อาการ: global-setup ล็อกอินได้ 401 {"error":"unauthorized"} ซึ่ง route ของเราไม่มีวันตอบ
+- สาเหตุ: อีกโปรเจกต์ (next start -p 3000) ยึดพอร์ตระหว่างสองรอบ และ webServer.reuseExistingServer:true ใช้แอปนั้นแทนโดยไม่เตือน
+- หลักฐาน: Get-NetTCPConnection 3000 → PID 9816 C:\projects\huay … next start -p 3000
+- กฎ: global-setup ต้องพิสูจน์ว่าเซิร์ฟเวอร์ที่ reuse เป็นแอปของเราจริง (เช่น หน้า /login มีชื่อแอป) ก่อนล็อกอิน
+- status: new
+
+## L-003 · 2026-09-23 · nextjs-supabase-ssr-auth · logout-replace
+- อาการ: ออกจากระบบแล้วกด Back ยังเห็นหน้า /tonight ทั้งที่ cookie ถูกลบและ GET /tonight ตอบ 307
+- สาเหตุ: เบราว์เซอร์คืนหน้าจาก HTTP cache/bfcache โดยไม่ส่ง request · Next dev ส่ง Cache-Control ไม่มี no-store และทับ header ที่ proxy ตั้ง
+- หลักฐาน: tests/e2e/P0-auth.spec.ts P0-AUTH-03 แดงก่อนเพิ่ม src/components/shell/bfcache-guard.tsx
+- กฎ: layout ที่ต้องล็อกอินต้อง reload เมื่อเอกสารถูกโหลดด้วย navigation type back_forward หรือ pageshow.persisted
+- status: new
