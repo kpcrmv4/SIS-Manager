@@ -1,8 +1,6 @@
-import { getCustomerLocale } from '@/lib/i18n/customer'
-import { LiffPlaceholder } from '@/components/liff/liff-placeholder'
+import { DepositRequestClient } from '@/components/liff/deposit-request-client'
 
-// LIFF route skeleton (P1-05) - built in P2-C2.
-export default async function Page() {
-  const locale = await getCustomerLocale()
-  return <LiffPlaceholder locale={locale} title="depositRequest.title" body="depositRequest.body" />
+// "ฝากขวดเพิ่ม" (P2-C2)
+export default function Page() {
+  return <DepositRequestClient />
 }

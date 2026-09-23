@@ -1,8 +1,7 @@
-import { getCustomerLocale } from '@/lib/i18n/customer'
-import { LiffPlaceholder } from '@/components/liff/liff-placeholder'
+import { TicketClient } from '@/components/liff/ticket-client'
 
-// LIFF route skeleton (P1-05) - built in P2-C3.
-export default async function Page() {
-  const locale = await getCustomerLocale()
-  return <LiffPlaceholder locale={locale} title="ticket.title" body="ticket.notFound" />
+// "บัตรจองของคุณ" (P2-C3)
+export default async function Page({ params }: { params: Promise<{ code: string }> }) {
+  const { code } = await params
+  return <TicketClient code={code} />
 }
