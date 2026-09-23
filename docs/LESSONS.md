@@ -70,3 +70,10 @@
 - หลักฐาน: results.json Expected 2026-12-22 Received 2026-10-23 · แก้ด้วย data-hydrated บน new-deposit-form
 - กฎ: ฟอร์ม client ที่เทสต์พิมพ์ลงไปต้องมี data-hydrated และ spec ต้องรอให้เป็น true ก่อน fill/click ช่องแรก
 - status: new
+
+## L-006 · 2026-09-23 · kp-e2e-playwright-real-db · leftover-fixture
+- อาการ: spec ของ worker C แดงด้วย blackout ที่ไม่มี spec ไหนของ C หรือ A สร้าง
+- สาเหตุ: owner ของ fixture B เห็นทุกสาขา ไม่มี cookie sis_branch เลยได้สาขาแรกตามชื่อ (ZTA ของ orchestrator) แล้ว UI ตั้งค่าเขียนลงสาขานั้น
+- หลักฐาน: booking_blackouts ZTA 2026-09-30 reason "muea1kes ปิดร้าน" สร้าง 15:47 UTC ระหว่าง worker B รัน
+- กฎ: fixture ที่แยกกันต่อ worker ต้องปักสาขาที่ทำงาน (cookie/param) ให้ทุกบทบาทที่เห็นหลายสาขา ไม่ใช่พึ่งค่าเริ่มต้น
+- status: new

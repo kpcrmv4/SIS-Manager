@@ -2,14 +2,14 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 10,
+    "iteration": 16,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
       "size": 8
     },
     "blocked_reason": "",
-    "current": "P2-C1"
+    "current": "P2-B1"
   },
   "phases": [
     {
@@ -86,17 +86,17 @@
         {
           "id": "P2-A1",
           "name": "Deposits list + detail",
-          "status": "doing"
+          "status": "written"
         },
         {
           "id": "P2-A2",
           "name": "Deposit flows",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P2-A3",
           "name": "Tonight + deposit scan",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P2-B1",
@@ -116,17 +116,17 @@
         {
           "id": "P2-C1",
           "name": "LIFF shell + auth + locale",
-          "status": "doing"
+          "status": "written"
         },
         {
           "id": "P2-C2",
           "name": "LIFF deposits",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P2-C3",
           "name": "LIFF booking + ticket",
-          "status": "todo"
+          "status": "written"
         }
       ]
     },
