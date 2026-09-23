@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 16,
+    "iteration": 19,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -101,17 +101,17 @@
         {
           "id": "P2-B1",
           "name": "Bookings plan + list + staff form",
-          "status": "doing"
+          "status": "written"
         },
         {
           "id": "P2-B2",
           "name": "Check-in + booking scan",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P2-B3",
           "name": "Owner settings",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P2-C1",

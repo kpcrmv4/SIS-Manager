@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { adminDb, fixtureIds } from './fixtures/db'
 import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { DEFAULT_SETTINGS, resetSettings, teardownZonesAndTables } from './fixtures/p2b-bookings'
+import { BRANCH_A_NAME } from './fixtures/users'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -47,7 +48,7 @@ test.describe('owner settings', () => {
     await admin().from('profiles').update({ active: true }).eq('id', ownerId)
     await context.addCookies([{ name: 'sis_branch', value: branchA, url: BASE_URL }])
     await page.goto('/tonight')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('E2EB-A')
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(BRANCH_A_NAME)
   })
 
   test('P2-B3-01 P2-B3-02 save every booking rule field incl. weekday toggles', async ({ page }) => {
@@ -143,7 +144,7 @@ test.describe('owner settings', () => {
     await page.goto('/settings/items')
     await page.getByTestId('add-item-button').click()
     await page.getByLabel('ชื่อเหล้า').fill(`${RUN} Whisky`)
-    await page.locator('#id-branch').selectOption({ label: 'E2EB-A' })
+    await page.locator('#id-branch').selectOption({ label: BRANCH_A_NAME })
     await page.getByTestId('item-dialog-submit').click()
     await expect(page.getByText(`${RUN} Whisky`)).toBeVisible()
 

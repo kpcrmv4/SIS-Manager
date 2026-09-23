@@ -81,6 +81,15 @@ test('P1-CORE-07 owner sees every branch', async () => {
   expect(ids).toHaveLength(count!)
 })
 
+test('P1-CORE-13 owner inserts a branch and reads it back in the same statement', async () => {
+  const code = `ZQ${String.fromCharCode(65 + (Date.now() % 26))}`
+  await adminDb().from('branches').delete().eq('code', code)
+  const { data, error } = await dbAs('owner').from('branches').insert({ code, name: `E2E probe ${code}`, active: false }).select('id, code').single()
+  expect(error, error?.message).toBeNull()
+  expect(data?.code).toBe(code)
+  await adminDb().from('branches').delete().eq('code', code)
+})
+
 test('P1-CORE-08 bar cannot create a branch', async () => {
   const { data, error } = await dbAs('bar').from('branches').insert({ code: 'ZZX', name: 'nope' }).select('id')
   expect(data).toBeNull()

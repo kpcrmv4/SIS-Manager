@@ -35,7 +35,9 @@ test('P1-OUT-02 no signed-in role can read the outbox', async () => {
 
 test('P1-OUT-09 claim → sending; failed backs off; sent is final; not callable by staff', async () => {
   const { branchA } = fixtureIds()
-  await admin().from('line_outbox').insert({ branch_id: branchA, target_kind: 'group', target: `C${'2'.repeat(32)}`, kind: 'test', dedupe_key: `${RUN}:claim` })
+  await admin().from('line_outbox').insert({ branch_id: branchA, target_kind: 'group', target: `C${'2'.repeat(32)}`, kind: 'test', dedupe_key: `${RUN}:claim`,
+    // oldest first: other runs may have queued more than one claim batch of real messages
+    created_at: '2000-01-01T00:00:00Z' })
   const claimed = await admin().rpc('claim_outbox', { p_limit: 100 })
   expect(claimed.error, claimed.error?.message).toBeNull()
   const mine = (claimed.data ?? []).find((r) => r.dedupe_key === `${RUN}:claim`)!
