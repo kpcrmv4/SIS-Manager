@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 9,
+    "iteration": 10,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -74,7 +74,7 @@
         {
           "id": "P1-05",
           "name": "Types, signatures, skeletons, RLS isolation spec",
-          "status": "todo"
+          "status": "written"
         }
       ]
     },
