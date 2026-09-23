@@ -84,3 +84,10 @@
 - evidence: .next/dev/types/routes.d.ts TS1002 Unterminated string literal; source tree clean after regenerating
 - rule: gate commands are chained with && on the typecheck exit code, never piped through grep; remove .next/dev/types when tsc errors point only there
 - status: new
+
+## L-008 · 2026-09-24 · kp-autonomous-loop · replace-dollar-backtick
+- symptom: a spec-fixing script pasted the whole file header into the middle of a line
+- cause: String.replaceAll(str, replacementString) expands $` (text before the match) — the replacement contained a template literal ending in `${A_CODE}$`` 
+- evidence: tests/e2e/P3-A2.spec.ts line 196 held the import block after the regex; restored from git and redone
+- rule: in maintenance scripts, pass a replacer function (or split/join) whenever the replacement text may contain $
+- status: new
