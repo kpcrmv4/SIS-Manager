@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import type { Database } from '@/types/database'
 import { pushMessage } from './client'
 import { renderMessage } from './render'
+import { dispatchPush } from '@/lib/push/dispatch'
 
 type OutboxRow = Database['public']['Tables']['line_outbox']['Row']
 type Outcome = 'sent' | 'failed' | 'skipped'
@@ -96,6 +97,12 @@ export function dispatchSoon(): Promise<void> {
         await dispatchOutbox()
       } catch {
         // the cron ping retries whatever is still queued
+      }
+      // the same state changes write in-app notifications (DB triggers) — push them now too
+      try {
+        await dispatchPush()
+      } catch {
+        // sis-push-dispatch cron picks up anything left within the hour
       }
     } while (state.again)
   }

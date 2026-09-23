@@ -19,6 +19,10 @@ import {
   postWebhook,
   textEvent,
 } from './fixtures/p3a-line'
+import { BRANCH_A_CODE } from './fixtures/users'
+
+/** this fixture's branch A code — the webhook path segment (lower case) */
+const A_CODE = BRANCH_A_CODE.toLowerCase()
 
 const as = (role: string) => join(AUTH_DIR, `${role}.json`)
 const mock = new MockLine()
@@ -193,7 +197,7 @@ test.describe('owner', () => {
     await page.goto('/settings/line')
     await expect(page.getByTestId('line-settings')).toHaveAttribute('data-hydrated', 'true')
     await expect(page.getByTestId('line-accessToken-status')).toHaveText('ยังไม่ได้ตั้งค่า')
-    await expect(page.getByTestId('line-webhook-url')).toHaveText(/\/api\/line\/webhook\/zaa$/)
+    await expect(page.getByTestId('line-webhook-url')).toHaveText(new RegExp(`/api/line/webhook/${A_CODE}$`))
     await page.locator('#line-liffId').fill(LIFF_ID)
     await page.locator('#line-channelId').fill('2001234567')
     await page.locator('#line-botUserId').fill('e2e.sis')
@@ -244,7 +248,7 @@ test.describe('owner', () => {
     expect(sec!.group_bind_code).toBe(shown)
     await adminDb().from('branch_line_secrets').update({ group_bind_expires_at: new Date(Date.now() - 1000).toISOString() }).eq('branch_id', branchA)
     const expired = textEvent({ type: 'group', groupId: group }, shown)
-    expect((await postWebhook(request, 'zaa', { destination: 'x', events: [expired] }, SECRET)).status()).toBe(200)
+    expect((await postWebhook(request, A_CODE, { destination: 'x', events: [expired] }, SECRET)).status()).toBe(200)
     let { data: b } = await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single()
     expect(b!.staff_group_id).toBeNull()
     expect(mock.repliesTo(expired.replyToken)).toHaveLength(0)
@@ -254,17 +258,17 @@ test.describe('owner', () => {
     await expect(page.getByTestId('line-bind-code').locator('p').first()).not.toHaveText(shown)
     const code = (await page.getByTestId('line-bind-code').locator('p').first().textContent())!.trim()
     const wrong = textEvent({ type: 'group', groupId: group }, code === 'SIS-000000' ? 'SIS-000001' : 'SIS-000000')
-    await postWebhook(request, 'zaa', { destination: 'x', events: [wrong] }, SECRET)
+    await postWebhook(request, A_CODE, { destination: 'x', events: [wrong] }, SECRET)
     ;({ data: b } = await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single())
     expect(b!.staff_group_id).toBeNull()
     const right = textEvent({ type: 'group', groupId: group }, ` ${code.toLowerCase().replace('-', '- ')} `)
-    expect((await postWebhook(request, 'zaa', { destination: 'x', events: [right] }, SECRET)).status()).toBe(200)
+    expect((await postWebhook(request, A_CODE, { destination: 'x', events: [right] }, SECRET)).status()).toBe(200)
     ;({ data: b } = await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single())
     expect(b!.staff_group_id).toBe(group)
     expect(mock.repliesTo(right.replyToken)).toHaveLength(1)
     // the code is single-use
     const reuse = textEvent({ type: 'group', groupId: groupId() }, code)
-    await postWebhook(request, 'zaa', { destination: 'x', events: [reuse] }, SECRET)
+    await postWebhook(request, A_CODE, { destination: 'x', events: [reuse] }, SECRET)
     ;({ data: b } = await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single())
     expect(b!.staff_group_id).toBe(group)
 
