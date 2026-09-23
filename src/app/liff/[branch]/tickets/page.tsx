@@ -1,8 +1,6 @@
-import { getCustomerLocale } from '@/lib/i18n/customer'
-import { LiffPlaceholder } from '@/components/liff/liff-placeholder'
+import { TicketsListClient } from '@/components/liff/tickets-list-client'
 
-// LIFF route skeleton (P2-C1 nav target) — built in P2-C3.
-export default async function Page() {
-  const locale = await getCustomerLocale()
-  return <LiffPlaceholder locale={locale} body="ticket.listEmpty" />
+// "การจองของฉัน" (P2-C3)
+export default function Page() {
+  return <TicketsListClient />
 }
