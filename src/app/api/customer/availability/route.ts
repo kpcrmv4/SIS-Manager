@@ -28,9 +28,18 @@ export async function GET(req: NextRequest) {
     admin.from('deposits').select('id', { count: 'exact', head: true }).eq('customer_id', s.customer.id).eq('branch_id', s.branch.id).eq('status', 'in_store'),
   ])
   if (avail.error) return rpcError(avail.error)
+  if (zones.error) return rpcError(zones.error)
+  if (deposits.error) return rpcError(deposits.error)
 
+  // customers see open/closed, the closing reason the owner wrote for them, and slots —
+  // never how many tables are booked or the nightly capacity
+  const a = avail.data as { line_enabled: boolean; party_min: number; party_max: number; cancel_hours: number; nights: { night: string; closed: boolean; reason: string | null; blackout_reason: string | null; full: boolean; slots: string[] }[] }
   return NextResponse.json({
-    ...(avail.data as object),
+    line_enabled: a.line_enabled,
+    party_min: a.party_min,
+    party_max: a.party_max,
+    cancel_hours: a.cancel_hours,
+    nights: a.nights.map((n) => ({ night: n.night, closed: n.closed, reason: n.reason, blackout_reason: n.blackout_reason, full: n.full, slots: n.slots })),
     zones: zones.data ?? [],
     inStoreDeposits: deposits.count ?? 0,
   })

@@ -156,26 +156,6 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
                 })}
               </tbody>
             </table>
-            <div className="flex items-center justify-between px-4 py-2.5 text-xs text-muted-token">
-              <span className="tnum">{tc('showing', { from, to, total })}</span>
-              <span className="flex gap-2">
-                <Link
-                  href={hrefWith('/deposits', sp, { page: page > 1 ? page - 1 : null })}
-                  aria-disabled={page <= 1}
-                  className={`btn-ghost btn-sm ${page <= 1 ? 'pointer-events-none opacity-50' : ''}`}
-                >
-                  {tc('previous')}
-                </Link>
-                <Link
-                  href={hrefWith('/deposits', sp, { page: page + 1 })}
-                  aria-disabled={to >= total}
-                  className={`btn-ghost btn-sm ${to >= total ? 'pointer-events-none opacity-50' : ''}`}
-                  data-testid="deposits-next"
-                >
-                  {tc('next')}
-                </Link>
-              </span>
-            </div>
           </div>
 
           <div className="panel nav:hidden" data-testid="deposits-list-mobile">
@@ -200,6 +180,27 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
                 />
               )
             })}
+          </div>
+
+          <div className="mt-2 flex items-center justify-between px-1 py-2.5 text-xs text-muted-token nav:px-4" data-testid="deposits-pagination">
+            <span className="tnum">{tc('showing', { from, to, total })}</span>
+            <span className="flex gap-2">
+              <Link
+                href={hrefWith('/deposits', sp, { page: page > 1 ? page - 1 : null })}
+                aria-disabled={page <= 1}
+                className={`btn-ghost btn-sm ${page <= 1 ? 'pointer-events-none opacity-50' : ''}`}
+              >
+                {tc('previous')}
+              </Link>
+              <Link
+                href={hrefWith('/deposits', sp, { page: page + 1 })}
+                aria-disabled={to >= total}
+                className={`btn-ghost btn-sm ${to >= total ? 'pointer-events-none opacity-50' : ''}`}
+                data-testid="deposits-next"
+              >
+                {tc('next')}
+              </Link>
+            </span>
           </div>
         </>
       )}

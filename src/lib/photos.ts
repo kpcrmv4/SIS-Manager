@@ -1,6 +1,5 @@
 'use client'
 
-import imageCompression from 'browser-image-compression'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { bangkokDate } from '@/lib/date'
 
@@ -14,6 +13,8 @@ export const PHOTO_BUCKET = 'deposit-photos'
 export async function uploadDepositPhoto(branchId: string, file: File): Promise<{ path: string } | { error: string }> {
   let blob: Blob = file
   try {
+    // loaded on first upload only — keeps the compression worker out of every detail-page bundle
+    const { default: imageCompression } = await import('browser-image-compression')
     blob = await imageCompression(file, { maxWidthOrHeight: 1600, maxSizeMB: 0.8, fileType: 'image/jpeg', useWebWorker: true })
   } catch {
     // an unsupported format falls through and is refused by the bucket's mime list

@@ -1,6 +1,7 @@
 import 'server-only'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { addDays, bangkokDate, businessNight } from '@/lib/date'
+import { LIVE_STATUSES } from '@/lib/booking/format'
 import type { Database } from '@/types/database'
 
 type BookingStatus = Database['public']['Enums']['booking_status']
@@ -53,6 +54,7 @@ export async function getTonightData(branchId: string, expiryNoticeDays: number)
     .select('id, code, slot_time, party_size, name, status, table:tables(label)')
     .eq('branch_id', branchId)
     .eq('night', night)
+    .in('status', LIVE_STATUSES) // cancelled / rejected / no-show are not "tonight's bookings"
     .order('slot_time')
     .range(0, 199)
 
@@ -85,13 +87,11 @@ export async function getTonightData(branchId: string, expiryNoticeDays: number)
     .order('expires_at')
     .range(0, 49)
 
-  const [{ data: bookingsRaw }, { data: toConfirmRaw, count: toConfirmCount }, { data: requestsRaw }, { data: withdrawalsRaw }, { data: expiringRaw }] = await Promise.all([
-    bookingsQ,
-    toConfirmQ,
-    requestsQ,
-    withdrawalsQ,
-    expiringQ,
-  ])
+  const results = await Promise.all([bookingsQ, toConfirmQ, requestsQ, withdrawalsQ, expiringQ])
+  const failed = results.find((r) => r.error)
+  // a failed leg must surface as an error state, not as an empty board
+  if (failed?.error) throw new Error(`tonight: ${failed.error.code ?? failed.error.message}`)
+  const [{ data: bookingsRaw }, { data: toConfirmRaw, count: toConfirmCount }, { data: requestsRaw }, { data: withdrawalsRaw }, { data: expiringRaw }] = results
 
   const bookings: TonightBooking[] = (bookingsRaw ?? []).map((b) => ({
     id: b.id,

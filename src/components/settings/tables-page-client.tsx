@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/states'
+import { ListRow } from '@/components/ui/list-row'
 import { ZoneDialog, type ZoneDialogValue } from './zone-dialog'
 import { TableDialog, type TableDialogValue } from './table-dialog'
 import { updateZone, updateTable, deleteZone } from '@/lib/settings/tables-actions'
@@ -23,6 +24,10 @@ export function TablesPageClient({ branchId, zones }: { branchId: string; zones:
 
   const refresh = () => router.refresh()
   const zoneOptions = zones.filter((z) => z.active).map((z) => ({ id: z.id, name: z.name }))
+
+  const seatsText = (row: TableRow) => (row.seatsMin === row.seatsMax ? String(row.seatsMin) : `${row.seatsMin}–${row.seatsMax}`)
+  const editTable = (z: ZoneWithTables, row: TableRow) =>
+    setTableDialog({ id: row.id, zoneId: z.id, label: row.label, shape: row.shape, seatsMin: row.seatsMin, seatsMax: row.seatsMax, sort: row.sort })
 
   async function toggleZoneBookable(z: ZoneWithTables) {
     const res = await updateZone(z.id, { customerBookable: !z.customerBookable })
@@ -82,7 +87,7 @@ export function TablesPageClient({ branchId, zones }: { branchId: string; zones:
                   </button>
                 </span>
               </div>
-              <div className="overflow-x-auto">
+              <div className="hidden overflow-x-auto nav:block" data-testid="zone-tables-desktop">
                 <table className="tbl">
                   <thead>
                     <tr>
@@ -102,7 +107,7 @@ export function TablesPageClient({ branchId, zones }: { branchId: string; zones:
                         </td>
                         <td>{t(`shape.${row.shape}`)}</td>
                         <td>
-                          {row.seatsMin === row.seatsMax ? row.seatsMin : `${row.seatsMin}–${row.seatsMax}`}
+                          {seatsText(row)}
                         </td>
                         <td>
                           <Badge tone={z.customerBookable ? 'done' : 'pending'}>{z.customerBookable ? t('bookableOn') : t('bookableOff')}</Badge>
@@ -112,20 +117,14 @@ export function TablesPageClient({ branchId, zones }: { branchId: string; zones:
                             type="button"
                             role="switch"
                             aria-checked={row.active}
-                            aria-label={t('active')}
+                            aria-label={`${t('active')} ${row.label}`}
                             className="tg"
                             onClick={() => void toggleTableActive(row)}
                             data-testid="table-active-toggle"
                           />
                         </td>
                         <td>
-                          <button
-                            type="button"
-                            className="btn-ghost btn-sm"
-                            onClick={() =>
-                              setTableDialog({ id: row.id, zoneId: z.id, label: row.label, shape: row.shape, seatsMin: row.seatsMin, seatsMax: row.seatsMax, sort: row.sort })
-                            }
-                          >
+                          <button type="button" className="btn-ghost btn-sm" onClick={() => editTable(z, row)}>
                             {tc('edit')}
                           </button>
                         </td>
@@ -140,6 +139,37 @@ export function TablesPageClient({ branchId, zones }: { branchId: string; zones:
                     )}
                   </tbody>
                 </table>
+              </div>
+              <div className="nav:hidden" data-testid="zone-tables-mobile">
+                {z.tables.map((row) => (
+                  <ListRow
+                    key={row.id}
+                    title={row.label}
+                    meta={
+                      <span className="tnum">
+                        {t(`shape.${row.shape}`)} · {seatsText(row)}
+                      </span>
+                    }
+                    aside={
+                      <>
+                        <Badge tone={z.customerBookable ? 'done' : 'pending'}>{z.customerBookable ? t('bookableOn') : t('bookableOff')}</Badge>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={row.active}
+                          aria-label={`${t('active')} ${row.label}`}
+                          className="tg"
+                          onClick={() => void toggleTableActive(row)}
+                          data-testid="table-active-toggle-mobile"
+                        />
+                        <button type="button" className="btn-ghost btn-sm" onClick={() => editTable(z, row)}>
+                          {tc('edit')}
+                        </button>
+                      </>
+                    }
+                  />
+                ))}
+                {!z.tables.length && <p className="px-4 py-2.5 text-center text-muted-token">—</p>}
               </div>
               <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line px-4 py-2 text-sm">
                 <label className="flex items-center gap-2">

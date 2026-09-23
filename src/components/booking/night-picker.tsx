@@ -10,6 +10,7 @@ import { hrefWith } from '@/components/ui/filter-href'
 export function NightPicker({ night, params }: { night: string; params: Record<string, string | undefined> }) {
   const router = useRouter()
   const t = useTranslations('common')
+  const tf = useTranslations('bookingForm')
   const go = (n: string) => router.push(hrefWith('/bookings', params, { night: n }))
 
   return (
@@ -20,7 +21,7 @@ export function NightPicker({ night, params }: { night: string; params: Record<s
       <input
         type="date"
         value={night}
-        aria-label="night"
+        aria-label={tf('night')}
         onChange={(e) => e.target.value && go(e.target.value)}
         className="w-[130px] rounded-sm bg-transparent px-1 py-1 text-sm tnum outline-none"
       />

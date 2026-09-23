@@ -69,8 +69,10 @@ export async function toggleBlackout(branchId: string, night: string, reason?: s
   const { data: existing, error: findError } = await sb.from('booking_blackouts').select('id').eq('branch_id', branchId).eq('night', night).maybeSingle()
   if (findError) return { ok: false, error: 'invalid' }
   if (existing) {
-    const { error } = await sb.from('booking_blackouts').delete().eq('id', existing.id)
+    const { data: removed, error } = await sb.from('booking_blackouts').delete().eq('id', existing.id).select('id')
     if (error) return { ok: false, error: 'invalid' }
+    // an RLS-refused delete matches zero rows and returns no error
+    if (!removed?.length) return { ok: false, error: 'forbidden' }
     touched()
     return { ok: true, data: { action: 'removed' } }
   }

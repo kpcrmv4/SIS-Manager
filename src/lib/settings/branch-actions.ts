@@ -23,15 +23,12 @@ export async function createBranch(code: string, name: string): Promise<Settings
   const cleanName = cleanText(name, 120)
   if (!CODE_RE.test(cleanCode) || !cleanName) return { ok: false, error: 'invalid' }
   const sb = await getSupabaseServer()
-  // No .select() on the insert itself: branches_select's my_branch_ids() scans the whole
-  // branches table from inside the RLS check, and does not see the row this same INSERT
-  // command is still creating, so `INSERT ... RETURNING` 42501s even though the write
-  // itself is allowed. A separate follow-up SELECT (its own statement) sees it fine.
-  const { error } = await sb.from('branches').insert({ code: cleanCode, name: cleanName })
+  // insert … returning works for owners since migration 20260923192000_branches_owner_select
+  const { data, error } = await sb.from('branches').insert({ code: cleanCode, name: cleanName }).select('id').single()
   if (error) return { ok: false, error: error.code === '23505' ? 'code_taken' : 'invalid' }
-  const { data } = await sb.from('branches').select('id').eq('code', cleanCode).single()
+  if (!data) return { ok: false, error: 'invalid' }
   touched()
-  return { ok: true, data: { id: data?.id ?? '' } }
+  return { ok: true, data: { id: data.id } }
 }
 
 export type BranchDetailInput = {

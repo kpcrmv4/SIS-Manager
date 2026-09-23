@@ -154,6 +154,8 @@
   --cx-gold: #D9B26A;
   --cx-warn: #F0A07F;
   --cx-warn-line: #E07B53;
+  --cx-logo-from: #3A1A1E;
+  --cx-logo-to: #120C0D;
 }
 
 /* ── Customer LIFF "cream" — only when the customer picks light ────────── */
@@ -170,6 +172,8 @@
   --cx-gold: #80591A;
   --cx-warn: #A6431C;
   --cx-warn-line: #A6431C;
+  --cx-logo-from: #3A1A1E;
+  --cx-logo-to: #120C0D;
 }
 
 @theme inline {

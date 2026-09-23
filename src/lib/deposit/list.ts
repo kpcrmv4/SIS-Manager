@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { searchOr } from './search'
 import type { DepositStatus } from './format'
@@ -83,12 +84,13 @@ function mapRow(d: DepositRawRow): DepositListRow {
  * Bounded at 1000 — a branch's pending-withdrawal queue is an operational backlog,
  * never a historical table.
  */
-async function pendingWithdrawalDepositIds(branchId: string): Promise<string[]> {
+// cache(): the tab counts and the withdraw tab both need it within one request
+const pendingWithdrawalDepositIds = cache(async (branchId: string): Promise<string[]> => {
   const sb = await getSupabaseServer()
-  const { data, error } = await sb.from('withdrawals').select('deposit_id').eq('branch_id', branchId).eq('status', 'pending').range(0, 999)
+  const { data, error } = await sb.from('withdrawals').select('deposit_id').eq('branch_id', branchId).eq('status', 'pending').order('created_at').order('id').range(0, 999)
   if (error || !data) return []
   return Array.from(new Set(data.map((w) => w.deposit_id)))
-}
+})
 
 export async function listDeposits(
   branchId: string,

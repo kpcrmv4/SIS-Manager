@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useNow } from '@/lib/use-now'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/states'
 import type { NightBooking, ZoneRow } from '@/lib/booking/queries'
@@ -28,11 +28,8 @@ export function FloorPlan({
 }) {
   const t = useTranslations('bookings')
   const tc = useTranslations('common')
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000)
-    return () => clearInterval(id)
-  }, [])
+  // null until hydrated; epoch 0 is before every slot, so nothing reads as late on the server
+  const now = useNow() ?? 0
 
   const byTable = new Map<string, NightBooking>()
   for (const b of bookings) {

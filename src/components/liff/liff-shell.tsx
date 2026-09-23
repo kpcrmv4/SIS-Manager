@@ -172,7 +172,7 @@ export function LiffShell({
         <header className="flex items-center gap-3 border-b border-cx-line px-4.5 pb-3 pt-4.5">
           <div
             className="grid size-[42px] flex-none place-items-center rounded-full border-[1.5px] border-cx-gold text-[14px] font-bold text-cx-gold"
-            style={{ background: 'radial-gradient(circle at 30% 30%, #3a1a1e, #120c0d)' }}
+            style={{ background: 'radial-gradient(circle at 30% 30%, var(--cx-logo-from), var(--cx-logo-to))' }}
             aria-hidden
           >
             SIS

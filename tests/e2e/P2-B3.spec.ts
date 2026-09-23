@@ -106,7 +106,8 @@ test.describe('owner settings', () => {
     await page.getByLabel('ชื่อโต๊ะ').fill('ZT1')
     await page.locator('#td-zone').selectOption({ label: `${RUN} โซน` })
     await page.getByTestId('table-dialog-submit').click()
-    await expect(page.getByText('ZT1')).toBeVisible()
+    // tables render twice (desktop table + hidden mobile card list) — assert the visible twin
+    await expect(page.getByText('ZT1').filter({ visible: true })).toBeVisible()
 
     // duplicate label in the same branch is refused
     await page.getByTestId('add-table-button').click()
@@ -121,7 +122,7 @@ test.describe('owner settings', () => {
     await zoneCard.getByRole('button', { name: 'แก้ไข' }).last().click()
     await page.getByLabel('ชื่อโต๊ะ').fill('ZT2')
     await page.getByTestId('table-dialog-submit').click()
-    await expect(zoneCard.getByText('ZT2')).toBeVisible()
+    await expect(zoneCard.getByText('ZT2').filter({ visible: true })).toBeVisible()
 
     // toggle bookable
     const bookableSwitch = zoneCard.getByRole('switch', { name: 'ให้ลูกค้าจองผ่าน LINE' })
@@ -146,23 +147,33 @@ test.describe('owner settings', () => {
     await page.getByLabel('ชื่อเหล้า').fill(`${RUN} Whisky`)
     await page.locator('#id-branch').selectOption({ label: BRANCH_A_NAME })
     await page.getByTestId('item-dialog-submit').click()
-    await expect(page.getByText(`${RUN} Whisky`)).toBeVisible()
+    await expect(page.getByText(`${RUN} Whisky`).filter({ visible: true })).toBeVisible()
 
     const { data: created } = await admin().from('liquor_items').select('id, branch_id, active').eq('name', `${RUN} Whisky`).single()
     expect(created?.branch_id).toBe(branchA)
     expect(created?.active).toBe(true)
 
+    // the new branch item is offered in the pick list on /deposits/new
+    await page.goto('/deposits/new')
+    await expect(page.locator(`#deposit-items option[value="${RUN} Whisky"]`)).toHaveCount(1)
+    await page.goto('/settings/items')
+
     const row = page.getByRole('row', { name: new RegExp(`${RUN} Whisky`) })
     await row.getByRole('button', { name: 'แก้ไข' }).click()
     await page.getByLabel('ชื่อเหล้า').fill(`${RUN} Whisky Gold`)
     await page.getByTestId('item-dialog-submit').click()
-    await expect(page.getByText(`${RUN} Whisky Gold`)).toBeVisible()
+    await expect(page.getByText(`${RUN} Whisky Gold`).filter({ visible: true })).toBeVisible()
 
     const activeToggle = page.getByRole('row', { name: new RegExp(`${RUN} Whisky Gold`) }).getByTestId('item-active-toggle')
     await activeToggle.click()
     await expect(activeToggle).toHaveAttribute('aria-checked', 'false')
     const { data: after } = await admin().from('liquor_items').select('active').eq('id', created!.id).single()
     expect(after?.active).toBe(false)
+
+    // …and disappears from it once deactivated
+    await page.goto('/deposits/new')
+    await expect(page.getByTestId('new-deposit-form')).toBeVisible()
+    await expect(page.locator(`#deposit-items option[value="${RUN} Whisky Gold"]`)).toHaveCount(0)
 
     await admin().from('liquor_items').delete().eq('id', created!.id)
   })

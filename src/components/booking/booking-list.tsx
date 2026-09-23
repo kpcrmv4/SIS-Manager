@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useNow } from '@/lib/use-now'
 import { ListRow } from '@/components/ui/list-row'
 import { EmptyState } from '@/components/ui/states'
 import { Badge } from '@/components/ui/badge'
@@ -30,11 +30,8 @@ export function BookingList({
   const t = useTranslations('bookings')
   const ts = useTranslations('status')
   const tc = useTranslations('common')
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000)
-    return () => clearInterval(id)
-  }, [])
+  // null until hydrated; epoch 0 is before every slot, so nothing reads as late on the server
+  const now = useNow() ?? 0
 
   if (!bookings.length) {
     return <EmptyState message={t('empty')} />
@@ -91,6 +88,17 @@ export function BookingList({
             tabIndex={onSelectBooking ? 0 : undefined}
             className={onSelectBooking ? 'cursor-pointer' : undefined}
             onClick={() => onSelectBooking?.(b.id)}
+            onKeyDown={
+              onSelectBooking
+                ? (e) => {
+                    if (e.target !== e.currentTarget) return
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onSelectBooking(b.id)
+                    }
+                  }
+                : undefined
+            }
           >
             <ListRow title={title} meta={meta} aside={aside} chevron={false} />
           </div>

@@ -41,7 +41,8 @@ export function slotOptions(start: string, end: string, minutes: number): string
   const [sh, sm] = start.slice(0, 5).split(':').map(Number)
   const [eh, em] = end.slice(0, 5).split(':').map(Number)
   const startM = sh * 60 + sm
-  const endM = eh * 60 + em
+  // an end before the start runs past midnight (20:00–02:00), as private.slots does
+  const endM = eh * 60 + em + (eh * 60 + em < startM ? 1440 : 0)
   const out: string[] = []
   if (minutes <= 0) return out
   for (let m = startM; m <= endM; m += minutes) {

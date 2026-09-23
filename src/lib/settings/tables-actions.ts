@@ -48,8 +48,10 @@ export async function updateZone(id: string, patch: { name?: string; sort?: numb
 
 export async function deleteZone(id: string): Promise<SettingsResult> {
   if (!isUuid(id)) return { ok: false, error: 'invalid' }
-  const { error } = await (await getSupabaseServer()).from('table_zones').delete().eq('id', id)
+  const { data, error } = await (await getSupabaseServer()).from('table_zones').delete().eq('id', id).select('id')
   if (error) return { ok: false, error: 'invalid' }
+  // an RLS-refused delete matches zero rows and returns no error
+  if (!data?.length) return { ok: false, error: 'forbidden' }
   touched()
   return { ok: true, data: undefined }
 }
@@ -121,8 +123,9 @@ export async function updateTable(id: string, patch: UpdateTableInput): Promise<
 
 export async function deleteTable(id: string): Promise<SettingsResult> {
   if (!isUuid(id)) return { ok: false, error: 'invalid' }
-  const { error } = await (await getSupabaseServer()).from('tables').delete().eq('id', id)
+  const { data, error } = await (await getSupabaseServer()).from('tables').delete().eq('id', id).select('id')
   if (error) return { ok: false, error: 'invalid' }
+  if (!data?.length) return { ok: false, error: 'forbidden' }
   touched()
   return { ok: true, data: undefined }
 }

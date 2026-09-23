@@ -146,27 +146,30 @@ export async function getBookingDetail(branchId: string, bookingId: string): Pro
   const { data: claims } = await sb.auth.getClaims()
   if (!claims?.claims?.sub) return { ok: false, error: 'unauthenticated' }
 
-  const { data: booking, error } = await sb
-    .from('bookings')
-    .select(
-      'id, code, status, name, phone, note, night, slot_time, party_size, source, zone_id, table_id, qr_token, customer_id, created_at, zone:table_zones(name), table:tables(label)',
-    )
-    .eq('id', bookingId)
-    .eq('branch_id', branchId)
-    .maybeSingle()
+  // independent reads in parallel — this runs on every door scan
+  const [{ data: booking, error }, actorState, { data: tables, error: tablesError }] = await Promise.all([
+    sb
+      .from('bookings')
+      .select(
+        'id, code, status, name, phone, note, night, slot_time, party_size, source, zone_id, table_id, qr_token, customer_id, created_at, zone:table_zones(name), table:tables(label)',
+      )
+      .eq('id', bookingId)
+      .eq('branch_id', branchId)
+      .maybeSingle(),
+    getActorState(),
+    sb.from('tables').select('id, label').eq('branch_id', branchId).eq('active', true).order('sort').range(0, 999),
+  ])
   if (error) return { ok: false, error: dbErrorCode(error) }
+  if (tablesError) return { ok: false, error: dbErrorCode(tablesError) }
   if (!booking) return { ok: false, error: 'NOT_FOUND' }
-
-  const actorState = await getActorState()
   const canChangeTable = actorState.status === 'ok' && isBarOrOwner(actorState.actor.role)
-
-  const { data: tables } = await sb.from('tables').select('id, label').eq('branch_id', branchId).eq('active', true).order('sort').range(0, 999)
 
   let deposits: { item_name: string; remaining_percent: number; expires_at: string | null }[] = []
   if (booking.customer_id || booking.phone) {
     let q = sb.from('deposits').select('item_name, remaining_percent, expires_at').eq('branch_id', branchId).in('status', ['in_store', 'pending_withdrawal'])
     q = booking.customer_id ? q.eq('customer_id', booking.customer_id) : q.eq('customer_phone', booking.phone as string)
-    const { data } = await q.range(0, 49)
+    const { data, error: depositsError } = await q.order('expires_at').range(0, 49)
+    if (depositsError) return { ok: false, error: dbErrorCode(depositsError) }
     deposits = data ?? []
   }
 
