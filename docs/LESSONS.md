@@ -77,3 +77,10 @@
 - หลักฐาน: booking_blackouts ZTA 2026-09-30 reason "muea1kes ปิดร้าน" สร้าง 15:47 UTC ระหว่าง worker B รัน
 - กฎ: fixture ที่แยกกันต่อ worker ต้องปักสาขาที่ทำงาน (cookie/param) ให้ทุกบทบาทที่เห็นหลายสาขา ไม่ใช่พึ่งค่าเริ่มต้น
 - status: new
+
+## L-007 · 2026-09-24 · kp-autonomous-loop · gate-exit-code
+- symptom: a commit was pushed after 'npm run typecheck | grep -c error' printed 39
+- cause: the gate ran as one line joined with ';' so a red typecheck did not stop git commit/push; the errors were only in .next/dev/types left half-written by a killed Playwright dev server
+- evidence: .next/dev/types/routes.d.ts TS1002 Unterminated string literal; source tree clean after regenerating
+- rule: gate commands are chained with && on the typecheck exit code, never piped through grep; remove .next/dev/types when tsc errors point only there
+- status: new

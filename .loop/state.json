@@ -2,14 +2,14 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 20,
+    "iteration": 21,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
       "size": 8
     },
     "blocked_reason": "",
-    "current": "P3-A1"
+    "current": "P3 workers A (P3-A1..3) + B (P3-B1..2)"
   },
   "phases": [
     {
@@ -137,27 +137,27 @@
         {
           "id": "P3-A1",
           "name": "LINE messaging + flex x4 locales",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P3-A2",
           "name": "Outbox dispatch + staff groups",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P3-A3",
           "name": "Webhook",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P3-B1",
           "name": "Print jobs + receipt/label with QR",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P3-B2",
           "name": "print-server port",
-          "status": "todo"
+          "status": "doing"
         }
       ]
     },
