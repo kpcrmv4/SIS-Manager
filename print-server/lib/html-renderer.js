@@ -7,6 +7,8 @@
  * Label:   Puppeteer PDF width=80mm, height=auto (portrait, cut short)
  */
 
+const { qrSvgDataUrl } = require('./qr');
+
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 /** Copy of a payload with every string HTML-escaped (numbers, booleans, nulls untouched). */
@@ -76,7 +78,11 @@ class HtmlRenderer {
       bottleBlock = `<tr><td colspan="2" style="padding-top:2px;">Per Bottle:</td></tr>${rows}`;
     }
 
-    return `<center style="font-size:10pt;">${this.storeName}</center>` +
+    const header = this.settings.header ? escapeDeep(String(this.settings.header)) : '';
+    const footer = this.settings.footer ? escapeDeep(String(this.settings.footer)) : '';
+
+    return (header ? `<center style="font-size:9pt;">${header}</center>` : '') +
+      `<center style="font-size:10pt;">${this.storeName}</center>` +
       `<center><b style="font-size:14pt;">DEPOSIT RECEIPT</b></center>` +
       `<hr>` +
       `<center><b style="font-size:16pt;">${payload.deposit_code}</b></center>` +
@@ -102,7 +108,8 @@ class HtmlRenderer {
           `<center style="font-size:10pt;">Please scan this QRcode</center>` +
           `<center style="font-size:10pt;">Send receipt in Line</center>` +
           `<center style="font-size:10pt;">Type <b>${payload.link_code || payload.deposit_code}</b> in chat</center>`
-        : '');
+        : '') +
+      (footer ? `<hr><center style="font-size:9pt;">${footer}</center>` : '');
   }
 
   /**
@@ -112,6 +119,9 @@ class HtmlRenderer {
    */
   renderLabel(payload, copyNumber = 1, totalCopies = 1) {
     const bottlePct = payload._bottle?.remaining_percent ?? payload.remaining_percent ?? null;
+    // Staff scan this on /scan — the DEP code only, never the LINE link code
+    // (that one is receipt-only, see _receiptBody).
+    const qrDataUrl = qrSvgDataUrl(payload.deposit_code || '');
     return `<html><head><meta charset="UTF-8"></head>` +
       `<body style="font-family:Tahoma,sans-serif;font-size:8pt;width:70mm;margin:0 auto;padding:2mm;">` +
       `<div style="text-align:center;font-size:9pt;font-weight:bold;padding:1mm 0;">${this.storeName} : Deposit</div>` +
@@ -127,6 +137,7 @@ class HtmlRenderer {
       this._labelRow('Expiry Date', `<b>${payload.expiry_date ? this._formatDateShort(payload.expiry_date) : '-'}</b>`) +
       this._labelRow('Return HQ', '________') +
       `</table>` +
+      `<center><img src="${qrDataUrl}" width="72" height="72" alt="DEP QR"></center>` +
       `<div style="text-align:center;font-size:12pt;font-weight:bold;font-family:'Courier New',monospace;padding:2mm 0;">${payload.deposit_code}</div>` +
       `</body></html>`;
   }

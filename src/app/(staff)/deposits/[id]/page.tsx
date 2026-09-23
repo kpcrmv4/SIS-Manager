@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { BottlesGrid } from '@/components/deposit/bottles-grid'
 import { HistoryTimeline } from '@/components/deposit/history-timeline'
 import { DetailActions } from '@/components/deposit/detail-actions'
+import { PrintStatusBadge } from '@/components/print/print-status-badge'
 import { getActorState } from '@/lib/auth/actor'
 import { getDepositDetail } from '@/lib/deposit/detail'
 import { getBranchSettings, DOW_NAMES } from '@/lib/deposit/branch'
@@ -123,6 +124,7 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <DetailActions deposit={detail} role={actor.role} branchId={branch.id} depositDays={depositDays} blockedTonight={blockedTonight} locale={actor.locale} />
+          <PrintStatusBadge branchId={branch.id} />
         </div>
 
         <HistoryTimeline events={detail.events} locale={actor.locale} />
