@@ -83,6 +83,9 @@ test('P2-C1-05 every /api/customer/* route answers 401 JSON without a credential
   const routes: { method: 'GET' | 'POST' | 'PATCH'; path: string }[] = [
     { method: 'POST', path: `/api/customer/session?branch=${BRANCH_A_CODE.toLowerCase()}` },
     { method: 'PATCH', path: `/api/customer/profile?branch=${BRANCH_A_CODE.toLowerCase()}` },
+    { method: 'GET', path: `/api/customer/deposits?branch=${BRANCH_A_CODE.toLowerCase()}` },
+    { method: 'POST', path: `/api/customer/withdrawals?branch=${BRANCH_A_CODE.toLowerCase()}` },
+    { method: 'POST', path: `/api/customer/deposit-requests?branch=${BRANCH_A_CODE.toLowerCase()}` },
   ]
   for (const r of routes) {
     const res = await request.fetch(`${BASE_URL}${r.path}`, { method: r.method, data: {} })

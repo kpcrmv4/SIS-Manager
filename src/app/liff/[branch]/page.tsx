@@ -1,8 +1,6 @@
-import { getCustomerLocale } from '@/lib/i18n/customer'
-import { LiffPlaceholder } from '@/components/liff/liff-placeholder'
+import { MyBottlesClient } from '@/components/liff/my-bottles-client'
 
-// LIFF route skeleton (P1-05) - built in P2-C2.
-export default async function Page() {
-  const locale = await getCustomerLocale()
-  return <LiffPlaceholder locale={locale} title="bottles.title" body="bottles.empty" />
+// "ขวดของฉัน" (P2-C2) — the session/branch come from <LiffShell>'s context, not params here.
+export default function Page() {
+  return <MyBottlesClient />
 }
