@@ -1,0 +1,902 @@
+<title>SIS Manager Demo</title>
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ═══ Staff app — "Minimal" (light) ═══
+     Same semantic names as thai-saas-ui-kit. In the app these live on :root / .dark;
+     here the toggle stamps data-theme so the page also follows the viewer's system theme. */
+  :root {
+    color-scheme: light;
+    --canvas:#F6F4F3; --ink:#1E1718; --card:#FFFFFF; --line:#E6E1E0; --muted:#6E6466;
+    --brand:#9A1F2A; --brand-sidebar:#221619; --accent:#D9A94E; --on-brand:#FFFFFF;
+    --brand-soft:#F6E4E6;
+    --status-pending:#5E5A5B;  --status-pending-bg:#EFECEC;
+    --status-progress:#9A5705; --status-progress-bg:#FCF0DD;
+    --status-done:#17703F;     --status-done-bg:#E3F3EA; --on-done:#FFFFFF;
+    --urgent:#B42318;          --urgent-bg:#FDECEA;
+    --info:#1D5FA8;            --info-bg:#E6EFFA;
+    --gold-ink:#7D5A12;        --gold-bg:#F8EFD9;
+    --placeholder:#786E70; --disabled-fg:#9A9091; --disabled-bg:#EDEAEA;
+    --selection:#F3D9DC; --focus:#9A1F2A;
+    --sidebar-title:#FFFFFF; --sidebar-fg:#E6DADB; --sidebar-fg-dim:#A8999B;
+    --radius-card:14px;
+
+    /* ═══ Customer LIFF — "Night Bar" (dark-first; light = cream variant) ═══ */
+    --cx-bg:#120C0D; --cx-card:#1F1517; --cx-card-2:#2A1D20; --cx-ink:#F6EEE6; --cx-muted:#B8A8A2;
+    --cx-line:#3A2B2D; --cx-wine:#B3262F; --cx-on-wine:#FFFFFF; --cx-gold:#D9B26A;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --canvas:#141011; --ink:#EEE8E7; --card:#1E191A; --line:#332B2C; --muted:#A99EA0;
+      --brand:#E0717C; --brand-sidebar:#0D0A0B; --accent:#E2B865; --on-brand:#230A0E;
+      --brand-soft:#3A1C20;
+      --status-pending:#B9B0B1;  --status-pending-bg:#2A2425;
+      --status-progress:#F0B060; --status-progress-bg:#36281A;
+      --status-done:#6BD49A;     --status-done-bg:#17301F; --on-done:#0B2416;
+      --urgent:#F28B82;          --urgent-bg:#3A1E1C;
+      --info:#8AB8F2;            --info-bg:#1A2638;
+      --gold-ink:#E2B865;        --gold-bg:#33291A;
+      --placeholder:#958A8C; --disabled-fg:#6F6567; --disabled-bg:#262021;
+      --selection:#4A2429; --focus:#E0717C;
+      --sidebar-title:#FFFFFF; --sidebar-fg:#D6CBCC; --sidebar-fg-dim:#8C8082;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --canvas:#141011; --ink:#EEE8E7; --card:#1E191A; --line:#332B2C; --muted:#A99EA0;
+    --brand:#E0717C; --brand-sidebar:#0D0A0B; --accent:#E2B865; --on-brand:#230A0E;
+    --brand-soft:#3A1C20;
+    --status-pending:#B9B0B1;  --status-pending-bg:#2A2425;
+    --status-progress:#F0B060; --status-progress-bg:#36281A;
+    --status-done:#6BD49A;     --status-done-bg:#17301F; --on-done:#0B2416;
+    --urgent:#F28B82;          --urgent-bg:#3A1E1C;
+    --info:#8AB8F2;            --info-bg:#1A2638;
+    --gold-ink:#E2B865;        --gold-bg:#33291A;
+    --placeholder:#958A8C; --disabled-fg:#6F6567; --disabled-bg:#262021;
+    --selection:#4A2429; --focus:#E0717C;
+    --sidebar-title:#FFFFFF; --sidebar-fg:#D6CBCC; --sidebar-fg-dim:#8C8082;
+  }
+  /* customer side: Night Bar unless the viewer explicitly picks light */
+  :root[data-theme="light"] {
+    --cx-bg:#FBF6EE; --cx-card:#FFFFFF; --cx-card-2:#F4ECE1; --cx-ink:#2A1A15; --cx-muted:#6E5A53;
+    --cx-line:#EADFD3; --cx-wine:#8E1B22; --cx-on-wine:#FFFFFF; --cx-gold:#80591A;
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'IBM Plex Sans Thai',system-ui,sans-serif; background:var(--canvas); color:var(--ink); font-size:14.5px; line-height:1.55; }
+  ::selection { background:var(--selection); }
+  :focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  input, select, button { font:inherit; color:inherit; }
+  input::placeholder { color:var(--placeholder); opacity:1; }
+  .num { font-variant-numeric:tabular-nums; }
+  .icon { width:20px; height:20px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  .i16 { width:16px; height:16px; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+
+  /* demo control bar (not part of the app) */
+  .demobar { position:sticky; top:env(safe-area-inset-top,0px); z-index:40; display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+             padding:8px 16px; background:var(--brand-sidebar); color:var(--sidebar-fg); font-size:12.5px; }
+  .demobar b { color:var(--accent); font-weight:600; margin-right:4px; }
+  .seg { display:inline-flex; border:1px solid #4a3a3d; border-radius:999px; overflow:hidden; }
+  .seg button { background:none; border:0; color:var(--sidebar-fg); padding:4px 12px; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:#221619; font-weight:600; }
+  .demobar .sp { flex:1; }
+
+  /* ── Shell ── */
+  .shell { display:flex; min-height:calc(100vh - 44px); }
+  .sidebar { width:240px; background:var(--brand-sidebar); color:var(--sidebar-fg); padding:18px 12px; display:flex; flex-direction:column; gap:2px; flex:none; }
+  .brandmark { display:flex; align-items:center; gap:10px; padding:4px 10px 14px; }
+  .brandmark .mk { width:36px; height:36px; border-radius:10px; background:#FBF6EE; display:grid; place-items:center;
+                   font-family:'Noto Serif Thai',serif; font-weight:700; color:#9A1F2A; font-size:15px; letter-spacing:.02em; }
+  .brandmark .nm { color:var(--sidebar-title); font-weight:700; font-size:16px; line-height:1.2; }
+  .brandmark .br { font-size:11.5px; color:var(--sidebar-fg-dim); }
+  .sidebar .cat { font-size:11px; font-weight:500; letter-spacing:.04em; color:var(--sidebar-fg-dim); padding:14px 12px 6px; }
+  .sidebar a { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; color:inherit; text-decoration:none; font-size:14px; }
+  .sidebar a:hover { background:rgba(255,255,255,.06); }
+  .sidebar a.active { background:rgba(255,255,255,.1); color:var(--sidebar-title); font-weight:600; }
+  .sidebar a .cnt { margin-left:auto; font-size:11px; background:var(--accent); color:#221619; border-radius:999px; padding:0 7px; font-weight:600; }
+  main { flex:1; min-width:0; padding:22px 28px 40px; max-width:1120px; }
+
+  .bottomnav { display:none; position:fixed; left:0; right:0; bottom:0; height:calc(64px + env(safe-area-inset-bottom,0px));
+               padding-bottom:env(safe-area-inset-bottom,0px); background:var(--card); border-top:1px solid var(--line);
+               grid-template-columns:repeat(5,1fr); z-index:20; }
+  .bottomnav a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:10.5px; color:var(--muted); text-decoration:none; }
+  .bottomnav a.active { color:var(--brand); font-weight:600; }
+  .bottomnav .center { position:relative; }
+  .bottomnav .fab { position:absolute; top:-20px; left:50%; transform:translateX(-50%); width:58px; height:58px; border-radius:50%;
+                    background:var(--brand-sidebar); color:var(--accent); display:flex; align-items:center; justify-content:center;
+                    box-shadow:0 8px 20px rgba(0,0,0,.28); border:3px solid var(--canvas); }
+  @media (max-width:859px) {
+    .sidebar { display:none; }
+    .bottomnav { display:grid; }
+    main { padding:16px 16px 104px; }
+  }
+
+  .sheet-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:30; }
+  .sheet { position:fixed; left:0; right:0; bottom:0; z-index:31; background:var(--card); color:var(--ink); border-radius:20px 20px 0 0;
+           padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px)); box-shadow:0 -8px 30px rgba(0,0,0,.25); max-height:88vh; overflow:auto; }
+  @media (min-width:860px) { .sheet { left:50%; right:auto; bottom:auto; top:50%; transform:translate(-50%,-50%); width:440px; border-radius:18px; } .sheet .grab { display:none; } }
+  .sheet .grab { width:40px; height:4px; border-radius:2px; background:var(--line); margin:4px auto 12px; }
+  .sheet .mi { display:flex; align-items:center; gap:12px; padding:13px 4px; color:inherit; text-decoration:none; font-size:15px; border-bottom:1px solid var(--line); }
+  .sheet .mi:last-child { border-bottom:none; }
+  .sheet .sec { font-size:11px; color:var(--muted); padding:10px 4px 4px; letter-spacing:.04em; }
+
+  /* ── Building blocks ── */
+  .topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+  .topbar h1 { font-size:21px; font-weight:700; margin:0; text-wrap:balance; }
+  .topbar .sub { color:var(--muted); font-size:13px; }
+  .tb-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card); border-radius:999px; padding:6px 12px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .btn { display:inline-flex; align-items:center; gap:6px; background:var(--brand); color:var(--on-brand); border:none; border-radius:10px; padding:9px 16px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn.ghost { background:var(--card); color:var(--ink); border:1px solid var(--line); }
+  .btn.sm { padding:6px 12px; font-size:13px; border-radius:8px; }
+  .btn.ok { background:var(--status-done); color:var(--on-done); }
+  .btn[disabled] { background:var(--disabled-bg); color:var(--disabled-fg); cursor:not-allowed; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius-card); }
+  .pad { padding:16px; }
+  h2.sec { font-size:15px; font-weight:600; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+  h2.sec .more { margin-left:auto; font-size:13px; font-weight:500; color:var(--brand); text-decoration:none; }
+
+  .kpis { display:grid; gap:12px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+  @media (max-width:859px) { .kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .kpi { padding:14px 16px; display:flex; flex-direction:column; gap:2px; }
+  .kpi .l { color:var(--muted); font-size:12.5px; display:flex; align-items:center; gap:6px; }
+  .kpi .n { font-size:26px; font-weight:700; line-height:1.2; }
+  .kpi .h { font-size:12px; color:var(--muted); }
+  .kpi.attn { border-color:var(--status-progress); }
+
+  .badge { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .b-pending  { color:var(--status-pending);  background:var(--status-pending-bg); }
+  .b-progress { color:var(--status-progress); background:var(--status-progress-bg); }
+  .b-done     { color:var(--status-done);     background:var(--status-done-bg); }
+  .b-urgent   { color:var(--urgent);          background:var(--urgent-bg); }
+  .b-info     { color:var(--info);            background:var(--info-bg); }
+  .b-gold     { color:var(--gold-ink);        background:var(--gold-bg); }
+  .b-brand    { color:var(--brand);           background:var(--brand-soft); }
+
+  .list { display:flex; flex-direction:column; }
+  .row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); }
+  .row:last-child { border-bottom:none; }
+  .row .grow { flex:1; min-width:0; }
+  .row .t { font-weight:600; font-size:14.5px; }
+  .row .s { color:var(--muted); font-size:12.5px; }
+  .row .time { width:52px; flex:none; font-weight:700; font-variant-numeric:tabular-nums; }
+  .row .tbl { width:44px; height:44px; flex:none; border-radius:10px; display:grid; place-items:center; font-weight:700; font-size:14px;
+              background:var(--canvas); border:1px solid var(--line); }
+  .row .tbl.none { color:var(--muted); font-weight:500; font-size:12px; }
+  .trunc { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px; scrollbar-width:none; }
+  .tabs button { border:1px solid var(--line); background:var(--card); border-radius:999px; padding:6px 14px; font-size:13px; white-space:nowrap; cursor:pointer; }
+  .tabs button.on { background:var(--ink); color:var(--canvas); border-color:var(--ink); font-weight:600; }
+  .tabs .c { font-variant-numeric:tabular-nums; opacity:.75; margin-left:4px; }
+
+  .search { display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 12px; flex:1; min-width:0; }
+  .search input { border:0; outline:0; background:none; flex:1; min-width:0; }
+  .toolbar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+
+  /* desktop table ↔ mobile cards */
+  .tablewrap { overflow-x:auto; }
+  table.dt { width:100%; border-collapse:collapse; font-size:13.5px; }
+  table.dt th { text-align:left; font-weight:500; color:var(--muted); font-size:12px; padding:10px 14px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  table.dt td { padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  table.dt tr:last-child td { border-bottom:none; }
+  table.dt tr.click { cursor:pointer; } table.dt tr.click:hover td { background:var(--canvas); }
+  .mcards { display:none; flex-direction:column; gap:10px; }
+  @media (max-width:859px) { .dt-desk { display:none; } .mcards { display:flex; } }
+  .mcard { padding:12px 14px; display:flex; flex-direction:column; gap:6px; cursor:pointer; }
+  .mcard .top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+  .mcard .meta { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:12.5px; color:var(--muted); }
+
+  .level { display:flex; align-items:center; gap:8px; }
+  .bar { height:6px; border-radius:3px; background:var(--line); overflow:hidden; width:64px; flex:none; }
+  .bar > i { display:block; height:100%; background:var(--brand); }
+  .code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; letter-spacing:.02em; }
+
+  .screen[hidden] { display:none !important; }
+  .grid2 { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:16px; }
+  @media (max-width:959px) { .grid2 { grid-template-columns:minmax(0,1fr); } }
+  .kv { display:grid; grid-template-columns:120px minmax(0,1fr); gap:8px 12px; font-size:14px; }
+  .kv dt { color:var(--muted); } .kv dd { margin:0; }
+  .bottles { display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:10px; }
+  .bottle { border:1px solid var(--line); border-radius:12px; padding:10px; text-align:center; font-size:12.5px; }
+  .bottle .glass { width:28px; height:58px; margin:2px auto 6px; border:2px solid var(--muted); border-radius:6px 6px 8px 8px; position:relative; overflow:hidden; }
+  .bottle .glass::before { content:""; position:absolute; top:-2px; left:50%; width:10px; height:8px; transform:translateX(-50%); }
+  .bottle .glass i { position:absolute; left:0; right:0; bottom:0; background:var(--brand); opacity:.85; }
+  .bottle.used { opacity:.55; }
+  .timeline { display:flex; flex-direction:column; gap:0; }
+  .tl { display:flex; gap:12px; padding-bottom:14px; position:relative; }
+  .tl .dot { width:10px; height:10px; border-radius:50%; background:var(--brand); margin-top:6px; flex:none; position:relative; z-index:1; }
+  .tl:not(:last-child)::before { content:""; position:absolute; left:4px; top:14px; bottom:0; width:2px; background:var(--line); }
+  .tl .s { color:var(--muted); font-size:12.5px; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; }
+  .note { font-size:12.5px; color:var(--muted); display:flex; gap:6px; align-items:flex-start; }
+  .warnbox { background:var(--status-progress-bg); color:var(--status-progress); border-radius:10px; padding:10px 12px; font-size:13px; display:flex; gap:8px; align-items:flex-start; }
+
+  /* floor plan */
+  .zones { display:flex; flex-direction:column; gap:14px; }
+  .zone h3 { font-size:13px; font-weight:600; margin:0 0 8px; color:var(--muted); display:flex; gap:8px; align-items:center; }
+  .tables { display:grid; grid-template-columns:repeat(auto-fill,minmax(78px,1fr)); gap:8px; }
+  .t-cell { border:1.5px solid var(--line); border-radius:12px; padding:8px 6px; text-align:center; background:var(--card); cursor:pointer; font-size:12px; min-height:74px;
+            display:flex; flex-direction:column; justify-content:center; gap:1px; }
+  .t-cell b { font-size:15px; }
+  .t-cell .who { color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .t-cell.booked { border-color:var(--info); background:var(--info-bg); }
+  .t-cell.arrived { border-color:var(--status-done); background:var(--status-done-bg); }
+  .t-cell.late { border-color:var(--status-progress); background:var(--status-progress-bg); }
+  .t-cell.round { border-radius:50%; aspect-ratio:1; min-height:0; max-width:86px; justify-self:center; width:100%; }
+  .legend { display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--muted); }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px; border:1.5px solid; }
+
+  /* scan */
+  .scanbox { aspect-ratio:1; max-width:320px; margin:0 auto; border-radius:18px; background:#0d0a0b; position:relative; overflow:hidden; display:grid; place-items:center; }
+  .scanbox .frame { width:62%; aspect-ratio:1; border-radius:14px; box-shadow:0 0 0 999px rgba(0,0,0,.45); position:relative; }
+  .scanbox .frame::before, .scanbox .frame::after { content:""; position:absolute; inset:-2px; border:3px solid #E2B865; border-radius:14px;
+     clip-path:polygon(0 0,28% 0,28% 6%,6% 6%,6% 28%,0 28%,0 72%,6% 72%,6% 94%,28% 94%,28% 100%,72% 100%,72% 94%,94% 94%,94% 72%,100% 72%,100% 28%,94% 28%,94% 6%,72% 6%,72% 0,100% 0,100% 100%,0 100%); }
+  .scanline { position:absolute; left:19%; right:19%; height:2px; background:#E2B865; top:30%; animation:scan 2.4s ease-in-out infinite alternate; box-shadow:0 0 12px #E2B865; }
+  @keyframes scan { to { top:68%; } }
+  .scanbox .hint { position:absolute; bottom:14px; left:0; right:0; text-align:center; color:#E6DADB; font-size:12.5px; }
+  .orline { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12.5px; margin:16px 0; }
+  .orline::before, .orline::after { content:""; flex:1; height:1px; background:var(--line); }
+
+  /* settings */
+  .form { display:flex; flex-direction:column; gap:14px; }
+  .field label { display:block; font-size:13px; font-weight:500; margin-bottom:5px; }
+  .field .help { font-size:12px; color:var(--muted); margin-top:4px; }
+  .inp { width:100%; border:1px solid var(--line); background:var(--card); border-radius:10px; padding:9px 12px; }
+  .inrow { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  @media (max-width:520px) { .inrow { grid-template-columns:minmax(0,1fr); } }
+  .days { display:flex; gap:6px; flex-wrap:wrap; }
+  .days button { width:42px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--card); cursor:pointer; }
+  .days button.off { background:var(--urgent-bg); color:var(--urgent); border-color:var(--urgent); font-weight:600; text-decoration:line-through; }
+  .switch { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .switch:last-child { border-bottom:0; }
+  .tg { width:42px; height:24px; border-radius:12px; background:var(--line); position:relative; flex:none; border:0; cursor:pointer; }
+  .tg::after { content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s; box-shadow:0 1px 2px rgba(0,0,0,.3); }
+  .tg.on { background:var(--status-done); } .tg.on::after { left:21px; }
+  .cal { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; text-align:center; font-size:13px; }
+  .cal .h { color:var(--muted); font-size:11.5px; padding:4px 0; }
+  .cal button { aspect-ratio:1; border:1px solid transparent; border-radius:9px; background:none; cursor:pointer; font-variant-numeric:tabular-nums; min-width:0; padding:0; }
+  .cal button:hover { border-color:var(--line); }
+  .cal button.wk { color:var(--muted); background:var(--disabled-bg); }
+  .cal button.x { background:var(--urgent-bg); color:var(--urgent); font-weight:700; border-color:var(--urgent); }
+  .cal button.today { border-color:var(--brand); font-weight:700; }
+  .cal button.past { color:var(--disabled-fg); cursor:default; }
+  .cal button.full { background:var(--status-progress-bg); color:var(--status-progress); font-weight:600; }
+
+  .empty { text-align:center; padding:36px 16px; color:var(--muted); }
+  .empty .icon { width:36px; height:36px; stroke-width:1.5; margin-bottom:6px; }
+  .empty p { margin:0 0 4px; } .empty .t { color:var(--ink); font-weight:600; }
+
+  /* role gating (demo) */
+  :root[data-role="staff"] .need-bar, :root[data-role="staff"] .need-owner, :root[data-role="bar"] .need-owner { display:none !important; }
+  :root:not([data-role="owner"]) .owner-only-view { display:none !important; }
+  :root[data-role="owner"] .staff-only-view { display:none !important; }
+
+  /* ═══ Customer LIFF (Night Bar) ═══ */
+  .cx-wrap { display:flex; gap:22px; flex-wrap:wrap; justify-content:center; padding:8px 0 20px; }
+  .phone { width:340px; max-width:100%; border-radius:34px; padding:10px; background:#0a0708; box-shadow:0 20px 50px rgba(0,0,0,.35); }
+  .cx { background:var(--cx-bg); color:var(--cx-ink); border-radius:26px; overflow:hidden; min-height:640px; display:flex; flex-direction:column; }
+  .cx .cap { font-size:12px; color:var(--cx-muted); text-align:center; margin-top:8px; }
+  .cx-head { padding:18px 18px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--cx-line); }
+  .cx-logo { width:42px; height:42px; border-radius:50%; flex:none; display:grid; place-items:center; background:radial-gradient(circle at 30% 30%, #3a1a1e, #120c0d);
+             border:1.5px solid var(--cx-gold); font-family:'Noto Serif Thai',serif; font-weight:700; color:var(--cx-gold); font-size:14px; }
+  :root[data-theme="light"] .cx-logo { background:#FBF6EE; }
+  .cx-head .h { font-family:'Noto Serif Thai',serif; font-weight:600; font-size:17px; line-height:1.25; }
+  .cx-head .s { font-size:12px; color:var(--cx-muted); }
+  .cx-body { padding:14px 16px 16px; display:flex; flex-direction:column; gap:12px; flex:1; }
+  .cx-tabs { display:flex; background:var(--cx-card); border-radius:12px; padding:4px; gap:4px; }
+  .cx-tabs span { flex:1; text-align:center; padding:7px 0; border-radius:9px; font-size:13px; color:var(--cx-muted); }
+  .cx-tabs span.on { background:var(--cx-card-2); color:var(--cx-ink); font-weight:600; }
+  .cx-card { background:var(--cx-card); border:1px solid var(--cx-line); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:8px; }
+  .cx-card .nm { font-weight:600; font-size:15px; }
+  .cx-card .meta { font-size:12.5px; color:var(--cx-muted); display:flex; justify-content:space-between; gap:8px; }
+  .cx-gold { color:var(--cx-gold); }
+  .cx-pill { font-size:11.5px; border:1px solid var(--cx-gold); color:var(--cx-gold); border-radius:999px; padding:1px 9px; white-space:nowrap; }
+  .cx-pill.warn { border-color:#E07B53; color:#F0A07F; }
+  :root[data-theme="light"] .cx-pill.warn { color:#A6431C; border-color:#A6431C; }
+  .cx-meter { height:6px; background:var(--cx-card-2); border-radius:3px; overflow:hidden; }
+  .cx-meter i { display:block; height:100%; background:linear-gradient(90deg,var(--cx-wine),var(--cx-gold)); }
+  .cx-btn { background:var(--cx-wine); color:var(--cx-on-wine); border:0; border-radius:12px; padding:12px; font-weight:600; width:100%; cursor:pointer; }
+  .cx-btn.ghost { background:none; border:1px solid var(--cx-line); color:var(--cx-ink); }
+  .cx-label { font-size:12.5px; color:var(--cx-muted); margin-bottom:6px; }
+  .cx-dates { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+  .cx-dates span { flex:none; width:50px; text-align:center; padding:7px 0; border-radius:12px; background:var(--cx-card); border:1px solid var(--cx-line); font-size:11.5px; color:var(--cx-muted); }
+  .cx-dates span b { display:block; font-size:16px; color:var(--cx-ink); }
+  .cx-dates span.on { border-color:var(--cx-gold); background:var(--cx-card-2); }
+  .cx-dates span.on b { color:var(--cx-gold); }
+  .cx-dates span.x { opacity:.45; text-decoration:line-through; }
+  .cx-slots { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+  .cx-slots span { text-align:center; padding:8px 0; border-radius:10px; background:var(--cx-card); border:1px solid var(--cx-line); font-size:13px; font-variant-numeric:tabular-nums; }
+  .cx-slots span.on { border-color:var(--cx-gold); color:var(--cx-gold); font-weight:600; }
+  .cx-slots span.full { opacity:.4; text-decoration:line-through; }
+  .cx-stepper { display:flex; align-items:center; justify-content:space-between; background:var(--cx-card); border:1px solid var(--cx-line); border-radius:12px; padding:6px 8px; }
+  .cx-stepper b { font-size:17px; }
+  .cx-stepper span { width:34px; height:34px; border-radius:9px; background:var(--cx-card-2); display:grid; place-items:center; font-size:18px; }
+  .ticket { background:var(--cx-card); border:1px solid var(--cx-gold); border-radius:18px; overflow:hidden; }
+  .ticket .tt { padding:16px; text-align:center; }
+  .ticket .no { font-family:'Noto Serif Thai',serif; font-size:24px; font-weight:700; color:var(--cx-gold); letter-spacing:.04em; }
+  .ticket .qr { background:#fff; border-radius:12px; padding:10px; width:172px; margin:10px auto 6px; }
+  .ticket .tear { border-top:1.5px dashed var(--cx-line); margin:0 16px; }
+  .ticket .rows { padding:12px 16px 16px; display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:13px; }
+  .ticket .rows span:nth-child(odd) { color:var(--cx-muted); }
+</style>
+
+<div class="demobar" data-demo-only>
+  <b>เดโม่ SIS Manager</b>
+  <span>ดูในบทบาท</span>
+  <div class="seg" id="roleSeg">
+    <button data-r="staff">staff</button><button data-r="bar" class="on">bar</button><button data-r="owner">owner</button>
+  </div>
+  <span class="sp"></span>
+  <div class="seg" id="sideSeg"><button data-s="app" class="on">แอปพนักงาน</button><button data-s="cx">ฝั่งลูกค้า LINE</button></div>
+  <button class="chip" id="themeBtn" style="background:none;color:inherit;border-color:#4a3a3d">
+    <svg class="icon i16" viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg><span>สลับโหมดมืด</span>
+  </button>
+</div>
+
+<!-- ═══════════════ STAFF APP ═══════════════ -->
+<div class="shell" id="app">
+  <nav class="sidebar" aria-label="เมนูหลัก">
+    <div class="brandmark"><div class="mk">SIS</div><div><div class="nm">SIS Manager</div><div class="br">สาขารามอินทรา</div></div></div>
+    <div class="cat">งานประจำวัน</div>
+    <a href="#" data-go="tonight" class="active staff-only-view"><svg class="icon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>คืนนี้</a>
+    <a href="#" data-go="overview" class="owner-only-view"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>ภาพรวมทุกสาขา</a>
+    <a href="#" data-go="deposits"><svg class="icon" viewBox="0 0 24 24"><path d="M9 2h6v4l1.5 2.5V21a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V8.5L9 6z"/><path d="M7.5 13h9"/></svg>ฝากเหล้า<span class="cnt num">5</span></a>
+    <a href="#" data-go="bookings"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>จองโต๊ะ</a>
+    <a href="#" data-go="scan"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>สแกน QR</a>
+    <div class="cat need-owner">รายงาน</div>
+    <a href="#" class="need-owner" data-go="overview"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>รายงาน</a>
+    <div class="cat">ตั้งค่า</div>
+    <a href="#" class="need-owner" data-go="settings"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M9 15l2 2 4-4"/></svg>ตั้งค่าการจอง</a>
+    <a href="#" class="need-owner" data-go="plan"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><circle cx="17.5" cy="6.5" r="3.5"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>ผังโต๊ะ</a>
+    <a href="#" class="need-owner"><svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>รายการเหล้า</a>
+    <a href="#" class="need-owner"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 11l2 2 4-4"/></svg>ผู้ใช้และสาขา</a>
+    <a href="#"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>บัญชีของฉัน</a>
+  </nav>
+
+  <main>
+    <!-- ── คืนนี้ (staff / bar landing) ── -->
+    <section class="screen" id="s-tonight">
+      <div class="topbar">
+        <div><h1>คืนนี้ · สาขารามอินทรา</h1><div class="sub">วันพุธที่ 23 ก.ย. 2569 · ร้านเปิด 19:00–02:00 น.</div></div>
+        <div class="tb-actions"><button class="btn" data-go="scan"><svg class="icon i16" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>สแกน QR</button><button class="btn ghost" data-go="new-deposit"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>รับฝากเหล้า</button></div>
+      </div>
+      <div class="kpis">
+        <div class="card kpi"><span class="l">จองคืนนี้</span><span class="n num">14 <small style="font-size:14px;font-weight:500;color:var(--muted)">โต๊ะ</small></span><span class="h num">52 คน · มาแล้ว 6 โต๊ะ</span></div>
+        <div class="card kpi attn need-bar"><span class="l">รอ bar ยืนยันขวด</span><span class="n num" style="color:var(--status-progress)">3</span><span class="h">ต้องใส่ % และรูปก่อนเก็บ</span></div>
+        <div class="card kpi"><span class="l">คำขอเบิก</span><span class="n num" style="color:var(--info)">2</span><span class="h">ลูกค้าขอผ่าน LINE</span></div>
+        <div class="card kpi"><span class="l">ใกล้หมดอายุ 7 วัน</span><span class="n num" style="color:var(--urgent)">5</span><span class="h">แจ้ง LINE ลูกค้าแล้ว 4</span></div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <h2 class="sec">การจองคืนนี้ <a class="more" href="#" data-go="bookings">ดูผังโต๊ะ</a></h2>
+          <div class="card list">
+            <div class="row"><span class="time">19:30</span><span class="tbl">A3</span><div class="grow"><div class="t trunc">คุณธนพล ศรีสุข · 6 คน</div><div class="s trunc">BK-0923-004 · มีขวดฝาก 2 ขวด</div></div><span class="badge b-done">มาแล้ว</span></div>
+            <div class="row"><span class="time">20:00</span><span class="tbl">V1</span><div class="grow"><div class="t trunc">คุณพิมพ์ชนก วงศ์ใหญ่ · 4 คน</div><div class="s trunc">BK-0923-007 · วันเกิด ขอเค้ก</div></div><span class="badge b-done">มาแล้ว</span></div>
+            <div class="row"><span class="time">20:30</span><span class="tbl">B2</span><div class="grow"><div class="t trunc">คุณอัครเดช มั่นคง · 3 คน</div><div class="s trunc">BK-0923-009 · เลยเวลา 12 นาที</div></div><button class="btn sm ok">มาแล้ว</button></div>
+            <div class="row"><span class="time">21:00</span><span class="tbl none">ยังไม่<br>จัดโต๊ะ</span><div class="grow"><div class="t trunc">คุณณัฐวุฒิ แก้วประเสริฐ · 8 คน</div><div class="s trunc">BK-0923-011 · จองผ่าน LINE</div></div><span class="badge b-progress">รอร้านยืนยัน</span></div>
+            <div class="row"><span class="time">21:30</span><span class="tbl">C1</span><div class="grow"><div class="t trunc">คุณศิริพร ทองดี · 2 คน</div><div class="s trunc">BK-0923-013 · พนักงานรับจองทางโทรศัพท์</div></div><span class="badge b-info">ยืนยันแล้ว</span></div>
+          </div>
+        </div>
+        <div>
+          <h2 class="sec">งานที่รอ</h2>
+          <div class="card list">
+            <a class="row need-bar" href="#" data-go="deposit-detail" style="color:inherit;text-decoration:none"><div class="grow"><div class="t trunc">ยืนยันขวด · Johnnie Walker Black Label</div><div class="s trunc">คุณธนพล · โต๊ะ A3 · staff รับเมื่อ 20:05</div></div><span class="badge b-progress">รอยืนยัน</span></a>
+            <a class="row" href="#" style="color:inherit;text-decoration:none"><div class="grow"><div class="t trunc">ขอเบิก · Chivas Regal 12 ปี (1 ขวด)</div><div class="s trunc">คุณวรวุฒิ · โต๊ะ B4 · ขอผ่าน LINE 20:41</div></div><span class="badge b-info">ขอเบิก</span></a>
+            <a class="row" href="#" style="color:inherit;text-decoration:none"><div class="grow"><div class="t trunc">คำขอฝากจาก LINE · คุณปวีณา</div><div class="s trunc">โต๊ะ A5 · ยังไม่ได้รับขวด</div></div><span class="badge b-pending">ขอฝาก</span></a>
+          </div>
+          <h2 class="sec">ใกล้หมดอายุ</h2>
+          <div class="card list">
+            <div class="row"><div class="grow"><div class="t trunc">Hennessy VSOP · คุณกิตติศักดิ์</div><div class="s trunc num">หมดอายุ 25 ก.ย. 69 · เหลือ 40%</div></div><span class="badge b-urgent">อีก 2 วัน</span></div>
+            <div class="row"><div class="grow"><div class="t trunc">Regency · คุณสุภาวดี</div><div class="s trunc num">หมดอายุ 28 ก.ย. 69 · เหลือ 1 ขวด</div></div><span class="badge b-progress">อีก 5 วัน</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ภาพรวมทุกสาขา (owner landing) ── -->
+    <section class="screen" id="s-overview" hidden>
+      <div class="topbar">
+        <div><h1>ภาพรวมทุกสาขา</h1><div class="sub">ข้อมูลถึงวันพุธที่ 23 ก.ย. 2569 เวลา 21:14 น.</div></div>
+        <div class="tb-actions"><span class="chip">เดือนนี้ <svg class="icon i16" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span><button class="btn ghost"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>ส่งออก Excel</button><button class="btn ghost"><svg class="icon i16" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>รายงาน PDF</button></div>
+      </div>
+      <div class="kpis">
+        <div class="card kpi"><span class="l">ขวดฝากในร้าน</span><span class="n num">412</span><span class="h num">ทั้ง 3 สาขา · ลูกค้า 287 คน</span></div>
+        <div class="card kpi"><span class="l">ฝากใหม่เดือนนี้</span><span class="n num">96</span><span class="h num">เบิกแล้ว 71 ขวด</span></div>
+        <div class="card kpi"><span class="l">จำหน่ายออกเดือนนี้</span><span class="n num" style="color:var(--urgent)">18</span><span class="h num">รอจำหน่ายออก 7 ขวด</span></div>
+        <div class="card kpi"><span class="l">อัตรามาตามจอง</span><span class="n num" style="color:var(--status-done)">87%</span><span class="h num">จอง 318 · ไม่มา 41</span></div>
+      </div>
+      <h2 class="sec">แยกตามสาขา</h2>
+      <div class="card tablewrap">
+        <table class="dt">
+          <thead><tr><th>สาขา</th><th>ขวดในร้าน</th><th>รอยืนยันขวด</th><th>ใกล้หมดอายุ</th><th>รอจำหน่ายออก</th><th>จองคืนนี้</th><th>มาแล้ว</th></tr></thead>
+          <tbody class="num">
+            <tr><td><b>รามอินทรา</b></td><td>188</td><td><span class="badge b-progress">3</span></td><td>5</td><td>2</td><td>14 โต๊ะ</td><td>6</td></tr>
+            <tr><td><b>เกษตร-นวมินทร์</b></td><td>141</td><td>0</td><td>3</td><td><span class="badge b-urgent">5</span></td><td>9 โต๊ะ</td><td>4</td></tr>
+            <tr><td><b>บางนา</b></td><td>83</td><td><span class="badge b-progress">1</span></td><td>1</td><td>0</td><td>6 โต๊ะ</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h2 class="sec">จำหน่ายออกล่าสุด</h2>
+      <div class="card list">
+        <div class="row"><div class="grow"><div class="t trunc">Absolut Vodka · คุณเอกชัย · เกษตร-นวมินทร์</div><div class="s trunc num">หมดอายุ 10 ก.ย. 69 · จำหน่ายออก 22 ก.ย. 69 โดย bar ต้น · แจ้ง LINE แล้ว</div></div><span class="badge b-urgent">จำหน่ายออก</span></div>
+        <div class="row"><div class="grow"><div class="t trunc">Jack Daniel's · คุณมานพ · รามอินทรา</div><div class="s trunc num">หมดอายุ 8 ก.ย. 69 · จำหน่ายออก 20 ก.ย. 69 โดย คุณเจ้าของ · แจ้ง LINE แล้ว</div></div><span class="badge b-urgent">จำหน่ายออก</span></div>
+      </div>
+    </section>
+
+    <!-- ── ฝากเหล้า ── -->
+    <section class="screen" id="s-deposits" hidden>
+      <div class="topbar">
+        <div><h1>ฝากเหล้า</h1><div class="sub">สาขารามอินทรา · ขวดในร้าน 188 ขวด</div></div>
+        <div class="tb-actions"><button class="btn" data-go="new-deposit"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>รับฝากเหล้า</button></div>
+      </div>
+      <div class="tabs" id="depTabs">
+        <button data-t="all" class="on">ในร้าน<span class="c">188</span></button>
+        <button data-t="confirm">รอยืนยันขวด<span class="c">3</span></button>
+        <button data-t="withdraw">ขอเบิก<span class="c">0</span></button>
+        <button data-t="request">ขอฝากจาก LINE<span class="c">1</span></button>
+        <button data-t="expired">หมดอายุ รอจำหน่ายออก<span class="c">2</span></button>
+        <button data-t="closed">ปิดแล้ว</button>
+      </div>
+      <div class="toolbar">
+        <label class="search"><svg class="icon i16" viewBox="0 0 24 24" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="depSearch" placeholder="ค้นหาชื่อลูกค้า เบอร์โทร หรือรหัสฝาก" aria-label="ค้นหา"></label>
+        <span class="chip">ทุกหมวด <svg class="icon i16" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+      </div>
+
+      <div id="dep-list">
+        <div class="card dt-desk tablewrap">
+          <table class="dt">
+            <thead><tr><th>รหัสฝาก</th><th>ลูกค้า</th><th>เหล้า</th><th>คงเหลือ</th><th>หมดอายุ</th><th>สถานะ</th></tr></thead>
+            <tbody>
+              <tr class="click" data-go="deposit-detail"><td class="code">DEP-RMI-7K2QX</td><td><b>คุณธนพล ศรีสุข</b><div class="s num" style="color:var(--muted);font-size:12px">081-234-5678</div></td><td>Johnnie Walker Black Label</td><td><div class="level num"><div class="bar"><i style="width:80%"></i></div>2 ขวด · 80%</div></td><td class="num">23 ต.ค. 69</td><td><span class="badge b-done">อยู่ในร้าน</span></td></tr>
+              <tr class="click"><td class="code">DEP-RMI-Q8M3A</td><td><b>คุณกิตติศักดิ์ เจริญผล</b><div class="s num" style="color:var(--muted);font-size:12px">089-777-1203</div></td><td>Hennessy VSOP</td><td><div class="level num"><div class="bar"><i style="width:40%"></i></div>1 ขวด · 40%</div></td><td class="num" style="color:var(--urgent);font-weight:600">25 ก.ย. 69</td><td><span class="badge b-urgent">อีก 2 วัน</span></td></tr>
+              <tr class="click"><td class="code">DEP-RMI-4TZ9P</td><td><b>คุณวรวุฒิ สายทอง</b><div class="s num" style="color:var(--muted);font-size:12px">062-510-8844</div></td><td>Chivas Regal 12 ปี</td><td><div class="level num"><div class="bar"><i style="width:100%"></i></div>3 ขวด · ยังไม่เปิด</div></td><td class="num">—</td><td><span class="badge b-gold">VIP ไม่หมดอายุ</span></td></tr>
+              <tr class="click"><td class="code">DEP-RMI-H2WQ7</td><td><b>คุณสุภาวดี นิลวงศ์</b><div class="s num" style="color:var(--muted);font-size:12px">095-338-2019</div></td><td>Regency</td><td><div class="level num"><div class="bar"><i style="width:65%"></i></div>1 ขวด · 65%</div></td><td class="num">28 ก.ย. 69</td><td><span class="badge b-progress">อีก 5 วัน</span></td></tr>
+              <tr class="click"><td class="code">DEP-RMI-9CX4L</td><td><b>คุณภานุวัฒน์ ใจดี</b><div class="s num" style="color:var(--muted);font-size:12px">086-102-4477</div></td><td>Jameson</td><td><div class="level num"><div class="bar"><i style="width:30%"></i></div>1 ขวด · 30%</div></td><td class="num">17 ต.ค. 69</td><td><span class="badge b-done">อยู่ในร้าน</span></td></tr>
+            </tbody>
+          </table>
+          <div class="row" style="justify-content:space-between;font-size:12.5px;color:var(--muted)"><span class="num">แสดง 1–5 จาก 188 รายการ</span><span class="actions"><button class="btn ghost sm" disabled>ก่อนหน้า</button><button class="btn ghost sm">ถัดไป</button></span></div>
+        </div>
+        <div class="mcards">
+          <div class="card mcard" data-go="deposit-detail"><div class="top"><div><div style="font-weight:600">คุณธนพล ศรีสุข</div><div class="code" style="color:var(--muted)">DEP-RMI-7K2QX</div></div><span class="badge b-done">อยู่ในร้าน</span></div><div>Johnnie Walker Black Label</div><div class="meta num"><span class="level"><span class="bar"><i style="width:80%"></i></span>2 ขวด · 80%</span><span>หมดอายุ 23 ต.ค. 69</span></div></div>
+          <div class="card mcard"><div class="top"><div><div style="font-weight:600">คุณกิตติศักดิ์ เจริญผล</div><div class="code" style="color:var(--muted)">DEP-RMI-Q8M3A</div></div><span class="badge b-urgent">อีก 2 วัน</span></div><div>Hennessy VSOP</div><div class="meta num"><span class="level"><span class="bar"><i style="width:40%"></i></span>1 ขวด · 40%</span><span>หมดอายุ 25 ก.ย. 69</span></div></div>
+          <div class="card mcard"><div class="top"><div><div style="font-weight:600">คุณวรวุฒิ สายทอง</div><div class="code" style="color:var(--muted)">DEP-RMI-4TZ9P</div></div><span class="badge b-gold">VIP</span></div><div>Chivas Regal 12 ปี</div><div class="meta num"><span class="level"><span class="bar"><i style="width:100%"></i></span>3 ขวด · ยังไม่เปิด</span><span>ไม่หมดอายุ</span></div></div>
+          <div class="card mcard"><div class="top"><div><div style="font-weight:600">คุณสุภาวดี นิลวงศ์</div><div class="code" style="color:var(--muted)">DEP-RMI-H2WQ7</div></div><span class="badge b-progress">อีก 5 วัน</span></div><div>Regency</div><div class="meta num"><span class="level"><span class="bar"><i style="width:65%"></i></span>1 ขวด · 65%</span><span>หมดอายุ 28 ก.ย. 69</span></div></div>
+        </div>
+      </div>
+
+      <div id="dep-expired" hidden>
+        <div class="warnbox" style="margin-bottom:12px"><svg class="icon i16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>ขวดที่เลยกำหนดรับคืนแล้ว เลือกขวดที่นำออกจากชั้นจริงแล้วกด "จำหน่ายออก" ระบบจะแจ้ง LINE ลูกค้าให้ทันที</span></div>
+        <div class="card list">
+          <label class="row"><input type="checkbox" checked aria-label="เลือก"><div class="grow"><div class="t trunc">Jack Daniel's · คุณมานพ รุ่งเรือง</div><div class="s trunc num">DEP-RMI-J7Q2D · หมดอายุ 15 ก.ย. 69 · เหลือ 1 ขวด 20% · แจ้งหมดอายุทาง LINE แล้ว</div></div><span class="badge b-urgent">เกิน 8 วัน</span></label>
+          <label class="row"><input type="checkbox" checked aria-label="เลือก"><div class="grow"><div class="t trunc">Smirnoff · คุณชลธิชา แสงทอง</div><div class="s trunc num">DEP-RMI-X3L8K · หมดอายุ 19 ก.ย. 69 · เหลือ 1 ขวด 55% · แจ้งหมดอายุทาง LINE แล้ว</div></div><span class="badge b-urgent">เกิน 4 วัน</span></label>
+        </div>
+        <div class="actions" style="margin-top:12px;justify-content:flex-end">
+          <span class="note need-bar" style="margin-right:auto;align-items:center">เลือกแล้ว 2 ขวด</span>
+          <button class="btn need-bar"><svg class="icon i16" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/></svg>จำหน่ายออก 2 ขวด</button>
+          <span class="note" style="display:none" data-staff-note>เฉพาะ bar และ owner จำหน่ายออกได้</span>
+        </div>
+      </div>
+
+      <div id="dep-empty" hidden>
+        <div class="card empty">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 2h6v4l1.5 2.5V21a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V8.5L9 6z"/><path d="M7.5 13h9"/></svg>
+          <p class="t">ไม่มีคำขอเบิกที่รออยู่</p>
+          <p>เมื่อลูกค้ากดขอเบิกใน LINE หรือพนักงานสร้างคำขอ รายการจะขึ้นที่นี่ทันที</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── รายละเอียดขวด ── -->
+    <section class="screen" id="s-deposit-detail" hidden>
+      <div class="topbar">
+        <div><a href="#" data-go="deposits" style="color:var(--muted);font-size:13px;text-decoration:none">‹ ฝากเหล้า</a><h1>Johnnie Walker Black Label</h1><div class="sub"><span class="code">DEP-RMI-7K2QX</span> · คุณธนพล ศรีสุข</div></div>
+        <div class="tb-actions"><span class="badge b-done" style="font-size:13px;padding:5px 12px">อยู่ในร้าน</span></div>
+      </div>
+      <div class="grid2">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card pad">
+            <h2 class="sec" style="margin-top:0">ขวดที่ฝาก <span class="badge b-pending num" style="margin-left:4px">เหลือ 2 จาก 3 ขวด</span></h2>
+            <div class="bottles">
+              <div class="bottle"><div class="glass"><i style="height:100%"></i></div><b>ขวด 1</b><div class="num">100% · ยังไม่เปิด</div></div>
+              <div class="bottle"><div class="glass"><i style="height:60%"></i></div><b>ขวด 2</b><div class="num">60% · เปิดแล้ว</div></div>
+              <div class="bottle used"><div class="glass"><i style="height:0"></i></div><b>ขวด 3</b><div>เบิกแล้ว</div></div>
+            </div>
+          </div>
+          <div class="card pad">
+            <dl class="kv">
+              <dt>ลูกค้า</dt><dd>คุณธนพล ศรีสุข · <span class="num">081-234-5678</span></dd>
+              <dt>LINE</dt><dd><span class="badge b-done">เชื่อม LINE แล้ว</span></dd>
+              <dt>ฝากเมื่อ</dt><dd class="num">23 ก.ย. 69 · 20:05 น. · โต๊ะ A3</dd>
+              <dt>หมดอายุ</dt><dd class="num">23 ต.ค. 69 <span style="color:var(--muted)">(อายุฝาก 30 วัน)</span></dd>
+              <dt>รับคืนได้ถึง</dt><dd class="num">24 ต.ค. 69 · 04:00 น.</dd>
+              <dt>รับฝากโดย</dt><dd>staff ปอ · ยืนยันโดย bar ต้น</dd>
+            </dl>
+          </div>
+          <div class="actions">
+            <button class="btn"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>เบิกขวด</button>
+            <button class="btn ghost"><svg class="icon i16" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8" rx="1"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>พิมพ์ใบรับฝาก</button>
+            <button class="btn ghost need-bar"><svg class="icon i16" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg>ต่ออายุ</button>
+            <button class="btn ghost need-bar"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>ตั้งเป็น VIP</button>
+          </div>
+          <p class="note staff-note" id="staffNote" hidden><svg class="icon i16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>ต่ออายุและตั้ง VIP ได้เฉพาะ bar และ owner</p>
+        </div>
+        <div class="card pad">
+          <h2 class="sec" style="margin-top:0">ประวัติ</h2>
+          <div class="timeline">
+            <div class="tl"><span class="dot"></span><div><div>เบิกขวด 3 ที่โต๊ะ A3</div><div class="s num">23 ก.ย. 69 · 22:40 น. · bar ต้น · แจ้ง LINE ลูกค้าแล้ว</div></div></div>
+            <div class="tl"><span class="dot"></span><div><div>bar ยืนยันขวด 100% · 60% · 100%</div><div class="s num">23 ก.ย. 69 · 20:12 น. · bar ต้น · พิมพ์ใบรับฝากแล้ว</div></div></div>
+            <div class="tl"><span class="dot"></span><div><div>รับฝาก 3 ขวด พร้อมรูป</div><div class="s num">23 ก.ย. 69 · 20:05 น. · staff ปอ</div></div></div>
+            <div class="tl"><span class="dot"></span><div><div>ลูกค้าขอฝากผ่าน LINE</div><div class="s num">23 ก.ย. 69 · 19:58 น.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── รับฝากเหล้า (form) ── -->
+    <section class="screen" id="s-new-deposit" hidden>
+      <div class="topbar"><div><a href="#" data-go="deposits" style="color:var(--muted);font-size:13px;text-decoration:none">‹ ฝากเหล้า</a><h1>รับฝากเหล้า</h1><div class="sub">bar จะยืนยัน % ของแต่ละขวดอีกครั้งก่อนเก็บเข้าชั้น</div></div></div>
+      <div class="card pad" style="max-width:640px">
+        <div class="form">
+          <div class="inrow">
+            <div class="field"><label for="f-name">ชื่อลูกค้า</label><input class="inp" id="f-name" value="คุณธนพล ศรีสุข"></div>
+            <div class="field"><label for="f-phone">เบอร์โทร</label><input class="inp num" id="f-phone" value="081-234-5678"></div>
+          </div>
+          <div class="inrow">
+            <div class="field"><label for="f-item">เหล้า</label><input class="inp" id="f-item" value="Johnnie Walker Black Label" ><div class="help">เลือกจากรายการเหล้าของร้าน ไม่มีในรายการให้พิมพ์ชื่อได้</div></div>
+            <div class="field"><label for="f-qty">จำนวนขวด</label><input class="inp num" id="f-qty" value="3" inputmode="numeric"></div>
+          </div>
+          <div class="inrow">
+            <div class="field"><label for="f-table">โต๊ะ</label><input class="inp" id="f-table" value="A3"></div>
+            <div class="field"><label for="f-exp">หมดอายุ</label><input class="inp num" id="f-exp" value="23 ต.ค. 2569 (30 วัน)" disabled><div class="help">ตามอายุฝากของสาขา แก้ได้เฉพาะ bar</div></div>
+          </div>
+          <div class="field"><label>รูปขวด</label>
+            <div style="border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:13px"><svg class="icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div>ถ่ายรูปขวด (ต้องมีสำหรับ staff)</div></div>
+          </div>
+          <div class="actions" style="justify-content:flex-end"><button class="btn ghost" data-go="deposits">ยกเลิก</button><button class="btn">บันทึกรับฝาก</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── จองโต๊ะ ── -->
+    <section class="screen" id="s-bookings" hidden>
+      <div class="topbar">
+        <div><h1>จองโต๊ะ</h1><div class="sub num">คืนวันพุธที่ 23 ก.ย. 69 · 14 โต๊ะ 52 คน · เต็มแล้ว 14 จาก 18 โต๊ะ</div></div>
+        <div class="tb-actions"><span class="chip"><svg class="icon i16" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>23 ก.ย. 69</span><button class="btn"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>รับจอง</button></div>
+      </div>
+      <div class="tabs" id="bkTabs"><button data-v="plan" class="on">ผังโต๊ะ</button><button data-v="list">รายการ</button></div>
+
+      <div id="bk-plan">
+        <div class="legend" style="margin-bottom:12px"><span><i style="border-color:var(--line)"></i>ว่าง</span><span><i style="border-color:var(--info);background:var(--info-bg)"></i>จองแล้ว</span><span><i style="border-color:var(--status-done);background:var(--status-done-bg)"></i>มาแล้ว</span><span><i style="border-color:var(--status-progress);background:var(--status-progress-bg)"></i>เลยเวลา</span></div>
+        <div class="card pad zones">
+          <div class="zone"><h3>โซนหน้าเวที <span class="badge b-pending num">6 โต๊ะ</span></h3>
+            <div class="tables">
+              <button class="t-cell arrived"><b>A1</b><span class="who">คุณแพรวา</span><span class="num">19:00 · 4</span></button>
+              <button class="t-cell"><b>A2</b><span class="who">ว่าง</span><span class="num">4 ที่</span></button>
+              <button class="t-cell arrived" data-open="bk"><b>A3</b><span class="who">คุณธนพล</span><span class="num">19:30 · 6</span></button>
+              <button class="t-cell booked"><b>A4</b><span class="who">คุณกมล</span><span class="num">22:00 · 4</span></button>
+              <button class="t-cell booked"><b>A5</b><span class="who">คุณปวีณา</span><span class="num">21:30 · 5</span></button>
+              <button class="t-cell"><b>A6</b><span class="who">ว่าง</span><span class="num">6 ที่</span></button>
+            </div>
+          </div>
+          <div class="zone"><h3>โซนบาร์ <span class="badge b-pending num">6 โต๊ะ</span></h3>
+            <div class="tables">
+              <button class="t-cell round booked"><b>B1</b><span class="num">21:00 · 2</span></button>
+              <button class="t-cell round late" data-open="bk"><b>B2</b><span class="num">20:30 · 3</span></button>
+              <button class="t-cell round"><b>B3</b><span class="num">2 ที่</span></button>
+              <button class="t-cell round arrived"><b>B4</b><span class="num">20:00 · 2</span></button>
+              <button class="t-cell round booked"><b>B5</b><span class="num">22:30 · 2</span></button>
+              <button class="t-cell round"><b>B6</b><span class="num">2 ที่</span></button>
+            </div>
+          </div>
+          <div class="zone"><h3>โซน VIP <span class="badge b-pending num">3 ห้อง</span></h3>
+            <div class="tables">
+              <button class="t-cell arrived"><b>V1</b><span class="who">คุณพิมพ์ชนก</span><span class="num">20:00 · 4</span></button>
+              <button class="t-cell booked"><b>V2</b><span class="who">คุณเจษฎา</span><span class="num">22:00 · 10</span></button>
+              <button class="t-cell"><b>V3</b><span class="who">ว่าง</span><span class="num">12 ที่</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="bk-list" hidden>
+        <div class="card list">
+          <div class="row"><span class="time">19:30</span><span class="tbl">A3</span><div class="grow"><div class="t trunc">คุณธนพล ศรีสุข · 6 คน</div><div class="s trunc">BK-0923-004 · จองผ่าน LINE · มีขวดฝาก 2 ขวด</div></div><span class="badge b-done">มาแล้ว</span></div>
+          <div class="row"><span class="time">20:30</span><span class="tbl">B2</span><div class="grow"><div class="t trunc">คุณอัครเดช มั่นคง · 3 คน</div><div class="s trunc">BK-0923-009 · เลยเวลา 12 นาที · ขึ้น "ไม่มา" อัตโนมัติ 21:00</div></div><button class="btn sm ok">มาแล้ว</button></div>
+          <div class="row"><span class="time">21:00</span><span class="tbl none">ยังไม่<br>จัดโต๊ะ</span><div class="grow"><div class="t trunc">คุณณัฐวุฒิ แก้วประเสริฐ · 8 คน</div><div class="s trunc">BK-0923-011 · จองผ่าน LINE เมื่อ 18:12</div></div><span class="actions"><button class="btn ghost sm">ปฏิเสธ</button><button class="btn sm">ยืนยัน + จัดโต๊ะ</button></span></div>
+          <div class="row"><span class="time">21:30</span><span class="tbl">C1</span><div class="grow"><div class="t trunc">คุณศิริพร ทองดี · 2 คน</div><div class="s trunc">BK-0923-013 · พนักงานรับจองทางโทรศัพท์</div></div><span class="badge b-info">ยืนยันแล้ว</span></div>
+          <div class="row"><span class="time">19:00</span><span class="tbl">—</span><div class="grow"><div class="t trunc">คุณวีรยุทธ ชัยมงคล · 4 คน</div><div class="s trunc">BK-0923-002 · ไม่มาภายใน 30 นาที</div></div><span class="badge b-pending">ไม่มา</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── สแกน QR ── -->
+    <section class="screen" id="s-scan" hidden>
+      <div class="topbar"><div><h1>สแกน QR</h1><div class="sub">ใช้ได้ทั้งบัตรจองโต๊ะ และ QR บนใบรับฝาก</div></div></div>
+      <div style="max-width:420px;margin:0 auto">
+        <div class="scanbox"><div class="frame"></div><div class="scanline"></div><div class="hint">หันกล้องไปที่ QR ของลูกค้า</div></div>
+        <div class="orline">หรือพิมพ์หา</div>
+        <label class="search"><svg class="icon i16" viewBox="0 0 24 24" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="scanInput" placeholder="เลขจอง เลขโต๊ะ หรือรหัสฝาก" aria-label="เลขจอง เลขโต๊ะ หรือรหัสฝาก"></label>
+        <button class="btn" style="width:100%;justify-content:center;margin-top:10px" data-open="bk">ค้นหา</button>
+        <p class="note" style="margin-top:10px;justify-content:center" data-demo-only>ในเดโม่ กดปุ่มค้นหาเพื่อดูผลการสแกนบัตรจอง</p>
+      </div>
+    </section>
+
+    <!-- ── ตั้งค่าการจอง (owner) ── -->
+    <section class="screen" id="s-settings" hidden>
+      <div class="topbar"><div><h1>ตั้งค่าการจอง</h1><div class="sub">สาขารามอินทรา · มีผลกับการจองใหม่เท่านั้น</div></div><div class="tb-actions"><button class="btn">บันทึก</button></div></div>
+      <div class="grid2">
+        <div class="card pad form">
+          <div class="switch"><div><b>เปิดรับจองผ่าน LINE</b><div class="note">ปิดแล้วลูกค้าจองเองไม่ได้ พนักงานยังรับจองได้</div></div><button class="tg on" aria-label="เปิดรับจองผ่าน LINE"></button></div>
+          <div class="switch"><div><b>ยืนยันการจองอัตโนมัติ</b><div class="note">ปิดไว้ = ร้านต้องกดยืนยันก่อน ลูกค้าถึงได้ QR</div></div><button class="tg" aria-label="ยืนยันการจองอัตโนมัติ"></button></div>
+          <div class="inrow">
+            <div class="field"><label for="s-adv">เปิดจองล่วงหน้า</label><input class="inp num" id="s-adv" value="14 วัน"></div>
+            <div class="field"><label for="s-cut">ปิดรับจองของคืนนั้นเวลา</label><input class="inp num" id="s-cut" value="18:00 น."></div>
+          </div>
+          <div class="inrow">
+            <div class="field"><label for="s-from">รอบเวลาให้จอง</label><input class="inp num" id="s-from" value="19:00 – 23:00 น. ทุก 30 นาที"></div>
+            <div class="field"><label for="s-late">นับว่าไม่มาเมื่อเลยเวลา</label><input class="inp num" id="s-late" value="30 นาที"></div>
+          </div>
+          <div class="inrow">
+            <div class="field"><label for="s-max">จองได้สูงสุดต่อคืน</label><input class="inp num" id="s-max" value="18 โต๊ะ"></div>
+            <div class="field"><label for="s-party">จำนวนคนต่อการจอง</label><input class="inp num" id="s-party" value="1 – 12 คน"></div>
+          </div>
+          <div class="field"><label>วันปิดรับจองประจำสัปดาห์</label>
+            <div class="days" id="days"><button>จ</button><button class="off">อ</button><button>พ</button><button>พฤ</button><button>ศ</button><button>ส</button><button>อา</button></div>
+            <div class="help">กดเพื่อสลับ วันที่ขีดฆ่า = ไม่รับจอง</div>
+          </div>
+          <div class="field"><label for="s-cancel">ลูกค้ายกเลิกเองใน LINE ได้ก่อนเวลาจอง</label><input class="inp num" id="s-cancel" value="2 ชั่วโมง"></div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><b>วันปิดรับจอง · ตุลาคม 2569</b><span class="actions"><button class="btn ghost sm" aria-label="เดือนก่อน">‹</button><button class="btn ghost sm" aria-label="เดือนถัดไป">›</button></span></div>
+          <div class="cal" id="cal"></div>
+          <div class="legend" style="margin-top:12px"><span><i style="border-color:var(--urgent);background:var(--urgent-bg)"></i>ปิดรับจอง (กดเลือกได้)</span><span><i style="border-color:transparent;background:var(--disabled-bg)"></i>ปิดประจำสัปดาห์</span><span><i style="border-color:transparent;background:var(--status-progress-bg)"></i>จองเต็ม</span></div>
+          <div class="field" style="margin-top:12px"><label for="s-reason">เหตุผลที่ปิด (แสดงให้ลูกค้าเห็น)</label><input class="inp" id="s-reason" value="13 ต.ค. — ปิดร้านวันหยุดนักขัตฤกษ์"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ผังโต๊ะ (owner, edit) ── -->
+    <section class="screen" id="s-plan" hidden>
+      <div class="topbar"><div><h1>ผังโต๊ะ</h1><div class="sub">สาขารามอินทรา · 3 โซน 15 โต๊ะ</div></div><div class="tb-actions"><button class="btn ghost"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>เพิ่มโซน</button><button class="btn"><svg class="icon i16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>เพิ่มโต๊ะ</button></div></div>
+      <div class="card tablewrap">
+        <table class="dt">
+          <thead><tr><th>โต๊ะ</th><th>โซน</th><th>รูปทรง</th><th>ที่นั่ง</th><th>ให้ลูกค้าจองผ่าน LINE</th><th></th></tr></thead>
+          <tbody class="num">
+            <tr><td><b>A1–A6</b></td><td>หน้าเวที</td><td>สี่เหลี่ยม</td><td>4–6</td><td><span class="badge b-done">เปิด</span></td><td><button class="btn ghost sm">แก้ไข</button></td></tr>
+            <tr><td><b>B1–B6</b></td><td>บาร์</td><td>กลม</td><td>2</td><td><span class="badge b-done">เปิด</span></td><td><button class="btn ghost sm">แก้ไข</button></td></tr>
+            <tr><td><b>V1–V3</b></td><td>VIP</td><td>ห้อง</td><td>4–12</td><td><span class="badge b-pending">เฉพาะพนักงาน</span></td><td><button class="btn ghost sm">แก้ไข</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px">ลูกค้าเลือกได้แค่โซน ร้านเป็นคนจัดโต๊ะให้ ลำดับโต๊ะในตารางคือลำดับบนผัง</p>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════════════ CUSTOMER LIFF (Night Bar) ═══════════════ -->
+<div id="cx" hidden style="padding:20px 16px 40px">
+  <div class="cx-wrap">
+    <div>
+      <div class="phone"><div class="cx">
+        <div class="cx-head"><div class="cx-logo">SIS</div><div><div class="h">ขวดของฉัน</div><div class="s">SIS Music Bar · รามอินทรา</div></div></div>
+        <div class="cx-body">
+          <div class="cx-tabs"><span class="on">ฝากอยู่ 3</span><span>ประวัติ</span></div>
+          <div class="cx-card">
+            <div style="display:flex;justify-content:space-between;gap:8px"><span class="nm">Johnnie Walker Black Label</span><span class="cx-pill">2 ขวด</span></div>
+            <div class="cx-meter"><i style="width:80%"></i></div>
+            <div class="meta num"><span>DEP-RMI-7K2QX</span><span>รับคืนได้ถึง 24 ต.ค. 69</span></div>
+            <button class="cx-btn">ขอเบิกขวด</button>
+          </div>
+          <div class="cx-card">
+            <div style="display:flex;justify-content:space-between;gap:8px"><span class="nm">Hennessy VSOP</span><span class="cx-pill warn">อีก 2 วัน</span></div>
+            <div class="cx-meter"><i style="width:40%"></i></div>
+            <div class="meta num"><span>DEP-RMI-Q8M3A</span><span>รับคืนได้ถึง 26 ก.ย. 69</span></div>
+            <button class="cx-btn">ขอเบิกขวด</button>
+          </div>
+          <div class="cx-card">
+            <div style="display:flex;justify-content:space-between;gap:8px"><span class="nm">Chivas Regal 12 ปี</span><span class="cx-pill">VIP</span></div>
+            <div class="cx-meter"><i style="width:100%"></i></div>
+            <div class="meta num"><span>DEP-RMI-4TZ9P</span><span class="cx-gold">ไม่มีวันหมดอายุ</span></div>
+          </div>
+          <button class="cx-btn ghost">ฝากขวดเพิ่ม</button>
+        </div>
+      </div></div>
+      <div class="cap" style="text-align:center;font-size:12.5px;color:var(--muted);margin-top:8px">ลูกค้า: ดูขวดและขอเบิก</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="cx">
+        <div class="cx-head"><div class="cx-logo">SIS</div><div><div class="h">จองโต๊ะ</div><div class="s">SIS Music Bar · รามอินทรา</div></div></div>
+        <div class="cx-body">
+          <div><div class="cx-label">วันที่</div>
+            <div class="cx-dates num"><span>พ<b>23</b></span><span class="on">พฤ<b>24</b></span><span>ศ<b>25</b></span><span>ส<b>26</b></span><span>อา<b>27</b></span><span>จ<b>28</b></span><span class="x">อ<b>29</b></span></div></div>
+          <div><div class="cx-label">เวลาเข้าร้าน</div>
+            <div class="cx-slots num"><span>19:00</span><span>19:30</span><span>20:00</span><span class="on">20:30</span><span>21:00</span><span class="full">21:30</span><span>22:00</span><span>22:30</span></div></div>
+          <div><div class="cx-label">จำนวนคน</div><div class="cx-stepper"><span>−</span><b class="num">4 คน</b><span>+</span></div></div>
+          <div><div class="cx-label">โซนที่อยากนั่ง</div><div class="cx-slots" style="grid-template-columns:repeat(3,minmax(0,1fr))"><span class="on">หน้าเวที</span><span>บาร์</span><span>ไม่ระบุ</span></div></div>
+          <div class="cx-card" style="padding:10px 12px;font-size:12.5px;color:var(--cx-muted)">คุณมีขวดฝากที่สาขานี้ 3 รายการ บอกพนักงานตอนเข้าร้านได้เลย</div>
+          <button class="cx-btn" style="margin-top:auto">ส่งคำขอจอง</button>
+        </div>
+      </div></div>
+      <div class="cap" style="text-align:center;font-size:12.5px;color:var(--muted);margin-top:8px">ลูกค้า: จองโต๊ะ (วันอังคารปิดรับจอง)</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="cx">
+        <div class="cx-head"><div class="cx-logo">SIS</div><div><div class="h">บัตรจองของคุณ</div><div class="s">ยืนยันแล้ว · แสดงบัตรนี้ที่หน้าร้าน</div></div></div>
+        <div class="cx-body">
+          <div class="ticket">
+            <div class="tt"><div style="font-size:12px;color:var(--cx-muted)">เลขจอง</div><div class="no num">BK-0924-006</div><div class="qr" id="qr"></div><div style="font-size:12px;color:var(--cx-muted)">พนักงานสแกน QR หรือพิมพ์เลขจอง</div></div>
+            <div class="tear"></div>
+            <div class="rows num"><span>วันที่</span><span>พฤหัสบดี 24 ก.ย. 69</span><span>เวลา</span><span>20:30 น. (มาได้ถึง 21:00 น.)</span><span>จำนวน</span><span>4 คน · โซนหน้าเวที</span><span>ชื่อ</span><span>คุณธนพล ศรีสุข</span></div>
+          </div>
+          <button class="cx-btn ghost" style="margin-top:auto">ยกเลิกการจอง</button>
+          <div style="font-size:11.5px;color:var(--cx-muted);text-align:center">ยกเลิกเองได้ถึง 18:30 น. ของวันจอง</div>
+        </div>
+      </div></div>
+      <div class="cap" style="text-align:center;font-size:12.5px;color:var(--muted);margin-top:8px">ลูกค้า: บัตรจองพร้อม QR</div>
+    </div>
+  </div>
+</div>
+
+<!-- mobile bottom nav: คืนนี้ · ฝากเหล้า · [สแกน] · จองโต๊ะ · เพิ่มเติม -->
+<nav class="bottomnav" id="bnav" aria-label="เมนูหลัก">
+  <a href="#" data-go="home" class="active"><svg class="icon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg><span id="homeLabel">คืนนี้</span></a>
+  <a href="#" data-go="deposits"><svg class="icon" viewBox="0 0 24 24"><path d="M9 2h6v4l1.5 2.5V21a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V8.5L9 6z"/><path d="M7.5 13h9"/></svg><span>ฝากเหล้า</span></a>
+  <a href="#" class="center" data-go="scan" aria-label="สแกน QR"><span class="fab"><svg class="icon" style="width:26px;height:26px" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></span></a>
+  <a href="#" data-go="bookings"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>จองโต๊ะ</span></a>
+  <a href="#" id="moreBtn"><svg class="icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>เพิ่มเติม</span></a>
+</nav>
+
+<!-- "เพิ่มเติม" bottom sheet -->
+<div class="sheet-bg" id="moreBg" hidden></div>
+<div class="sheet" id="moreSheet" role="dialog" aria-label="เพิ่มเติม" hidden>
+  <div class="grab"></div>
+  <div class="sec need-owner">ภาพรวมและรายงาน</div>
+  <a href="#" class="mi need-owner" data-go="overview"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>รายงาน</a>
+  <div class="sec need-owner">ตั้งค่าสาขา</div>
+  <a href="#" class="mi need-owner" data-go="settings"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18"/></svg>ตั้งค่าการจอง</a>
+  <a href="#" class="mi need-owner" data-go="plan"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><circle cx="17.5" cy="6.5" r="3.5"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>ผังโต๊ะ</a>
+  <a href="#" class="mi need-owner"><svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>รายการเหล้า</a>
+  <a href="#" class="mi need-owner"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/></svg>ผู้ใช้และสาขา</a>
+  <div class="sec">บัญชี</div>
+  <a href="#" class="mi" id="sheetTheme"><svg class="icon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>สลับโหมดมืด</a>
+  <a href="#" class="mi"><svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>ออกจากระบบ</a>
+</div>
+
+<!-- scan / booking result sheet -->
+<div class="sheet-bg" id="bkBg" hidden></div>
+<div class="sheet" id="bkSheet" role="dialog" aria-label="ข้อมูลการจอง" hidden>
+  <div class="grab"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px">
+    <div><div class="code" style="color:var(--muted)">BK-0923-009</div><div style="font-size:18px;font-weight:700">คุณอัครเดช มั่นคง</div><div class="note num">โทร 084-551-9020 · จองผ่าน LINE</div></div>
+    <span class="badge b-progress">เลยเวลา 12 นาที</span>
+  </div>
+  <dl class="kv num" style="margin-bottom:12px"><dt>เวลาจอง</dt><dd>คืนนี้ 20:30 น.</dd><dt>จำนวน</dt><dd>3 คน · โซนบาร์</dd><dt>โต๊ะ</dt><dd><b>B2</b> <a href="#" style="color:var(--brand);font-size:13px">เปลี่ยนโต๊ะ</a></dd><dt>หมายเหตุ</dt><dd>ขอที่นั่งใกล้ลำโพงน้อย ๆ</dd></dl>
+  <div class="card" style="padding:10px 12px;margin-bottom:14px;background:var(--gold-bg);border-color:transparent;color:var(--gold-ink);font-size:13px;display:flex;gap:8px;align-items:center">
+    <svg class="icon i16" viewBox="0 0 24 24"><path d="M9 2h6v4l1.5 2.5V21a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V8.5L9 6z"/></svg>
+    <span>มีขวดฝาก 1 รายการ: Regency เหลือ 65% · หมดอายุ 28 ก.ย. 69</span>
+  </div>
+  <div class="actions"><button class="btn ghost" style="flex:1;justify-content:center" id="bkClose">ปิด</button><button class="btn ok" style="flex:2;justify-content:center">ลูกค้ามาแล้ว</button></div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var role = 'bar';
+  root.setAttribute('data-role', role);
+
+  var screens = ['tonight','overview','deposits','deposit-detail','new-deposit','bookings','scan','settings','plan'];
+  function show(id) {
+    if (id === 'home') id = role === 'owner' ? 'overview' : 'tonight';
+    screens.forEach(function (s) { var el = document.getElementById('s-' + s); if (el) el.hidden = (s !== id); });
+    document.querySelectorAll('[data-go]').forEach(function (a) {
+      if (!a.matches('.sidebar a, .bottomnav a')) return;
+      var g = a.getAttribute('data-go');
+      var hit = g === id || (g === 'home' && (id === 'tonight' || id === 'overview')) || (g === 'deposits' && (id === 'deposit-detail' || id === 'new-deposit'));
+      a.classList.toggle('active', hit);
+    });
+    closeSheets();
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', function (e) {
+    var go = e.target.closest('[data-go]');
+    if (go) { e.preventDefault(); show(go.getAttribute('data-go')); return; }
+    var op = e.target.closest('[data-open="bk"]');
+    if (op) { e.preventDefault(); openSheet('bk'); }
+  });
+
+  function openSheet(k) { document.getElementById(k + 'Sheet').hidden = false; document.getElementById(k + 'Bg').hidden = false; }
+  function closeSheets() { ['more','bk'].forEach(function (k) { document.getElementById(k + 'Sheet').hidden = true; document.getElementById(k + 'Bg').hidden = true; }); }
+  document.getElementById('moreBtn').addEventListener('click', function (e) { e.preventDefault(); openSheet('more'); });
+  document.getElementById('moreBg').addEventListener('click', closeSheets);
+  document.getElementById('bkBg').addEventListener('click', closeSheets);
+  document.getElementById('bkClose').addEventListener('click', closeSheets);
+
+  function isDark() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function toggleTheme(e) { if (e) e.preventDefault(); root.setAttribute('data-theme', isDark() ? 'light' : 'dark'); }
+  document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+  document.getElementById('sheetTheme').addEventListener('click', toggleTheme);
+
+  document.querySelectorAll('#roleSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      role = b.getAttribute('data-r');
+      root.setAttribute('data-role', role);
+      document.querySelectorAll('#roleSeg button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.getElementById('homeLabel').textContent = role === 'owner' ? 'ภาพรวม' : 'คืนนี้';
+      document.getElementById('staffNote').hidden = role !== 'staff';
+      var sn = document.querySelector('[data-staff-note]'); if (sn) sn.style.display = role === 'staff' ? 'block' : 'none';
+      show('home');
+    });
+  });
+
+  document.querySelectorAll('#sideSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var cx = b.getAttribute('data-s') === 'cx';
+      document.getElementById('app').hidden = cx;
+      document.getElementById('bnav').style.visibility = cx ? 'hidden' : '';
+      document.getElementById('cx').hidden = !cx;
+      document.querySelectorAll('#sideSeg button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      closeSheets();
+    });
+  });
+
+  document.querySelectorAll('#depTabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-t');
+      document.querySelectorAll('#depTabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.getElementById('dep-list').hidden = !(t === 'all' || t === 'confirm' || t === 'request' || t === 'closed');
+      document.getElementById('dep-expired').hidden = t !== 'expired';
+      document.getElementById('dep-empty').hidden = t !== 'withdraw';
+    });
+  });
+  document.querySelectorAll('#bkTabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-v');
+      document.querySelectorAll('#bkTabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.getElementById('bk-plan').hidden = v !== 'plan';
+      document.getElementById('bk-list').hidden = v !== 'list';
+    });
+  });
+  document.querySelectorAll('#days button').forEach(function (b) { b.addEventListener('click', function () { b.classList.toggle('off'); }); });
+  document.querySelectorAll('.tg').forEach(function (b) { b.addEventListener('click', function () { b.classList.toggle('on'); }); });
+
+  // October 2569 (2026): 1 Oct 2026 is a Thursday. Weekly closed day = Tuesday.
+  var cal = document.getElementById('cal');
+  var heads = ['จ','อ','พ','พฤ','ศ','ส','อา'];
+  var html = heads.map(function (h) { return '<span class="h">' + h + '</span>'; }).join('');
+  for (var i = 0; i < 3; i++) html += '<span></span>';
+  var closed = { 13: 1, 23: 1 }, full = { 3: 1, 10: 1 };
+  for (var d = 1; d <= 31; d++) {
+    var dow = (3 + d - 1) % 7; // 0 = Monday
+    var cls = dow === 1 ? 'wk' : closed[d] ? 'x' : full[d] ? 'full' : '';
+    html += '<button class="' + cls + '" data-d="' + d + '" aria-label="' + d + ' ต.ค.">' + d + '</button>';
+  }
+  cal.innerHTML = html;
+  cal.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.classList.contains('wk')) return;
+    b.classList.toggle('x');
+  });
+
+  // placeholder QR pattern (deterministic)
+  var n = 25, s = 7, cells = '', seed = 97;
+  function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  function finder(x, y) { return '<rect x="' + x*s + '" y="' + y*s + '" width="' + 7*s + '" height="' + 7*s + '" fill="#120C0D"/><rect x="' + (x+1)*s + '" y="' + (y+1)*s + '" width="' + 5*s + '" height="' + 5*s + '" fill="#fff"/><rect x="' + (x+2)*s + '" y="' + (y+2)*s + '" width="' + 3*s + '" height="' + 3*s + '" fill="#120C0D"/>'; }
+  for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+    var inF = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
+    if (!inF && rnd() > 0.52) cells += '<rect x="' + x*s + '" y="' + y*s + '" width="' + s + '" height="' + s + '" fill="#120C0D"/>';
+  }
+  document.getElementById('qr').innerHTML = '<svg viewBox="0 0 ' + n*s + ' ' + n*s + '" width="100%" style="display:block" role="img" aria-label="QR เลขจอง BK-0924-006">' + cells + finder(0,0) + finder(n-7,0) + finder(0,n-7) + '</svg>';
+
+  show('home');
+})();
+</script>
