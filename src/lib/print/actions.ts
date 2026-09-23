@@ -32,7 +32,9 @@ function isWorkingHours(v: unknown): v is PrintWorkingHours {
   const o = v as Record<string, unknown>
   const hour = (n: unknown) => Number.isInteger(n) && (n as number) >= 0 && (n as number) <= 23
   const minute = (n: unknown) => Number.isInteger(n) && (n as number) >= 0 && (n as number) <= 59
-  return typeof o.enabled === 'boolean' && hour(o.startHour) && minute(o.startMinute) && hour(o.endHour) && minute(o.endMinute)
+  if (!(typeof o.enabled === 'boolean' && hour(o.startHour) && minute(o.startMinute) && hour(o.endHour) && minute(o.endMinute))) return false
+  // start == end would make print-server/lib/working-hours.js hold every job forever
+  return !o.enabled || o.startHour !== o.endHour || o.startMinute !== o.endMinute
 }
 
 /**
@@ -95,6 +97,8 @@ export type PrintJobRow = {
   status: PrintStatus
   createdAt: string
   errorMessage: string | null
+  /** a newer job for the same deposit + type exists — no "พิมพ์ใหม่" (it would print twice) */
+  superseded: boolean
 }
 
 export type PrintStatusView = {
@@ -112,7 +116,7 @@ export async function getPrintStatus(branchId: string): Promise<ActionResult<Pri
 
   const [{ data: station, error: stationError }, { data: jobs, error: jobsError }] = await Promise.all([
     sb.from('print_stations').select('is_online, last_heartbeat').eq('branch_id', branchId).maybeSingle(),
-    sb.from('print_jobs').select('id, job_type, status, payload, error_message, created_at').eq('branch_id', branchId).order('created_at', { ascending: false }).range(0, 19),
+    sb.from('print_jobs').select('id, deposit_id, job_type, status, payload, error_message, created_at').eq('branch_id', branchId).order('created_at', { ascending: false }).range(0, 19),
   ])
   if (stationError) return { ok: false, error: 'unknown' }
   if (jobsError) return { ok: false, error: 'unknown' }
@@ -128,13 +132,15 @@ export async function getPrintStatus(branchId: string): Promise<ActionResult<Pri
     data: {
       state,
       lastHeartbeat: station?.last_heartbeat ?? null,
-      jobs: (jobs ?? []).map((j) => ({
+      // newest first: a job is superseded when an earlier-listed (newer) job has its deposit + type
+      jobs: (jobs ?? []).map((j, i, all) => ({
         id: j.id,
         type: j.job_type as PrintJobType,
         code: (j.payload as { deposit_code?: string } | null)?.deposit_code ?? null,
         status: j.status,
         createdAt: j.created_at,
         errorMessage: j.error_message,
+        superseded: all.slice(0, i).some((n) => n.deposit_id === j.deposit_id && n.job_type === j.job_type),
       })),
     },
   }
@@ -144,8 +150,18 @@ export async function getPrintStatus(branchId: string): Promise<ActionResult<Pri
 export async function requeuePrintJob(jobId: string): Promise<ActionResult<{ id: string }>> {
   if (!isUuid(jobId)) return { ok: false, error: 'invalid' }
   const sb = await getSupabaseServer()
-  const { data: job, error } = await sb.from('print_jobs').select('deposit_id, job_type, copies, status').eq('id', jobId).maybeSingle()
+  const { data: job, error } = await sb.from('print_jobs').select('deposit_id, job_type, copies, status, created_at').eq('id', jobId).maybeSingle()
   if (error) return { ok: false, error: 'unknown' }
   if (!job || job.status !== 'failed' || !job.deposit_id) return { ok: false, error: 'NOT_FOUND' }
+  // already reprinted (by anyone) — a second click must not print the receipt / labels again
+  const { data: newer, error: newerError } = await sb
+    .from('print_jobs')
+    .select('id')
+    .eq('deposit_id', job.deposit_id)
+    .eq('job_type', job.job_type)
+    .gt('created_at', job.created_at)
+    .limit(1)
+  if (newerError) return { ok: false, error: 'unknown' }
+  if (newer?.length) return { ok: false, error: 'BAD_STATE' }
   return queuePrint(job.deposit_id, job.job_type as PrintJobType, job.copies)
 }

@@ -4,7 +4,7 @@ import { promisify } from 'node:util'
 import JSZip from 'jszip'
 import { createClient } from '@supabase/supabase-js'
 import { expect, test } from '@playwright/test'
-import { adminDb, dbAs, fixtureIds } from './fixtures/db'
+import { adminDb, clearLocalLoginThrottle, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR, required } from './fixtures/env'
 import { mustCreate, cleanupRun } from './fixtures/deposits'
 import { cleanupPrintStation } from './fixtures/p3b-print'
@@ -22,6 +22,7 @@ let printAccountId = ''
 let printCreds: { email: string; password: string } | null = null
 
 test.beforeAll(async () => {
+  await clearLocalLoginThrottle() // the print-account login checks must not hit the per-IP throttle
   const ids = fixtureIds()
   branchA = ids.branchA
   branchB = ids.branchB
@@ -103,6 +104,32 @@ test.describe('owner', () => {
 
     // keep the account on the CURRENT password for the tests below
     printCreds = { email: config2.PRINT_ACCOUNT_EMAIL as string, password: config2.PRINT_ACCOUNT_PASSWORD as string }
+  })
+
+  test('P3-B2-03 a re-activated print profile still cannot use the staff app; users admin refuses it; setup switches it off again', async ({ request }) => {
+    // someone flips the profile back on (the owner could, before this fix, from ผู้ใช้และสาขา)
+    await admin().from('profiles').update({ active: true }).eq('id', printAccountId)
+    const login = await request.post('/api/auth/login', { data: { identifier: printCreds!.email, password: printCreds!.password } })
+    expect(login.status()).toBe(403)
+    expect((await login.json()).error).toBe('inactive')
+
+    for (const data of [
+      { action: 'update', userId: printAccountId, active: true, role: 'owner' },
+      { action: 'reset_password', userId: printAccountId, password: 'Whatever123' },
+    ]) {
+      const res = await request.post('/api/admin/users', { data })
+      expect(res.status(), JSON.stringify(data)).toBe(422)
+      expect((await res.json()).error).toBe('print_account')
+    }
+
+    // re-running setup deactivates it again (and rotates the password)
+    const setup = await request.post('/api/print-server/setup', { data: { branchId: branchA } })
+    expect(setup.status()).toBe(200)
+    const zip = await JSZip.loadAsync(await setup.body())
+    const config = JSON.parse(await zip.file('print-server/config.json')!.async('string')) as Record<string, unknown>
+    printCreds = { email: config.PRINT_ACCOUNT_EMAIL as string, password: config.PRINT_ACCOUNT_PASSWORD as string }
+    const { data: profile } = await admin().from('profiles').select('active').eq('id', printAccountId).single()
+    expect(profile?.active).toBe(false)
   })
 })
 

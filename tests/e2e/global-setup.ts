@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { request, type FullConfig } from '@playwright/test'
-import { adminDb } from './fixtures/db'
+import { adminDb, clearLocalLoginThrottle } from './fixtures/db'
 import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { SIGNED_IN_ROLES, ensureFixture } from './fixtures/users'
 
@@ -22,6 +22,7 @@ function accessTokenFrom(cookies: { name: string; value: string }[]): string | n
 
 export default async function globalSetup(_config: FullConfig) {
   mkdirSync(AUTH_DIR, { recursive: true })
+  await clearLocalLoginThrottle() // a previous run's deliberate failures must not throttle this one
   const fixture = await ensureFixture(adminDb())
   writeFileSync(join(AUTH_DIR, 'creds.json'), JSON.stringify(fixture.creds, null, 2))
   writeFileSync(join(AUTH_DIR, 'fixture.json'), JSON.stringify({ branchA: fixture.branchA, branchB: fixture.branchB, users: fixture.users }, null, 2))

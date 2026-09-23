@@ -41,6 +41,8 @@ export const getActorState = cache(async (): Promise<ActorState> => {
     throw new Error(`auth unavailable: ${userError.message}`)
   }
   if (!userData.user) return { status: 'anonymous' }
+  // print-server accounts never act in the staff app (see sign-in.ts)
+  if (userData.user.app_metadata?.print_branch) return { status: 'inactive' }
 
   // RLS returns exactly the branches this user may see (owner: all) — independent of the
   // profile row, so both run at once.

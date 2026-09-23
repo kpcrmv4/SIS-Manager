@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
-import { adminDb, fixtureIds } from './fixtures/db'
+import { adminDb, clearLocalLoginThrottle, fixtureIds } from './fixtures/db'
 import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { DEFAULT_SETTINGS, resetSettings, teardownZonesAndTables } from './fixtures/p2b-bookings'
 import { BRANCH_A_NAME } from './fixtures/users'
@@ -17,6 +17,7 @@ const cleanupUserIds: string[] = []
 const cleanupBranchCodes: string[] = []
 
 test.beforeAll(async () => {
+  await clearLocalLoginThrottle() // this file logs in several times; earlier specs fail logins on purpose
   const ids = fixtureIds()
   branchA = ids.branchA
   branchB = ids.branchB

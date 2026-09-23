@@ -14,7 +14,7 @@ export default async function SettingsUsersPage() {
   if (state.status !== 'ok') return null
 
   const sb = await getSupabaseServer()
-  const [{ data: profiles, error: pError }, { data: userBranches, error: ubError }, { data: branches, error: bError }] = await Promise.all([
+  const [{ data: allProfiles, error: pError }, { data: userBranches, error: ubError }, { data: branches, error: bError }, { data: stations, error: sError }] = await Promise.all([
     sb.from('profiles').select('id, username, display_name, role, active').order('username').range(0, 499),
     sb.from('user_branches').select('user_id, branch_id').range(0, 999),
     sb
@@ -22,9 +22,10 @@ export default async function SettingsUsersPage() {
       .select('id, code, name, active, deposit_days, expiry_notice_days, withdrawal_blocked_days, opens_at, closes_at, receipt_settings')
       .order('sort')
       .range(0, 199),
+    sb.from('print_stations').select('account_id').range(0, 199),
   ])
 
-  if (pError || ubError || bError) {
+  if (pError || ubError || bError || sError) {
     return (
       <>
         <PageHeader title={t('title')} />
@@ -40,7 +41,10 @@ export default async function SettingsUsersPage() {
     branchesByUser.set(r.user_id, list)
   }
 
-  const users: UserRow[] = (profiles ?? []).map((p) => ({
+  // print-server accounts are managed from ข้อมูลสาขา → เครื่องพิมพ์, never as staff users
+  const printIds = new Set((stations ?? []).map((s) => s.account_id).filter(Boolean))
+  const profiles = (allProfiles ?? []).filter((p) => !printIds.has(p.id) && !/^printer-[a-z]{2,5}$/.test(p.username))
+  const users: UserRow[] = profiles.map((p) => ({
     id: p.id,
     username: p.username,
     displayName: p.display_name,

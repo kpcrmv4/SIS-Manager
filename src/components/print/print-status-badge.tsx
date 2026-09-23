@@ -15,18 +15,42 @@ const TONE: Record<PrintStatusView['state'], BadgeTone> = { online: 'done', offl
  */
 export function PrintStatusBadge({ branchId, refreshKey = 0 }: { branchId: string; refreshKey?: number }) {
   const t = useTranslations('print')
-  const [state, setState] = useState<PrintStatusView['state'] | null>(null)
+  const tc = useTranslations('common')
+  const [state, setState] = useState<PrintStatusView['state'] | 'error' | null>(null)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let alive = true
-    getPrintStatus(branchId).then((res) => {
-      if (!alive) return
-      setState(res.ok ? res.data.state : 'not_set_up')
-    })
+    getPrintStatus(branchId)
+      .then((res) => {
+        // a failed load is an error, never "not set up"
+        if (alive) setState(res.ok ? res.data.state : 'error')
+      })
+      .catch(() => {
+        if (alive) setState('error')
+      })
     return () => {
       alive = false
     }
-  }, [branchId, refreshKey])
+  }, [branchId, refreshKey, attempt])
+
+  if (state === 'error') {
+    return (
+      <span className="inline-flex items-center gap-2 text-sm text-urgent" data-testid="print-status-badge" data-state="error">
+        {t('statusError')}
+        <button
+          type="button"
+          className="btn-ghost btn-sm"
+          onClick={() => {
+            setState(null)
+            setAttempt((n) => n + 1)
+          }}
+        >
+          {tc('retry')}
+        </button>
+      </span>
+    )
+  }
 
   if (state === null) {
     return (

@@ -33,7 +33,10 @@ export async function signInWithPassword(req: NextRequest, email: string, passwo
     .eq('id', data.user.id)
     .maybeSingle()
 
-  if (profileError || !profile || !profile.active) {
+  // a print-server account (app_metadata.print_branch) never uses the staff app, whatever its
+  // profile says — its password lives in plain text in config.json on the shop PC
+  const printAccount = Boolean(data.user.app_metadata?.print_branch)
+  if (profileError || !profile || !profile.active || printAccount) {
     // The cookies were written onto `staging`, which is discarded — the browser
     // never receives this session. signOut also revokes its refresh token.
     await supabase.auth.signOut({ scope: 'local' })

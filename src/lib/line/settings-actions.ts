@@ -8,6 +8,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import type { ActionResult } from '@/lib/errors'
 import { dispatchSoon } from './dispatch'
+import { lineAddFriendUrl, pngDataUrl } from '@/lib/print/qr'
 
 /**
  * /settings/line (P3-A2-06..09), owner only. The branch's public LINE ids go through the
@@ -51,9 +52,22 @@ export async function saveLineSettings(branchId: string, input: LineSettingsInpu
   }
 
   const sb = await getSupabaseServer()
+  const { data: before, error: beforeError } = await sb.from('branches').select('line_bot_user_id, receipt_settings').eq('id', branchId).maybeSingle()
+  if (beforeError) return { ok: false, error: 'unknown' }
+
+  // the receipt's add-friend QR is built from the OA id — keep it in step when the id changes
+  const receipt = (before?.receipt_settings ?? {}) as Record<string, unknown>
+  const oaChanged = (before?.line_bot_user_id ?? null) !== (botUserId || null)
+  const receiptPatch =
+    oaChanged && receipt.show_qr
+      ? botUserId
+        ? { receipt_settings: { ...receipt, qr_code_image_url: await pngDataUrl(lineAddFriendUrl(botUserId)) } }
+        : { receipt_settings: { ...receipt, show_qr: false, qr_code_image_url: null } }
+      : {}
+
   const { data, error } = await sb
     .from('branches')
-    .update({ liff_id: liffId || null, line_channel_id: channelId || null, line_bot_user_id: botUserId || null })
+    .update({ liff_id: liffId || null, line_channel_id: channelId || null, line_bot_user_id: botUserId || null, ...receiptPatch })
     .eq('id', branchId)
     .select('id')
     .maybeSingle()

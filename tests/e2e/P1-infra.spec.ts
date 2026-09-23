@@ -144,7 +144,7 @@ test('P1-OUT-05 P1-OUT-06 photos: private bucket, branch folders enforced', asyn
   }
 })
 
-test('P1-OUT-07 six sis-* cron jobs on UTC schedules', async () => {
+test('P1-OUT-07 seven sis-* cron jobs on UTC schedules (P4-03 added sis-push-dispatch)', async () => {
   const rows = await sql<{ jobname: string; schedule: string }>("select jobname, schedule from cron.job where jobname like 'sis-%' order by jobname")
   expect(rows).toEqual([
     { jobname: 'sis-booking-reminders', schedule: '0 9 * * *' },
@@ -152,6 +152,7 @@ test('P1-OUT-07 six sis-* cron jobs on UTC schedules', async () => {
     { jobname: 'sis-expiry-notices', schedule: '0 5 * * *' },
     { jobname: 'sis-line-dispatch', schedule: '* * * * *' },
     { jobname: 'sis-no-shows', schedule: '*/5 * * * *' },
+    { jobname: 'sis-push-dispatch', schedule: '* * * * *' },
     { jobname: 'sis-retention', schedule: '30 20 * * *' },
   ])
 })

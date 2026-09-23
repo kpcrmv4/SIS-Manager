@@ -13,7 +13,8 @@ const HtmlRenderer = require(resolve('print-server/lib/html-renderer.js')) as ne
 }
 
 test('P1-OUT-11 Davis renderer: receipt with link code, one label per bottle, payload text escaped', () => {
-  const r = new HtmlRenderer({ show_qr: true, qr_code_image_url: 'https://example.com/qr.png', line_oa_id: '@sis' }, 'SIS', 80)
+  // the app stores an inline PNG data URL (src/lib/print/qr.ts); the renderer refuses anything else
+  const r = new HtmlRenderer({ show_qr: true, qr_code_image_url: 'data:image/png;base64,iVBORw0KGgo=', line_oa_id: '@sis' }, 'SIS', 80)
   const payload = {
     deposit_code: 'DEP-RMI-7K2QX', link_code: 'K7M2QX', customer_name: '<script>alert(1)</script>', customer_phone: '081',
     product_name: 'Johnnie "Black"', quantity: 2, remaining_qty: 2, table_number: 'A3', created_at: '2026-09-23T13:05:00Z',
@@ -30,4 +31,13 @@ test('P1-OUT-11 Davis renderer: receipt with link code, one label per bottle, pa
   expect(html).toContain('Johnnie &quot;Black&quot;')
   expect(html).toContain('Type <b>K7M2QX</b> in chat')
   expect(html).toContain('DEP-RMI-7K2QX')
+
+  // a remote or attribute-breaking QR value is dropped (the shop PC must not fetch it),
+  // and without a link code the receipt never tells the customer to type the DEP code
+  const hostile = new HtmlRenderer({ show_qr: true, qr_code_image_url: 'https://evil.example/x.png" onerror="alert(1)', line_oa_id: '<b>x</b>' }, '<i>SIS</i>', 80)
+  const bad = hostile.renderForPrint({ job_type: 'receipt', copies: 1, payload: { ...payload, link_code: null } }).join('')
+  expect(bad).not.toContain('evil.example')
+  expect(bad).not.toContain('<i>SIS</i>')
+  expect(bad).toContain('&lt;i&gt;SIS&lt;/i&gt;')
+  expect(bad).not.toContain('in chat')
 })

@@ -58,6 +58,15 @@ export async function sql<T = Record<string, unknown>>(query: string): Promise<T
   return (await res.json()) as T[]
 }
 
+/**
+ * The login throttle counts failed logins per IP (20 / 15 min). Every E2E request comes from
+ * the same local address, and several specs fail logins on purpose, so back-to-back runs
+ * trip it for unrelated tests. Clears FAILED attempts from local / unknown addresses only.
+ */
+export async function clearLocalLoginThrottle(): Promise<void> {
+  await sql("delete from private.login_attempts where not ok and ip in ('unknown', '127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost')")
+}
+
 export function fixtureIds(): { branchA: string; branchB: string; users: Record<string, string> } {
   return JSON.parse(readFileSync(join(AUTH_DIR, 'fixture.json'), 'utf8'))
 }

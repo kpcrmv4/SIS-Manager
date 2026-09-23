@@ -35,6 +35,13 @@ export async function POST(req: NextRequest) {
     if (error || (data ?? []).length !== ids.length) return null
     return ids as string[]
   }
+  // print-server accounts are provisioned by /api/print-server/setup only — never edited,
+  // activated or given a password here (their password is in the shop PC's config.json)
+  const isPrintAccount = async (userId: string): Promise<boolean | null> => {
+    const { data, error } = await admin.auth.admin.getUserById(userId)
+    if (error) return error.status === 404 ? false : null
+    return Boolean(data.user?.app_metadata?.print_branch)
+  }
   const setBranches = async (userId: string, ids: string[]) => {
     const { error: delError } = await admin.from('user_branches').delete().eq('user_id', userId)
     if (delError) return delError
@@ -73,6 +80,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'unavailable' }, { status: 503 })
     }
     return NextResponse.json({ ok: true, id }, { status: 201 })
+  }
+
+  if ((body.action === 'update' || body.action === 'reset_password') && UUID.test(String(body.userId))) {
+    const printAccount = await isPrintAccount(body.userId)
+    if (printAccount === null) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+    if (printAccount) return NextResponse.json({ error: 'print_account' }, { status: 422 })
   }
 
   if (body.action === 'update') {

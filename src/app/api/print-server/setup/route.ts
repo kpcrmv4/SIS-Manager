@@ -36,7 +36,9 @@ function generatePassword(): string {
 }
 
 type WorkingHours = { enabled: boolean; startHour: number; startMinute: number; endHour: number; endMinute: number }
-const DEFAULT_HOURS: WorkingHours = { enabled: true, startHour: 12, startMinute: 0, endHour: 6, endMinute: 0 }
+// same default as the print settings form (off) — a ZIP made before the owner ever saved
+// print settings must not silently hold jobs outside hours the page shows as "off"
+const DEFAULT_HOURS: WorkingHours = { enabled: false, startHour: 12, startMinute: 0, endHour: 6, endMinute: 0 }
 
 /**
  * POST /api/print-server/setup — owner only. Creates (or reuses) the branch's print
@@ -74,9 +76,19 @@ export async function POST(req: NextRequest) {
   const email = `printer-${branch.code.toLowerCase()}@print.sis.local`
   const password = generatePassword()
   let accountId = existingStation?.account_id ?? null
+  let created = false
+
+  if (!accountId) {
+    // a previous run may have created the account and then failed before recording the
+    // station — its profile username is the email's local part (handle_new_user)
+    const { data: orphan, error: orphanError } = await admin.from('profiles').select('id').eq('username', `printer-${branch.code.toLowerCase()}`).maybeSingle()
+    if (orphanError) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+    accountId = orphan?.id ?? null
+  }
 
   if (accountId) {
-    const { error } = await admin.auth.admin.updateUserById(accountId, { password })
+    // re-pin the branch too: the account must stay a print account whatever was edited since
+    const { error } = await admin.auth.admin.updateUserById(accountId, { password, app_metadata: { print_branch: branchId } })
     if (error) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
   } else {
     const { data, error } = await admin.auth.admin.createUser({
@@ -87,20 +99,22 @@ export async function POST(req: NextRequest) {
     })
     if (error || !data.user) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
     accountId = data.user.id
-
-    // handle_new_user() makes a `staff` profile for every new auth user — deactivate it
-    // (the print account must never be able to sign in to the staff app) and make sure
-    // it carries no branch memberships (it reads its branch through app_metadata.print_branch).
-    const { error: profileError } = await admin.from('profiles').update({ active: false }).eq('id', accountId)
-    const { error: branchesError } = await admin.from('user_branches').delete().eq('user_id', accountId)
-    if (profileError || branchesError) {
-      await admin.auth.admin.deleteUser(accountId)
-      return NextResponse.json({ error: 'unavailable' }, { status: 503 })
-    }
+    created = true
   }
 
-  const { error: stationError } = await admin.from('print_stations').upsert({ branch_id: branchId, account_id: accountId }, { onConflict: 'branch_id' })
-  if (stationError) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+  // handle_new_user() makes a `staff` profile for every new auth user — keep it inactive and
+  // without branch memberships on EVERY run (it reads its branch through app_metadata), so a
+  // profile someone re-activated is switched off again here
+  const { error: profileError } = await admin.from('profiles').update({ active: false }).eq('id', accountId)
+  const { error: branchesError } = await admin.from('user_branches').delete().eq('user_id', accountId)
+  const { error: stationError } = profileError || branchesError
+    ? { error: profileError ?? branchesError }
+    : await admin.from('print_stations').upsert({ branch_id: branchId, account_id: accountId }, { onConflict: 'branch_id' })
+  if (profileError || branchesError || stationError) {
+    // never leave a half-made account behind
+    if (created) await admin.auth.admin.deleteUser(accountId)
+    return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+  }
 
   const printerName = (body?.printerName || branch.print_server_printer_name || 'POS80').slice(0, 60)
   const workingHours = (branch.print_server_working_hours as WorkingHours | null) ?? DEFAULT_HOURS

@@ -730,6 +730,7 @@
     }
   },
   "print": {
+    "statusError": "Couldn't check the printer",
     "receiptTitle": "Liquor deposit receipt",
     "labelTitle": "Deposit bottle label",
     "queued": "Sent to the print queue",

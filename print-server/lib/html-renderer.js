@@ -26,7 +26,7 @@ function escapeDeep(value) {
 class HtmlRenderer {
   constructor(receiptSettings, storeName, paperWidth) {
     this.settings = receiptSettings || {};
-    this.storeName = storeName;
+    this.storeName = escapeDeep(String(storeName || ''));
     this.paperWidth = paperWidth || this.settings.paper_width || 80;
   }
 
@@ -56,8 +56,12 @@ class HtmlRenderer {
   }
 
   _receiptBody(payload, { bottles, totalBottles }) {
-    const showQr = this.settings.show_qr && this.settings.qr_code_image_url;
-    const lineOaId = this.settings.line_oa_id || '';
+    // only an inline image the app generated — never a remote URL the shop PC would fetch,
+    // and nothing that could break out of the src attribute
+    const qrUrl = String(this.settings.qr_code_image_url || '');
+    const safeQr = /^data:image\/(png|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(qrUrl) ? qrUrl : '';
+    const showQr = this.settings.show_qr && safeQr;
+    const lineOaId = escapeDeep(String(this.settings.line_oa_id || ''));
 
     // Three render shapes for the bottle/% block:
     //   - 0 bottles[] entries: skip the rows
@@ -102,12 +106,13 @@ class HtmlRenderer {
       `</table>` +
       `<hr>` +
       (showQr
-        ? `<center><img src="${this.settings.qr_code_image_url}" width="120" height="120"></center>` +
+        ? `<center><img src="${showQr}" width="120" height="120"></center>` +
           (lineOaId ? `<center>LINE: ${lineOaId}</center>` : '') +
           `<hr>` +
           `<center style="font-size:10pt;">Please scan this QRcode</center>` +
           `<center style="font-size:10pt;">Send receipt in Line</center>` +
-          `<center style="font-size:10pt;">Type <b>${payload.link_code || payload.deposit_code}</b> in chat</center>`
+          // only the secret link code links a deposit (R-022) — the DEP code never does
+          (payload.link_code ? `<center style="font-size:10pt;">Type <b>${payload.link_code}</b> in chat</center>` : '')
         : '') +
       (footer ? `<hr><center style="font-size:9pt;">${footer}</center>` : '');
   }

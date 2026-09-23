@@ -42,6 +42,8 @@ export async function PrintSettingsSection({ branchId, branchCode }: { branchId:
           printerName: branch.print_server_printer_name,
         }}
       />
+      {/* a failed status load is an error state, never "no jobs" */}
+      {!statusRes.ok && <RefreshRetry />}
       <PrintStatusPanel branchId={branchId} branchCode={branchCode} initialJobs={statusRes.ok ? statusRes.data.jobs : []} />
     </div>
   )

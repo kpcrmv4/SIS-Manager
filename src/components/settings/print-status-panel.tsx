@@ -128,7 +128,7 @@ export function PrintStatusPanel({ branchId, branchCode, initialJobs }: { branch
                     </td>
                     <td className="tnum text-sm">{when(j.createdAt)}</td>
                     <td>
-                      {j.status === 'failed' && (
+                      {j.status === 'failed' && !j.superseded && (
                         <button type="button" className="btn-ghost btn-sm" disabled={retryingId === j.id} onClick={() => retry(j.id)} data-testid="print-job-retry">
                           {retryingId === j.id && <Loader2 className="size-4 animate-spin" aria-hidden />}
                           {t('retryJob')}
@@ -150,7 +150,7 @@ export function PrintStatusPanel({ branchId, branchCode, initialJobs }: { branch
                 aside={
                   <>
                     <Badge tone={JOB_TONE[j.status]}>{statusLabel(j.status)}</Badge>
-                    {j.status === 'failed' && (
+                    {j.status === 'failed' && !j.superseded && (
                       <button type="button" className="btn-ghost btn-sm" disabled={retryingId === j.id} onClick={() => retry(j.id)} data-testid="print-job-retry">
                         {retryingId === j.id && <Loader2 className="size-4 animate-spin" aria-hidden />}
                         {t('retryJob')}
