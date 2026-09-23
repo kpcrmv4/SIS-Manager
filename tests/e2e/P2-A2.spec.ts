@@ -113,6 +113,7 @@ test.describe('new deposit form', () => {
 
     test('P2-A2-03 bar: expiry is editable and the saved value matches the chosen date', async ({ page }) => {
       await page.goto('/deposits/new')
+      await expect(page.getByTestId('new-deposit-form')).toHaveAttribute('data-hydrated', 'true')
       const exp = page.getByTestId('deposit-expires')
       await expect(exp).toBeEditable()
       const chosen = addDays(bangkokDate(), 90)

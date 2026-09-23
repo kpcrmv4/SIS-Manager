@@ -63,3 +63,10 @@
 - หลักฐาน: git stash list → stash@{0}: On main: review-temp-stash ขณะ reviewer correctness ยังทำงาน
 - กฎ: brief ของ reviewer ต้องห้าม git stash/checkout/reset ชัดเจน และ orchestrator ห้ามแก้ working tree ระหว่างที่ reviewer ยังรัน
 - status: new
+
+## L-005 · 2026-09-23 · kp-e2e-playwright-real-db · wait-for-success-element
+- อาการ: P2-A2-03 ผ่านใน worktree แต่แดงหลัง merge — ค่าวันหมดอายุที่ fill แล้วถูกบันทึกเป็นค่าเริ่มต้น แม้ toHaveValue จะผ่าน
+- สาเหตุ: Playwright fill input ก่อน React hydrate เสร็จ render แรกของ React เขียนค่า state เดิมทับ DOM
+- หลักฐาน: results.json Expected 2026-12-22 Received 2026-10-23 · แก้ด้วย data-hydrated บน new-deposit-form
+- กฎ: ฟอร์ม client ที่เทสต์พิมพ์ลงไปต้องมี data-hydrated และ spec ต้องรอให้เป็น true ก่อน fill/click ช่องแรก
+- status: new

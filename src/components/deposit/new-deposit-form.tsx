@@ -1,6 +1,8 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useState, useSyncExternalStore, useTransition } from 'react'
+
+const noopSubscribe = () => () => {}
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
@@ -39,6 +41,8 @@ export function NewDepositForm({
   const [notes, setNotes] = useState('')
   const [photos, setPhotos] = useState<string[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
+  // typing before hydration is overwritten by React's first render — tests wait for this flag
+  const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false)
   const [pending, start] = useTransition()
 
   const matchedItem = useMemo(() => items.find((i) => i.name === itemName), [items, itemName])
@@ -76,7 +80,7 @@ export function NewDepositForm({
   }
 
   return (
-    <div className="card-surface max-w-160 p-4">
+    <div className="card-surface max-w-160 p-4" data-testid="new-deposit-form" data-hydrated={hydrated}>
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
