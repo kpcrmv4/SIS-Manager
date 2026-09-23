@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "verify": "node scripts/verify-route-guards.mjs && node scripts/verify-red-tested.mjs scripts && node scripts/verify-portability.mjs && node scripts/verify-contrast.mjs && node scripts/verify-catalogs.mjs",
     "db:mcp-smoke": "node scripts/supabase-mcp-smoke.mjs",
+    "db:types": "node scripts/gen-types.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
