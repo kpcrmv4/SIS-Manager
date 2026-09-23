@@ -765,6 +765,162 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          payload: Json
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          payload?: Json
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          payload?: Json
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_jobs: {
+        Row: {
+          attempts: number
+          branch_id: string
+          copies: number
+          created_at: string
+          deposit_id: string | null
+          error: string | null
+          id: string
+          payload: Json
+          printed_at: string | null
+          requested_by: string | null
+          status: Database["public"]["Enums"]["print_status"]
+          type: string
+        }
+        Insert: {
+          attempts?: number
+          branch_id: string
+          copies?: number
+          created_at?: string
+          deposit_id?: string | null
+          error?: string | null
+          id?: string
+          payload?: Json
+          printed_at?: string | null
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["print_status"]
+          type: string
+        }
+        Update: {
+          attempts?: number
+          branch_id?: string
+          copies?: number
+          created_at?: string
+          deposit_id?: string | null
+          error?: string | null
+          id?: string
+          payload?: Json
+          printed_at?: string | null
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["print_status"]
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_jobs_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_jobs_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_jobs_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_stations: {
+        Row: {
+          account_id: string | null
+          branch_id: string
+          created_at: string
+          id: string
+          last_seen_at: string | null
+          name: string
+          printer_name: string | null
+          version: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          branch_id: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          printer_name?: string | null
+          version?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          branch_id?: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          printer_name?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_stations_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: true
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active: boolean
@@ -797,6 +953,44 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       table_zones: {
         Row: {
@@ -1053,6 +1247,31 @@ export type Database = {
         Args: { p_branch: string; p_ref: string }
         Returns: Json
       }
+      claim_outbox: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          branch_id: string
+          created_at: string
+          dedupe_key: string
+          error: string | null
+          id: string
+          kind: string
+          locale: Database["public"]["Enums"]["app_locale"]
+          next_attempt_at: string
+          payload: Json
+          sent_at: string | null
+          status: Database["public"]["Enums"]["outbox_status"]
+          target: string
+          target_kind: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "line_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       complete_withdrawals: {
         Args: {
           p_notes?: string
@@ -1125,6 +1344,14 @@ export type Database = {
         Args: { p_days: number; p_deposit: string }
         Returns: Json
       }
+      finish_outbox: {
+        Args: {
+          p_error?: string
+          p_id: string
+          p_status: Database["public"]["Enums"]["outbox_status"]
+        }
+        Returns: undefined
+      }
       link_deposit_customer: {
         Args: { p_code: string; p_customer_id: string }
         Returns: Json
@@ -1161,6 +1388,7 @@ export type Database = {
         }
         Returns: Json
       }
+      send_booking_reminders: { Args: never; Returns: number }
       send_expiry_notices: { Args: never; Returns: number }
       set_vip: { Args: { p_deposit: string; p_vip: boolean }; Returns: Json }
       staff_receive_request: {
@@ -1197,6 +1425,7 @@ export type Database = {
         | "disposed"
         | "cancelled"
       outbox_status: "queued" | "sending" | "sent" | "failed" | "skipped"
+      print_status: "pending" | "printing" | "done" | "failed"
       user_role: "staff" | "bar" | "owner"
       withdrawal_status: "pending" | "completed" | "rejected" | "cancelled"
       withdrawal_type: "in_store" | "take_home"
@@ -1349,6 +1578,7 @@ export const Constants = {
         "cancelled",
       ],
       outbox_status: ["queued", "sending", "sent", "failed", "skipped"],
+      print_status: ["pending", "printing", "done", "failed"],
       user_role: ["staff", "bar", "owner"],
       withdrawal_status: ["pending", "completed", "rejected", "cancelled"],
       withdrawal_type: ["in_store", "take_home"],

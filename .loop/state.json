@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 8,
+    "iteration": 9,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -69,7 +69,7 @@
         {
           "id": "P1-04",
           "name": "Outbox, notifications, print, storage, realtime, cron",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P1-05",

@@ -46,6 +46,18 @@ export function anonDb(): Db {
   })
 }
 
+/** Read-only SQL through the Management API (for catalogs PostgREST does not expose, e.g. cron.job). */
+export async function sql<T = Record<string, unknown>>(query: string): Promise<T[]> {
+  const ref = required('SUPABASE_PROJECT_REF')
+  const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${required('SUPABASE_ACCESS_TOKEN')}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  })
+  if (!res.ok) throw new Error(`sql → ${res.status}`)
+  return (await res.json()) as T[]
+}
+
 export function fixtureIds(): { branchA: string; branchB: string; users: Record<string, string> } {
   return JSON.parse(readFileSync(join(AUTH_DIR, 'fixture.json'), 'utf8'))
 }
