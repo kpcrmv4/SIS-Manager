@@ -8,10 +8,10 @@ import type { BranchRef } from '@/lib/auth/actor'
 import { BranchSwitcher } from './branch-switcher'
 import { logout } from './logout'
 import type { NavItem, NavSection } from './nav'
-import { ThemeToggle } from './theme-toggle'
-import { BellButton } from './bell'
 
-const ROW = 'flex w-full items-center gap-3 border-b border-line px-1 py-3.25 text-[15px] text-ink last:border-b-0'
+/** A square tile: icon above a two-line label. */
+const TILE =
+  'flex aspect-square min-w-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface-2 p-2 text-center text-[12.5px] leading-tight text-ink transition-colors active:bg-line'
 
 const HEADING: Partial<Record<NavSection, string>> = {
   catReports: 'moreOverview',
@@ -26,14 +26,12 @@ export function MoreSheet({
   items,
   branches,
   branch,
-  userId,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   items: NavItem[]
   branches: BranchRef[]
   branch: BranchRef | null
-  userId: string
 }) {
   const t = useTranslations('nav')
   const groups = (['catReports', 'catSettings', 'catAccount'] as const).map((s) => ({
@@ -60,24 +58,22 @@ export function MoreSheet({
             const account = section === 'catAccount'
             if (!group.length && !account) return null
             return (
-              <div key={section}>
-                <div className="px-1 pb-1 pt-2.5 text-[11px] tracking-wide text-muted-token">{t(HEADING[section] ?? section)}</div>
-                {group.map((item) => (
-                  <Link key={item.key} href={item.href} className={ROW} onClick={() => onOpenChange(false)}>
-                    <item.icon className="size-5 text-muted-token" aria-hidden />
-                    {t(item.label)}
-                  </Link>
-                ))}
-                {account && (
-                  <>
-                    <BellButton userId={userId} className={ROW} />
-                    <ThemeToggle className={ROW} />
-                    <button type="button" className={ROW} onClick={() => void logout()}>
-                      <LogOut className="size-5 text-muted-token" aria-hidden />
-                      {t('logout')}
+              <div key={section} className="pb-2">
+                <div className="px-1 pb-2 pt-2.5 text-[11px] tracking-wide text-muted-token">{t(HEADING[section] ?? section)}</div>
+                <div className="grid grid-cols-3 gap-2 min-[420px]:grid-cols-4">
+                  {group.map((item) => (
+                    <Link key={item.key} href={item.href} className={TILE} onClick={() => onOpenChange(false)}>
+                      <item.icon className="size-6 text-muted-token" aria-hidden />
+                      <span>{t(item.label)}</span>
+                    </Link>
+                  ))}
+                  {account && (
+                    <button type="button" className={TILE} onClick={() => void logout()}>
+                      <LogOut className="size-6 text-muted-token" aria-hidden />
+                      <span>{t('logout')}</span>
                     </button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
             )
           })}

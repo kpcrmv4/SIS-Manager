@@ -249,7 +249,7 @@
     "history": "ประวัติ",
     "photos": "รูปขวด",
     "notes": "หมายเหตุ",
-    "actionWithdraw": "เบิกขวด",
+    "actionWithdraw": "เบิกเหล้า",
     "actionPrint": "พิมพ์ใบรับฝาก",
     "actionPrintLabel": "พิมพ์ป้ายขวด",
     "actionExtend": "ต่ออายุ",
@@ -269,8 +269,8 @@
       "confirmed": "bar ยืนยันขวด {levels}",
       "rejected": "ปฏิเสธการฝาก · {reason}",
       "withdrawal_requested": "ขอเบิก {count} ขวด",
-      "withdrawal_completed": "เบิกขวด {bottles} ที่โต๊ะ {table}",
-      "withdrawal_completed_home": "เบิกขวด {bottles} กลับบ้าน",
+      "withdrawal_completed": "เบิกเหล้า {bottles} ที่โต๊ะ {table}",
+      "withdrawal_completed_home": "เบิกเหล้า {bottles} กลับบ้าน",
       "withdrawal_rejected": "ปฏิเสธการเบิก · {reason}",
       "extended": "ต่ออายุถึง {date}",
       "vip_on": "ตั้งเป็น VIP",
@@ -324,7 +324,7 @@
     "done": "ปฏิเสธแล้ว"
   },
   "withdrawDialog": {
-    "title": "เบิกขวด",
+    "title": "เบิกเหล้า",
     "pickBottles": "เลือกขวดที่จะเบิก",
     "type": "เบิกแบบ",
     "typeInStore": "ดื่มในร้าน",
@@ -334,7 +334,7 @@
     "submit": "สร้างคำขอเบิก",
     "complete": "เบิกเลย",
     "done": "สร้างคำขอเบิกแล้ว",
-    "completed": "เบิกขวดแล้ว",
+    "completed": "เบิกเหล้าแล้ว",
     "rejected": "ปฏิเสธการเบิกแล้ว"
   },
   "extendDialog": {
@@ -482,7 +482,15 @@
     "reasonPlaceholder": "เช่น ปิดร้านวันหยุดนักขัตฤกษ์",
     "blackoutAdded": "ปิดรับจอง {date} แล้ว",
     "blackoutRemoved": "เปิดรับจอง {date} แล้ว",
-    "weekdays": ["จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"]
+    "weekdays": [
+      "จ",
+      "อ",
+      "พ",
+      "พฤ",
+      "ศ",
+      "ส",
+      "อา"
+    ]
   },
   "settingsTables": {
     "title": "ผังโต๊ะ",
@@ -579,7 +587,15 @@
     "receiptHeader": "หัวใบรับฝาก",
     "receiptFooter": "ท้ายใบรับฝาก",
     "receiptCopies": "จำนวนสำเนา",
-    "weekdaysLong": ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"]
+    "weekdaysLong": [
+      "จันทร์",
+      "อังคาร",
+      "พุธ",
+      "พฤหัสบดี",
+      "ศุกร์",
+      "เสาร์",
+      "อาทิตย์"
+    ]
   },
   "settingsLine": {
     "title": "LINE ของสาขา",
@@ -761,7 +777,15 @@
     "setupButton": "ตั้งค่าเครื่องพิมพ์",
     "setupConfirmBody": "ดาวน์โหลดไฟล์ตั้งค่าเครื่องพิมพ์ชุดใหม่ — ถ้าเครื่องนี้เคยตั้งค่าไว้แล้ว รหัสผ่านเดิมจะใช้ไม่ได้ทันที",
     "setupDownloaded": "ดาวน์โหลดไฟล์ตั้งค่าแล้ว",
-    "setupErrorGeneric": "ตั้งค่าเครื่องพิมพ์ไม่สำเร็จ ลองอีกครั้ง"
+    "setupErrorGeneric": "ตั้งค่าเครื่องพิมพ์ไม่สำเร็จ ลองอีกครั้ง",
+    "confirmTitleReceipt": "พิมพ์ใบรับฝาก?",
+    "confirmTitleLabel": "พิมพ์ป้ายขวด?",
+    "confirmReady": "เครื่องพิมพ์ออนไลน์ พร้อมพิมพ์ {code}",
+    "warnOffline": "Print server ไม่ได้เปิดอยู่ — งานจะรอในคิว และพิมพ์ออกเมื่อเปิดเครื่องที่ร้าน",
+    "warnNotSetUp": "สาขานี้ยังไม่ได้ตั้งค่าเครื่องพิมพ์ — งานจะรอในคิวจนกว่าจะตั้งค่าและเปิด print server",
+    "warnUnknown": "ตรวจสถานะเครื่องพิมพ์ไม่สำเร็จ — ยังส่งงานเข้าคิวได้",
+    "confirmPrint": "พิมพ์",
+    "confirmQueueAnyway": "ส่งเข้าคิวไว้ก่อน"
   },
   "errors": {
     "UNAUTHENTICATED": "เซสชันหมดอายุ เข้าสู่ระบบใหม่",

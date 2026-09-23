@@ -7,14 +7,14 @@ import { adminDb, fixtureIds } from './fixtures/db'
 import { env } from './fixtures/env'
 
 /**
- * P5-01 — demo reset + seed + one-tap demo login. The reset only touches RMI / KSN / BNA and
+ * P5-01 — demo reset + seed + one-tap demo login. The reset only touches SRC (R-029) and
  * demo.* accounts; it seeds ~30 rows per run (well under the 1,000-row rule, R-024).
  */
 test.describe.configure({ mode: 'serial' })
 
 const ROOT = join(__dirname, '..', '..')
-// demo-only codes (never a real branch's code); ids below are keyed without the D prefix
-const DEMO = ['DRMI', 'DKSN', 'DBNA'] as const
+// the one demo branch (R-029), marked receipt_settings.demo
+const DEMO = ['SRC'] as const
 const DEP_STATUSES = ['requested', 'pending_confirm', 'in_store', 'pending_withdrawal', 'withdrawn', 'expired', 'disposed', 'cancelled']
 const BK_STATUSES = ['pending', 'confirmed', 'arrived', 'no_show', 'cancelled', 'rejected']
 
@@ -25,9 +25,9 @@ function reset() {
 async function demoBranchIds(): Promise<Record<string, string>> {
   const { data, error } = await adminDb().from('branches').select('id, code, active').in('code', [...DEMO])
   expect(error, error?.message).toBeNull()
-  expect(data!.length).toBe(3)
+  expect(data!.length).toBe(1)
   expect(data!.every((b) => b.active)).toBe(true)
-  return Object.fromEntries(data!.map((b) => [b.code.slice(1), b.id]))
+  return Object.fromEntries(data!.map((b) => [b.code, b.id]))
 }
 
 async function statusCounts(table: 'deposits' | 'bookings', branchIds: string[]) {
@@ -65,32 +65,31 @@ test('P5-01-01 P5-01-02 P5-01-05 reset seeds the demo set, is idempotent, and le
     { username: 'demo.owner', role: 'owner', active: true },
     { username: 'demo.staff', role: 'staff', active: true },
   ])
-  const { count: tables } = await adminDb().from('tables').select('id', { count: 'exact', head: true }).eq('branch_id', ids.RMI)
+  const { count: tables } = await adminDb().from('tables').select('id', { count: 'exact', head: true }).eq('branch_id', ids.SRC)
   expect(tables).toBe(11)
 })
 
-test('P5-01-03 P5-01-04 every deposit and booking display state exists at RMI', async () => {
+test('P5-01-03 P5-01-04 every deposit and booking display state exists at SRC', async () => {
   const ids = await demoBranchIds()
-  const dep = await statusCounts('deposits', [ids.RMI])
+  const dep = await statusCounts('deposits', [ids.SRC])
   for (const s of DEP_STATUSES) expect(dep[s], `deposit ${s}`).toBeGreaterThan(0)
-  const bk = await statusCounts('bookings', [ids.RMI])
+  const bk = await statusCounts('bookings', [ids.SRC])
   for (const s of BK_STATUSES) expect(bk[s], `booking ${s}`).toBeGreaterThan(0)
 
   const db = adminDb()
-  const { count: vip } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids.RMI).eq('is_vip', true)
+  const { count: vip } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids.SRC).eq('is_vip', true)
   expect(vip).toBeGreaterThan(0)
   const soon = new Date(Date.now() + 2.5 * 86400_000).toISOString()
-  const { count: near } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids.RMI).eq('status', 'in_store').eq('is_vip', false).lte('expires_at', soon)
+  const { count: near } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids.SRC).eq('status', 'in_store').eq('is_vip', false).lte('expires_at', soon)
   expect(near).toBeGreaterThan(0)
-  const { count: linked } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids.RMI).not('customer_id', 'is', null)
+  const { count: linked } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids.SRC).not('customer_id', 'is', null)
   expect(linked).toBeGreaterThan(0)
-  for (const code of ['KSN', 'BNA']) {
-    const { count } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', ids[code]).eq('status', 'in_store')
-    expect(count, code).toBeGreaterThan(0)
-  }
-  const { data: settings } = await db.from('booking_settings').select('closed_weekdays').eq('branch_id', ids.RMI).single()
+  const { data: wd, error: wdErr } = await db.from('withdrawals').select('status').eq('branch_id', ids.SRC).range(0, 999)
+  expect(wdErr, wdErr?.message).toBeNull()
+  for (const s of ['pending', 'completed', 'rejected']) expect(wd!.some((w) => w.status === s), `withdrawal ${s}`).toBe(true)
+  const { data: settings } = await db.from('booking_settings').select('closed_weekdays').eq('branch_id', ids.SRC).single()
   expect(settings!.closed_weekdays.length).toBeGreaterThan(0)
-  const { count: blackouts } = await db.from('booking_blackouts').select('id', { count: 'exact', head: true }).eq('branch_id', ids.RMI)
+  const { count: blackouts } = await db.from('booking_blackouts').select('id', { count: 'exact', head: true }).eq('branch_id', ids.SRC)
   expect(blackouts).toBe(1)
 })
 
@@ -108,12 +107,12 @@ test('P5-01-09 the reset refuses to run next to a real branch, and never adopts 
     await db.from('branches').delete().eq('id', real!.id)
   }
   // strip the marker from one demo branch: the reset must refuse to touch it
-  const { data: drmi } = await db.from('branches').select('id, receipt_settings').eq('code', 'DRMI').single()
+  const { data: drmi } = await db.from('branches').select('id, receipt_settings').eq('code', 'SRC').single()
   await db.from('branches').update({ receipt_settings: { header: 'not demo' } }).eq('id', drmi!.id)
   try {
     const res = run()
     expect(res.status).toBe(1)
-    expect(res.stderr).toContain('DRMI')
+    expect(res.stderr).toContain('SRC')
     const { count } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', drmi!.id)
     expect(count).toBeGreaterThan(0) // nothing wiped
   } finally {
@@ -142,9 +141,9 @@ const DEMO_OFF = process.env.E2E_DEMO_OFF === '1'
 test.describe('one-tap demo login', () => {
   test.skip(DEMO_OFF || env.ENABLE_DEMO_LOGIN !== 'true', 'ENABLE_DEMO_LOGIN is not true on this server')
   for (const [role, landing, marker] of [
-    ['staff', '/tonight', 'รามอินทรา'],
-    ['bar', '/tonight', 'รามอินทรา'],
-    ['owner', '/overview', 'เกษตร-นวมินทร์'],
+    ['staff', '/tonight', 'ศรีราชา'],
+    ['bar', '/tonight', 'ศรีราชา'],
+    ['owner', '/overview', 'ศรีราชา'],
   ] as const) {
     test(`P5-01-06 ${role} lands on ${landing} with seeded data`, async ({ page }) => {
       await page.goto('/login')

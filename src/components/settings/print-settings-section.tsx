@@ -31,7 +31,7 @@ export async function PrintSettingsSection({ branchId, branchCode }: { branchId:
   const receipt = (branch.receipt_settings ?? {}) as { show_qr?: boolean; qr_code_image_url?: string }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div id="print" className="flex scroll-mt-4 flex-col gap-4">
       <PrintSettingsForm
         branchId={branchId}
         initial={{

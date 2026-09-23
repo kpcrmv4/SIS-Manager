@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { Download, FileText } from 'lucide-react'
+import { CalendarDays, Download, FileText, Wine } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
 import { MetricBar, Metric } from '@/components/ui/metric'
 import { Badge } from '@/components/ui/badge'
@@ -104,7 +104,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
               </tbody>
             </table>
           </div>
-          <div className="panel nav:hidden" data-testid="overview-branches-mobile">
+          <div className="flex flex-col gap-3 nav:hidden" data-testid="overview-branches-mobile">
             {data.branches.map((b) => (
               <BranchCard key={b.id} b={b} t={t} tc={tc} />
             ))}
@@ -141,6 +141,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
   )
 }
 
+/** Phone card: row 1 = liquor (deposits), row 2 = table bookings. */
 function BranchCard({
   b,
   t,
@@ -151,19 +152,32 @@ function BranchCard({
   tc: Awaited<ReturnType<typeof getTranslations>>
 }) {
   return (
-    <ListRow
-      title={b.name}
-      meta={
-        <span className="tnum">
-          {t('colInStore')} {b.in_store_bottles} · {t('colExpiring')} {b.expiring} · {t('colBookingsTonight')} {tc('tables', { count: b.bookings_tonight })} · {t('colArrived')} {b.arrived_tonight}
-        </span>
-      }
-      aside={
-        <>
+    <div className="panel p-3.5" data-testid="overview-branch-card" data-branch={b.code}>
+      <div className="mb-2.5 font-semibold text-ink">{b.name}</div>
+      <div className="flex items-start gap-2.5 border-b border-line pb-2.5" data-testid="overview-card-liquor">
+        <Wine className="mt-0.5 size-4 flex-none text-muted-token" aria-hidden />
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm tnum">
+          <span>
+            {t('colInStore')} <b>{b.in_store_bottles}</b>
+          </span>
+          <span>
+            {t('colExpiring')} <b>{b.expiring}</b>
+          </span>
           {b.to_confirm > 0 && <Badge tone="progress">{`${t('colToConfirm')} ${b.to_confirm}`}</Badge>}
           {b.to_dispose > 0 && <Badge tone="urgent">{`${t('colToDispose')} ${b.to_dispose}`}</Badge>}
-        </>
-      }
-    />
+        </div>
+      </div>
+      <div className="flex items-start gap-2.5 pt-2.5" data-testid="overview-card-bookings">
+        <CalendarDays className="mt-0.5 size-4 flex-none text-muted-token" aria-hidden />
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm tnum">
+          <span>
+            {t('colBookingsTonight')} <b>{tc('tables', { count: b.bookings_tonight })}</b>
+          </span>
+          <span>
+            {t('colArrived')} <b>{b.arrived_tonight}</b>
+          </span>
+        </div>
+      </div>
+    </div>
   )
 }

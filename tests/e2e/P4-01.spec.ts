@@ -114,6 +114,18 @@ test.describe('owner', () => {
     }).toPass({ timeout: 30_000 })
   })
 
+  test('P4-01-01b on a phone each branch card has a liquor row above a bookings row', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/overview')
+    const card = page.getByTestId('overview-branch-card').and(page.locator(`[data-branch="${BRANCH_A_CODE}"]`))
+    await expect(card).toBeVisible()
+    const liquor = await card.getByTestId('overview-card-liquor').boundingBox()
+    const bookings = await card.getByTestId('overview-card-bookings').boundingBox()
+    expect(bookings!.y).toBeGreaterThanOrEqual(liquor!.y + liquor!.height - 1)
+    await expect(card.getByTestId('overview-card-liquor')).toContainText('ขวดในร้าน')
+    await expect(card.getByTestId('overview-card-bookings')).toContainText('จองคืนนี้')
+  })
+
   test('P4-01-02 period chips switch the Bangkok range', async ({ page }) => {
     const last = periodRange('last')
     const today = bangkokDate()

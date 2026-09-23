@@ -84,9 +84,23 @@ test.describe('P3-B1-01 print buttons queue a job', () => {
 
     // both buttons show the identical toast text, so waiting on the toast alone cannot tell
     // the two clicks apart — poll the row count instead, which is what actually matters.
+    // print-server not running: the confirm dialog warns before anything is queued
+    await markStationOffline(admin(), branchA)
     await page.getByTestId('print-receipt').click()
+    await expect(page.getByTestId('print-offline-warning')).toBeVisible()
+    expect(await jobCount()).toBe(0)
+    await page.getByTestId('print-confirm').click()
     await expect.poll(jobCount, { message: 'receipt job queued' }).toBe(1)
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    // running: the dialog says it is ready, still asks to confirm; cancel queues nothing
+    await markStationOnline(admin(), branchA)
     await page.getByTestId('print-label').click()
+    await expect(page.getByTestId('print-ready')).toBeVisible()
+    await expect(page.getByTestId('print-offline-warning')).toHaveCount(0)
+    await page.getByRole('button', { name: 'ยกเลิก', exact: true }).click()
+    expect(await jobCount()).toBe(1)
+    await page.getByTestId('print-label').click()
+    await page.getByTestId('print-confirm').click()
     await expect.poll(jobCount, { message: 'label job queued' }).toBe(2)
 
     const { data: jobs, error } = await admin().from('print_jobs').select('job_type, status, payload').eq('deposit_id', created.id).order('created_at')
@@ -99,6 +113,24 @@ test.describe('P3-B1-01 print buttons queue a job', () => {
     expect((receipt.payload as { deposit_code?: string }).deposit_code).toBe(created.code)
     expect(label.status).toBe('pending')
     expect((label.payload as { link_code?: string | null }).link_code ?? null).toBeNull()
+  })
+})
+
+test.describe('P3-B1-07 top-bar printer indicator', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P3-B1-07 the printer icon shows online / offline / not set up for the working branch', async ({ page }) => {
+    await markStationOnline(admin(), branchA)
+    await page.goto('/tonight')
+    const icon = page.getByTestId('printer-indicator')
+    await expect(icon).toHaveAttribute('data-state', 'online')
+    await expect(icon).toHaveAttribute('aria-label', /ออนไลน์/)
+    await markStationOffline(admin(), branchA)
+    await page.reload()
+    await expect(icon).toHaveAttribute('data-state', 'offline')
+    await cleanupPrintStation(admin(), branchA)
+    await page.reload()
+    await expect(icon).toHaveAttribute('data-state', 'not_set_up')
   })
 })
 

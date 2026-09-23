@@ -146,6 +146,17 @@ export async function getPrintStatus(branchId: string): Promise<ActionResult<Pri
   }
 }
 
+/** Heartbeat only (no job list) — polled by the top-bar printer icon. RLS scopes it to branch members. */
+export async function getPrintState(branchId: string): Promise<ActionResult<PrintStatusView['state']>> {
+  if (!isUuid(branchId)) return { ok: false, error: 'invalid' }
+  const sb = await getSupabaseServer()
+  const { data: station, error } = await sb.from('print_stations').select('is_online, last_heartbeat').eq('branch_id', branchId).maybeSingle()
+  if (error) return { ok: false, error: 'unknown' }
+  if (!station) return { ok: true, data: 'not_set_up' }
+  const fresh = station.last_heartbeat ? Date.now() - new Date(station.last_heartbeat).getTime() < ONLINE_WINDOW_MS : false
+  return { ok: true, data: station.is_online && fresh ? 'online' : 'offline' }
+}
+
 /** "พิมพ์ใหม่" on a failed job — re-reads the deposit + type off the failed job and calls `queue_print` again (a fresh row; the failed one is left as a record). */
 export async function requeuePrintJob(jobId: string): Promise<ActionResult<{ id: string }>> {
   if (!isUuid(jobId)) return { ok: false, error: 'invalid' }

@@ -482,7 +482,15 @@
     "reasonPlaceholder": "e.g. Closed for the public holiday",
     "blackoutAdded": "Closed {date}",
     "blackoutRemoved": "Reopened {date}",
-    "weekdays": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+    "weekdays": [
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa",
+      "Su"
+    ]
   },
   "settingsTables": {
     "title": "Floor plan",
@@ -579,7 +587,15 @@
     "receiptHeader": "Receipt header",
     "receiptFooter": "Receipt footer",
     "receiptCopies": "Copies",
-    "weekdaysLong": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    "weekdaysLong": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ]
   },
   "settingsLine": {
     "title": "Branch LINE",
@@ -761,7 +777,15 @@
     "setupButton": "Set up printer",
     "setupConfirmBody": "Downloads a fresh printer config — if this station was already set up, its old password stops working immediately.",
     "setupDownloaded": "Setup file downloaded",
-    "setupErrorGeneric": "Could not set up the printer. Try again."
+    "setupErrorGeneric": "Could not set up the printer. Try again.",
+    "confirmTitleReceipt": "Print the receipt?",
+    "confirmTitleLabel": "Print the bottle label?",
+    "confirmReady": "The printer is online, ready to print {code}",
+    "warnOffline": "The print server is not running — the job waits in the queue and prints once the shop PC is on",
+    "warnNotSetUp": "This branch's printer is not set up — the job waits in the queue until the print server is set up and running",
+    "warnUnknown": "Couldn't check the printer — you can still queue the job",
+    "confirmPrint": "Print",
+    "confirmQueueAnyway": "Queue it anyway"
   },
   "errors": {
     "UNAUTHENTICATED": "Session expired — log in again",

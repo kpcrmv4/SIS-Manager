@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Demo reset + seed (P5-01, CLAUDE §9). Wipes and re-seeds ONLY the three demo branches
-// (RMI · KSN · BNA) and the three demo accounts (demo.owner · demo.bar · demo.staff).
+// Demo reset + seed (P5-01, CLAUDE §9, R-029). Wipes and re-seeds ONLY the demo branch
+// SRC (SIS Music Bar ศรีราชา) and the three demo accounts (demo.owner · demo.bar · demo.staff).
 // Every other branch — the E2E fixtures included — is never read for deletion.
 //
 //   npm run demo:reset
@@ -40,18 +40,16 @@ const STAFF_DOMAIN = 'staff.sis.local'
 
 // Demo-only codes (never a real branch's code) + a marker in receipt_settings: the reset
 // only ever adopts a branch it made itself (security review P3/P4 — a real "RMI" must be safe).
-const DEMO_MARK = { demo: true, header: 'SIS Music Bar · เดโม', footer: 'ข้อมูลตัวอย่าง', copies: 1 }
-const BRANCHES = [
-  { code: 'DRMI', name: 'รามอินทรา · เดโม', sort: 91, phone: '02-000-0001' },
-  { code: 'DKSN', name: 'เกษตร-นวมินทร์ · เดโม', sort: 92, phone: '02-000-0002' },
-  { code: 'DBNA', name: 'บางนา · เดโม', sort: 93, phone: '02-000-0003' },
-]
+// The owner chose one demo branch under the shop's real name (R-029); the marker still keeps
+// the reset away from any branch it did not make.
+const DEMO_MARK = { demo: true, header: 'SIS Music Bar ศรีราชา', footer: 'ข้อมูลตัวอย่าง', copies: 1 }
+const BRANCHES = [{ code: 'SRC', name: 'SIS Music Bar ศรีราชา', sort: 1, phone: '038-000-000' }]
 const DEMO_CODES = BRANCHES.map((b) => b.code)
 const FIXTURE_CODE = /^Z[A-Z]{2}$/ // E2E fixture branches (tests/e2e/fixtures/users.ts)
 const USERS = [
-  { key: 'owner', username: 'demo.owner', display: 'คุณเจ้าของ (เดโม)', role: 'owner', branches: ['RMI', 'KSN', 'BNA'], pw: env.SEED_OWNER_PASSWORD },
-  { key: 'bar', username: 'demo.bar', display: 'bar ต้น (เดโม)', role: 'bar', branches: ['RMI', 'KSN'], pw: env.SEED_BAR_PASSWORD },
-  { key: 'staff', username: 'demo.staff', display: 'staff มิ้นท์ (เดโม)', role: 'staff', branches: ['RMI'], pw: env.SEED_STAFF_PASSWORD },
+  { key: 'owner', username: 'demo.owner', display: 'คุณเจ้าของ (เดโม)', role: 'owner', branches: ['SRC'], pw: env.SEED_OWNER_PASSWORD },
+  { key: 'bar', username: 'demo.bar', display: 'bar ต้น (เดโม)', role: 'bar', branches: ['SRC'], pw: env.SEED_BAR_PASSWORD },
+  { key: 'staff', username: 'demo.staff', display: 'staff มิ้นท์ (เดโม)', role: 'staff', branches: ['SRC'], pw: env.SEED_STAFF_PASSWORD },
 ]
 // LINE user ids are U + 32 hex — demo customers use a recognisable hex prefix
 const DEMO_LINE_PREFIX = 'Udeadbeef'
@@ -84,7 +82,8 @@ async function guard() {
   if (foreign.length) {
     throw new Error(`branch code(s) ${foreign.map((b) => b.code).join(', ')} exist but were not made by demo-reset — refusing to touch them`)
   }
-  const real = all.filter((b) => b.active && !DEMO_CODES.includes(b.code) && !FIXTURE_CODE.test(b.code))
+  // a branch an older demo-reset made (marked) is not real data
+  const real = all.filter((b) => b.active && b.receipt_settings?.demo !== true && !FIXTURE_CODE.test(b.code))
   if (real.length && env.DEMO_RESET_ALLOW_WITH_REAL_BRANCHES !== '1') {
     throw new Error(
       `this project has real branches (${real.map((b) => b.code).join(', ')}) — demo data does not belong next to them. ` +
@@ -105,7 +104,7 @@ async function upsertBranches() {
       )
       .select('id, code'),
   )
-  return Object.fromEntries(rows.map((r) => [r.code.slice(1), r.id])) // DRMI → RMI key used below
+  return Object.fromEntries(rows.map((r) => [r.code, r.id]))
 }
 
 // ── 2. accounts ─────────────────────────────────────────────────────────
@@ -215,7 +214,7 @@ const rpc = async (client, fn, args) => must(fn, await client.rpc(fn, args))
 
 // ── 6. deposits in every display state ───────────────────────────────────
 async function seedDeposits(c, branchIds, photos, customers) {
-  const RMI = branchIds.RMI
+  const RMI = branchIds.SRC
   const create = async (who, branch, name, phone, item, qty, table, extra = {}) =>
     rpc(who, 'create_deposit', { p_branch: branch, p_customer_name: name, p_customer_phone: phone, p_item_name: item, p_quantity: qty, p_table: table, p_photo_paths: [photos[branch]], ...extra })
   const confirm = (id, levels, branch = RMI, who = c.bar) => rpc(who, 'confirm_deposit', { p_deposit: id, p_levels: levels, p_photo_paths: [photos[branch]] })
@@ -277,21 +276,36 @@ async function seedDeposits(c, branchIds, photos, customers) {
     p_item_name: 'Hennessy VSOP', p_quantity: 1, p_table: 'B4', p_terms_locale: 'en', p_terms_version: '2026-09',
   })
 
-  // the other branches: a few bottles on the shelf
-  for (const [code, who, rows] of [
-    ['KSN', c.bar, [['คุณปกรณ์ วงศ์ดี', 'Chivas Regal 12 ปี', 2], ['คุณอรวรรณ แสงทอง', 'Jameson', 1], ['คุณชยพล มีสุข', 'Absolut Vodka', 1]]],
-    ['BNA', c.owner, [['คุณศิริพร ใจเย็น', 'Johnnie Walker Black Label', 1], ['คุณธีรเดช พรมมา', 'Regency', 2]]],
-  ]) {
-    for (const [name, item, qty] of rows) {
-      const d = await create(who, branchIds[code], name, '090-000-0000', item, qty, 'A1')
-      await confirm(d.id, Array(qty).fill(100), branchIds[code], who)
-    }
-  }
+  // partly withdrawn: one of two bottles taken, the other still on the shelf
+  const part = await create(c.staff, RMI, 'คุณปกรณ์ วงศ์ดี', '090-414-7788', 'Chivas Regal 12 ปี', 2, 'A2')
+  await confirm(part.id, [100, 70])
+  const pb = await bottles(part.id)
+  await rpc(c.staff, 'request_withdrawal', { p_deposit: part.id, p_bottle_ids: [pb[1].id], p_type: 'in_store', p_table: 'A2' })
+  const partIds = must('withdrawal ids', await admin.from('withdrawals').select('id').eq('deposit_id', part.id).eq('status', 'pending')).map((w) => w.id)
+  await rpc(c.bar, 'complete_withdrawals', { p_withdrawal_ids: partIds })
+
+  // a withdrawal the bar rejected (the deposit stays in store)
+  const wrej = await create(c.staff, RMI, 'คุณอรวรรณ แสงทอง', '091-222-6060', 'Jameson', 1, 'B4')
+  await confirm(wrej.id, [90])
+  const rb = await bottles(wrej.id)
+  await rpc(c.staff, 'request_withdrawal', { p_deposit: wrej.id, p_bottle_ids: [rb[0].id], p_type: 'in_store', p_table: 'B4' })
+  const rejIds = must('withdrawal ids', await admin.from('withdrawals').select('id').eq('deposit_id', wrej.id).eq('status', 'pending')).map((w) => w.id)
+  await rpc(c.bar, 'reject_withdrawal', { p_withdrawal_ids: rejIds, p_reason: 'ขวดไม่ตรงกับที่ฝาก' })
+
+  // a staff-side withdrawal waiting for the bar (in store, tonight)
+  const wst = await create(c.staff, RMI, 'คุณชยพล มีสุข', '083-640-1122', 'Johnnie Walker Black Label', 1, 'A4')
+  await confirm(wst.id, [60])
+  const sb = await bottles(wst.id)
+  await rpc(c.staff, 'request_withdrawal', { p_deposit: wst.id, p_bottle_ids: [sb[0].id], p_type: 'in_store', p_table: 'A4' })
+
+  // received by the owner (history shows a third person)
+  const own = await create(c.owner, RMI, 'คุณศิริพร ใจเย็น', '084-909-3030', 'Hennessy VSOP', 2, 'V1')
+  await confirm(own.id, [100, 100], RMI, c.owner)
 }
 
 // ── 7. bookings in every state + a closed weekday and a blackout ─────────────
 async function seedBookings(c, branchIds, tables, customers) {
-  const RMI = branchIds.RMI
+  const RMI = branchIds.SRC
   const night = businessNight()
   const open = { line_enabled: true, auto_confirm: false, advance_days: 30, cutoff_time: '23:59', slot_start: '19:00', slot_end: '23:00', slot_minutes: 30, max_bookings_per_night: null, party_min: 1, party_max: 20, no_show_minutes: 30, customer_cancel_hours: 2, closed_weekdays: [] }
   must('settings open', await admin.from('booking_settings').update(open).eq('branch_id', RMI))
@@ -299,11 +313,11 @@ async function seedBookings(c, branchIds, tables, customers) {
     rpc(c.staff, 'create_booking', { p_branch: RMI, p_night: n, p_slot: slot, p_party: party, p_name: name, p_phone: phone, p_table: table })
   const lineBook = (n, slot, party, name, customer) => rpc(admin, 'create_booking', { p_branch: RMI, p_night: n, p_slot: slot, p_party: party, p_name: name, p_customer_id: customer })
 
-  const confirmed = await staffBook(night, '21:00', 4, 'คุณธนพล', '081-234-5678', tables.RMI.A3)
+  const confirmed = await staffBook(night, '21:00', 4, 'คุณธนพล', '081-234-5678', tables.SRC.A3)
   void confirmed
-  const arrived = await staffBook(night, '20:00', 6, 'คุณกิตติศักดิ์', '089-777-1203', tables.RMI.A1)
+  const arrived = await staffBook(night, '20:00', 6, 'คุณกิตติศักดิ์', '089-777-1203', tables.SRC.A1)
   await rpc(c.staff, 'check_in_booking', { p_branch: RMI, p_ref: arrived.code })
-  const noShow = await staffBook(night, '19:00', 2, 'คุณวีระ', '082-333-4444', tables.RMI.B1)
+  const noShow = await staffBook(night, '19:00', 2, 'คุณวีระ', '082-333-4444', tables.SRC.B1)
   must('no-show', await admin.from('bookings').update({ status: 'no_show', no_show_at: new Date().toISOString() }).eq('id', noShow.id))
   await lineBook(night, '22:00', 5, 'Mr. James', customers.en) // pending, waiting for the bar
   const cancelled = await staffBook(night, '22:30', 3, 'คุณนภา', '080-111-2222', null)
@@ -311,7 +325,7 @@ async function seedBookings(c, branchIds, tables, customers) {
   const rejected = await lineBook(night, '23:00', 8, 'คุณธนพล', customers.th)
   await rpc(c.bar, 'reject_booking', { p_booking: rejected.id, p_reason: 'โต๊ะเต็มคืนนี้' })
   // upcoming nights
-  await staffBook(addDays(night, 1), '20:30', 4, 'คุณสุภาวดี', '095-338-2019', tables.RMI.A2)
+  await staffBook(addDays(night, 1), '20:30', 4, 'คุณสุภาวดี', '095-338-2019', tables.SRC.A2)
   await lineBook(addDays(night, 2), '21:30', 2, 'คุณธนพล', customers.th)
 
   // final rules: Monday closed, cutoff 18:00, a private-event blackout next week

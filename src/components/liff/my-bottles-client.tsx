@@ -29,7 +29,7 @@ type DepositsResponse = { deposits: Deposit[]; blockedToday: boolean; branch: { 
 const ACTIVE = new Set(['requested', 'pending_confirm', 'in_store', 'pending_withdrawal'])
 const METERED = new Set(['in_store', 'pending_withdrawal'])
 
-/** "ขวดของฉัน" (P2-C2): active/history tabs, one card per deposit, "ขอเบิกขวด" opens the sheet. */
+/** "ขวดของฉัน" (P2-C2): active/history tabs, one card per deposit, "ขอเบิกเหล้า" opens the sheet. */
 export function MyBottlesClient() {
   const t = useTranslations('cx')
   const session = useCxSession()

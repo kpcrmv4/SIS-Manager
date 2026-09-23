@@ -8,7 +8,7 @@ import { errorText } from './error-text'
 import type { Deposit } from './my-bottles-client'
 import { customerFetch, useCxSession } from './session-context'
 
-/** "ขอเบิกขวด" bottom sheet (P2-C2): pick bottles, in-store/take-home, an optional table. */
+/** "ขอเบิกเหล้า" bottom sheet (P2-C2): pick bottles, in-store/take-home, an optional table. */
 export function WithdrawSheet({
   deposit,
   blockedToday,

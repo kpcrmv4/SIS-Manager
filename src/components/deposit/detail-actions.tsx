@@ -78,14 +78,14 @@ export function DetailActions({
             {t('actionWithdraw')}
           </button>
         )}
-        {canPrint && <PrintButtons depositId={deposit.id} />}
+        {canPrint && <PrintButtons depositId={deposit.id} branchId={branchId} code={deposit.code} />}
         {canExtend && (
-          <button type="button" className="btn-ghost" onClick={() => setDialog('extend')} data-testid="action-extend">
+          <button type="button" className="btn-secondary" onClick={() => setDialog('extend')} data-testid="action-extend">
             {t('actionExtend')}
           </button>
         )}
         {canVip && (
-          <button type="button" className="btn-ghost" onClick={() => setDialog('vip')} data-testid="action-vip">
+          <button type="button" className="btn-secondary" onClick={() => setDialog('vip')} data-testid="action-vip">
             {isVip ? t('actionUnvip') : t('actionVip')}
           </button>
         )}

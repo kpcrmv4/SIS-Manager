@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 import { adminDb, fixtureIds } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
-import { SIGNED_IN_ROLES } from './fixtures/users'
+import { BRANCH_A_NAME, BRANCH_B_NAME, SIGNED_IN_ROLES } from './fixtures/users'
 
 const as = (role: string) => join(AUTH_DIR, `${role}.json`)
 const PHONE = { width: 390, height: 844 }
@@ -79,8 +79,15 @@ test.describe('phone shell · owner', () => {
     for (const name of ['รายงาน', 'ตั้งค่าการจอง', 'ผังโต๊ะ', 'รายการเหล้า', 'ผู้ใช้และสาขา']) {
       await expect(sheet.getByRole('link', { name, exact: true })).toBeVisible()
     }
-    await expect(sheet.getByRole('button', { name: 'สลับโหมดมืด', exact: true })).toBeVisible()
     await expect(sheet.getByRole('button', { name: 'ออกจากระบบ', exact: true })).toBeVisible()
+    // bell + theme live in the top bar now, not in the sheet
+    await expect(sheet.getByTestId('theme-toggle')).toHaveCount(0)
+    await expect(sheet.getByTestId('bell-button')).toHaveCount(0)
+    // tiles: a grid of squares, several per row
+    const a = await sheet.getByRole('link', { name: 'ตั้งค่าการจอง', exact: true }).boundingBox()
+    const b = await sheet.getByRole('link', { name: 'ผังโต๊ะ', exact: true }).boundingBox()
+    expect(Math.round(a!.y)).toBe(Math.round(b!.y))
+    expect(Math.abs(a!.width - a!.height)).toBeLessThan(2)
     const box = await sheet.boundingBox()
     expect(box!.y).toBeGreaterThan(0)
     expect(Math.round(box!.y + box!.height)).toBe(PHONE.height)
@@ -122,7 +129,8 @@ test.describe('desktop shell', () => {
     test('P0-SHELL-12 owner switcher lists every active branch', async ({ page }) => {
       await page.goto('/overview')
       const { count } = await adminDb().from('branches').select('id', { count: 'exact', head: true }).eq('active', true)
-      await expect(page.getByTestId('branch-switcher').first().locator('option')).toHaveCount(count!)
+      await page.getByTestId('branch-switcher').first().getByRole('button').click()
+      await expect(page.getByRole('option')).toHaveCount(count!)
     })
   })
 
@@ -131,9 +139,10 @@ test.describe('desktop shell', () => {
     test('P0-SHELL-11 switcher lists exactly the 2 assigned branches and persists', async ({ page, context }) => {
       await page.goto('/tonight')
       const sw = page.getByTestId('branch-switcher').first()
-      await expect(sw.locator('option')).toHaveText(['E2E-A', 'E2E-B'])
+      await sw.getByRole('button').click()
+      await expect(sw.getByRole('option')).toHaveText([BRANCH_A_NAME, BRANCH_B_NAME])
       const { branchB } = fixtureIds()
-      await sw.selectOption(branchB)
+      await sw.getByRole('option', { name: BRANCH_B_NAME }).click()
       await expect(page.getByRole('heading', { level: 1 })).toContainText('E2E-B')
       await page.reload()
       await expect(page.getByRole('heading', { level: 1 })).toContainText('E2E-B')

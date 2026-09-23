@@ -9,12 +9,10 @@ import { BranchSwitcher } from './branch-switcher'
 import { LogOut } from 'lucide-react'
 import { logout } from './logout'
 import { isActive, navFor, type NavSection } from './nav'
-import { ThemeToggle } from './theme-toggle'
-import { BellButton } from './bell'
 
 const SECTIONS: NavSection[] = ['catDaily', 'catReports', 'catSettings', 'catAccount']
 
-export function Sidebar({ role, branches, branch, userId }: { role: Role; branches: BranchRef[]; branch: BranchRef | null; userId: string }) {
+export function Sidebar({ role, branches, branch }: { role: Role; branches: BranchRef[]; branch: BranchRef | null }) {
   const t = useTranslations('nav')
   const pathname = usePathname()
   const items = navFor(role)
@@ -57,8 +55,6 @@ export function Sidebar({ role, branches, branch, userId }: { role: Role; branch
         )
       })}
       <div className="mt-auto flex flex-col gap-0.5 border-t border-sidebar-line pt-2">
-        <BellButton userId={userId} className="flex items-center gap-2.5 rounded-[10px] px-3 py-2.25 text-sm hover:bg-sidebar-hover" />
-        <ThemeToggle className="flex items-center gap-2.5 rounded-[10px] px-3 py-2.25 text-sm hover:bg-sidebar-hover" />
         <button
           type="button"
           onClick={() => void logout()}

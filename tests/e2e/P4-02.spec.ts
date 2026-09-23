@@ -53,8 +53,8 @@ test.describe('staff (branch A)', () => {
   test('P4-02-06 on a phone the bell opens as a bottom sheet', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/tonight')
-    await page.getByRole('button', { name: 'เพิ่มเติม' }).click()
-    await page.getByTestId('bell-button').last().click()
+    // the bell sits in the top bar on phones too
+    await page.getByTestId('bell-button').click()
     const sheet = page.getByRole('dialog', { name: 'การแจ้งเตือน' })
     await expect(sheet).toBeVisible()
     const box = await sheet.boundingBox()

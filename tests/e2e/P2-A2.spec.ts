@@ -172,7 +172,7 @@ test.describe('detail dialogs', () => {
       await page.goto(`/deposits/${dep.id}`)
       await page.getByTestId('withdrawal-complete-open').click()
       await page.getByTestId('withdrawal-complete-submit').click()
-      await expect(page.getByText('เบิกขวดแล้ว', { exact: true })).toBeVisible()
+      await expect(page.getByText('เบิกเหล้าแล้ว', { exact: true })).toBeVisible()
       const { data: w } = await adminDb().from('withdrawals').select('status').eq('deposit_id', dep.id)
       expect(w!.every((x) => x.status === 'completed')).toBe(true)
     })

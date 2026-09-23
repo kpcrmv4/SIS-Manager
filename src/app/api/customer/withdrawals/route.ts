@@ -12,7 +12,7 @@ type Body = { deposit_id?: string; bottle_ids?: string[]; type?: 'in_store' | 't
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
- * "ขอเบิกขวด" from the LIFF app (P2-C2) → request_withdrawal, scoped to this customer + branch
+ * "ขอเบิกเหล้า" from the LIFF app (P2-C2) → request_withdrawal, scoped to this customer + branch
  * server-side (never taken from the body — security rule #2). The RPC checks the deposit's
  * customer_id against p_customer_id, so a bottle_id/deposit_id that isn't the caller's own is
  * refused (NOT_YOURS), not silently accepted.
