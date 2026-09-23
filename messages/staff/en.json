@@ -507,7 +507,8 @@
     "active": "Active",
     "note": "Customers pick a zone only; the shop assigns the table. Table order here is the order on the plan",
     "empty": "No zones yet",
-    "emptyBody": "Add a zone first, then add tables to it"
+    "emptyBody": "Add a zone first, then add tables to it",
+    "labelTaken": "That table name is already used in this branch"
   },
   "settingsItems": {
     "title": "Liquor list",
@@ -554,10 +555,20 @@
     "branchCode": "Branch code",
     "branchCodeHelp": "2–5 letters, used in deposit codes DEP-{code}-XXXXX",
     "branchName": "Branch name",
-    "empty": "No other users yet"
+    "empty": "No other users yet",
+    "errorUsernameTaken": "That username is already taken",
+    "errorPasswordShort": "Password must be at least 8 characters",
+    "errorCannotChangeSelf": "You can't change your own role or disable your own account",
+    "errorUnavailable": "Couldn't save — try again",
+    "errorNotFound": "That user wasn't found",
+    "codeTaken": "That branch code is already taken"
   },
   "settingsBranch": {
     "title": "Branch details",
+    "name": "Branch name",
+    "opensAt": "Opens at",
+    "closesAt": "Closes at",
+    "active": "Branch active",
     "depositDays": "Deposit term (days)",
     "expiryNoticeDays": "Expiry reminder (days before)",
     "withdrawalBlockedDays": "No in-store withdrawals on",
