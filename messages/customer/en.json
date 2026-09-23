@@ -185,6 +185,31 @@
     "viewTicket": "View booking",
     "viewBottles": "View my bottles",
     "linked": "LINE linked to deposit {code}",
-    "linkFailed": "Deposit code {code} not found"
+    "linkFailed": "Deposit code {code} not found",
+    "titles": {
+      "depositConfirmed": "Deposit stored",
+      "depositRejected": "Deposit declined",
+      "withdrawCompleted": "Bottles collected",
+      "withdrawRejected": "Request declined",
+      "expirySoon": "Expiring soon",
+      "expired": "Expired",
+      "disposed": "Disposed of",
+      "bookingConfirmed": "Booking confirmed",
+      "bookingPending": "Booking request received",
+      "bookingRejected": "Booking declined",
+      "bookingCancelled": "Booking cancelled",
+      "bookingReminder": "Your booking today",
+      "linked": "LINE linked",
+      "welcome": "Welcome"
+    },
+    "noExpiry": "No expiry (VIP)",
+    "noReason": "Please ask our staff for details",
+    "linkedDetail": "{item} · {left} of {count} bottles left",
+    "expiresOn": "Expires {date}",
+    "welcome": "Thanks for adding us · type the 6-character code on your deposit receipt in this chat to see your bottles and get reminders before they expire",
+    "linkNotFound": "Code not found · check the 6-character code on your receipt and try again",
+    "useReceiptCode": "The DEP code on the bottle tag can't link LINE · type the 6-character code on your receipt instead",
+    "throttled": "Too many wrong codes · try again in 15 minutes",
+    "openApp": "Open the shop app"
   }
 }

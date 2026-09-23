@@ -185,6 +185,31 @@
     "viewTicket": "查看订位",
     "viewBottles": "查看我的存酒",
     "linked": "已将 LINE 与存酒 {code} 绑定",
-    "linkFailed": "找不到存酒编号 {code}"
+    "linkFailed": "找不到存酒编号 {code}",
+    "titles": {
+      "depositConfirmed": "寄存成功",
+      "depositRejected": "无法寄存",
+      "withdrawCompleted": "取酒完成",
+      "withdrawRejected": "取酒申请未通过",
+      "expirySoon": "即将到期",
+      "expired": "已过期",
+      "disposed": "已处理",
+      "bookingConfirmed": "订位已确认",
+      "bookingPending": "已收到订位申请",
+      "bookingRejected": "无法接受订位",
+      "bookingCancelled": "订位已取消",
+      "bookingReminder": "今日订位提醒",
+      "linked": "LINE 已绑定",
+      "welcome": "欢迎"
+    },
+    "noExpiry": "无到期日（VIP）",
+    "noReason": "详情请咨询店员",
+    "linkedDetail": "{item} · 剩 {left}/{count} 瓶",
+    "expiresOn": "到期 {date}",
+    "welcome": "感谢加为好友 · 在此聊天中输入寄存单上的 6 位代码，即可查看存酒并在到期前收到提醒",
+    "linkNotFound": "找不到此代码 · 请核对寄存单上的 6 位代码后重试",
+    "useReceiptCode": "酒瓶标签上的 DEP 编号无法绑定 LINE · 请改为输入寄存单上的 6 位代码",
+    "throttled": "输入错误次数过多 · 请 15 分钟后再试",
+    "openApp": "打开店铺应用"
   }
 }
