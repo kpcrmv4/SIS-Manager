@@ -117,6 +117,7 @@ test.describe('new deposit form', () => {
       await expect(exp).toBeEditable()
       const chosen = addDays(bangkokDate(), 90)
       await exp.fill(chosen)
+      await expect(exp).toHaveValue(chosen) // a date input can silently ignore a fill before it settles
       await page.getByTestId('deposit-name').fill(`${RUN} bar หมดอายุเอง`)
       await page.getByTestId('deposit-item').fill(`${RUN} Johnnie Walker Black Label`)
       await page.getByTestId('deposit-quantity').fill('1')
