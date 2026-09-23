@@ -185,6 +185,31 @@
     "viewTicket": "ดูบัตรจอง",
     "viewBottles": "ดูขวดของฉัน",
     "linked": "เชื่อม LINE กับรายการฝาก {code} แล้ว",
-    "linkFailed": "ไม่พบรหัสฝาก {code}"
+    "linkFailed": "ไม่พบรหัสฝาก {code}",
+    "titles": {
+      "depositConfirmed": "รับฝากเรียบร้อย",
+      "depositRejected": "รับฝากไม่ได้",
+      "withdrawCompleted": "เบิกเรียบร้อย",
+      "withdrawRejected": "คำขอเบิกไม่สำเร็จ",
+      "expirySoon": "ใกล้หมดอายุ",
+      "expired": "หมดอายุแล้ว",
+      "disposed": "จำหน่ายออกแล้ว",
+      "bookingConfirmed": "ยืนยันการจองแล้ว",
+      "bookingPending": "ได้รับคำขอจองแล้ว",
+      "bookingRejected": "รับการจองไม่ได้",
+      "bookingCancelled": "ยกเลิกการจองแล้ว",
+      "bookingReminder": "เตือนการจองวันนี้",
+      "linked": "เชื่อม LINE แล้ว",
+      "welcome": "ยินดีต้อนรับ"
+    },
+    "noExpiry": "ไม่มีวันหมดอายุ (VIP)",
+    "noReason": "สอบถามรายละเอียดกับพนักงานได้เลย",
+    "linkedDetail": "{item} · เหลือ {left} จาก {count} ขวด",
+    "expiresOn": "หมดอายุ {date}",
+    "welcome": "ขอบคุณที่เพิ่มเพื่อน · พิมพ์รหัส 6 ตัวบนใบรับฝากในแชทนี้ เพื่อดูขวดที่ฝากไว้และรับแจ้งเตือนก่อนหมดอายุ",
+    "linkNotFound": "ไม่พบรหัสนี้ · ตรวจรหัส 6 ตัวบนใบรับฝากแล้วลองอีกครั้ง",
+    "useReceiptCode": "รหัส DEP บนป้ายขวดใช้เชื่อม LINE ไม่ได้ · พิมพ์รหัส 6 ตัวบนใบรับฝากแทน",
+    "throttled": "ใส่รหัสผิดหลายครั้งเกินไป · ลองใหม่อีกครั้งใน 15 นาที",
+    "openApp": "เปิดแอปของร้าน"
   }
 }

@@ -185,6 +185,31 @@
     "viewTicket": "예약 보기",
     "viewBottles": "내 보관 술 보기",
     "linked": "LINE이 보관 코드 {code}에 연결되었습니다",
-    "linkFailed": "보관 코드 {code}을 찾을 수 없습니다"
+    "linkFailed": "보관 코드 {code}을 찾을 수 없습니다",
+    "titles": {
+      "depositConfirmed": "보관 완료",
+      "depositRejected": "보관 불가",
+      "withdrawCompleted": "꺼내기 완료",
+      "withdrawRejected": "요청 거절",
+      "expirySoon": "만료 임박",
+      "expired": "만료됨",
+      "disposed": "폐기됨",
+      "bookingConfirmed": "예약 확정",
+      "bookingPending": "예약 요청 접수",
+      "bookingRejected": "예약 불가",
+      "bookingCancelled": "예약 취소",
+      "bookingReminder": "오늘의 예약 알림",
+      "linked": "LINE 연결 완료",
+      "welcome": "환영합니다"
+    },
+    "noExpiry": "만료 없음 (VIP)",
+    "noReason": "자세한 내용은 직원에게 문의해 주세요",
+    "linkedDetail": "{item} · {count}병 중 {left}병 남음",
+    "expiresOn": "만료 {date}",
+    "welcome": "친구 추가 감사합니다 · 보관증의 6자리 코드를 이 채팅에 입력하면 보관 중인 술을 확인하고 만료 전 알림을 받을 수 있습니다",
+    "linkNotFound": "코드를 찾을 수 없습니다 · 보관증의 6자리 코드를 확인하고 다시 시도해 주세요",
+    "useReceiptCode": "병 태그의 DEP 코드로는 LINE을 연결할 수 없습니다 · 보관증의 6자리 코드를 입력해 주세요",
+    "throttled": "잘못된 코드를 너무 많이 입력했습니다 · 15분 후 다시 시도해 주세요",
+    "openApp": "매장 앱 열기"
   }
 }

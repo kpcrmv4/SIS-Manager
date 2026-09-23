@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, after, type NextRequest } from 'next/server'
+import { dispatchSoon } from '@/lib/line/dispatch'
 import { customerAuthStatus, requireCustomer } from '@/lib/customer/auth'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { readJsonBody } from '../../../_lib/body'
@@ -28,5 +29,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     p_branch: s.branch.id,
   })
   if (error) return rpcError(error)
+  after(() => dispatchSoon())
   return NextResponse.json({ ok: true, ...(data as object) })
 }

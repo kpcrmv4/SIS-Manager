@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, after, type NextRequest } from 'next/server'
+import { dispatchSoon } from '@/lib/line/dispatch'
 import { customerAuthStatus, requireCustomer } from '@/lib/customer/auth'
 import { daysUntil } from '@/lib/date'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -119,5 +120,6 @@ export async function POST(req: NextRequest) {
     p_customer_id: s.customer.id,
   })
   if (error) return rpcError(error)
+  after(() => dispatchSoon())
   return NextResponse.json({ ok: true, ...(data as object) }, { status: 201 })
 }

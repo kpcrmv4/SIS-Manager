@@ -1,6 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
+import { dispatchSoon } from '@/lib/line/dispatch'
 import { callRpc, cleanText, isUuid } from '@/lib/action'
 import type { ActionResult } from '@/lib/errors'
 
@@ -49,7 +51,10 @@ export async function createDeposit(input: CreateDepositInput): Promise<ActionRe
       // a customer is attached only by the verified LINE link flow (RULINGS R-017)
     }),
   )
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -74,7 +79,10 @@ export async function receiveRequest(input: {
       p_customer_phone: cleanText(input.customerPhone, 20),
     }),
   )
-  if (res.ok) touched(input.depositId)
+  if (res.ok) {
+    touched(input.depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -83,14 +91,20 @@ export async function confirmDeposit(depositId: string, levels: number[], photoP
   const res = await callRpc<{ id: string; status: string }>((sb) =>
     sb.rpc('confirm_deposit', { p_deposit: depositId, p_levels: levels.map((l) => Math.round(l)), p_photo_paths: photoPaths.slice(0, 10) }),
   )
-  if (res.ok) touched(depositId)
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
 export async function rejectDeposit(depositId: string, reason: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(depositId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('reject_deposit', { p_deposit: depositId, p_reason: cleanText(reason, 200) ?? '' }))
-  if (res.ok) touched(depositId)
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -113,7 +127,10 @@ export async function requestWithdrawal(input: {
       p_notes: cleanText(input.notes, 500),
     }),
   )
-  if (res.ok) touched(input.depositId)
+  if (res.ok) {
+    touched(input.depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -122,7 +139,10 @@ export async function completeWithdrawals(withdrawalIds: string[], depositId: st
   const res = await callRpc<{ deposit_id: string; status: string }>((sb) =>
     sb.rpc('complete_withdrawals', { p_withdrawal_ids: withdrawalIds, p_photo_path: photoPath, p_notes: cleanText(notes, 500) }),
   )
-  if (res.ok) touched(depositId)
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -131,27 +151,39 @@ export async function rejectWithdrawal(withdrawalIds: string[], depositId: strin
   const res = await callRpc<{ deposit_id: string; status: string }>((sb) =>
     sb.rpc('reject_withdrawal', { p_withdrawal_ids: withdrawalIds, p_reason: cleanText(reason, 200) ?? '' }),
   )
-  if (res.ok) touched(depositId)
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
 export async function extendDeposit(depositId: string, days: number): Promise<ActionResult<{ id: string; expires_at: string }>> {
   if (!isUuid(depositId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; expires_at: string }>((sb) => sb.rpc('extend_deposit', { p_deposit: depositId, p_days: Math.trunc(days) }))
-  if (res.ok) touched(depositId)
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
 export async function setVip(depositId: string, vip: boolean): Promise<ActionResult<{ id: string; is_vip: boolean }>> {
   if (!isUuid(depositId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; is_vip: boolean }>((sb) => sb.rpc('set_vip', { p_deposit: depositId, p_vip: vip }))
-  if (res.ok) touched(depositId)
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
   return res
 }
 
 export async function disposeDeposits(depositIds: string[], reason?: string): Promise<ActionResult<{ count: number }>> {
   if (!depositIds.length || !depositIds.every(isUuid)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ count: number }>((sb) => sb.rpc('dispose_deposits', { p_deposit_ids: depositIds, p_reason: cleanText(reason, 200) }))
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
