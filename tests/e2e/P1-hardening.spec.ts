@@ -80,6 +80,41 @@ test('P1-SEC-04 a customer request naming another branch is refused', async () =
   expect(data?.status).not.toBe('cancelled')
 })
 
+test('P1-DEP-28 a withdrawal requested in time cannot be completed after the deadline, only rejected', async () => {
+  const d = await mustCreate('staff', { qty: 1 })
+  await confirmAll(d.id, [100])
+  const b = await bottles(d.id)
+  const req = await dbAs('staff').rpc('request_withdrawal', { p_deposit: d.id, p_bottle_ids: [b[0].id], p_type: 'take_home' })
+  expect(req.error, req.error?.message).toBeNull()
+  const ids = (req.data as { withdrawal_ids: string[] }).withdrawal_ids
+  await admin().from('deposits').update({ expires_at: new Date(Date.now() - 10 * 86400000).toISOString() }).eq('id', d.id)
+  const late = await dbAs('bar').rpc('complete_withdrawals', { p_withdrawal_ids: ids })
+  expect(late.error?.message).toContain('DEPOSIT_EXPIRED')
+  const rej = await dbAs('bar').rpc('reject_withdrawal', { p_withdrawal_ids: ids, p_reason: 'เลยกำหนด' })
+  expect(rej.error, rej.error?.message).toBeNull()
+})
+
+test('P1-BK-22 check-in by code prefers tonight over a same-code booking on another night', async () => {
+  const { branchA } = fixtureIds()
+  const tonight = businessNight()
+  const t = await dbAs('staff').rpc('create_booking', { p_branch: branchA, p_night: tonight, p_slot: '21:00', p_party: 2, p_name: `${RUN} tonight` } as never)
+  expect(t.error, t.error?.message).toBeNull()
+  const tonightBk = t.data as { id: string; code: string }
+  const f = await dbAs('staff').rpc('create_booking', { p_branch: branchA, p_night: addDays(tonight, 30), p_slot: '21:00', p_party: 2, p_name: `${RUN} future` } as never)
+  expect(f.error, f.error?.message).toBeNull()
+  const future = f.data as { id: string }
+  // make the future booking carry tonight's code (codes repeat every year)
+  await admin().from('bookings').update({ code: tonightBk.code }).eq('id', future.id)
+  const r = await dbAs('staff').rpc('check_in_booking', { p_branch: branchA, p_ref: tonightBk.code } as never)
+  expect(r.error, r.error?.message).toBeNull()
+  expect((r.data as { id: string }).id).toBe(tonightBk.id)
+  const { data } = await admin().from('bookings').select('id, status').in('id', [tonightBk.id, future.id])
+  const st = Object.fromEntries((data ?? []).map((x) => [x.id, x.status]))
+  expect(st[tonightBk.id]).toBe('arrived')
+  expect(st[future.id]).toBe('confirmed')
+  await admin().from('bookings').delete().in('id', [tonightBk.id, future.id])
+})
+
 test('P1-SEC-05 expiry guard: staff RPC refused, bar RPC allowed', async () => {
   const d = await mustCreate('staff', { qty: 1 })
   await confirmAll(d.id, [100])

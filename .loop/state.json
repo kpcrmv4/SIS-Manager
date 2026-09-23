@@ -59,22 +59,22 @@
         {
           "id": "P1-02",
           "name": "Deposits + RPCs",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P1-03",
           "name": "Bookings + RPCs",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P1-04",
           "name": "Outbox, notifications, print, storage, realtime, cron",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P1-05",
           "name": "Types, signatures, skeletons, RLS isolation spec",
-          "status": "written"
+          "status": "done"
         }
       ]
     },

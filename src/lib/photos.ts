@@ -2,6 +2,7 @@
 
 import imageCompression from 'browser-image-compression'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
+import { bangkokDate } from '@/lib/date'
 
 export const PHOTO_BUCKET = 'deposit-photos'
 
@@ -17,7 +18,7 @@ export async function uploadDepositPhoto(branchId: string, file: File): Promise<
   } catch {
     // an unsupported format falls through and is refused by the bucket's mime list
   }
-  const month = new Date().toISOString().slice(0, 7)
+  const month = bangkokDate().slice(0, 7) // Bangkok month, not the device/UTC one
   const path = `${branchId}/${month}/${crypto.randomUUID()}.jpg`
   const { error } = await getSupabaseBrowser().storage.from(PHOTO_BUCKET).upload(path, blob, {
     contentType: 'image/jpeg',
