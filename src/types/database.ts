@@ -269,18 +269,24 @@ export type Database = {
           branch_id: string
           channel_access_token: string | null
           channel_secret: string | null
+          group_bind_code: string | null
+          group_bind_expires_at: string | null
           updated_at: string
         }
         Insert: {
           branch_id: string
           channel_access_token?: string | null
           channel_secret?: string | null
+          group_bind_code?: string | null
+          group_bind_expires_at?: string | null
           updated_at?: string
         }
         Update: {
           branch_id?: string
           channel_access_token?: string | null
           channel_secret?: string | null
+          group_bind_code?: string | null
+          group_bind_expires_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -673,6 +679,35 @@ export type Database = {
             columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_link_failures: {
+        Row: {
+          branch_id: string
+          created_at: string
+          id: number
+          line_user_id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          id?: never
+          line_user_id: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          id?: never
+          line_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_link_failures_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
@@ -1262,6 +1297,10 @@ export type Database = {
         Args: { p_booking: string; p_table: string }
         Returns: Json
       }
+      bind_staff_group: {
+        Args: { p_branch: string; p_code: string; p_group_id: string }
+        Returns: boolean
+      }
       booking_availability: {
         Args: { p_branch: string; p_from: string; p_to: string }
         Returns: Json
@@ -1384,6 +1423,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      line_link_attempt: {
+        Args: { p_branch: string; p_customer_id: string; p_ref: string }
+        Returns: Json
+      }
       link_deposit_customer: {
         Args: { p_branch: string; p_customer_id: string; p_token: string }
         Returns: Json
@@ -1397,6 +1440,7 @@ export type Database = {
         Returns: boolean
       }
       mark_no_shows: { Args: never; Returns: number }
+      new_group_bind_code: { Args: { p_branch: string }; Returns: Json }
       queue_print: {
         Args: { p_copies?: number; p_deposit: string; p_type: string }
         Returns: Json
@@ -1427,6 +1471,7 @@ export type Database = {
       }
       send_booking_reminders: { Args: never; Returns: number }
       send_expiry_notices: { Args: never; Returns: number }
+      send_line_test: { Args: { p_branch: string }; Returns: Json }
       set_vip: { Args: { p_deposit: string; p_vip: boolean }; Returns: Json }
       staff_receive_request: {
         Args: {

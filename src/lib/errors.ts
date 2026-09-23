@@ -37,6 +37,7 @@ export const DB_ERROR_CODES = [
   'ZONE_OTHER_BRANCH',
   'BAD_RANGE',
   'BAD_TYPE',
+  'NO_GROUP',
   'line_disabled',
   'past',
   'closed_weekday',

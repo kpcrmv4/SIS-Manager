@@ -675,6 +675,7 @@
     "ZONE_OTHER_BRANCH": "That zone belongs to another branch",
     "BAD_RANGE": "The date range isn't valid",
     "BAD_TYPE": "Unknown print type",
+    "NO_GROUP": "No staff LINE group is linked yet",
     "line_disabled": "This branch isn't taking LINE bookings",
     "past": "That date has passed",
     "closed_weekday": "Bookings are closed on this weekday",
