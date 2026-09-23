@@ -822,7 +822,7 @@ export default function StoreDetailSettingsPage() {
           }
         />
         <CardContent className="space-y-4">
-          {/* Clarify: this is per-store, NOT the central DAVIS Ai config */}
+          {/* Clarify: this is per-store, NOT the central SIS AI config */}
           <div className="rounded-lg border border-violet-200 bg-violet-50 p-3 dark:border-violet-800/50 dark:bg-violet-900/20">
             <div className="flex items-start gap-2">
               <Bot className="mt-0.5 h-4 w-4 shrink-0 text-violet-600 dark:text-violet-400" />

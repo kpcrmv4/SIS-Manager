@@ -1,4 +1,4 @@
-export const APP_NAME = 'DavisManage';
+export const APP_NAME = 'SIS Manager';
 export const DEFAULT_TIMEZONE = 'Asia/Bangkok';
 
 export const DEPOSIT_STATUS_LABELS: Record<string, string> = {

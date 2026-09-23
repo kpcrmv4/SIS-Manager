@@ -387,7 +387,7 @@ export default function BranchSetupGuidePage() {
         <Warn>
           ปุ่มฝากเหล้าต้องตั้งให้ส่งข้อความ <Code>alcohol deposit</Code> เป๊ะ ๆ — เพราะบอทจับคีย์เวิร์ดนี้แล้วเปิดระบบฝากเหล้าให้
           (จะใช้คำอื่นที่บอทรองรับก็ได้ เช่น <Code>ฝากเหล้า</Code> · <Code>deposit</Code> · <Code>เมนู</Code> —
-          ดูคำสั่งทั้งหมดที่หน้า ตั้งค่า → DAVIS Ai → คำสั่งที่รองรับ)
+          ดูคำสั่งทั้งหมดที่หน้า ตั้งค่า → SIS AI → คำสั่งที่รองรับ)
         </Warn>
 
         {/* Test callout */}

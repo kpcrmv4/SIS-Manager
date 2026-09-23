@@ -60,7 +60,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* DAVIS Ai Central Config — Owner only */}
+      {/* SIS AI Central Config — Owner only */}
       {isOwner && (
         <Card padding="none">
           <button

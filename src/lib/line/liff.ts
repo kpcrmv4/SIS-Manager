@@ -15,7 +15,7 @@ export async function initLiff(liffId: string): Promise<void> {
   if (initialized) return;
 
   if (!liffId) {
-    console.error('[LIFF] LIFF ID not provided — configure it in ตั้งค่า → DAVIS Ai');
+    console.error('[LIFF] LIFF ID not provided — configure it in ตั้งค่า → SIS AI');
     return;
   }
 

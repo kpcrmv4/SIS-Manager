@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(
     {
-      bot_name: globalMap['davis_ai.bot_name'] || 'DAVIS Ai',
+      bot_name: globalMap['davis_ai.bot_name'] || 'SIS AI',
       liff_id: storeLiff || centralLiff,
       // Echo back so client can tell whether it landed on the store-specific
       // LIFF (preferred for multi-Provider setups) or the central fallback

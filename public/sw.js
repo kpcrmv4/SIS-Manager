@@ -1,6 +1,6 @@
 // Bump on every deploy that changes the shell: an unbumped name kept serving the OLD register form
 // from cache for weeks (HR screenshot 2026-09-10). The activate handler deletes every other cache.
-const CACHE_NAME = 'davismanage-v3';
+const CACHE_NAME = 'sis-manager-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -62,10 +62,10 @@ self.addEventListener('push', (event) => {
     data = event.data?.json() || {};
   } catch {
     // Fallback if JSON parse fails
-    data = { title: 'DavisManage', body: event.data?.text() || 'มีข้อความใหม่' };
+    data = { title: 'SIS Manager', body: event.data?.text() || 'มีข้อความใหม่' };
   }
 
-  const title = data.title || 'DavisManage';
+  const title = data.title || 'SIS Manager';
   const isChatMessage = data.data?.type === 'chat_message';
 
   const options = {

@@ -19,7 +19,7 @@ const playpenSansThai = Playpen_Sans_Thai({
 });
 
 export const metadata: Metadata = {
-  title: 'DavisManage - ระบบจัดการร้าน',
+  title: 'SIS Manager - ระบบจัดการร้าน',
   description: 'ระบบจัดการสต๊อกเครื่องดื่มและฝากเหล้า สำหรับร้านอาหารและบาร์',
   manifest: '/manifest.json',
   icons: {
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'DavisManage',
+    title: 'SIS Manager',
   },
 };
 

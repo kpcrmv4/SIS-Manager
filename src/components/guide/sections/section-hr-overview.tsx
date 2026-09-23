@@ -20,7 +20,7 @@ export function SectionHrOverview() {
       {/* ── วิธีเข้าโมดูล HR ── */}
       <Card>
         <CardTitle icon="🚪">วิธีเข้าโมดูล HR</CardTitle>
-        <Step num={1} title="เข้าสู่ระบบ Davis-Inventory ตามปกติ">
+        <Step num={1} title="เข้าสู่ระบบ SIS Manager ตามปกติ">
           <p>ล็อกอินด้วยบัญชีของคุณ</p>
         </Step>
         <Step num={2} title="เปิดการ์ดโมดูล บุคคล (HR)">

@@ -153,12 +153,12 @@ export function Sidebar({ stores }: SidebarProps) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icons/icon-192.png"
-          alt="DavisManage"
+          alt="SIS Manager"
           className="h-8 w-8 shrink-0 rounded-md object-contain"
         />
         {!collapsed && (
           <span className="text-lg font-bold text-gray-900 dark:text-white">
-            DavisManage
+            SIS Manager
           </span>
         )}
       </Link>

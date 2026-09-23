@@ -46,7 +46,7 @@ export default function DavisAiSettingsPage() {
   const isOwner = user?.role === 'owner';
 
   // Form state
-  const [botName, setBotName] = useState('DAVIS Ai');
+  const [botName, setBotName] = useState('SIS AI');
 
   // UI state
   const [isLoading, setIsLoading] = useState(true);
@@ -83,7 +83,7 @@ export default function DavisAiSettingsPage() {
       map[row.key] = row.value || '';
     }
 
-    setBotName(map[SYSTEM_KEYS.BOT_NAME] || 'DAVIS Ai');
+    setBotName(map[SYSTEM_KEYS.BOT_NAME] || 'SIS AI');
     setIsLoading(false);
   }, [t]);
 
@@ -104,7 +104,7 @@ export default function DavisAiSettingsPage() {
     const supabase = createClient();
 
     const rows = [
-      { key: SYSTEM_KEYS.BOT_NAME, value: botName.trim() || 'DAVIS Ai' },
+      { key: SYSTEM_KEYS.BOT_NAME, value: botName.trim() || 'SIS AI' },
     ];
 
     const { error } = await supabase
@@ -176,7 +176,7 @@ export default function DavisAiSettingsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {botName || 'DAVIS Ai'}
+              {botName || 'SIS AI'}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               ตั้งค่าชื่อบอทกลาง + ดู Webhook URL ใช้ร่วมทุกสาขา
@@ -215,7 +215,7 @@ export default function DavisAiSettingsPage() {
             label="ชื่อบอท"
             value={botName}
             onChange={(e) => setBotName(e.target.value)}
-            placeholder="DAVIS Ai"
+            placeholder="SIS AI"
             hint="ชื่อนี้ใช้แสดงในแชทและข้อความอัตโนมัติ"
           />
         </CardContent>
