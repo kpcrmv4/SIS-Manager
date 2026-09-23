@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
 import { addDays, bangkokParts, businessNight } from '../../src/lib/date'
 import { adminDb, fixtureIds } from './fixtures/db'
-import { AUTH_DIR } from './fixtures/env'
+import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { BRANCH_B_NAME } from './fixtures/users'
 import { clearBookings, resetSettings, setupZonesAndTables, teardownZonesAndTables, type ZoneTableSet } from './fixtures/p2b-bookings'
 
@@ -217,12 +217,13 @@ test.describe('plan + list', () => {
 test.describe('empty zones (owner)', () => {
   test.use({ storageState: as('owner') })
 
-  test('P2-B1-09 no zones → empty state with a link to ตั้งค่า → ผังโต๊ะ', async ({ page }) => {
+  test('P2-B1-09 no zones → empty state with a link to ตั้งค่า → ผังโต๊ะ', async ({ page, context }) => {
     const { branchB: ownerBranchB } = fixtureIds()
     await teardownZonesAndTables(admin(), ownerBranchB)
+    // owner sees every branch; pin sis_branch directly (no cookie in storageState → the app
+    // would otherwise default to the alphabetically-first branch, which is another fixture's)
+    await context.addCookies([{ name: 'sis_branch', value: ownerBranchB, url: BASE_URL }])
     await page.goto('/tonight')
-    const switcher = page.getByTestId('branch-switcher').first()
-    await switcher.selectOption(ownerBranchB)
     await expect(page.getByRole('heading', { level: 1 })).toContainText(BRANCH_B_NAME)
     await page.goto(`/bookings?night=${NIGHT}&view=plan`)
     await expect(page.getByText('ยังไม่มีผังโต๊ะ')).toBeVisible()
