@@ -7,6 +7,20 @@
  * Label:   Puppeteer PDF width=80mm, height=auto (portrait, cut short)
  */
 
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+/** Copy of a payload with every string HTML-escaped (numbers, booleans, nulls untouched). */
+function escapeDeep(value) {
+  if (typeof value === 'string') return value.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+  if (Array.isArray(value)) return value.map(escapeDeep);
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) out[k] = escapeDeep(v);
+    return out;
+  }
+  return value;
+}
+
 class HtmlRenderer {
   constructor(receiptSettings, storeName, paperWidth) {
     this.settings = receiptSettings || {};
@@ -87,7 +101,7 @@ class HtmlRenderer {
           `<hr>` +
           `<center style="font-size:10pt;">Please scan this QRcode</center>` +
           `<center style="font-size:10pt;">Send receipt in Line</center>` +
-          `<center style="font-size:10pt;">Type <b>${payload.deposit_code}</b> in chat</center>`
+          `<center style="font-size:10pt;">Type <b>${payload.link_code || payload.deposit_code}</b> in chat</center>`
         : '');
   }
 
@@ -123,7 +137,9 @@ class HtmlRenderer {
    * อย่างอื่น => array ที่มี 1 element
    */
   renderForPrint(job) {
-    const payload = job.payload;
+    // SIS: payload text (a customer name typed in LINE) is escaped once here, before any
+    // template interpolates it — the page runs in Puppeteer on the shop PC.
+    const payload = escapeDeep(job.payload || {});
     const copies = job.copies || 1;
 
     if (job.job_type === 'receipt') {

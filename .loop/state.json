@@ -8,7 +8,8 @@
     "batch": {
       "size": 8
     },
-    "blocked_reason": ""
+    "blocked_reason": "",
+    "current": "P2-C1"
   },
   "phases": [
     {
@@ -85,7 +86,7 @@
         {
           "id": "P2-A1",
           "name": "Deposits list + detail",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P2-A2",
@@ -100,7 +101,7 @@
         {
           "id": "P2-B1",
           "name": "Bookings plan + list + staff form",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P2-B2",
@@ -115,7 +116,7 @@
         {
           "id": "P2-C1",
           "name": "LIFF shell + auth + locale",
-          "status": "todo"
+          "status": "doing"
         },
         {
           "id": "P2-C2",

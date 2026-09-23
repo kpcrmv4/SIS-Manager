@@ -308,6 +308,8 @@ export type Database = {
           name: string
           opens_at: string
           phone: string | null
+          print_server_printer_name: string | null
+          print_server_working_hours: Json | null
           receipt_settings: Json
           sort: number
           staff_group_id: string | null
@@ -328,6 +330,8 @@ export type Database = {
           name: string
           opens_at?: string
           phone?: string | null
+          print_server_printer_name?: string | null
+          print_server_working_hours?: Json | null
           receipt_settings?: Json
           sort?: number
           staff_group_id?: string | null
@@ -348,6 +352,8 @@ export type Database = {
           name?: string
           opens_at?: string
           phone?: string | null
+          print_server_printer_name?: string | null
+          print_server_working_hours?: Json | null
           receipt_settings?: Json
           sort?: number
           staff_group_id?: string | null
@@ -518,6 +524,7 @@ export type Database = {
           is_vip: boolean
           item_id: string | null
           item_name: string
+          link_code: string
           link_token: string
           notes: string | null
           photo_paths: string[]
@@ -559,6 +566,7 @@ export type Database = {
           is_vip?: boolean
           item_id?: string | null
           item_name: string
+          link_code?: string
           link_token?: string
           notes?: string | null
           photo_paths?: string[]
@@ -600,6 +608,7 @@ export type Database = {
           is_vip?: boolean
           item_id?: string | null
           item_name?: string
+          link_code?: string
           link_token?: string
           notes?: string | null
           photo_paths?: string[]
@@ -823,13 +832,13 @@ export type Database = {
           copies: number
           created_at: string
           deposit_id: string | null
-          error: string | null
+          error_message: string | null
           id: string
+          job_type: string
           payload: Json
           printed_at: string | null
           requested_by: string | null
           status: Database["public"]["Enums"]["print_status"]
-          type: string
         }
         Insert: {
           attempts?: number
@@ -837,13 +846,13 @@ export type Database = {
           copies?: number
           created_at?: string
           deposit_id?: string | null
-          error?: string | null
+          error_message?: string | null
           id?: string
+          job_type: string
           payload?: Json
           printed_at?: string | null
           requested_by?: string | null
           status?: Database["public"]["Enums"]["print_status"]
-          type: string
         }
         Update: {
           attempts?: number
@@ -851,13 +860,13 @@ export type Database = {
           copies?: number
           created_at?: string
           deposit_id?: string | null
-          error?: string | null
+          error_message?: string | null
           id?: string
+          job_type?: string
           payload?: Json
           printed_at?: string | null
           requested_by?: string | null
           status?: Database["public"]["Enums"]["print_status"]
-          type?: string
         }
         Relationships: [
           {
@@ -888,31 +897,46 @@ export type Database = {
           account_id: string | null
           branch_id: string
           created_at: string
+          error_message: string | null
+          hostname: string | null
           id: string
-          last_seen_at: string | null
+          is_online: boolean
+          last_heartbeat: string | null
           name: string
           printer_name: string | null
-          version: string | null
+          printer_status: string | null
+          server_version: string | null
+          updated_at: string
         }
         Insert: {
           account_id?: string | null
           branch_id: string
           created_at?: string
+          error_message?: string | null
+          hostname?: string | null
           id?: string
-          last_seen_at?: string | null
+          is_online?: boolean
+          last_heartbeat?: string | null
           name?: string
           printer_name?: string | null
-          version?: string | null
+          printer_status?: string | null
+          server_version?: string | null
+          updated_at?: string
         }
         Update: {
           account_id?: string | null
           branch_id?: string
           created_at?: string
+          error_message?: string | null
+          hostname?: string | null
           id?: string
-          last_seen_at?: string | null
+          is_online?: boolean
+          last_heartbeat?: string | null
           name?: string
           printer_name?: string | null
-          version?: string | null
+          printer_status?: string | null
+          server_version?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1438,7 +1462,7 @@ export type Database = {
         | "disposed"
         | "cancelled"
       outbox_status: "queued" | "sending" | "sent" | "failed" | "skipped"
-      print_status: "pending" | "printing" | "done" | "failed"
+      print_status: "pending" | "printing" | "completed" | "failed"
       user_role: "staff" | "bar" | "owner"
       withdrawal_status: "pending" | "completed" | "rejected" | "cancelled"
       withdrawal_type: "in_store" | "take_home"
@@ -1591,7 +1615,7 @@ export const Constants = {
         "cancelled",
       ],
       outbox_status: ["queued", "sending", "sent", "failed", "skipped"],
-      print_status: ["pending", "printing", "done", "failed"],
+      print_status: ["pending", "printing", "completed", "failed"],
       user_role: ["staff", "bar", "owner"],
       withdrawal_status: ["pending", "completed", "rejected", "cancelled"],
       withdrawal_type: ["in_store", "take_home"],

@@ -61,8 +61,8 @@ class SupabaseConnector {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'print_queue',
-          filter: `store_id=eq.${this.config.STORE_ID}`,
+          table: 'print_jobs',
+          filter: `branch_id=eq.${this.config.STORE_ID}`,
         },
         (payload) => {
           console.log(`  [RT] New print job received: ${payload.new.id}`);
@@ -71,7 +71,7 @@ class SupabaseConnector {
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log('  [OK] Realtime subscribed to print_queue');
+          console.log('  [OK] Realtime subscribed to print_jobs');
           this.isConnected = true;
           this.lastDisconnect = null;
           this.stopFallbackPolling();
@@ -129,9 +129,9 @@ class SupabaseConnector {
    */
   async fetchPendingJobs() {
     const { data, error } = await this.client
-      .from('print_queue')
+      .from('print_jobs')
       .select('*')
-      .eq('store_id', this.config.STORE_ID)
+      .eq('branch_id', this.config.STORE_ID)
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
       .limit(500);
@@ -150,7 +150,7 @@ class SupabaseConnector {
     }
 
     const { error } = await this.client
-      .from('print_queue')
+      .from('print_jobs')
       .update(updateData)
       .eq('id', jobId);
 
@@ -164,9 +164,9 @@ class SupabaseConnector {
    */
   async fetchReceiptSettings() {
     const { data, error } = await this.client
-      .from('store_settings')
+      .from('branches')
       .select('receipt_settings')
-      .eq('store_id', this.config.STORE_ID)
+      .eq('id', this.config.STORE_ID)
       .single();
 
     if (error) {
@@ -186,9 +186,9 @@ class SupabaseConnector {
    */
   async fetchPrintServerSettings() {
     const { data, error } = await this.client
-      .from('store_settings')
+      .from('branches')
       .select('receipt_settings, print_server_working_hours, print_server_printer_name')
-      .eq('store_id', this.config.STORE_ID)
+      .eq('id', this.config.STORE_ID)
       .single();
     if (error) {
       console.warn('  [!] Cannot fetch print server settings:', error.message);
@@ -205,9 +205,9 @@ class SupabaseConnector {
    * ส่ง heartbeat
    */
   async sendHeartbeat(printerInfo = {}) {
-    const { error } = await this.client.from('print_server_status').upsert(
+    const { error } = await this.client.from('print_stations').upsert(
       {
-        store_id: this.config.STORE_ID,
+        branch_id: this.config.STORE_ID,
         is_online: true,
         last_heartbeat: new Date().toISOString(),
         server_version: '2.0.0',
@@ -217,7 +217,7 @@ class SupabaseConnector {
         error_message: printerInfo.error || null,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: 'store_id' }
+      { onConflict: 'branch_id' }
     );
 
     if (error) {
@@ -230,14 +230,14 @@ class SupabaseConnector {
    */
   async sendOffline() {
     try {
-      await this.client.from('print_server_status').upsert(
+      await this.client.from('print_stations').upsert(
         {
-          store_id: this.config.STORE_ID,
+          branch_id: this.config.STORE_ID,
           is_online: false,
           last_heartbeat: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'store_id' }
+        { onConflict: 'branch_id' }
       );
     } catch (err) {
       // Ignore — shutting down

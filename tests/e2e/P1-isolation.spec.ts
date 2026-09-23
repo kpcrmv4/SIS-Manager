@@ -28,7 +28,7 @@ test.beforeAll(async () => {
   const z = await admin.from('table_zones').insert({ branch_id: branchB, name: `${RUN}-zone` }).select('id').single()
   await admin.from('tables').insert({ branch_id: branchB, zone_id: z.data!.id, label: 'ZB1' })
   await admin.from('booking_blackouts').insert({ branch_id: branchB, night: addDays(businessNight(), 30), reason: RUN })
-  await admin.from('print_jobs').insert({ branch_id: branchB, type: 'receipt', payload: { run: RUN } })
+  await admin.from('print_jobs').insert({ branch_id: branchB, job_type: 'receipt', payload: { run: RUN } })
   await admin.from('liquor_items').insert({ branch_id: branchB, name: `${RUN}-item` })
   const bk = await dbAs('staffB').rpc('create_booking', { p_branch: branchB, p_night: businessNight(), p_slot: '21:00', p_party: 2, p_name: `${RUN} booking` } as never)
   expect(bk.error, bk.error?.message).toBeNull()
