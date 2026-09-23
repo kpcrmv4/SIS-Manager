@@ -8,7 +8,7 @@ import { getActorState, isBarOrOwner } from '@/lib/auth/actor'
 import { getBranchSettings } from '@/lib/deposit/branch'
 import { getTonightData, type TonightBooking, type PendingTask } from '@/lib/deposit/tonight'
 import { depositBadgeSpec, badgeText } from '@/lib/deposit/format'
-import { formatLongDate, formatShortDate } from '@/lib/date'
+import { formatLongDate, formatShortDate, formatTime } from '@/lib/date'
 import { CheckInButton } from './check-in-button'
 
 function taskHref(task: PendingTask) {
@@ -166,7 +166,7 @@ function TaskRow({ task, t, ts }: { task: PendingTask; t: Awaited<ReturnType<typ
       <Link href={taskHref(task)} className="flex items-center gap-3 border-b border-line-soft px-3.5 py-2.5 transition-colors duration-100 last:border-b-0 hover:bg-surface-2 md:px-4" data-testid="tonight-task-confirm">
         <div className="min-w-0 flex-1">
           <div className="truncate text-base font-semibold leading-6 text-ink">{t('taskConfirm', { item: task.itemName })}</div>
-          <div className="truncate text-sm leading-5 text-muted-token">{t('taskConfirmMeta', { customer: task.customerName, table, time: task.receivedAt ? task.receivedAt.slice(11, 16) : '' })}</div>
+          <div className="truncate text-sm leading-5 text-muted-token">{t('taskConfirmMeta', { customer: task.customerName, table, time: task.receivedAt ? formatTime(task.receivedAt) : '' })}</div>
         </div>
         <Badge tone="progress">{ts('deposit.pending_confirm')}</Badge>
       </Link>
@@ -177,7 +177,7 @@ function TaskRow({ task, t, ts }: { task: PendingTask; t: Awaited<ReturnType<typ
       <Link href={taskHref(task)} className="flex items-center gap-3 border-b border-line-soft px-3.5 py-2.5 transition-colors duration-100 last:border-b-0 hover:bg-surface-2 md:px-4" data-testid="tonight-task-withdraw">
         <div className="min-w-0 flex-1">
           <div className="truncate text-base font-semibold leading-6 text-ink">{t('taskWithdraw', { item: task.itemName, count: task.count })}</div>
-          <div className="truncate text-sm leading-5 text-muted-token">{t('taskWithdrawMeta', { customer: task.customerName, table, time: task.createdAt.slice(11, 16) })}</div>
+          <div className="truncate text-sm leading-5 text-muted-token">{t('taskWithdrawMeta', { customer: task.customerName, table, time: formatTime(task.createdAt) })}</div>
         </div>
         <Badge tone="info">{ts('deposit.pending_withdrawal')}</Badge>
       </Link>
