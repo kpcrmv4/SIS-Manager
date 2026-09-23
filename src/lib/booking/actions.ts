@@ -1,6 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
+import { dispatchSoon } from '@/lib/line/dispatch'
 import { callRpc, cleanText, isUuid } from '@/lib/action'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { getActorState, isBarOrOwner } from '@/lib/auth/actor'
@@ -45,7 +47,10 @@ export async function createStaffBooking(input: {
       p_note: cleanText(input.note, 300),
     }),
   )
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -54,14 +59,20 @@ export async function confirmBooking(bookingId: string, tableId?: string): Promi
   const res = await callRpc<{ id: string; status: string }>((sb) =>
     sb.rpc('confirm_booking', { p_booking: bookingId, p_table: isUuid(tableId) ? tableId : undefined }),
   )
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 
 export async function rejectBooking(bookingId: string, reason: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(bookingId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('reject_booking', { p_booking: bookingId, p_reason: cleanText(reason, 200) ?? '' }))
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -70,7 +81,10 @@ export async function assignTable(bookingId: string, tableId: string | null): Pr
   const res = await callRpc<{ id: string; table_id: string | null }>((sb) =>
     sb.rpc('assign_table', { p_booking: bookingId, p_table: tableId as string }),
   )
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 
@@ -78,14 +92,20 @@ export async function checkInBooking(branchId: string, ref: string): Promise<Act
   const r = cleanText(ref, 64)
   if (!isUuid(branchId) || !r) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string; already: boolean }>((sb) => sb.rpc('check_in_booking', { p_branch: branchId, p_ref: r }))
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 
 export async function cancelBooking(bookingId: string, reason?: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(bookingId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('cancel_booking', { p_booking: bookingId, p_reason: cleanText(reason, 200) }))
-  if (res.ok) touched()
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
   return res
 }
 

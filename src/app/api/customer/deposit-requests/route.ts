@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, after, type NextRequest } from 'next/server'
+import { dispatchSoon } from '@/lib/line/dispatch'
 import { customerAuthStatus, requireCustomer } from '@/lib/customer/auth'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { TERMS_VERSION } from '@/components/liff/constants'
@@ -46,5 +47,6 @@ export async function POST(req: NextRequest) {
     p_notes: typeof notes === 'string' ? notes.trim().slice(0, 300) || undefined : undefined,
   })
   if (error) return rpcError(error)
+  after(() => dispatchSoon())
   return NextResponse.json({ ok: true, ...(data as object) }, { status: 201 })
 }
