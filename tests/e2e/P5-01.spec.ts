@@ -13,7 +13,8 @@ import { env } from './fixtures/env'
 test.describe.configure({ mode: 'serial' })
 
 const ROOT = join(__dirname, '..', '..')
-const DEMO = ['RMI', 'KSN', 'BNA'] as const
+// demo-only codes (never a real branch's code); ids below are keyed without the D prefix
+const DEMO = ['DRMI', 'DKSN', 'DBNA'] as const
 const DEP_STATUSES = ['requested', 'pending_confirm', 'in_store', 'pending_withdrawal', 'withdrawn', 'expired', 'disposed', 'cancelled']
 const BK_STATUSES = ['pending', 'confirmed', 'arrived', 'no_show', 'cancelled', 'rejected']
 
@@ -26,7 +27,7 @@ async function demoBranchIds(): Promise<Record<string, string>> {
   expect(error, error?.message).toBeNull()
   expect(data!.length).toBe(3)
   expect(data!.every((b) => b.active)).toBe(true)
-  return Object.fromEntries(data!.map((b) => [b.code, b.id]))
+  return Object.fromEntries(data!.map((b) => [b.code.slice(1), b.id]))
 }
 
 async function statusCounts(table: 'deposits' | 'bookings', branchIds: string[]) {
@@ -91,6 +92,33 @@ test('P5-01-03 P5-01-04 every deposit and booking display state exists at RMI', 
   expect(settings!.closed_weekdays.length).toBeGreaterThan(0)
   const { count: blackouts } = await db.from('booking_blackouts').select('id', { count: 'exact', head: true }).eq('branch_id', ids.RMI)
   expect(blackouts).toBe(1)
+})
+
+test('P5-01-09 the reset refuses to run next to a real branch, and never adopts an unmarked demo code', async () => {
+  const run = () => spawnSync(process.execPath, [join(ROOT, 'scripts', 'demo-reset.mjs')], { cwd: ROOT, encoding: 'utf8', timeout: 240_000 })
+  const db = adminDb()
+  // a real-looking active branch (not demo, not an E2E fixture)
+  const { data: real, error } = await db.from('branches').insert({ code: 'QQRL', name: 'E2E real-branch guard' }).select('id').single()
+  expect(error, error?.message).toBeNull()
+  try {
+    const res = run()
+    expect(res.status).toBe(1)
+    expect(res.stderr).toContain('QQRL')
+  } finally {
+    await db.from('branches').delete().eq('id', real!.id)
+  }
+  // strip the marker from one demo branch: the reset must refuse to touch it
+  const { data: drmi } = await db.from('branches').select('id, receipt_settings').eq('code', 'DRMI').single()
+  await db.from('branches').update({ receipt_settings: { header: 'not demo' } }).eq('id', drmi!.id)
+  try {
+    const res = run()
+    expect(res.status).toBe(1)
+    expect(res.stderr).toContain('DRMI')
+    const { count } = await db.from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', drmi!.id)
+    expect(count).toBeGreaterThan(0) // nothing wiped
+  } finally {
+    await db.from('branches').update({ receipt_settings: drmi!.receipt_settings }).eq('id', drmi!.id)
+  }
 })
 
 test('P5-01-08 a missing SEED_* password stops the reset and names the key', async () => {

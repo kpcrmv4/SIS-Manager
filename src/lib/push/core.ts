@@ -28,8 +28,9 @@ export async function deliver(
   let removed = 0
   let failed = 0
   for (const row of rows) {
-    const message = render(row)
     try {
+      // inside the try: one malformed row must not abandon the rest of the claimed batch
+      const message = render(row)
       const res = await send({ endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } }, message)
       if (res.statusCode >= 200 && res.statusCode < 300) sent++
       else failed++

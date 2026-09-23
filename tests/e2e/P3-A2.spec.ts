@@ -243,7 +243,7 @@ test.describe('owner', () => {
     // expired code
     await page.getByTestId('line-make-code').click()
     const shown = (await page.getByTestId('line-bind-code').locator('p').first().textContent())!.trim()
-    expect(shown).toMatch(/^SIS-\d{6}$/)
+    expect(shown).toMatch(/^SIS-[A-HJ-NP-Z2-9]{8}$/)
     const { data: sec } = await adminDb().from('branch_line_secrets').select('group_bind_code').eq('branch_id', branchA).single()
     expect(sec!.group_bind_code).toBe(shown)
     await adminDb().from('branch_line_secrets').update({ group_bind_expires_at: new Date(Date.now() - 1000).toISOString() }).eq('branch_id', branchA)
@@ -257,7 +257,7 @@ test.describe('owner', () => {
     await page.getByTestId('line-make-code').click()
     await expect(page.getByTestId('line-bind-code').locator('p').first()).not.toHaveText(shown)
     const code = (await page.getByTestId('line-bind-code').locator('p').first().textContent())!.trim()
-    const wrong = textEvent({ type: 'group', groupId: group }, code === 'SIS-000000' ? 'SIS-000001' : 'SIS-000000')
+    const wrong = textEvent({ type: 'group', groupId: group }, code === 'SIS-AAAAAAAA' ? 'SIS-BBBBBBBB' : 'SIS-AAAAAAAA')
     await postWebhook(request, A_CODE, { destination: 'x', events: [wrong] }, SECRET)
     ;({ data: b } = await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single())
     expect(b!.staff_group_id).toBeNull()
@@ -274,6 +274,23 @@ test.describe('owner', () => {
 
     await page.reload()
     await expect(page.getByTestId('line-group-status')).toHaveText('ผูกกลุ่มแล้ว')
+  })
+
+  test('P3-A2-08 ten wrong bind codes burn the open code (no brute force)', async () => {
+    const { branchA } = fixtureIds()
+    const { data: made, error } = await dbAs('owner').rpc('new_group_bind_code', { p_branch: branchA })
+    expect(error, error?.message).toBeNull()
+    const code = (made as { code: string }).code
+    const before = (await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single()).data!.staff_group_id
+    const attacker = groupId()
+    for (let i = 0; i < 10; i++) {
+      const { data } = await adminDb().rpc('bind_staff_group', { p_branch: branchA, p_code: `SIS-WRONG${i}`, p_group_id: attacker })
+      expect(data).toBe(false)
+    }
+    const { data: late } = await adminDb().rpc('bind_staff_group', { p_branch: branchA, p_code: code, p_group_id: attacker })
+    expect(late).toBe(false)
+    const after = (await adminDb().from('branches').select('staff_group_id').eq('id', branchA).single()).data!.staff_group_id
+    expect(after).toBe(before)
   })
 
   test('P3-A2-09 "ส่งข้อความทดสอบ" queues a test row delivered to the group; no group → NO_GROUP toast', async ({ page, context }) => {

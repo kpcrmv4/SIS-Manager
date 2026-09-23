@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  const buf = await buildPdf(report, tt, { range, generated: tt('generatedAt', { date: formatShortDate(now, locale), time: formatTime(now, locale) }) }, req.nextUrl.origin)
+  const buf = await buildPdf(report, tt, { range, generated: tt('generatedAt', { date: formatShortDate(now, locale), time: formatTime(now, locale) }) })
   return new NextResponse(new Uint8Array(buf), {
     headers: {
       'content-type': 'application/pdf',

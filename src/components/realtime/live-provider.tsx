@@ -91,8 +91,15 @@ export function LiveProvider({ userId, branchId, children }: { userId: string; b
       )
     })()
 
+    // the access token refreshes about hourly — hand each new one to the open socket, or the
+    // private channels silently stop delivering after the first hour of a shift
+    const { data: authSub } = sb.auth.onAuthStateChange((_event, session) => {
+      if (session) void sb.realtime.setAuth(session.access_token)
+    })
+
     return () => {
       cancelled = true
+      authSub.subscription.unsubscribe()
       setJoined(false)
       clearTimeout(timer.current)
       for (const ch of channels) void sb.removeChannel(ch)

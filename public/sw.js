@@ -19,7 +19,8 @@ self.addEventListener('push', (event) => {
       icon: '/android-chrome-192x192.png',
       badge: '/favicon-32x32.png',
       tag: data.tag || undefined,
-      data: { url: typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/' },
+      // in-app paths only — '//host' is protocol-relative and would leave the app
+      data: { url: typeof data.url === 'string' && /^\/(?![/\\])/.test(data.url) ? data.url : '/' },
     }),
   )
 })

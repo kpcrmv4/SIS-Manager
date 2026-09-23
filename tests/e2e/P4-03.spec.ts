@@ -9,13 +9,16 @@ import { deliver, type PushRow } from '../../src/lib/push/core'
 const as = (role: string) => join(AUTH_DIR, `${role}.json`)
 test.describe.configure({ mode: 'serial' })
 
-const FAKE_ENDPOINT = `https://push.invalid/sis-e2e/${RUN}`
+// an FCM-shaped endpoint (the save action only accepts real push-service hosts); nothing is
+// ever sent to it — P4-03-04 drives deliver() with a recording sender
+const FAKE_PREFIX = 'https://fcm.googleapis.com/fcm/send/sis-e2e-'
+const FAKE_ENDPOINT = `${FAKE_PREFIX}${RUN}`
 // valid-looking base64url keys (65-byte P-256 point, 16-byte auth secret)
 const FAKE_P256DH = 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM'
 const FAKE_AUTH = 'tBHItJI5svbpez7KI4CCXg'
 
 test.afterAll(async () => {
-  await adminDb().from('push_subscriptions').delete().like('endpoint', `https://push.invalid/sis-e2e/${RUN}%`)
+  await adminDb().from('push_subscriptions').delete().like('endpoint', `${FAKE_PREFIX}${RUN}%`)
   await adminDb().from('notifications').delete().like('payload->>customer', `${RUN}%`)
 })
 

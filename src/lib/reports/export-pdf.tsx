@@ -1,4 +1,5 @@
 import 'server-only'
+import { join } from 'node:path'
 import { Document, Font, Page, StyleSheet, Text, View, renderToBuffer } from '@react-pdf/renderer'
 import { APP_NAME, SHOP_NAME } from '@/lib/constants'
 import { REPORT_TOTAL_KEYS, reportTotals, showRate, type Report } from './overview'
@@ -6,23 +7,25 @@ import { REPORT_TOTAL_KEYS, reportTotals, showRate, type Report } from './overvi
 type T = (key: string, values?: Record<string, string | number>) => string
 
 /**
- * The owner's PDF report. Thai needs an embedded font: react-pdf fetches Sarabun from the
- * app's own /fonts (RULINGS R-023 — screens keep IBM Plex Sans Thai; the PDF uses the
- * bundled Sarabun TTFs because react-pdf needs a TTF it can load at render time).
+ * The owner's PDF report. Thai needs an embedded font: react-pdf reads the bundled Sarabun
+ * TTFs from disk (RULINGS R-023 — screens keep IBM Plex Sans Thai). Read from the file system,
+ * never from a URL built from the request's Host header; next.config traces public/fonts
+ * into this route's function.
  */
-let registeredFor = ''
-function registerFont(origin: string) {
-  if (registeredFor === origin) return
+let registered = false
+function registerFont() {
+  if (registered) return
+  const dir = join(process.cwd(), 'public', 'fonts')
   Font.register({
     family: 'Sarabun',
     fonts: [
-      { src: `${origin}/fonts/Sarabun-Regular.ttf` },
-      { src: `${origin}/fonts/Sarabun-Bold.ttf`, fontWeight: 'bold' },
+      { src: join(dir, 'Sarabun-Regular.ttf') },
+      { src: join(dir, 'Sarabun-Bold.ttf'), fontWeight: 'bold' },
     ],
   })
   // Thai has no spaces between words — never hyphenate, let lines break anywhere
   Font.registerHyphenationCallback((word) => [word])
-  registeredFor = origin
+  registered = true
 }
 
 const s = StyleSheet.create({
@@ -50,8 +53,8 @@ const COL_KEY: Record<(typeof REPORT_TOTAL_KEYS)[number], string> = {
   cancelled: 'colCancelled',
 }
 
-export async function buildPdf(report: Report, t: T, labels: { range: string; generated: string }, origin: string): Promise<Buffer> {
-  registerFont(origin)
+export async function buildPdf(report: Report, t: T, labels: { range: string; generated: string }): Promise<Buffer> {
+  registerFont()
   const totals = reportTotals(report.branches)
   const rate = (a: number, n: number) => {
     const r = showRate(a, n)

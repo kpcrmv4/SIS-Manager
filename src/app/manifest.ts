@@ -1,12 +1,13 @@
 import type { MetadataRoute } from 'next'
 import { APP_NAME } from '@/lib/constants'
+import staffTh from '../../messages/staff/th.json'
 
 /** P4-03 — staff PWA. Colours are the Minimal palette tokens (--brand-sidebar, --canvas). */
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_NAME,
     short_name: 'SIS',
-    description: 'ฝากเหล้าและจองโต๊ะ',
+    description: staffTh.login.subtitle, // no request locale here — the staff default (th)
     start_url: '/',
     scope: '/',
     display: 'standalone',

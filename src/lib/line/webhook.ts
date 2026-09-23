@@ -29,7 +29,8 @@ const USER_ID = /^U[0-9a-f]{32}$/
 const DEP_CODE = /^DEP-?[A-Z]{2,5}-?[A-Z0-9]{5}$/
 const LINK_CODE = /^[A-HJ-NP-Z2-9]{6}$/
 const LINK_TOKEN = /^[0-9A-F]{32}$/
-const BIND_CODE = /^SIS-\d{6}$/
+// staff-group bind code: SIS- + 8 chars of the link alphabet (CSPRNG, private.random_code)
+const BIND_CODE = /^SIS-[A-HJ-NP-Z2-9]{8}$/
 
 // ── best-effort in-process dedupe on webhookEventId ─────────────────────
 const SEEN_TTL_MS = 60 * 60 * 1000

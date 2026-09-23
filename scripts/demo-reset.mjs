@@ -38,11 +38,16 @@ const URL = env.NEXT_PUBLIC_SUPABASE_URL
 const admin = createClient(URL, env.SUPABASE_SECRET_KEY, { auth: { persistSession: false, autoRefreshToken: false } })
 const STAFF_DOMAIN = 'staff.sis.local'
 
+// Demo-only codes (never a real branch's code) + a marker in receipt_settings: the reset
+// only ever adopts a branch it made itself (security review P3/P4 — a real "RMI" must be safe).
+const DEMO_MARK = { demo: true, header: 'SIS Music Bar · เดโม', footer: 'ข้อมูลตัวอย่าง', copies: 1 }
 const BRANCHES = [
-  { code: 'RMI', name: 'รามอินทรา', sort: 1, phone: '02-000-0001' },
-  { code: 'KSN', name: 'เกษตร-นวมินทร์', sort: 2, phone: '02-000-0002' },
-  { code: 'BNA', name: 'บางนา', sort: 3, phone: '02-000-0003' },
+  { code: 'DRMI', name: 'รามอินทรา · เดโม', sort: 91, phone: '02-000-0001' },
+  { code: 'DKSN', name: 'เกษตร-นวมินทร์ · เดโม', sort: 92, phone: '02-000-0002' },
+  { code: 'DBNA', name: 'บางนา · เดโม', sort: 93, phone: '02-000-0003' },
 ]
+const DEMO_CODES = BRANCHES.map((b) => b.code)
+const FIXTURE_CODE = /^Z[A-Z]{2}$/ // E2E fixture branches (tests/e2e/fixtures/users.ts)
 const USERS = [
   { key: 'owner', username: 'demo.owner', display: 'คุณเจ้าของ (เดโม)', role: 'owner', branches: ['RMI', 'KSN', 'BNA'], pw: env.SEED_OWNER_PASSWORD },
   { key: 'bar', username: 'demo.bar', display: 'bar ต้น (เดโม)', role: 'bar', branches: ['RMI', 'KSN'], pw: env.SEED_BAR_PASSWORD },
@@ -72,16 +77,35 @@ const addDays = (ymd, n) => {
 const businessNight = () => bkkDate(new Date(Date.now() - 6 * 3600 * 1000))
 const daysFromNow = (n) => new Date(Date.now() + n * 86400 * 1000).toISOString()
 
+// ── 0. guards: never touch a branch this script did not make ───────────────
+async function guard() {
+  const all = must('branches', await admin.from('branches').select('code, active, receipt_settings').range(0, 999))
+  const foreign = all.filter((b) => DEMO_CODES.includes(b.code) && b.receipt_settings?.demo !== true)
+  if (foreign.length) {
+    throw new Error(`branch code(s) ${foreign.map((b) => b.code).join(', ')} exist but were not made by demo-reset — refusing to touch them`)
+  }
+  const real = all.filter((b) => b.active && !DEMO_CODES.includes(b.code) && !FIXTURE_CODE.test(b.code))
+  if (real.length && env.DEMO_RESET_ALLOW_WITH_REAL_BRANCHES !== '1') {
+    throw new Error(
+      `this project has real branches (${real.map((b) => b.code).join(', ')}) — demo data does not belong next to them. ` +
+        'Set DEMO_RESET_ALLOW_WITH_REAL_BRANCHES=1 in .env.local only if you are sure',
+    )
+  }
+}
+
 // ── 1. branches ─────────────────────────────────────────────────────────
 async function upsertBranches() {
   const rows = must(
     'branches',
     await admin
       .from('branches')
-      .upsert(BRANCHES.map((b) => ({ ...b, active: true, deposit_days: 30, expiry_notice_days: 7, withdrawal_blocked_days: ['Fri', 'Sat'], opens_at: '19:00', closes_at: '02:00' })), { onConflict: 'code' })
+      .upsert(
+        BRANCHES.map((b) => ({ ...b, active: true, deposit_days: 30, expiry_notice_days: 7, withdrawal_blocked_days: ['Fri', 'Sat'], opens_at: '19:00', closes_at: '02:00', receipt_settings: DEMO_MARK })),
+        { onConflict: 'code' },
+      )
       .select('id, code'),
   )
-  return Object.fromEntries(rows.map((r) => [r.code, r.id]))
+  return Object.fromEntries(rows.map((r) => [r.code.slice(1), r.id])) // DRMI → RMI key used below
 }
 
 // ── 2. accounts ─────────────────────────────────────────────────────────
@@ -297,6 +321,7 @@ async function seedBookings(c, branchIds, tables, customers) {
 
 // ── run ─────────────────────────────────────────────────────────────────
 async function main() {
+  await guard()
   const branchIds = await upsertBranches()
   const userIds = await upsertUsers(branchIds)
   await wipe(branchIds, userIds)
@@ -328,5 +353,7 @@ async function main() {
 
 main().catch((e) => {
   console.error(`demo-reset: failed — ${e.message}`)
-  process.exit(1)
+  // exitCode, not process.exit(): exiting with fetch sockets still open trips a libuv
+  // assertion on Windows (0xC0000409) and the real status is lost
+  process.exitCode = 1
 })

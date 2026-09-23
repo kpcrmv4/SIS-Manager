@@ -84,7 +84,8 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
       if (!error) onChanged()
     }
     onNavigate()
-    if (r.link?.startsWith('/')) router.push(r.link)
+    // in-app paths only — '//host' is protocol-relative and would leave the app
+    if (r.link && /^\/(?![/\\])/.test(r.link)) router.push(r.link)
   }
 
   async function markAll() {

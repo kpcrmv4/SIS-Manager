@@ -31,6 +31,18 @@ export async function dispatchPush(limit = 50): Promise<{ sent: number; removed:
   const rows = (data ?? []) as PushRow[]
   if (!rows.length) return { sent: 0, removed: 0, failed: 0 }
 
+  try {
+    return await deliverClaimed(admin, rows)
+  } catch (e) {
+    // claim_push already marked these pushed — hand them back so the next tick retries.
+    // A re-send is harmless: the push tag is the notification id, so the browser shows it once.
+    const ids = [...new Set(rows.map((r) => r.notification_id))]
+    await admin.from('notifications').update({ pushed_at: null }).in('id', ids)
+    throw e
+  }
+}
+
+async function deliverClaimed(admin: ReturnType<typeof getSupabaseAdmin>, rows: PushRow[]) {
   const userIds = [...new Set(rows.map((r) => r.user_id))]
   const { data: profiles, error: pErr } = await admin.from('profiles').select('id, locale').in('id', userIds)
   if (pErr) throw new Error(`push profiles: ${pErr.code ?? pErr.message}`)
@@ -43,7 +55,7 @@ export async function dispatchPush(limit = 50): Promise<{ sent: number; removed:
     const v = (k: string) => (p[k] == null ? '' : String(p[k]))
     const kind = KINDS.includes(row.kind) ? row.kind : 'other'
     const body = t(`kinds.${kind}` as never, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') } as never)
-    return { title: t('title'), body, url: row.link?.startsWith('/') ? row.link : '/', tag: row.notification_id }
+    return { title: t('title'), body, url: row.link && /^\/(?![/\\])/.test(row.link) ? row.link : '/', tag: row.notification_id }
   }
 
   return deliver(

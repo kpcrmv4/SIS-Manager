@@ -271,6 +271,7 @@ export type Database = {
           channel_secret: string | null
           group_bind_code: string | null
           group_bind_expires_at: string | null
+          group_bind_failures: number
           updated_at: string
         }
         Insert: {
@@ -279,6 +280,7 @@ export type Database = {
           channel_secret?: string | null
           group_bind_code?: string | null
           group_bind_expires_at?: string | null
+          group_bind_failures?: number
           updated_at?: string
         }
         Update: {
@@ -287,6 +289,7 @@ export type Database = {
           channel_secret?: string | null
           group_bind_code?: string | null
           group_bind_expires_at?: string | null
+          group_bind_failures?: number
           updated_at?: string
         }
         Relationships: [

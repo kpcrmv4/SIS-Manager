@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['localhost', '127.0.0.1', '*.localhost'],
   outputFileTracingIncludes: {
     '/api/print-server/setup': ['./print-server/**/*'],
+    // the PDF report reads its Thai font from disk (never from a Host-derived URL)
+    '/api/reports/export': ['./public/fonts/**/*'],
   },
   headers: async () => [
     {
