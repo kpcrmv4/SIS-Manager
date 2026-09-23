@@ -1,0 +1,145 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Run report — C:\projects\sismusicbar</title>
+<style>
+:root{color-scheme:light;--bg:#f7f7f5;--panel:#fff;--fg:#16161a;--muted:#6b6b73;--faint:#9a9aa2;
+  --ring:#e6e6e2;--brand:#1c5cab;--track:#ececea;
+  --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;
+  --st-ready:#0ca30c;--st-review:#fab219;--st-needs:#d03b3b;--st-merged:#8a8a92}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#111114;--panel:#18181c;--fg:#ececed;--muted:#9a9aa2;--faint:#6f6f78;--ring:#2b2b32;
+  --brand:#6da7ec;--track:#26262c;--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.55 ui-sans-serif,system-ui,"IBM Plex Sans Thai","Noto Sans Thai",sans-serif}
+main{max-width:1000px;margin:0 auto;padding:26px 22px 60px}
+h1{font-size:17px;margin:0 0 3px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:12px;margin-bottom:20px}
+.panel{background:var(--panel);border:1px solid var(--ring);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;font-weight:600}
+.heroes{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.hero .fig{font-size:27px;font-weight:660;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.hero .cap{font-size:12px;color:var(--muted)}
+.segbar{display:flex;gap:2px;height:10px;margin:6px 0 10px}
+.segbar i{display:block;height:100%;border-radius:2px;min-width:4px}
+.segbar i:first-child{border-radius:4px 2px 2px 4px}.segbar i:last-child{border-radius:2px 4px 4px 2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+.legend b{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.sw{width:8px;height:8px;border-radius:2px;flex:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:500;color:var(--muted);padding:4px 10px 4px 0;white-space:nowrap}
+td{padding:4px 0}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:12px}
+.barcell{width:100%}.barcell i{display:block;height:7px;border-radius:2px;background:var(--c1);min-width:2px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;align-items:start}
+.note{font-size:12px;color:var(--muted);margin-top:12px;padding-top:12px;border-top:1px solid var(--ring)}
+.warn{color:var(--st-needs)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+ul{margin:8px 0 0;padding-left:18px;font-size:12.5px}
+#tip{position:fixed;opacity:0;pointer-events:none;transition:opacity .1s;background:var(--panel);
+  border:1px solid var(--ring);border-radius:8px;padding:5px 9px;font-size:12px;white-space:nowrap;
+  box-shadow:0 6px 20px rgba(0,0,0,.14)}
+</style></head><body><main>
+<h1>Run report — C:\projects\sismusicbar</h1>
+<div class="sub">since 2026-09-16 18:12 · base <code>main</code> ·
+ generated 2026-09-23 18:12</div>
+
+<div class="panel"><div class="heroes">
+  <div class="hero"><div class="fig">$0.00</div><div class="cap">token spend</div></div>
+  <div class="hero"><div class="fig">911,815,553</div><div class="cap">input tokens</div></div>
+  <div class="hero"><div class="fig">3,371,465</div><div class="cap">output tokens</div></div>
+  <div class="hero"><div class="fig">2,031</div><div class="cap">model turns</div></div>
+  <div class="hero"><div class="fig">99%</div><div class="cap">of input served from cache</div></div>
+  <div class="hero"><div class="fig">17%</div><div class="cap">of output was thinking</div></div>
+</div></div>
+
+<div class="panel"><h2>Where the tokens went</h2>
+  <div class="segbar"><i style="flex:905552682;background:var(--c1)" data-tip="cache read: 905,552,682"></i><i style="flex:6258743;background:var(--c2)" data-tip="cache write: 6,258,743"></i><i style="flex:4128;background:var(--c3)" data-tip="fresh input: 4,128"></i><i style="flex:3371465;background:var(--c4)" data-tip="output: 3,371,465"></i></div><div class="legend"><span><i class="sw" style="background:var(--c1)"></i><b>905,552,682</b> cache read</span><span><i class="sw" style="background:var(--c2)"></i><b>6,258,743</b> cache write</span><span><i class="sw" style="background:var(--c3)"></i><b>4,128</b> fresh input</span><span><i class="sw" style="background:var(--c4)"></i><b>3,371,465</b> output</span></div>
+  <div class="note">Cache reads bill at 0.1× fresh input. A low cache share on a run with many
+  workers usually means each one re-read the skills from cold — that is the re-brief cost, priced.</div>
+</div>
+
+<div class="grid2">
+  <div class="panel"><h2>Spend by model</h2><table><tr><th>claude-opus-5-5</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr></table>
+    <div class="note warn">Unpriced, counted but not costed: claude-opus-5-5</div>
+  </div>
+  <div class="panel"><h2>Spend by branch</h2><table><tr><th>HEAD</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr><tr><th>main</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr><tr><th>worktree-agent-a8a5a07913d9cd414</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr><tr><th>worktree-agent-a45ae93d66e29cc65</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr><tr><th>worktree-agent-aebc6662b52eae635</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr><tr><th>worktree-agent-a64001e3c24adf1c6</th><td class="barcell"><i style="width:0%"></i></td>
+        <td class="num">$0.00</td></tr></table></div>
+  <div class="panel"><h2>Tool calls</h2><table><tr><th>Bash</th><td class="barcell"><i style="width:100%"></i></td>
+        <td class="num">480</td></tr><tr><th>Edit</th><td class="barcell"><i style="width:57.49999999999999%"></i></td>
+        <td class="num">276</td></tr><tr><th>Write</th><td class="barcell"><i style="width:47.708333333333336%"></i></td>
+        <td class="num">229</td></tr><tr><th>Read</th><td class="barcell"><i style="width:6.666666666666667%"></i></td>
+        <td class="num">32</td></tr><tr><th>Agent</th><td class="barcell"><i style="width:5%"></i></td>
+        <td class="num">24</td></tr><tr><th>mcp__supabase__execute_sql</th><td class="barcell"><i style="width:4.375%"></i></td>
+        <td class="num">21</td></tr><tr><th>AskUserQuestion</th><td class="barcell"><i style="width:2.2916666666666665%"></i></td>
+        <td class="num">11</td></tr><tr><th>ScheduleWakeup</th><td class="barcell"><i style="width:2.2916666666666665%"></i></td>
+        <td class="num">11</td></tr></table></div>
+  <div class="panel"><h2>Main vs subagent</h2><table>
+    <tr><th>main session</th><td class="barcell"><i style="width:0%"></i></td><td class="num">$0.00</td></tr>
+    <tr><th>subagents</th><td class="barcell"><i style="width:0%"></i></td><td class="num">$0.00</td></tr>
+  </table><div class="note">0 of 2,031 turns ran in subagents.</div></div>
+</div>
+
+<div class="panel"><h2>Gates</h2><div class="note">No test report supplied
+     (<code>--playwright &lt;results.json&gt;</code>). Absent, not zero — this run proves nothing about tests.</div></div>
+
+<div class="panel"><h2>What still waits on a person</h2>
+  <div class="heroes" style="margin-bottom:12px">
+    <div class="hero"><div class="fig">229/232</div>
+      <div class="cap">rows proven by something that can go red</div></div>
+    <div class="hero"><div class="fig">3</div>
+      <div class="cap">rows waiting on a person</div></div>
+    <div class="hero"><div class="fig">0</div>
+      <div class="cap">never checked by anyone</div></div>
+  </div>
+  <div class="segbar"><i style="flex:229;background:var(--st-ready)" data-tip="proven: 229"></i><i style="flex:3;background:var(--st-review)" data-tip="manual: 3"></i></div>
+  <div class="legend"><span><i class="sw" style="background:var(--st-ready)"></i><b>229</b> proven</span><span><i class="sw" style="background:var(--st-review)"></i><b>3</b> manual</span></div>
+  <table>
+    <tr><th>row</th><th>status</th><th>declared in</th></tr>
+    <tr><th><code>P2-C1-07</code></th>
+      <td>manual</td><td><code>docs\test-plan\P2.md</code></td></tr><tr><th><code>P3-A3-09</code></th>
+      <td>manual</td><td><code>docs\test-plan\P3.md</code></td></tr><tr><th><code>P3-B1-06</code></th>
+      <td>manual</td><td><code>docs\test-plan\P3.md</code></td></tr>
+  </table>
+  <div class="note warn">
+    A pass rate counts what ran. These rows are what nobody ran — a build agent may only tick a
+    row backed by a command that can actually go red, so everything else lands here and stays
+    until a person walks it. <b>The run is not finished while this number is above zero</b>, and a
+    row still marked "never checked" may describe a feature that was specified and never built.
+  </div></div>
+
+<div class="panel"><h2>Per branch</h2><table>
+  <tr><th>branch</th><th class="num">commits</th><th class="num">+/−</th><th class="num">files</th>
+      <th class="num">reworked</th><th class="num">spend</th></tr>
+  <tr>
+    <th><code>main</code></th><td class="num">62</td>
+    <td class="num">+44,405/−253,651</td><td class="num">1552</td>
+    <td class="num">246 (16%)</td>
+    <td class="num">$0.00</td></tr>
+</table><div class="note">"Reworked" counts files a later commit came back to. High rework is
+churn, not throughput — and it is the number a cheaper model shows up in first.</div></div>
+
+<div class="panel"><h2>What this report cannot tell you</h2>
+<ul>
+  <li>Nothing here is self-reported. Every figure comes from the session transcripts, git, or the
+      test runner's own JSON — artifacts no one in the run can edit afterwards.</li>
+  <li>Tokens are effort, not value. A cheap run that shipped nothing is not a good run.</li>
+  <li>A pass rate is only as honest as the specs behind it; read it next to the test-file churn above.</li>
+  <li>A pass rate also cannot see the rows nobody ran. Read it next to "what still waits on a
+      person" — green tests plus unwalked manual rows is not a finished build.</li>
+  <li>Rates checked 2026-08-30. Prices move — correct <code>rates.json</code> and re-run.</li>
+  
+</ul></div>
+</main><div id="tip"></div><script>
+const tip=document.getElementById('tip');
+document.addEventListener('mousemove',(e)=>{const t=e.target.closest('[data-tip]');
+ if(!t){tip.style.opacity=0;return}tip.textContent=t.dataset.tip;tip.style.opacity=1;
+ tip.style.left=Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8)+'px';
+ tip.style.top=(e.clientY-tip.offsetHeight-10)+'px';});
+</script></body></html>

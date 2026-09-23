@@ -78,16 +78,16 @@
 - กฎ: fixture ที่แยกกันต่อ worker ต้องปักสาขาที่ทำงาน (cookie/param) ให้ทุกบทบาทที่เห็นหลายสาขา ไม่ใช่พึ่งค่าเริ่มต้น
 - status: new
 
-## L-007 · 2026-09-24 · kp-autonomous-loop · gate-exit-code
-- symptom: a commit was pushed after 'npm run typecheck | grep -c error' printed 39
-- cause: the gate ran as one line joined with ';' so a red typecheck did not stop git commit/push; the errors were only in .next/dev/types left half-written by a killed Playwright dev server
-- evidence: .next/dev/types/routes.d.ts TS1002 Unterminated string literal; source tree clean after regenerating
-- rule: gate commands are chained with && on the typecheck exit code, never piped through grep; remove .next/dev/types when tsc errors point only there
+## L-007 · 2026-09-24 · kp-autonomous-loop · false-exit-0
+- อาการ: commit ถูก push ไปแล้วทั้งที่ npm run typecheck | grep -c error พิมพ์ 39
+- สาเหตุ: gate เขียนเป็นบรรทัดเดียวคั่นด้วย ; และส่งผ่าน grep — typecheck แดงจึงไม่หยุด git commit/push · error ทั้งหมดอยู่ใน .next/dev/types ที่ dev server ของ Playwright ถูกฆ่ากลางการเขียน
+- หลักฐาน: .next/dev/types/routes.d.ts TS1002 Unterminated string literal · source สะอาดหลังลบโฟลเดอร์แล้ว typegen ใหม่
+- กฎ: gate ต่อกันด้วย && ตาม exit code ของ typecheck เท่านั้น ห้ามตัดสินผ่านจากผลของ grep
 - status: new
 
-## L-008 · 2026-09-24 · kp-autonomous-loop · replace-dollar-backtick
-- symptom: a spec-fixing script pasted the whole file header into the middle of a line
-- cause: String.replaceAll(str, replacementString) expands $` (text before the match) — the replacement contained a template literal ending in `${A_CODE}$`` 
-- evidence: tests/e2e/P3-A2.spec.ts line 196 held the import block after the regex; restored from git and redone
-- rule: in maintenance scripts, pass a replacer function (or split/join) whenever the replacement text may contain $
+## L-008 · 2026-09-24 · kp-autonomous-loop · shell-writes-code
+- อาการ: สคริปต์แก้ spec วางหัวไฟล์ทั้งก้อนลงกลางบรรทัดหนึ่ง
+- สาเหตุ: String.replaceAll(str, สตริงแทนที่) ตีความ $` เป็น "ข้อความก่อนจุดที่เจอ" — สตริงแทนที่มี template literal ที่ลงท้ายด้วย ${A_CODE}$`
+- หลักฐาน: tests/e2e/P3-A2.spec.ts บรรทัด 196 มีบล็อก import ต่อท้าย regex · กู้จาก git แล้วทำใหม่
+- กฎ: สคริปต์ดูแลไฟล์ใช้ replacer function (หรือ split/join) ทุกครั้งที่ข้อความแทนที่อาจมี $
 - status: new

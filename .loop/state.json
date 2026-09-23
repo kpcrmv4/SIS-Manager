@@ -1,15 +1,16 @@
 {
   "project": "sis-manager",
   "run": {
-    "status": "running",
-    "iteration": 25,
+    "status": "done",
+    "iteration": 30,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
       "size": 8
     },
     "blocked_reason": "",
-    "current": "waiting on P3 worker B; then P3/P4 verify sprint"
+    "current": "",
+    "finished": "2026-09-23T18:12:01.305Z"
   },
   "phases": [
     {
@@ -137,27 +138,27 @@
         {
           "id": "P3-A1",
           "name": "LINE messaging + flex x4 locales",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P3-A2",
           "name": "Outbox dispatch + staff groups",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P3-A3",
           "name": "Webhook",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P3-B1",
           "name": "Print jobs + receipt/label with QR",
-          "status": "doing"
+          "status": "done"
         },
         {
           "id": "P3-B2",
           "name": "print-server port",
-          "status": "doing"
+          "status": "done"
         }
       ]
     },
@@ -168,17 +169,17 @@
         {
           "id": "P4-01",
           "name": "Owner overview + reports + PDF/Excel",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P4-02",
           "name": "Realtime + bell",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P4-03",
           "name": "PWA + web push",
-          "status": "written"
+          "status": "done"
         }
       ]
     },
@@ -189,12 +190,12 @@
         {
           "id": "P5-01",
           "name": "Reset + demo seed + demo login",
-          "status": "todo"
+          "status": "done"
         },
         {
           "id": "P5-02",
           "name": "Matrices reconciled + full E2E",
-          "status": "todo"
+          "status": "done"
         }
       ]
     }
