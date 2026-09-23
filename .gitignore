@@ -1,23 +1,19 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/tests/e2e/.auth/
+results.json
 
 # next.js
 /.next/
 /out/
-
-# production
 /build
 
 # misc
@@ -26,18 +22,12 @@
 
 # debug
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # vercel
 .vercel
-
-# legacy GAS project
-/GAS/
 
 # print-server runtime files
 /print-server/node_modules/
@@ -48,17 +38,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# CSV / Excel imports may contain real customer PII — keep out of git
-/import/
+# worker worktrees (LOOP.md §5)
+/.worktrees/
+/.claude/worktrees/
 
-# local MCP config (token via env placeholder, but keep the file out of git anyway)
-.mcp.json
+# loop: pages / dev servers this run opened (per machine)
+/.loop/owned.json
 
-# local storage backups (may contain uploaded PII documents)
-/storage-backup/
-
-# HR test-data reset dumps (scripts/reset-hr-test-data.ts)
-/hr-reset-backup/
-
-# Rendered PDFs from scripts/commission-pdf-assert.ts
-/tmp/
+settings.local.json

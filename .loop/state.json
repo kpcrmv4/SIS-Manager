@@ -1,42 +1,201 @@
 {
   "project": "sis-manager",
-  "run": { "status": "stopped", "iteration": 0, "budget": 40, "started": null, "batch": { "size": 8 }, "blocked_reason": "" },
+  "run": {
+    "status": "running",
+    "iteration": 1,
+    "budget": 40,
+    "started": "2026-09-23T13:20:00.721Z",
+    "batch": {
+      "size": 8
+    },
+    "blocked_reason": ""
+  },
   "phases": [
-    { "id": "P0", "name": "Scaffold + auth", "tasks": [
-      { "id": "P0-01", "name": "Remove Davis tree, bootstrap Next 16, repo hygiene, env", "status": "todo" },
-      { "id": "P0-02", "name": "globals.css tokens + page kit + contrast", "status": "todo" },
-      { "id": "P0-03", "name": "i18n staff th/en, customer th/en/zh/ko", "status": "todo" },
-      { "id": "P0-04", "name": "Supabase clients + proxy.ts + login", "status": "todo" },
-      { "id": "P0-05", "name": "App shell + landing + branch switcher", "status": "todo" },
-      { "id": "P0-06", "name": "Playwright harness + storageState", "status": "todo" } ] },
-    { "id": "P1", "name": "Schema + RLS + RPCs", "tasks": [
-      { "id": "P1-01", "name": "Core tables + RLS", "status": "todo" },
-      { "id": "P1-02", "name": "Deposits + RPCs", "status": "todo" },
-      { "id": "P1-03", "name": "Bookings + RPCs", "status": "todo" },
-      { "id": "P1-04", "name": "Outbox, notifications, print, storage, realtime, cron", "status": "todo" },
-      { "id": "P1-05", "name": "Types, signatures, skeletons, RLS isolation spec", "status": "todo" } ] },
-    { "id": "P2", "name": "Screens (workers A/B/C)", "tasks": [
-      { "id": "P2-A1", "name": "Deposits list + detail", "status": "todo" },
-      { "id": "P2-A2", "name": "Deposit flows", "status": "todo" },
-      { "id": "P2-A3", "name": "Tonight + deposit scan", "status": "todo" },
-      { "id": "P2-B1", "name": "Bookings plan + list + staff form", "status": "todo" },
-      { "id": "P2-B2", "name": "Check-in + booking scan", "status": "todo" },
-      { "id": "P2-B3", "name": "Owner settings", "status": "todo" },
-      { "id": "P2-C1", "name": "LIFF shell + auth + locale", "status": "todo" },
-      { "id": "P2-C2", "name": "LIFF deposits", "status": "todo" },
-      { "id": "P2-C3", "name": "LIFF booking + ticket", "status": "todo" } ] },
-    { "id": "P3", "name": "LINE + printing (workers A/B)", "tasks": [
-      { "id": "P3-A1", "name": "LINE messaging + flex x4 locales", "status": "todo" },
-      { "id": "P3-A2", "name": "Outbox dispatch + staff groups", "status": "todo" },
-      { "id": "P3-A3", "name": "Webhook", "status": "todo" },
-      { "id": "P3-B1", "name": "Print jobs + receipt/label with QR", "status": "todo" },
-      { "id": "P3-B2", "name": "print-server port", "status": "todo" } ] },
-    { "id": "P4", "name": "Reports, realtime, PWA", "tasks": [
-      { "id": "P4-01", "name": "Owner overview + reports + PDF/Excel", "status": "todo" },
-      { "id": "P4-02", "name": "Realtime + bell", "status": "todo" },
-      { "id": "P4-03", "name": "PWA + web push", "status": "todo" } ] },
-    { "id": "P5", "name": "Seed + acceptance", "tasks": [
-      { "id": "P5-01", "name": "Reset + demo seed + demo login", "status": "todo" },
-      { "id": "P5-02", "name": "Matrices reconciled + full E2E", "status": "todo" } ] }
+    {
+      "id": "P0",
+      "name": "Scaffold + auth",
+      "tasks": [
+        {
+          "id": "P0-01",
+          "name": "Remove Davis tree, bootstrap Next 16, repo hygiene, env",
+          "status": "written"
+        },
+        {
+          "id": "P0-02",
+          "name": "globals.css tokens + page kit + contrast",
+          "status": "todo"
+        },
+        {
+          "id": "P0-03",
+          "name": "i18n staff th/en, customer th/en/zh/ko",
+          "status": "todo"
+        },
+        {
+          "id": "P0-04",
+          "name": "Supabase clients + proxy.ts + login",
+          "status": "todo"
+        },
+        {
+          "id": "P0-05",
+          "name": "App shell + landing + branch switcher",
+          "status": "todo"
+        },
+        {
+          "id": "P0-06",
+          "name": "Playwright harness + storageState",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "name": "Schema + RLS + RPCs",
+      "tasks": [
+        {
+          "id": "P1-01",
+          "name": "Core tables + RLS",
+          "status": "todo"
+        },
+        {
+          "id": "P1-02",
+          "name": "Deposits + RPCs",
+          "status": "todo"
+        },
+        {
+          "id": "P1-03",
+          "name": "Bookings + RPCs",
+          "status": "todo"
+        },
+        {
+          "id": "P1-04",
+          "name": "Outbox, notifications, print, storage, realtime, cron",
+          "status": "todo"
+        },
+        {
+          "id": "P1-05",
+          "name": "Types, signatures, skeletons, RLS isolation spec",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "name": "Screens (workers A/B/C)",
+      "tasks": [
+        {
+          "id": "P2-A1",
+          "name": "Deposits list + detail",
+          "status": "todo"
+        },
+        {
+          "id": "P2-A2",
+          "name": "Deposit flows",
+          "status": "todo"
+        },
+        {
+          "id": "P2-A3",
+          "name": "Tonight + deposit scan",
+          "status": "todo"
+        },
+        {
+          "id": "P2-B1",
+          "name": "Bookings plan + list + staff form",
+          "status": "todo"
+        },
+        {
+          "id": "P2-B2",
+          "name": "Check-in + booking scan",
+          "status": "todo"
+        },
+        {
+          "id": "P2-B3",
+          "name": "Owner settings",
+          "status": "todo"
+        },
+        {
+          "id": "P2-C1",
+          "name": "LIFF shell + auth + locale",
+          "status": "todo"
+        },
+        {
+          "id": "P2-C2",
+          "name": "LIFF deposits",
+          "status": "todo"
+        },
+        {
+          "id": "P2-C3",
+          "name": "LIFF booking + ticket",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "LINE + printing (workers A/B)",
+      "tasks": [
+        {
+          "id": "P3-A1",
+          "name": "LINE messaging + flex x4 locales",
+          "status": "todo"
+        },
+        {
+          "id": "P3-A2",
+          "name": "Outbox dispatch + staff groups",
+          "status": "todo"
+        },
+        {
+          "id": "P3-A3",
+          "name": "Webhook",
+          "status": "todo"
+        },
+        {
+          "id": "P3-B1",
+          "name": "Print jobs + receipt/label with QR",
+          "status": "todo"
+        },
+        {
+          "id": "P3-B2",
+          "name": "print-server port",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "name": "Reports, realtime, PWA",
+      "tasks": [
+        {
+          "id": "P4-01",
+          "name": "Owner overview + reports + PDF/Excel",
+          "status": "todo"
+        },
+        {
+          "id": "P4-02",
+          "name": "Realtime + bell",
+          "status": "todo"
+        },
+        {
+          "id": "P4-03",
+          "name": "PWA + web push",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "name": "Seed + acceptance",
+      "tasks": [
+        {
+          "id": "P5-01",
+          "name": "Reset + demo seed + demo login",
+          "status": "todo"
+        },
+        {
+          "id": "P5-02",
+          "name": "Matrices reconciled + full E2E",
+          "status": "todo"
+        }
+      ]
+    }
   ]
 }

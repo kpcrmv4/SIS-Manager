@@ -1,30 +1,15 @@
-import type { NextConfig } from "next";
-import createNextIntlPlugin from 'next-intl/plugin';
+import type { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const withNextIntl = createNextIntlPlugin('./src/lib/i18n/request.ts')
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Next 16 dev blocks cross-origin chunk requests; without this, 127.0.0.1 never hydrates.
+  allowedDevOrigins: ['localhost', '127.0.0.1', '*.localhost'],
   outputFileTracingIncludes: {
     '/api/print-server/setup': ['./print-server/**/*'],
   },
-  images: {
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [320, 420, 768, 1024],
-    imageSizes: [36, 48, 96, 240],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'profile.line-scdn.net',
-      },
-    ],
-  },
-  // Allow service worker to be served from public/
   headers: async () => [
     {
       source: '/sw.js',
@@ -34,14 +19,6 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
-  // ระบบแจ้งซ่อมถูกยุบเข้า Task Rooms (ห้อง "แจ้งซ่อม") — ชี้ /repairs ไปที่ /tasks
-  // ใช้ permanent:false เพื่อให้ย้อนกลับได้ระหว่างช่วงเปลี่ยนผ่าน (ตารางเก่ายังอยู่)
-  redirects: async () => [
-    { source: '/repairs', destination: '/tasks', permanent: false },
-    { source: '/repairs/:path*', destination: '/tasks', permanent: false },
-    { source: '/maintenance', destination: '/tasks', permanent: false },
-    { source: '/maintenance/:path*', destination: '/tasks', permanent: false },
-  ],
-};
+}
 
-export default withNextIntl(nextConfig);
+export default withNextIntl(nextConfig)

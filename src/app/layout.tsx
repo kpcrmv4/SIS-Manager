@@ -1,89 +1,17 @@
-import type { Metadata, Viewport } from 'next';
-import { Noto_Sans_Thai, Playpen_Sans_Thai } from 'next/font/google';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
-import { ToastContainer } from '@/components/ui/toast';
-import { ThemeSync } from '@/components/theme-sync';
-import './globals.css';
-
-const notoSansThai = Noto_Sans_Thai({
-  subsets: ['thai', 'latin'],
-  variable: '--font-noto-sans-thai',
-  display: 'swap',
-});
-
-const playpenSansThai = Playpen_Sans_Thai({
-  subsets: ['thai', 'latin'],
-  variable: '--font-playpen-thai',
-  display: 'swap',
-});
+import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
+import { APP_NAME } from '@/lib/constants'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SIS Manager - ระบบจัดการร้าน',
-  description: 'ระบบจัดการสต๊อกเครื่องดื่มและฝากเหล้า สำหรับร้านอาหารและบาร์',
-  manifest: '/manifest.json',
-  icons: {
-    icon: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-    ],
-    apple: '/apple-touch-icon.png',
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'SIS Manager',
-  },
-};
+  title: APP_NAME,
+  icons: { icon: '/favicon-32x32.png', apple: '/apple-touch-icon.png' },
+}
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#1f2937' },
-  ],
-};
-
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <head>
-        {/* ป้องกันจอขาว flash ก่อน React hydrate โดยอ่าน theme จาก localStorage ทันที */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var d=JSON.parse(localStorage.getItem('stockmanager-app')||'{}');if(d.state&&d.state.theme==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
-          }}
-        />
-        {/* Launched from the installed icon (manifest start_url carries ?source=pwa, or an
-            android-app:// referrer) → stamp sessionStorage BEFORE React mounts, so the PWA gate
-            never mis-nags an installed app whose display-mode query is unreliable. sessionStorage
-            is per app-window, so plain browser tabs are unaffected (the gate still blocks them). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(new URLSearchParams(location.search).get('source')==='pwa'||document.referrer.indexOf('android-app://')===0)sessionStorage.setItem('pwa-standalone-launch','1')}catch(e){}`,
-          }}
-        />
-      </head>
-      <body
-        className={`${notoSansThai.variable} ${playpenSansThai.variable} font-sans antialiased bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100`}
-      >
-        <NextIntlClientProvider messages={messages}>
-          {children}
-        </NextIntlClientProvider>
-        <ThemeSync />
-        <ToastContainer />
-      </body>
+    <html lang="th" suppressHydrationWarning>
+      <body>{children}</body>
     </html>
-  );
+  )
 }

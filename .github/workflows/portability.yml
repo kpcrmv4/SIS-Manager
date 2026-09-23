@@ -1,0 +1,32 @@
+# .github/workflows/portability.yml — copy this in and commit it.
+#
+# The point is not that CI is stricter than you. It is that CI runs on a
+# machine you do not control: a pre-push hook lives in .git/hooks, which is
+# never pushed, so it protects exactly one clone on exactly one laptop. This
+# file is in the repo, so it runs for every push from every machine — and its
+# verdict is visible to anyone (a reviewer, a cloud session) who looks at the
+# PR instead of at your screen.
+name: portability
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  portability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The checks read the git index, so no install and no build is needed.
+      - run: node scripts/verify-portability.mjs
+
+      # Optional but cheap: prove the repo installs and builds on Linux, which
+      # is where the case-sensitive import and the missing optional binary
+      # actually surface.
+      - run: npm ci
+      - run: npm run typecheck
