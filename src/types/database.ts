@@ -820,6 +820,7 @@ export type Database = {
           kind: string
           link: string | null
           payload: Json
+          pushed_at: string | null
           read_at: string | null
           user_id: string
         }
@@ -830,6 +831,7 @@ export type Database = {
           kind: string
           link?: string | null
           payload?: Json
+          pushed_at?: string | null
           read_at?: string | null
           user_id: string
         }
@@ -840,6 +842,7 @@ export type Database = {
           kind?: string
           link?: string | null
           payload?: Json
+          pushed_at?: string | null
           read_at?: string | null
           user_id?: string
         }
@@ -1342,6 +1345,20 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      claim_push: {
+        Args: { p_limit?: number }
+        Returns: {
+          auth: string
+          endpoint: string
+          kind: string
+          link: string
+          notification_id: string
+          p256dh: string
+          payload: Json
+          subscription_id: string
+          user_id: string
+        }[]
       }
       complete_withdrawals: {
         Args: {

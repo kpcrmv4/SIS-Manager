@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/shell/page-header'
 import { getActorState } from '@/lib/auth/actor'
 import { AccountSettings } from './account-settings'
 import { PasswordForm } from './password-form'
+import { PushToggle } from '@/components/pwa/push-toggle'
 
 export default async function MePage() {
   const t = await getTranslations('me')
@@ -30,6 +31,7 @@ export default async function MePage() {
           </dl>
         </section>
         <AccountSettings locale={actor.locale} />
+        <PushToggle />
         <PasswordForm />
       </div>
     </>

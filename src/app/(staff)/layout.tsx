@@ -5,6 +5,7 @@ import { BfcacheGuard } from '@/components/shell/bfcache-guard'
 import { BottomNav } from '@/components/shell/bottom-nav'
 import { Sidebar } from '@/components/shell/sidebar'
 import { LiveProvider } from '@/components/realtime/live-provider'
+import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
 
 /**
  * Staff shell. The auth decision lives HERE, not in a page under a loading
@@ -23,6 +24,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
         <main className="min-w-0 max-w-[1120px] flex-1 px-4 pb-[104px] pt-4 nav:px-7 nav:pb-10 nav:pt-5.5">{children}</main>
         <BottomNav role={actor.role} branches={actor.branches} branch={actor.branch} userId={actor.id} />
         <BfcacheGuard />
+        <ServiceWorkerRegister />
       </div>
     </LiveProvider>
   )

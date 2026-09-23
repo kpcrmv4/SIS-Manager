@@ -616,7 +616,11 @@
     "push": "Notifications on this device",
     "pushOn": "Turn on",
     "pushOff": "Turn off",
-    "pushUnsupported": "This browser doesn't support notifications"
+    "pushUnsupported": "This browser doesn't support notifications",
+    "pushDenied": "Notifications are blocked for this site. Allow them in the browser settings",
+    "pushEnabled": "Notifications are on for this device",
+    "pushDisabled": "Notifications are off for this device",
+    "pushHint": "Get notified about bottles to confirm, withdrawal requests and new bookings even when the app is closed (on iPhone, add the app to the Home Screen first)"
   },
   "reports": {
     "title": "Reports",
