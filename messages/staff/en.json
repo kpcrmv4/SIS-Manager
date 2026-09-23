@@ -644,7 +644,9 @@
       "testBody": "The branch LINE can post to this group · {date} {time}",
       "groupBound": "This group is now linked to branch {branch} · deposit, withdrawal and new booking alerts will arrive here",
       "groupBoundTitle": "Staff group connected"
-    }
+    },
+    "liffEndpoint": "LIFF endpoint URL",
+    "liffEndpointHelp": "Paste into LINE Developers → LINE Login → LIFF → Endpoint URL · if it points at the site's home page, customers land on the staff login instead of their own pages"
   },
   "me": {
     "title": "My account",

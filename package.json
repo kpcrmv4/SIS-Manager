@@ -12,6 +12,7 @@
     "db:mcp-smoke": "node scripts/supabase-mcp-smoke.mjs",
     "db:types": "node scripts/gen-types.mjs",
     "demo:reset": "node scripts/demo-reset.mjs",
+    "e2e:clean": "node scripts/clean-e2e.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

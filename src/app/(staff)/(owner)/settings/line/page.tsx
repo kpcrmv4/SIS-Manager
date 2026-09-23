@@ -56,6 +56,7 @@ export default async function SettingsLinePage() {
         hasSecret={!!secrets?.channel_secret}
         groupBound={!!data.staff_group_id}
         webhookUrl={`${base}/api/line/webhook/${branch.code.toLowerCase()}`}
+        liffEndpoint={`${base}/liff/${branch.code.toLowerCase()}`}
         liffLink={liffUrl(data.liff_id)}
       />
     </>

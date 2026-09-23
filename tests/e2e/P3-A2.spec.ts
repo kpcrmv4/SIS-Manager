@@ -198,6 +198,8 @@ test.describe('owner', () => {
     await expect(page.getByTestId('line-settings')).toHaveAttribute('data-hydrated', 'true')
     await expect(page.getByTestId('line-accessToken-status')).toHaveText('ยังไม่ได้ตั้งค่า')
     await expect(page.getByTestId('line-webhook-url')).toHaveText(new RegExp(`/api/line/webhook/${A_CODE}$`))
+    // the LIFF endpoint is the branch's customer app — never the site root (that is the staff login)
+    await expect(page.getByTestId('line-liff-endpoint')).toHaveText(new RegExp(`^https?://[^/]+/liff/${A_CODE}$`))
     await page.locator('#line-liffId').fill(LIFF_ID)
     await page.locator('#line-channelId').fill('2001234567')
     await page.locator('#line-botUserId').fill('e2e.sis')

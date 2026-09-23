@@ -644,7 +644,9 @@
       "testBody": "LINE ของสาขาส่งข้อความเข้ากลุ่มนี้ได้แล้ว · {date} {time} น.",
       "groupBound": "ผูกกลุ่มนี้กับสาขา {branch} แล้ว · แจ้งเตือนคำขอฝาก คำขอเบิก และการจองใหม่จะส่งมาที่กลุ่มนี้",
       "groupBoundTitle": "เชื่อมกลุ่มพนักงานแล้ว"
-    }
+    },
+    "liffEndpoint": "Endpoint URL ของ LIFF",
+    "liffEndpointHelp": "วางใน LINE Developers → LINE Login → LIFF → Endpoint URL · ถ้าใส่เป็นหน้าแรกของเว็บ ลูกค้าจะเจอหน้าล็อกอินพนักงานแทนหน้าของลูกค้า"
   },
   "me": {
     "title": "บัญชีของฉัน",

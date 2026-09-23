@@ -91,3 +91,17 @@
 - หลักฐาน: tests/e2e/P3-A2.spec.ts บรรทัด 196 มีบล็อก import ต่อท้าย regex · กู้จาก git แล้วทำใหม่
 - กฎ: สคริปต์ดูแลไฟล์ใช้ replacer function (หรือ split/join) ทุกครั้งที่ข้อความแทนที่อาจมี $
 - status: new
+
+## L-009 · 2026-09-24 · kp-e2e-playwright-real-db · env-drift
+- อาการ: P3-A2-02 ได้ skipped และ P3-A3-03 ไม่มี reply ทั้งที่ renderer คืน flex ปกติเมื่อลองแยก
+- สาเหตุ: dev server ของเทสต์เริ่มโดยไม่มี LINE_API_BASE จึงยิง api.line.me จริงด้วย token ปลอม (401 → skipped) · รอบสองตั้งพอร์ต mock ผิดเพราะ E2E_PORT ไม่ได้ตั้ง
+- หลักฐาน: mock ฟังที่ 4000 (PORT 3000 + 1000) ไม่ใช่ 4107 · หลังตั้ง webServer.env ใน playwright.config ผ่าน 26/26 โดยไม่ตั้งค่าใน shell
+- กฎ: env ที่เทสต์ขาดไม่ได้ (URL ของ mock) ต้องตั้งใน playwright.config webServer.env จากพอร์ตเดียวกับ mock ไม่ใช่พึ่งคำสั่ง shell
+- status: new
+
+## L-010 · 2026-09-24 · kp-seed-and-reset · cleanup-deletes-cited
+- อาการ: เกือบใช้ wipe-all ล้าง fixture หลังเทสต์ ขณะสาขาเดโม SRC มี token และ LIFF ของ LINE OA จริงแล้ว
+- สาเหตุ: wipe-all ตัดสินว่าลบได้จากป้าย receipt_settings.demo อย่างเดียว · เจ้าของตั้งค่า LINE จริงบนสาขาเดโมทีหลัง ป้ายเดโมไม่ได้แปลว่าไม่มีค่าจริง
+- หลักฐาน: branch_line_secrets ของ SRC มี token + secret · แก้ด้วย scripts/clean-e2e.mjs (ลบเฉพาะ fixture) และ guard --include-line-config ใน wipe-all
+- กฎ: งานล้างหลังเทสต์ต้องจำกัดที่ fixture ของเทสต์เอง ส่วน full reset ต้องปฏิเสธเมื่อเจอค่าที่คนตั้งทีหลัง (secret, LIFF) เว้นมีธงยืนยัน
+- status: new

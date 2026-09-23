@@ -24,6 +24,7 @@ export function LineSettings({
   hasSecret,
   groupBound,
   webhookUrl,
+  liffEndpoint,
   liffLink,
 }: {
   branchId: string
@@ -32,6 +33,8 @@ export function LineSettings({
   hasSecret: boolean
   groupBound: boolean
   webhookUrl: string
+  /** what LINE Developers → LIFF → Endpoint URL must be: this branch's customer app */
+  liffEndpoint: string
   liffLink: string | null
 }) {
   const t = useTranslations('settingsLine')
@@ -176,6 +179,16 @@ export function LineSettings({
           </button>
         </div>
         <p className="help-text">{t('webhookHelp')}</p>
+        <h3 className="mt-2 text-sm font-semibold text-ink">{t('liffEndpoint')}</h3>
+        <div className="flex min-w-0 items-center gap-2">
+          <code className="min-w-0 flex-1 break-all rounded-xs bg-surface-2 px-3 py-2 text-sm text-ink" data-testid="line-liff-endpoint">
+            {liffEndpoint}
+          </code>
+          <button type="button" className="btn-secondary btn-sm shrink-0" onClick={() => copy(liffEndpoint)} aria-label={t('copy')}>
+            <Copy className="size-4" aria-hidden />
+          </button>
+        </div>
+        <p className="help-text">{t('liffEndpointHelp')}</p>
         <div className="text-sm">
           <span className="text-muted-token">{t('liffUrl')}: </span>
           {liffLink ? (

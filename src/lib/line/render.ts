@@ -65,9 +65,9 @@ function logoUrl(ctx: RenderContext): string | null {
   return u && u.startsWith('https://') ? u : null
 }
 
+/** The header line: the branch name alone (it already carries the shop's name); the shop name only when unknown. */
 function eyebrow(ctx: RenderContext): string {
-  const branch = clip(ctx.branchName, 40)
-  return branch ? `${SHOP_NAME} · ${branch}` : SHOP_NAME
+  return clip(ctx.branchName, 60) || SHOP_NAME
 }
 
 type CustomerSpec = {

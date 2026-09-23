@@ -245,4 +245,15 @@ test('P3-A1-06 every reply is a flex bubble; keyword cards open the matching LIF
   // logo in the header only over https
   expect(JSON.stringify(flex(renderMessage('kw_menu', 'th', {}, { appBaseUrl: 'https://sis.example.com' })))).toContain('https://sis.example.com/apple-touch-icon.png')
   expect(JSON.stringify(flex(renderMessage('kw_menu', 'th', {}, { appBaseUrl: 'http://localhost:3000' })))).not.toContain('apple-touch-icon')
+
+  // the header names the branch only (its name already carries the shop's); the shop name when unknown
+  const headerTexts = (m: FlexMessage) => {
+    const out: string[] = []
+    const walk = (c: FlexComponent) => (c.type === 'text' ? out.push(c.text) : c.type === 'box' ? c.contents.forEach(walk) : undefined)
+    walk(m.contents.header)
+    return out
+  }
+  expect(headerTexts(flex(renderMessage('kw_book', 'th', {}, { branchName: 'SIS Music Bar ศรีราชา' })))[0]).toBe('SIS Music Bar ศรีราชา')
+  expect(headerTexts(flex(renderMessage('deposit_confirmed', 'en', PAYLOAD, { branchName: 'SIS Music Bar ศรีราชา' })))[0]).toBe('SIS Music Bar ศรีราชา')
+  expect(headerTexts(flex(renderMessage('kw_book', 'th', {}, {})))[0]).toBe('SIS Music Bar')
 })

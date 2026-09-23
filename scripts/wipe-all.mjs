@@ -48,9 +48,18 @@ async function storagePaths(bucket, prefix = '') {
 }
 
 async function main() {
-  const branches = must('branches', await admin.from('branches').select('code, name, receipt_settings').range(0, 999))
+  const branches = must('branches', await admin.from('branches').select('id, code, name, receipt_settings').range(0, 999))
   const real = branches.filter((b) => b.receipt_settings?.demo !== true && !FIXTURE_CODE.test(b.code))
   if (real.length) throw new Error(`branch(es) ${real.map((b) => b.code).join(', ')} are neither demo nor E2E fixtures — refusing`)
+  // L-010: a demo branch the owner has since wired to a real LINE OA must not be wiped by accident
+  const configured = must('secrets', await admin.from('branch_line_secrets').select('branch_id').not('channel_access_token', 'is', null).range(0, 999))
+  const wired = branches.filter((b) => configured.some((s) => s.branch_id === b.id) && !FIXTURE_CODE.test(b.code))
+  if (wired.length && !process.argv.includes('--include-line-config')) {
+    throw new Error(
+      `branch(es) ${wired.map((b) => b.code).join(', ')} have LINE settings saved — wiping deletes them. ` +
+        'Use `npm run e2e:clean` to remove test data only, or pass --include-line-config if a full reset is really intended',
+    )
+  }
   const users = (await allUsers()).filter((u) => !KEEP.has(u.email))
   const buckets = must('buckets', await admin.storage.listBuckets())
   const files = {}
