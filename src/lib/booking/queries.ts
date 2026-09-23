@@ -64,40 +64,70 @@ export type NightBooking = {
   createdAt: string
 }
 
+const BOOKING_COLUMNS =
+  'id, code, status, name, phone, note, night, slot_time, party_size, source, zone_id, table_id, qr_token, customer_id, created_at, zone:table_zones(name), table:tables(label)'
+
+type BookingRowWithRefs = {
+  id: string
+  code: string
+  status: BookingStatus
+  name: string
+  phone: string | null
+  note: string | null
+  night: string
+  slot_time: string
+  party_size: number
+  source: 'line' | 'staff'
+  zone_id: string | null
+  table_id: string | null
+  qr_token: string
+  customer_id: string | null
+  created_at: string
+  zone: unknown
+  table: unknown
+}
+
+const toNightBooking = (b: BookingRowWithRefs): NightBooking => ({
+  id: b.id,
+  code: b.code,
+  status: b.status,
+  name: b.name,
+  phone: b.phone,
+  note: b.note,
+  night: b.night,
+  slotTime: b.slot_time,
+  party: b.party_size,
+  source: b.source,
+  zoneId: b.zone_id,
+  zoneName: (b.zone as { name: string } | null)?.name ?? null,
+  tableId: b.table_id,
+  tableLabel: (b.table as { label: string } | null)?.label ?? null,
+  qrToken: b.qr_token,
+  customerId: b.customer_id,
+  createdAt: b.created_at,
+})
+
 export async function nightBookings(branchId: string, night: string): Promise<{ bookings: NightBooking[]; error: string | null }> {
+  const sb = await getSupabaseServer()
+  const { data, error } = await sb.from('bookings').select(BOOKING_COLUMNS).eq('branch_id', branchId).eq('night', night).order('slot_time').range(0, 499)
+  if (error) return { bookings: [], error: error.message }
+  return { bookings: (data ?? []).map((b) => toNightBooking(b as BookingRowWithRefs)), error: null }
+}
+
+/** Every booking still waiting for the shop from `fromNight` on (tonight + later), night then slot order. */
+export async function pendingBookings(branchId: string, fromNight: string): Promise<{ bookings: NightBooking[]; error: string | null }> {
   const sb = await getSupabaseServer()
   const { data, error } = await sb
     .from('bookings')
-    .select(
-      'id, code, status, name, phone, note, night, slot_time, party_size, source, zone_id, table_id, qr_token, customer_id, created_at, zone:table_zones(name), table:tables(label)',
-    )
+    .select(BOOKING_COLUMNS)
     .eq('branch_id', branchId)
-    .eq('night', night)
+    .eq('status', 'pending')
+    .gte('night', fromNight)
+    .order('night')
     .order('slot_time')
-    .range(0, 499)
+    .range(0, 199)
   if (error) return { bookings: [], error: error.message }
-  return {
-    bookings: (data ?? []).map((b) => ({
-      id: b.id,
-      code: b.code,
-      status: b.status,
-      name: b.name,
-      phone: b.phone,
-      note: b.note,
-      night: b.night,
-      slotTime: b.slot_time,
-      party: b.party_size,
-      source: b.source,
-      zoneId: b.zone_id,
-      zoneName: (b.zone as { name: string } | null)?.name ?? null,
-      tableId: b.table_id,
-      tableLabel: (b.table as { label: string } | null)?.label ?? null,
-      qrToken: b.qr_token,
-      customerId: b.customer_id,
-      createdAt: b.created_at,
-    })),
-    error: null,
-  }
+  return { bookings: (data ?? []).map((b) => toNightBooking(b as BookingRowWithRefs)), error: null }
 }
 
 export type BookingSettingsRow = {

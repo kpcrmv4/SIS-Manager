@@ -118,7 +118,9 @@ export function bubble(opts: {
   logoUrl?: string | null
 }): FlexMessage {
   const c = COLORS[opts.theme]
-  const lines = opts.lines.filter((l) => l.text.trim() !== '')
+  // "a · b · c" in the body → one row each (owner, 2026-09-24): a card reads as short lines, never
+  // one run-on sentence. Titles and the footer hint (a "·" list of keywords) are never split.
+  const lines = opts.lines.flatMap((l) => l.text.split(/\s+·\s+/).map((part) => ({ ...l, text: part }))).filter((l) => l.text.trim() !== '')
   const rows = (opts.rows ?? []).filter((r) => r.value.trim() !== '')
 
   const titleBlock: FlexBox = {

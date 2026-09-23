@@ -231,13 +231,13 @@ test('P3-A1-06 every reply is a flex bubble; keyword cards open the matching LIF
   // no LIFF app yet: no buttons, and the card says to ask the staff
   const bare = flex(renderMessage('kw_book', 'en', {}, {}))
   expect(buttons(bare)).toHaveLength(0)
-  expect(texts(bare)).toContain(cxEn.line.kwNoApp)
+  for (const part of cxEn.line.kwNoApp.split(' · ')) expect(texts(bare)).toContain(part)
 
   // the former plain-text replies are bubbles too
   for (const kind of ['link_not_found', 'use_receipt_code', 'throttled', 'welcome', 'linked'] as const) {
     for (const loc of LOCALES) expect(flex(renderMessage(kind, loc, PAYLOAD, { liffId: LIFF })).contents.type).toBe('bubble')
   }
-  expect(texts(flex(renderMessage('throttled', 'th', {}, {})))).toContain(cxTh.line.throttled)
+  for (const part of cxTh.line.throttled.split(' · ')) expect(texts(flex(renderMessage('throttled', 'th', {}, {})))).toContain(part)
   const bound = flex(renderMessage('group_bound', 'th', {}, { branchName: 'ศรีราชา' }))
   expect(texts(bound)).toContain(staffTh.settingsLine.messages.groupBoundTitle)
   expect(texts(bound).join(' ')).toContain('ศรีราชา')
@@ -256,4 +256,28 @@ test('P3-A1-06 every reply is a flex bubble; keyword cards open the matching LIF
   expect(headerTexts(flex(renderMessage('kw_book', 'th', {}, { branchName: 'SIS Music Bar ศรีราชา' })))[0]).toBe('SIS Music Bar ศรีราชา')
   expect(headerTexts(flex(renderMessage('deposit_confirmed', 'en', PAYLOAD, { branchName: 'SIS Music Bar ศรีราชา' })))[0]).toBe('SIS Music Bar ศรีราชา')
   expect(headerTexts(flex(renderMessage('kw_book', 'th', {}, {})))[0]).toBe('SIS Music Bar')
+})
+
+test('P3-A1-07 every "·" part of a card body is its own row; titles and the tip line stay whole', () => {
+  const body = (m: FlexMessage) => {
+    const out: string[] = []
+    const walk = (c: FlexComponent) => (c.type === 'text' ? out.push(c.text) : c.type === 'box' ? c.contents.forEach(walk) : undefined)
+    walk(m.contents.body)
+    return out
+  }
+  // the owner's two examples
+  expect(body(flex(renderMessage('kw_book', 'th', {}, { liffId: LIFF })))).toEqual(expect.arrayContaining(['เลือกวัน เวลา และจำนวนคน', 'ร้านจะยืนยันการจองทาง LINE']))
+  expect(body(flex(renderMessage('booking_pending', 'th', BOOKING, { liffId: LIFF })))).toEqual(expect.arrayContaining(['ได้รับคำขอจอง BK-1024-007 แล้ว', 'รอร้านยืนยัน']))
+  // no body row anywhere still joins two parts with " · "
+  const kinds = [...CUSTOMER_KINDS, ...KEYWORD_KINDS, 'welcome', 'linked', 'link_not_found', 'use_receipt_code', 'throttled'] as const
+  for (const kind of kinds) {
+    for (const loc of LOCALES) {
+      const m = flex(renderMessage(kind, loc, kind.startsWith('booking') ? BOOKING : PAYLOAD, { liffId: LIFF }))
+      for (const row of body(m)) expect(row, `${kind}/${loc}`).not.toContain(' · ')
+    }
+  }
+  // the tip line is a list and stays one line; the alt text keeps the full sentence
+  const menu = flex(renderMessage('kw_menu', 'th', {}, { liffId: LIFF }))
+  expect(texts(menu)).toContain(cxTh.line.hint)
+  expect(flex(renderMessage('booking_pending', 'th', BOOKING, {})).altText).toContain('ได้รับคำขอจอง BK-1024-007 แล้ว · รอร้านยืนยัน')
 })

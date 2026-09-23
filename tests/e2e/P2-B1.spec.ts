@@ -121,7 +121,7 @@ test.describe('plan + list', () => {
     ok(await lineBook({ p_slot: '19:00' }))
 
     await page.goto(`/bookings?night=${NIGHT}&view=list`)
-    const rows = page.locator('.panel > div')
+    const rows = page.getByTestId('booking-list').locator(':scope > div')
     await expect(rows).toHaveCount(2)
     await expect(rows.nth(0)).toContainText('19:00')
     await expect(rows.nth(1)).toContainText('22:00')
@@ -131,7 +131,7 @@ test.describe('plan + list', () => {
     const staffCtx = await browser.newContext({ storageState: as('staff') })
     const staffPage = await staffCtx.newPage()
     await staffPage.goto(`/bookings?night=${NIGHT}&view=list`)
-    const staffRows = staffPage.locator('.panel > div')
+    const staffRows = staffPage.getByTestId('booking-list').locator(':scope > div')
     await expect(staffRows.nth(0).getByRole('button', { name: 'ยืนยัน + จัดโต๊ะ' })).toHaveCount(0)
     await expect(staffRows.nth(0).getByText('รอร้านยืนยัน')).toBeVisible()
     await staffCtx.close()
@@ -173,7 +173,7 @@ test.describe('plan + list', () => {
     await admin().from('bookings').update({ status: 'confirmed', table_id: zt.tableA1 }).eq('id', (ok(await lineBook({ p_slot: '21:30' }))).id)
 
     await page.goto(`/bookings?night=${NIGHT}&view=list`)
-    const row = page.locator('.panel > div', { hasText: '21:00' })
+    const row = page.getByTestId('booking-list').locator(':scope > div', { hasText: '21:00' })
     await row.getByRole('button', { name: 'ยืนยัน + จัดโต๊ะ' }).click()
     await page.getByTestId('assign-table-select').selectOption(zt.tableA1)
     await page.getByTestId('assign-confirm-submit').click()
@@ -193,7 +193,7 @@ test.describe('plan + list', () => {
     await clearBookings(admin(), [branchA])
     const p = ok(await lineBook({ p_slot: '22:30' }))
     await page.goto(`/bookings?night=${NIGHT}&view=list`)
-    const row = page.locator('.panel > div', { hasText: '22:30' })
+    const row = page.getByTestId('booking-list').locator(':scope > div', { hasText: '22:30' })
     await row.getByRole('button', { name: 'ปฏิเสธ', exact: true }).click()
     await page.getByLabel('เหตุผลที่ปฏิเสธ').fill('ลูกค้ายกเลิกทางโทรศัพท์')
     await page.getByTestId('reject-submit').click()
@@ -228,5 +228,36 @@ test.describe('empty zones (owner)', () => {
     await page.goto(`/bookings?night=${NIGHT}&view=plan`)
     await expect(page.getByText('ยังไม่มีผังโต๊ะ')).toBeVisible()
     await expect(page.getByRole('link', { name: 'ยังไม่มีผังโต๊ะ' })).toBeVisible()
+  })
+})
+
+test.describe('pending panel', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P2-B1-10 รอยืนยัน lists pending bookings from tonight on by night, whatever night is picked; a row opens its sheet', async ({ page }) => {
+    const tonight = businessNight()
+    const later = addDays(tonight, 3)
+    const a = await insertBooking({ night: tonight, slotTime: '21:00', status: 'pending', name: 'P2B pending tonight' })
+    const b = await insertBooking({ night: later, slotTime: '20:30', status: 'pending', name: 'P2B pending later' })
+    const past = await insertBooking({ night: addDays(tonight, -1), slotTime: '20:00', status: 'pending', name: 'P2B pending past' })
+    const done = await insertBooking({ night: later, slotTime: '22:00', status: 'confirmed', name: 'P2B confirmed later' })
+
+    // a picked night that shows none of them
+    await page.goto(`/bookings?night=${addDays(tonight, 9)}&view=list`)
+    const panel = page.getByTestId('pending-bookings')
+    const group = (night: string) => panel.locator(`[data-testid="pending-night"][data-night="${night}"]`)
+    await expect(group(tonight)).toContainText(a.code)
+    await expect(group(tonight)).toContainText('คืนนี้')
+    await expect(group(later)).toContainText(b.code)
+    await expect(panel).not.toContainText(past.code)
+    await expect(panel).not.toContainText(done.code)
+    const nights = await panel.getByTestId('pending-night').evaluateAll((els) => els.map((e) => e.getAttribute('data-night')!))
+    expect(nights).toEqual([...nights].sort())
+
+    // bar gets the row actions; tapping the row opens the booking sheet at once
+    const row = panel.locator(`[data-testid="pending-row"][data-code="${b.code}"]`)
+    await expect(row.getByRole('button', { name: 'ยืนยัน + จัดโต๊ะ' })).toBeVisible()
+    await row.click()
+    await expect(page.getByRole('dialog')).toContainText(b.code)
   })
 })

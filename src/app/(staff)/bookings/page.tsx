@@ -2,8 +2,9 @@ import { Suspense } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { PageHeader } from '@/components/shell/page-header'
 import { EmptyState, Skeleton } from '@/components/ui/states'
-import { getActorState } from '@/lib/auth/actor'
-import { zonesWithTables, bookingSettingsRow } from '@/lib/booking/queries'
+import { getActorState, isBarOrOwner } from '@/lib/auth/actor'
+import { zonesWithTables, bookingSettingsRow, pendingBookings } from '@/lib/booking/queries'
+import { PendingBookings } from '@/components/booking/pending-bookings'
 import { NightPicker } from '@/components/booking/night-picker'
 import { ViewTabs } from '@/components/booking/view-tabs'
 import { NewBookingButton } from '@/components/booking/new-booking-button'
@@ -57,9 +58,12 @@ export default async function BookingsPage({
   const view = sp.view === 'list' ? 'list' : 'plan'
   const params = { night: nightParam, view: typeof sp.view === 'string' ? sp.view : undefined }
 
-  const [{ zones, error: zError }, { settings, error: sError }] = await Promise.all([
+  const tonight = businessNight()
+  const [{ zones, error: zError }, { settings, error: sError }, pending] = await Promise.all([
     zonesWithTables(branch.id),
     bookingSettingsRow(branch.id),
+    // waiting bookings from tonight on, whatever night is picked below (owner request 2026-09-24)
+    pendingBookings(branch.id, tonight),
   ])
 
   if (zError || sError || !settings) {
@@ -82,6 +86,18 @@ export default async function BookingsPage({
           </>
         }
       />
+      {pending.error ? (
+        <RefreshRetry />
+      ) : (
+        <PendingBookings
+          bookings={pending.bookings}
+          tonight={tonight}
+          locale={actor.locale}
+          branchId={branch.id}
+          zones={zones}
+          isBarOrOwner={isBarOrOwner(actor.role)}
+        />
+      )}
       <ViewTabs view={view} params={params} planLabel={t('viewPlan')} listLabel={t('viewList')} />
       <Suspense key={`${branch.id}:${night}:${view}`} fallback={view === 'plan' ? <PlanSkeleton /> : <div className="panel h-64 animate-pulse" />}>
         <BookingsContent branchId={branch.id} night={night} view={view} role={actor.role} locale={actor.locale} isOwner={actor.role === 'owner'} zones={zones} />

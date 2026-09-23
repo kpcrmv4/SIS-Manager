@@ -38,7 +38,7 @@ export function BookingList({
   }
 
   return (
-    <div className="panel">
+    <div className="panel" data-testid="booking-list">
       {bookings.map((b) => {
         const live = LIVE_STATUSES.includes(b.status)
         const late = live && b.status !== 'arrived' ? minutesLate(night, b.slotTime, now) : 0

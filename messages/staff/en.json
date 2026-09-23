@@ -487,7 +487,12 @@
     "emptyBody": "Bookings from LINE and staff show up here",
     "emptyZones": "No floor plan yet",
     "emptyZonesBody": "The owner adds zones and tables under Settings → Floor plan",
-    "closedNight": "Closed for bookings tonight · {reason}"
+    "closedNight": "Closed for bookings tonight · {reason}",
+    "pendingTitle": "Waiting for confirmation",
+    "pendingCount": "{count} bookings",
+    "pendingNone": "No bookings waiting for confirmation",
+    "pendingTonight": "Tonight",
+    "pendingTomorrow": "Tomorrow"
   },
   "booking": {
     "time": "Time",

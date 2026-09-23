@@ -487,7 +487,12 @@
     "emptyBody": "การจองจาก LINE และที่พนักงานรับจะขึ้นที่นี่",
     "emptyZones": "ยังไม่มีผังโต๊ะ",
     "emptyZonesBody": "เจ้าของร้านเพิ่มโซนและโต๊ะได้ที่ ตั้งค่า → ผังโต๊ะ",
-    "closedNight": "ปิดรับจองคืนนี้ · {reason}"
+    "closedNight": "ปิดรับจองคืนนี้ · {reason}",
+    "pendingTitle": "รอยืนยัน",
+    "pendingCount": "{count} รายการ",
+    "pendingNone": "ไม่มีการจองรอยืนยัน",
+    "pendingTonight": "คืนนี้",
+    "pendingTomorrow": "พรุ่งนี้"
   },
   "booking": {
     "time": "เวลาจอง",
