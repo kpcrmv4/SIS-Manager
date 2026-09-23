@@ -28,12 +28,13 @@ export function LoginForm({ next, demo }: { next: string; demo: boolean }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
+      const data = (await res.json().catch(() => ({}))) as { error?: string; landing?: string }
       if (res.ok) {
-        // replace, not push: Back after login must not return to the form
-        window.location.replace(next)
+        // replace, not push: Back after login must not return to the form.
+        // No explicit ?next → go straight to the role's landing (skips the / hop).
+        window.location.replace(next === '/' && data.landing ? data.landing : next)
         return
       }
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
       setError(ERROR_KEY[data.error ?? ''] ?? 'errorGeneric')
     } catch {
       setError('errorGeneric')

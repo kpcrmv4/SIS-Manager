@@ -46,7 +46,7 @@ export function BranchSwitcher({
         className={`min-w-0 flex-1 appearance-none bg-transparent outline-none ${dark ? 'text-sidebar-title' : 'text-ink'}`}
       >
         {branches.map((b) => (
-          <option key={b.id} value={b.id} className="text-[#1E1718]">
+          <option key={b.id} value={b.id} className="bg-card text-ink">
             {b.name}
           </option>
         ))}

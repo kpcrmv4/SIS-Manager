@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { identifierToEmail } from '@/lib/auth/identifier'
 import { signInWithPassword } from '@/lib/auth/sign-in'
+import { clientIp, isThrottled, recordAttempt } from '@/lib/auth/throttle'
 
 export const runtime = 'nodejs'
 
@@ -21,11 +22,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
 
+  const ip = clientIp(req)
+  const key = identifier.trim().toLowerCase().slice(0, 254)
+  if (await isThrottled(ip, key)) return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
+
   const email = identifierToEmail(identifier)
   // Same answer as a wrong password: the form must not reveal which accounts exist.
-  if (!email) return NextResponse.json({ error: 'invalid' }, { status: 401 })
+  if (!email) {
+    await recordAttempt(ip, key, false)
+    return NextResponse.json({ error: 'invalid' }, { status: 401 })
+  }
 
   const result = await signInWithPassword(req, email, password)
+  if (result.ok || result.error === 'invalid' || result.error === 'inactive') await recordAttempt(ip, key, result.ok)
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status })
   return result.response
 }

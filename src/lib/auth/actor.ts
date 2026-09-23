@@ -31,24 +31,25 @@ export const BRANCH_COOKIE = 'sis_branch'
 export const getActorState = cache(async (): Promise<ActorState> => {
   const supabase = await getSupabaseServer()
   const { data: userData, error: userError } = await supabase.auth.getUser()
-  if (userError || !userData.user) return { status: 'anonymous' }
+  if (userError) {
+    // Only "no/expired/revoked session" means signed out. An Auth outage must not
+    // log every user out mid-shift — surface it as an error instead.
+    const status = userError.status ?? 0
+    if (userError.name === 'AuthSessionMissingError' || status === 401 || status === 403 || status === 400) {
+      return { status: 'anonymous' }
+    }
+    throw new Error(`auth unavailable: ${userError.message}`)
+  }
+  if (!userData.user) return { status: 'anonymous' }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, username, display_name, role, locale, active')
-    .eq('id', userData.user.id)
-    .maybeSingle()
+  // RLS returns exactly the branches this user may see (owner: all) — independent of the
+  // profile row, so both run at once.
+  const [{ data: profile, error: profileError }, { data: branches, error: branchError }] = await Promise.all([
+    supabase.from('profiles').select('id, username, display_name, role, locale, active').eq('id', userData.user.id).maybeSingle(),
+    supabase.from('branches').select('id, code, name').eq('active', true).order('sort').order('name').range(0, 199),
+  ])
   if (profileError) throw new Error(`profile load failed: ${profileError.message}`)
   if (!profile || !profile.active) return { status: 'inactive' }
-
-  // RLS returns exactly the branches this user may see (owner: all).
-  const { data: branches, error: branchError } = await supabase
-    .from('branches')
-    .select('id, code, name')
-    .eq('active', true)
-    .order('sort')
-    .order('name')
-    .range(0, 199)
   if (branchError) throw new Error(`branches load failed: ${branchError.message}`)
 
   const store = await cookies()

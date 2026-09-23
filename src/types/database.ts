@@ -251,7 +251,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      login_record: {
+        Args: { p_identifier: string; p_ip: string; p_ok: boolean }
+        Returns: undefined
+      }
+      login_throttle: {
+        Args: { p_identifier: string; p_ip: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_locale: "th" | "en" | "zh" | "ko"

@@ -4,7 +4,8 @@
 // settings it manages, never the rest of the auth config.
 import { mgmt } from './lib/env.mjs'
 
-const WANT = { disable_signup: true, external_anonymous_users_enabled: false }
+// password_hibp_enabled (leaked-password check) needs the Pro plan — RULINGS R-010
+const WANT = { disable_signup: true, external_anonymous_users_enabled: false, password_min_length: 8 }
 
 const before = await mgmt('/config/auth')
 const diff = Object.fromEntries(Object.entries(WANT).filter(([k, v]) => before[k] !== v))

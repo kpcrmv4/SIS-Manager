@@ -56,3 +56,10 @@
 - หลักฐาน: tests/e2e/P0-auth.spec.ts P0-AUTH-03 แดงก่อนเพิ่ม src/components/shell/bfcache-guard.tsx
 - กฎ: layout ที่ต้องล็อกอินต้อง reload เมื่อเอกสารถูกโหลดด้วย navigation type back_forward หรือ pageshow.persisted
 - status: new
+
+## L-004 · 2026-09-23 · kp-work-routing · tree-moved
+- อาการ: ไฟล์ที่ orchestrator เพิ่งแก้กลับเป็นเวอร์ชันเก่าระหว่าง review แล้วกลับมาเองทีหลัง
+- สาเหตุ: reviewer แบบ Explore (อ่านอย่างเดียว) รัน git stash เพื่อดู diff ของ commit ขณะ orchestrator แก้ไฟล์ขนานกัน แล้ว pop คืนตอนจบ
+- หลักฐาน: git stash list → stash@{0}: On main: review-temp-stash ขณะ reviewer correctness ยังทำงาน
+- กฎ: brief ของ reviewer ต้องห้าม git stash/checkout/reset ชัดเจน และ orchestrator ห้ามแก้ working tree ระหว่างที่ reviewer ยังรัน
+- status: new

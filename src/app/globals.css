@@ -46,6 +46,8 @@
   --sidebar-title: #FFFFFF;
   --sidebar-fg: #E6DADB;
   --sidebar-fg-dim: #A8999B;
+  /* the cream plate behind the SIS logo (demo .brandmark .mk) — same in both themes */
+  --logo-bg: #FBF6EE;
 
   /* ── Kit names → demo values (DESIGN.md "Token mapping") ── */
   --surface: var(--card);
@@ -194,6 +196,7 @@
   --color-brand-solid-active: var(--brand-solid-active);
   --color-brand-ring: var(--brand-ring);
   --color-accent: var(--accent);
+  --color-logo: var(--logo-bg);
   --color-gold-ink: var(--gold-ink);
   --color-gold-bg: var(--gold-bg);
   --color-gold-ring: var(--gold-ring);

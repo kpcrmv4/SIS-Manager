@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { anonDb, credsFor } from './fixtures/db'
+import { adminDb, anonDb, credsFor } from './fixtures/db'
 
 const ANON = { cookies: [], origins: [] }
 
@@ -97,6 +97,44 @@ test.describe('anonymous', () => {
       expect(new URL(page.url()).origin).toBe(new URL(baseURL!).origin)
     })
   }
+})
+
+test.describe('throttle + revocation', () => {
+  test.use({ storageState: ANON })
+
+  test('P0-AUTH-16 the 9th failed login for one identifier is throttled', async ({ request }) => {
+    const who = `probe.${Date.now()}`
+    for (let i = 1; i <= 8; i++) {
+      const res = await request.post('/api/auth/login', { data: { identifier: who, password: 'wrong-password' } })
+      expect(res.status(), `attempt ${i}`).toBe(401)
+    }
+    const ninth = await request.post('/api/auth/login', { data: { identifier: who, password: 'wrong-password' } })
+    expect(ninth.status()).toBe(429)
+    expect(await ninth.json()).toEqual({ error: 'rate_limited' })
+  })
+
+  test('P0-AUTH-04 a revoked session on / ends on /login without looping', async ({ browser }) => {
+    const context = await browser.newContext({ storageState: ANON })
+    const page = await context.newPage()
+    try {
+      const c = credsFor('multi')
+      const login = await page.request.post('/api/auth/login', { data: { identifier: c.username, password: c.password } })
+      expect(login.status()).toBe(200)
+      const cookies = await context.cookies()
+      const raw = cookies.filter((k) => /^sb-.*-auth-token(\.\d+)?$/.test(k.name)).map((k) => k.value).join('')
+      const session = JSON.parse(Buffer.from(raw.replace(/^base64-/, ''), 'base64url').toString('utf8')) as { access_token: string }
+      const { error } = await adminDb().auth.admin.signOut(session.access_token, 'local')
+      expect(error).toBeNull()
+      const redirects: string[] = []
+      page.on('response', (r) => { if (r.status() >= 300 && r.status() < 400) redirects.push(r.url()) })
+      await page.goto('/')
+      await expect(page).toHaveURL(/\/login/)
+      expect(redirects.length).toBeLessThanOrEqual(3)
+      expect((await context.cookies()).filter((k) => k.name.startsWith('sb-'))).toHaveLength(0)
+    } finally {
+      await context.close()
+    }
+  })
 })
 
 test.describe('signed in', () => {

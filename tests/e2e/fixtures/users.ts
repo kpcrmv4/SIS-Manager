@@ -27,6 +27,20 @@ export const SIGNED_IN_ROLES: FixtureRole[] = ['staff', 'bar', 'owner', 'staffB'
 
 const email = (u: string) => `${u}@staff.sis.local`
 
+/**
+ * After a run the fixture accounts are switched off (the owner one sees every
+ * real branch), and the fixture branches hidden. Setup switches them back on.
+ */
+export async function parkFixture(db: Db, users: Record<string, string>) {
+  const ids = Object.values(users)
+  if (ids.length) {
+    const { error } = await db.from('profiles').update({ active: false }).in('id', ids)
+    if (error) throw new Error(`park profiles: ${error.message}`)
+  }
+  const { error } = await db.from('branches').update({ active: false }).in('code', E2E_BRANCHES.map((b) => b.code))
+  if (error) throw new Error(`park branches: ${error.message}`)
+}
+
 async function findUserId(db: Db, mail: string): Promise<string | null> {
   for (let page = 1; page <= 20; page++) {
     const { data, error } = await db.auth.admin.listUsers({ page, perPage: 200 })
@@ -41,7 +55,13 @@ async function findUserId(db: Db, mail: string): Promise<string | null> {
 export async function ensureFixture(db: Db) {
   const branchIds: Record<string, string> = {}
   for (const b of E2E_BRANCHES) {
-    const { data, error } = await db.from('branches').upsert({ code: b.code, name: b.name, sort: 900 }, { onConflict: 'code' }).select('id').single()
+    // never adopt a real branch that happens to use the fixture code
+    const { data: existing, error: findError } = await db.from('branches').select('id, name').eq('code', b.code).maybeSingle()
+    if (findError) throw new Error(`branch ${b.code}: ${findError.message}`)
+    if (existing && existing.name !== b.name && !existing.name.startsWith('E2E')) {
+      throw new Error(`branch code ${b.code} belongs to "${existing.name}", not the E2E fixture — refusing to touch it`)
+    }
+    const { data, error } = await db.from('branches').upsert({ code: b.code, name: b.name, sort: 900, active: true }, { onConflict: 'code' }).select('id').single()
     if (error) throw new Error(`branch ${b.code}: ${error.message}`)
     branchIds[b.key] = data.id
   }

@@ -18,32 +18,32 @@
         {
           "id": "P0-01",
           "name": "Remove Davis tree, bootstrap Next 16, repo hygiene, env",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P0-02",
           "name": "globals.css tokens + page kit + contrast",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P0-03",
           "name": "i18n staff th/en, customer th/en/zh/ko",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P0-04",
           "name": "Supabase clients + proxy.ts + login",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P0-05",
           "name": "App shell + landing + branch switcher",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P0-06",
           "name": "Playwright harness + storageState",
-          "status": "written"
+          "status": "done"
         }
       ]
     },
@@ -54,7 +54,7 @@
         {
           "id": "P1-01",
           "name": "Core tables + RLS",
-          "status": "written"
+          "status": "done"
         },
         {
           "id": "P1-02",
