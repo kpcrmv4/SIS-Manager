@@ -20,12 +20,8 @@ test.beforeAll(async () => {
   const { branchB } = fixtureIds()
   const admin = adminDb()
   const d = await mustCreate('staffB', { qty: 1, branch: 'B' })
-  const { error: cErr } = await dbAs('staffB').rpc('confirm_deposit', { p_deposit: d.id, p_levels: [100], p_photo_paths: ['x.jpg'] })
-  // staff cannot confirm; do it as the owner (every branch) so the B deposit can take a withdrawal
-  if (cErr) {
-    const { error } = await dbAs('owner').rpc('confirm_deposit', { p_deposit: d.id, p_levels: [100], p_photo_paths: ['x.jpg'] })
-    expect(error, error?.message).toBeNull()
-  }
+  // staff cannot confirm; the owner (every branch) does, so the B deposit can take a withdrawal
+  await confirmAll(d.id, [100], 'owner')
   const b = await bottles(d.id)
   const w = await dbAs('staffB').rpc('request_withdrawal', { p_deposit: d.id, p_bottle_ids: [b[0].id], p_type: 'take_home' })
   expect(w.error, w.error?.message).toBeNull()

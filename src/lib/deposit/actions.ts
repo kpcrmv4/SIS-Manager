@@ -29,7 +29,6 @@ export type CreateDepositInput = {
   notes?: string
   /** bar/owner only — the RPC refuses it for staff */
   expiresAt?: string
-  customerId?: string
 }
 
 export async function createDeposit(input: CreateDepositInput): Promise<ActionResult<{ id: string; code: string }>> {
@@ -47,7 +46,7 @@ export async function createDeposit(input: CreateDepositInput): Promise<ActionRe
       p_category: cleanText(input.category, 20),
       p_notes: cleanText(input.notes, 500),
       p_expires_at: input.expiresAt,
-      p_customer_id: isUuid(input.customerId) ? input.customerId : undefined,
+      // a customer is attached only by the verified LINE link flow (RULINGS R-017)
     }),
   )
   if (res.ok) touched()

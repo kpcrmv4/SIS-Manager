@@ -94,7 +94,9 @@ export async function requireCustomer(req: NextRequest, branchCode: string, loca
     if (error || !created) return 'line_unavailable'
     customer = created
   } else if (line.displayName && line.displayName !== customer.display_name) {
-    await admin.from('customers').update({ display_name: line.displayName, picture_url: line.pictureUrl }).eq('id', customer.id)
+    // a stale display name is cosmetic: the session still stands if this refresh fails
+    const { error: refreshError } = await admin.from('customers').update({ display_name: line.displayName, picture_url: line.pictureUrl }).eq('id', customer.id)
+    if (!refreshError) customer = { ...customer, display_name: line.displayName }
   }
   return { customer, branch, token: signCustomerToken(customer.id, branch.id) }
 }

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { adminDb, dbAs, fixtureIds } from './fixtures/db'
-import { RUN, bottles, cleanupRun, confirmAll, createDeposit, deposit, mustCreate } from './fixtures/deposits'
+import { RUN, bottles, cleanupRun, confirmAll, createDeposit, deposit, mustCreate, photo } from './fixtures/deposits'
 
 /**
  * P1-02 deposit state machine at the database: every transition through its RPC,
@@ -83,7 +83,7 @@ test('P1-DEP-05 bar confirms levels 100/60/0: in_store, bottle states, remaining
 
 test('P1-DEP-06 staff cannot confirm', async () => {
   const d = await mustCreate('staff', { qty: 1 })
-  const { error } = await dbAs('staff').rpc('confirm_deposit', { p_deposit: d.id, p_levels: [100], p_photo_paths: ['x.jpg'] })
+  const { error } = await dbAs('staff').rpc('confirm_deposit', { p_deposit: d.id, p_levels: [100], p_photo_paths: [await photo()] })
   expect(error?.message).toContain('BAR_ONLY')
   expect((await deposit(d.id)).status).toBe('pending_confirm')
 })
@@ -124,7 +124,7 @@ test('P1-DEP-08 bar rejects a LINE request → cancelled (same result)', async (
 
 test('P1-DEP-09 staff receives a LINE request with 2 bottles and a photo', async () => {
   const r = await lineRequest(1)
-  const { error } = await dbAs('staff').rpc('staff_receive_request', { p_deposit: r.id, p_quantity: 2, p_photo_paths: ['r.jpg'] })
+  const { error } = await dbAs('staff').rpc('staff_receive_request', { p_deposit: r.id, p_quantity: 2, p_photo_paths: [await photo()] })
   expect(error, error?.message).toBeNull()
   const row = await deposit(r.id)
   expect(row.status).toBe('pending_confirm')

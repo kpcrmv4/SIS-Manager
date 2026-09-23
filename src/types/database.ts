@@ -518,6 +518,7 @@ export type Database = {
           is_vip: boolean
           item_id: string | null
           item_name: string
+          link_token: string
           notes: string | null
           photo_paths: string[]
           quantity: number
@@ -558,6 +559,7 @@ export type Database = {
           is_vip?: boolean
           item_id?: string | null
           item_name: string
+          link_token?: string
           notes?: string | null
           photo_paths?: string[]
           quantity: number
@@ -598,6 +600,7 @@ export type Database = {
           is_vip?: boolean
           item_id?: string | null
           item_name?: string
+          link_token?: string
           notes?: string | null
           photo_paths?: string[]
           quantity?: number
@@ -1240,7 +1243,12 @@ export type Database = {
         Returns: Json
       }
       cancel_booking: {
-        Args: { p_booking: string; p_customer_id?: string; p_reason?: string }
+        Args: {
+          p_booking: string
+          p_branch?: string
+          p_customer_id?: string
+          p_reason?: string
+        }
         Returns: Json
       }
       check_in_booking: {
@@ -1353,7 +1361,7 @@ export type Database = {
         Returns: undefined
       }
       link_deposit_customer: {
-        Args: { p_code: string; p_customer_id: string }
+        Args: { p_branch: string; p_customer_id: string; p_token: string }
         Returns: Json
       }
       login_record: {
@@ -1365,6 +1373,10 @@ export type Database = {
         Returns: boolean
       }
       mark_no_shows: { Args: never; Returns: number }
+      queue_print: {
+        Args: { p_copies?: number; p_deposit: string; p_type: string }
+        Returns: Json
+      }
       reject_booking: {
         Args: { p_booking: string; p_reason: string }
         Returns: Json
@@ -1380,6 +1392,7 @@ export type Database = {
       request_withdrawal: {
         Args: {
           p_bottle_ids: string[]
+          p_branch?: string
           p_customer_id?: string
           p_deposit: string
           p_notes?: string

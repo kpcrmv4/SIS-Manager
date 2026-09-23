@@ -70,13 +70,19 @@ test('P1-OUT-03 bell: a received deposit notifies bar, not staff; nobody reads a
   expect(peek).toEqual([])
 })
 
-test('P1-OUT-04 print jobs: own branch insert ok, other branch refused', async () => {
-  const { branchA, branchB } = fixtureIds()
-  const ok = await dbAs('staff').from('print_jobs').insert({ branch_id: branchA, type: 'receipt', payload: { run: RUN } }).select('id, status, requested_by').single()
-  expect(ok.error, ok.error?.message).toBeNull()
-  expect(ok.data).toMatchObject({ status: 'pending', requested_by: fixtureIds().users.staff })
-  const no = await dbAs('staff').from('print_jobs').insert({ branch_id: branchB, type: 'receipt' }).select('id')
-  expect(no.error?.code).toBe('42501')
+test('P1-OUT-04 print jobs: queue_print builds the payload from the deposit; no client inserts; other branch refused', async () => {
+  const { branchA } = fixtureIds()
+  const d = await mustCreate('staff', { qty: 2 })
+  const q = await dbAs('staff').rpc('queue_print', { p_deposit: d.id, p_type: 'receipt' })
+  expect(q.error, q.error?.message).toBeNull()
+  const { data: job } = await admin().from('print_jobs').select('status, requested_by, branch_id, payload').eq('id', (q.data as { id: string }).id).single()
+  expect(job).toMatchObject({ status: 'pending', requested_by: fixtureIds().users.staff, branch_id: branchA })
+  expect(job!.payload).toMatchObject({ code: d.code, quantity: 2 })
+  expect((job!.payload as { link_token: string }).link_token).toMatch(/^[0-9a-f]{32}$/)
+  const raw = await dbAs('staff').from('print_jobs').insert({ branch_id: branchA, type: 'receipt', payload: { html: '<script>' } }).select('id')
+  expect(raw.error?.code).toBe('42501')
+  const b = await mustCreate('staffB', { qty: 1, branch: 'B' })
+  expect((await dbAs('staff').rpc('queue_print', { p_deposit: b.id, p_type: 'label' })).error?.message).toContain('FORBIDDEN')
 })
 
 test('P1-OUT-10 a print account updates only its own branch jobs; staff cannot update jobs', async () => {
@@ -122,7 +128,7 @@ test('P1-OUT-05 P1-OUT-06 photos: private bucket, branch folders enforced', asyn
   }
 })
 
-test('P1-OUT-07 five sis-* cron jobs on UTC schedules', async () => {
+test('P1-OUT-07 six sis-* cron jobs on UTC schedules', async () => {
   const rows = await sql<{ jobname: string; schedule: string }>("select jobname, schedule from cron.job where jobname like 'sis-%' order by jobname")
   expect(rows).toEqual([
     { jobname: 'sis-booking-reminders', schedule: '0 9 * * *' },
@@ -130,6 +136,7 @@ test('P1-OUT-07 five sis-* cron jobs on UTC schedules', async () => {
     { jobname: 'sis-expiry-notices', schedule: '0 5 * * *' },
     { jobname: 'sis-line-dispatch', schedule: '* * * * *' },
     { jobname: 'sis-no-shows', schedule: '*/5 * * * *' },
+    { jobname: 'sis-retention', schedule: '30 20 * * *' },
   ])
 })
 

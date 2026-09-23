@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Loader2, Search } from 'lucide-react'
+import { toast } from 'sonner'
 import { Scanner } from '@/components/scan/scanner'
 import { ScanResultBooking } from '@/components/booking/scan-result-booking'
 import { ScanResultDeposit } from '@/components/deposit/scan-result-deposit'
@@ -11,6 +12,7 @@ import { lookupScan, type ScanHit } from '@/lib/scan/actions'
 /** Scan or type → one lookup → the deposit or booking result slot (filled by workers A and B). */
 export function ScanPanel({ branchId }: { branchId: string }) {
   const t = useTranslations('scan')
+  const tc = useTranslations('common')
   const [query, setQuery] = useState('')
   const [hit, setHit] = useState<ScanHit | null>(null)
   const [missed, setMissed] = useState<string | null>(null)
@@ -21,7 +23,17 @@ export function ScanPanel({ branchId }: { branchId: string }) {
     if (!q) return
     setMissed(null)
     start(async () => {
-      const r = await lookupScan(branchId, q)
+      let r: ScanHit
+      try {
+        r = await lookupScan(branchId, q)
+      } catch {
+        r = { kind: 'error' }
+      }
+      if (r.kind === 'error') {
+        setHit(null)
+        toast.error(tc('errorTitle'), { action: { label: tc('retry'), onClick: () => resolve(q) } })
+        return
+      }
       setHit(r.kind === 'none' ? null : r)
       if (r.kind === 'none') setMissed(q)
     })

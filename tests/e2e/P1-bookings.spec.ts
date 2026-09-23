@@ -153,7 +153,7 @@ test('P1-BK-10 capacity: full at the max, cancelled ones do not count', async ()
   const a = ok(await lineBook({ p_slot: '19:00' }))
   ok(await lineBook({ p_slot: '19:30' }))
   expect((await lineBook({ p_slot: '20:00' })).error?.message).toContain('full')
-  ok(await admin().rpc('cancel_booking', { p_booking: a.id, p_customer_id: customerId } as never))
+  ok(await admin().rpc('cancel_booking', { p_booking: a.id, p_customer_id: customerId, p_branch: fixtureIds().branchA } as never))
   expect((await lineBook({ p_slot: '20:00' })).error).toBeNull()
   await settings({})
 })
@@ -207,14 +207,14 @@ test('P1-BK-16 staff of branch A cannot check in a branch B booking', async () =
 
 test('P1-BK-17 customer cancels inside the window; too late once the window has passed', async () => {
   const early = ok(await lineBook({ p_slot: '19:30', p_night: addDays(TODAY, 4) }))
-  ok(await admin().rpc('cancel_booking', { p_booking: early.id, p_customer_id: customerId } as never))
+  ok(await admin().rpc('cancel_booking', { p_booking: early.id, p_customer_id: customerId, p_branch: fixtureIds().branchA } as never))
   const { data } = await admin().from('bookings').select('status, cancelled_by_customer').eq('id', early.id).single()
   expect(data).toEqual({ status: 'cancelled', cancelled_by_customer: true })
   const late = ok(await lineBook({ p_slot: '20:00', p_night: addDays(TODAY, 4) }))
   await admin().from('bookings').update({ night: addDays(TODAY, -1) }).eq('id', late.id)
-  expect((await admin().rpc('cancel_booking', { p_booking: late.id, p_customer_id: customerId } as never)).error?.message).toContain('cancel_too_late')
+  expect((await admin().rpc('cancel_booking', { p_booking: late.id, p_customer_id: customerId, p_branch: fixtureIds().branchA } as never)).error?.message).toContain('cancel_too_late')
   const other = ok(await lineBook({ p_slot: '21:30', p_night: addDays(TODAY, 4) }))
-  expect((await admin().rpc('cancel_booking', { p_booking: other.id, p_customer_id: '00000000-0000-0000-0000-000000000000' } as never)).error?.message).toContain('NOT_YOURS')
+  expect((await admin().rpc('cancel_booking', { p_booking: other.id, p_customer_id: '00000000-0000-0000-0000-000000000000', p_branch: fixtureIds().branchA } as never)).error?.message).toContain('NOT_YOURS')
 })
 
 test('P1-BK-18 no-show job: past confirmed/pending → no_show, arrived untouched', async () => {
