@@ -1,6 +1,6 @@
 {
   "project": "sis-manager",
-  "run": { "status": "stopped", "iteration": 0, "budget": 40, "started": null, "batch": { "size": 8 }, "blocked_reason": "waiting for .env.local Supabase keys + PAT" },
+  "run": { "status": "stopped", "iteration": 0, "budget": 40, "started": null, "batch": { "size": 8 }, "blocked_reason": "" },
   "phases": [
     { "id": "P0", "name": "Scaffold + auth", "tasks": [
       { "id": "P0-01", "name": "Remove Davis tree, bootstrap Next 16, repo hygiene, env", "status": "todo" },

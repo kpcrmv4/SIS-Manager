@@ -87,8 +87,11 @@ booking_settings rule + blackouts + capacity), `confirm_booking`, `reject_bookin
 (re-scoped to roles `bar`/`owner`).
 
 ## 5 · Supabase connection & DB workflow
-- **PAT per project** (`SUPABASE_PROJECT_REF` + `SUPABASE_ACCESS_TOKEN` in `.env.local`), MCP set up with
-  `/setup-supabase-mcp`, read-only by default. **Before any migration:** `get_project_url` must equal
+- **PAT per project** (`SUPABASE_PROJECT_REF` + `SUPABASE_ACCESS_TOKEN` in `.env.local`). The MCP server
+  is `.mcp.json` → `supabase` → `node scripts/supabase-mcp.mjs`, which reads `.env.local` itself (repo values
+  win over machine env) and is read-only unless `SUPABASE_MCP_WRITE=true` (set — migrations are granted).
+  Use the `mcp__supabase__*` tools, **not** the plugin's `kp-supabase-nextjs` server (it sees an
+  unexpanded `${SUPABASE_PROJECT_REF}`). Proof of binding: `npm run db:mcp-smoke`. **Before any migration:** `get_project_url` must equal
   `NEXT_PUBLIC_SUPABASE_URL`.
 - Every DB change = a file in `supabase/migrations/` **and** applied via MCP → select it back →
   regenerate `src/types/database.ts` → `get_advisors(security)` has no new ERROR.
@@ -126,7 +129,7 @@ from env (`SEED_*`), never hard-coded. Self-service password change asks for the
 
 ## 10 · Build phases (task ids are what `.loop/state.json` tracks)
 **P0 — scaffold + auth (orchestrator, alone)**
-- P0-01 Remove the Davis app tree (keep `print-server/`, `public/` icons + logo, `docs/design/`); bootstrap Next 16 + TS + Tailwind v4; deps; `.gitattributes`; `.claude/settings.json` (plugin + `guard-shell-writes.mjs` hook); `.github/workflows/portability.yml`; `vercel.json` `{regions:["sin1"]}`; `next.config` `allowedDevOrigins`; npm scripts `typecheck`/`verify`; `.env.local` generated values (never overwrite)
+- P0-01 Remove the Davis app tree (keep `print-server/`, `public/` icons + logo, `docs/design/`, `.mcp.json`, `scripts/supabase-mcp.mjs`, `scripts/supabase-mcp-smoke.mjs`; pin `@supabase/mcp-server-supabase@0.13.0` as devDependency and add script `"db:mcp-smoke": "node scripts/supabase-mcp-smoke.mjs"`); bootstrap Next 16 + TS + Tailwind v4; deps; `.gitattributes`; `.claude/settings.json` (plugin + `guard-shell-writes.mjs` hook); `.github/workflows/portability.yml`; `vercel.json` `{regions:["sin1"]}`; `next.config` `allowedDevOrigins`; npm scripts `typecheck`/`verify`; `.env.local` generated values (never overwrite)
 - P0-02 `globals.css` from kit tokens + DESIGN.md values + mapping; copy page-kit components; verify-contrast green
 - P0-03 i18n (next-intl): staff th/en, customer th/en/zh/ko catalogs from the demo strings
 - P0-04 Four Supabase clients + `proxy.ts` gate excluding `/api/*` and `/liff/*`; login (username or email); cookies bound to the response

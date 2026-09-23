@@ -15,7 +15,7 @@
 
 | อะไร | ค่า |
 |---|---|
-| Supabase MCP server | ตั้งด้วย `/setup-supabase-mcp` (PAT, project-scoped) · project_ref = `SUPABASE_PROJECT_REF` ใน `.env.local` |
+| Supabase MCP server | `supabase` จาก `.mcp.json` (tools `mcp__supabase__*`) · launcher `scripts/supabase-mcp.mjs` อ่าน `.env.local` เอง · project_ref `lpeuocqqfmftnukvfmek` · เขียนได้ (`SUPABASE_MCP_WRITE=true`) · **ห้ามใช้ server ของ plugin kp-supabase-nextjs** (ref ไม่ถูกแทนค่า) · พิสูจน์: `node scripts/supabase-mcp-smoke.mjs` |
 | ตรวจก่อนใช้ | `get_project_url` ต้องตรงกับ `NEXT_PUBLIC_SUPABASE_URL` ใน `.env.local` — ไม่ตรง = หยุด |
 | git remote / branch | `origin` (github.com/kpcrmv4/SIS-Manager) / `main` · `upstream` = Davis (อ่านอย่างเดียว ห้าม push) |
 | dev port | `3000` |
@@ -63,13 +63,13 @@
 
 | กลุ่ม | คีย์ / สิ่งที่ต้องมี | สถานะ (2026-09-23) |
 |---|---|---|
-| `.env.local` Supabase | `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` · `SUPABASE_SECRET_KEY` | ว่าง |
-| `.env.local` MCP (PAT) | `SUPABASE_PROJECT_REF` · `SUPABASE_ACCESS_TOKEN` | ว่าง |
+| `.env.local` Supabase | `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` · `SUPABASE_SECRET_KEY` | มีแล้ว |
+| `.env.local` MCP (PAT) | `SUPABASE_PROJECT_REF` · `SUPABASE_ACCESS_TOKEN` | มีแล้ว |
 | `.env.local` generated | `CRON_SECRET` · `CUSTOMER_TOKEN_SECRET` · `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` + `VAPID_SUBJECT` · `SEED_OWNER_PASSWORD` · `SEED_BAR_PASSWORD` · `SEED_STAFF_PASSWORD` *(P0-01 สร้าง ห้ามทับของเดิม)* | สร้างใน P0-01 |
 | `.env.local` ฟีเจอร์ | `ENABLE_DEMO_LOGIN=true` (dev) · `APP_BASE_URL` (ว่างได้จน deploy — outbox cron เป็น no-op) | สร้างใน P0-01 |
 | LINE ทดสอบ (ไม่บังคับ) | ใส่ผ่านหน้า ตั้งค่า → LINE ของสาขา (ไม่ใช่ env) | ไม่มี → แถวส่ง LINE จริงเป็น `manual_verify` |
 | git | `origin/main` push ได้ | มีแล้ว |
-| MCP | `get_project_url` ตรงกับ `NEXT_PUBLIC_SUPABASE_URL` | รอ PAT |
+| MCP | `get_project_url` ตรงกับ `NEXT_PUBLIC_SUPABASE_URL` | มีแล้ว (smoke OK 2026-09-23) · ต้องรีสตาร์ต Claude Code และอนุมัติ server `supabase` ของโปรเจกต์ก่อน loop เรียกผ่าน MCP ได้ |
 
 ถ้ามีแถวไหน **ว่าง** → ยังไม่เริ่ม · แจ้งชื่อคีย์ที่ขาดให้ผู้ใช้กรอกในไฟล์เอง (ไม่ใช่วางในแชท)
 
@@ -249,7 +249,7 @@ worker P2/P3 ทำบน branch ของ worktree แล้ว orchestrator me
 8. **ตัดสินใจแทนได้แค่ไหน** — ทุกอย่างนอก 4 กรณีใน §6 · ข้อความข้อกำหนดการฝาก (terms) ใช้ของ Davis แปลเป็น 4 ภาษาเป็นค่าชั่วคราว
 8b. **ใครเดินแถว manual** — เจ้าของ (kpcrmv4) หลังจบ run: LINE จริง, LIFF ในแอป LINE, print-server, กล้องสแกน, push บนมือถือ
 9. **สรุปเมื่อไหร่** — ทำยาวจนเสร็จค่อยสรุปครั้งเดียว พร้อม run report
-10. **ค่าที่ต้องให้ (§0)** — ยังว่าง: Supabase 3 คีย์ + PAT 2 คีย์ → เริ่มไม่ได้จนกว่าจะครบ
+10. **ค่าที่ต้องให้ (§0)** — ครบแล้ว 2026-09-23 (Supabase 3 คีย์ + PAT + MCP smoke OK) · ค่า generated สร้างใน P0-01
 11. **ความคืบหน้า** — ผู้ใช้รัน `--watch` เอง · loop derive ครั้งเดียวต่อ iteration
 
 ---
