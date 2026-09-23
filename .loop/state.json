@@ -2,7 +2,7 @@
   "project": "sis-manager",
   "run": {
     "status": "running",
-    "iteration": 3,
+    "iteration": 4,
     "budget": 40,
     "started": "2026-09-23T13:20:00.721Z",
     "batch": {
@@ -33,7 +33,7 @@
         {
           "id": "P0-04",
           "name": "Supabase clients + proxy.ts + login",
-          "status": "todo"
+          "status": "written"
         },
         {
           "id": "P0-05",

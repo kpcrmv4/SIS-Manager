@@ -1,0 +1,31 @@
+import { NextResponse, type NextRequest } from 'next/server'
+import { identifierToEmail } from '@/lib/auth/identifier'
+import { signInWithPassword } from '@/lib/auth/sign-in'
+
+export const runtime = 'nodejs'
+
+const MAX_BODY = 2048
+
+export async function POST(req: NextRequest) {
+  const text = await req.text()
+  if (text.length > MAX_BODY) return NextResponse.json({ error: 'invalid' }, { status: 413 })
+
+  let body: unknown
+  try {
+    body = JSON.parse(text)
+  } catch {
+    return NextResponse.json({ error: 'invalid' }, { status: 400 })
+  }
+  const { identifier, password } = (body ?? {}) as { identifier?: unknown; password?: unknown }
+  if (typeof identifier !== 'string' || typeof password !== 'string' || !password || password.length > 128) {
+    return NextResponse.json({ error: 'invalid' }, { status: 400 })
+  }
+
+  const email = identifierToEmail(identifier)
+  // Same answer as a wrong password: the form must not reveal which accounts exist.
+  if (!email) return NextResponse.json({ error: 'invalid' }, { status: 401 })
+
+  const result = await signInWithPassword(req, email, password)
+  if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status })
+  return result.response
+}
