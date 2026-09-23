@@ -139,6 +139,8 @@ export async function POST(req: NextRequest) {
     headers: {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="print-server-${branch.code}.zip"`,
+      // the ZIP carries the account password — never cache it anywhere
+      'Cache-Control': 'no-store',
     },
   })
 }
