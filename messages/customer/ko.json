@@ -112,7 +112,18 @@
       "금",
       "토",
       "일"
-    ]
+    ],
+    "table": "테이블 선택",
+    "tableHint": "빈 테이블을 눌러 선택하세요",
+    "tableFree": "빈 테이블",
+    "tablePicked": "선택됨",
+    "tableTaken": "예약됨",
+    "tableBlocked": "예약 불가",
+    "tableSeats": "{min}–{max}인석",
+    "tableSeatsOne": "{count}인석",
+    "tableSmall": "{count}명에게 맞지 않음",
+    "tableNone": "선택한 날짜에 {count}명이 앉을 빈 테이블이 없어요. 날짜나 인원을 바꿔 보세요",
+    "tableChosen": "테이블 {label} · {zone}"
   },
   "ticket": {
     "title": "예약 내역",
@@ -174,7 +185,13 @@
     "BAD_ZONE": "해당 구역을 사용할 수 없습니다",
     "BAD_RANGE": "날짜 범위가 올바르지 않습니다",
     "CUSTOMER_REQUIRED": "고객 계정을 찾을 수 없습니다 · 다시 로그인해 주세요",
-    "unknown": "오류가 발생했습니다. 다시 시도해 주세요"
+    "unknown": "오류가 발생했습니다. 다시 시도해 주세요",
+    "table_required": "먼저 테이블을 선택하세요",
+    "table_taken": "방금 예약된 테이블이에요. 다른 테이블을 선택하세요",
+    "table_not_bookable": "이 테이블은 선택한 날짜에 예약할 수 없어요",
+    "table_seats": "이 테이블은 인원 수에 맞지 않아요",
+    "table_choice_off": "이 지점은 매장에서 테이블을 배정해요",
+    "BAD_TABLE": "테이블을 찾을 수 없어요"
   },
   "line": {
     "depositConfirmed": "{item} {count}병을 보관했습니다 · 코드 {code} · 만료 {date}",

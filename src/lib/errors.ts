@@ -49,6 +49,10 @@ export const DB_ERROR_CODES = [
   'zone_not_bookable',
   'full',
   'table_taken',
+  'table_required',
+  'table_not_bookable',
+  'table_seats',
+  'TABLE_OTHER_BRANCH',
   'cancel_too_late',
 ] as const
 

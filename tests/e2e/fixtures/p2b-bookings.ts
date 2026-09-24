@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS = {
   no_show_minutes: 30,
   customer_cancel_hours: 2,
   closed_weekdays: [] as number[],
+  table_choice: 'shop' as 'shop' | 'customer',
 }
 
 export async function resetSettings(admin: Db, branchId: string, patch: Partial<typeof DEFAULT_SETTINGS> = {}) {

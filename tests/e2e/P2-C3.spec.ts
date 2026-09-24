@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
-import { adminDb, fixtureIds } from './fixtures/db'
+import { adminDb, dbAs, fixtureIds } from './fixtures/db'
+import { BASE_URL } from './fixtures/env'
 import { BRANCH_A_CODE } from './fixtures/users'
 import { cleanupRun, confirmAll, mustCreate } from './fixtures/deposits'
 import { cleanupCustomers, makeCustomer } from './fixtures/p2c-customers'
@@ -18,7 +19,7 @@ test.afterAll(async () => {
   const admin = adminDb()
   const { branchA } = fixtureIds()
   if (zoneIds.length) await admin.from('table_zones').delete().in('id', zoneIds)
-  await admin.from('booking_settings').update({ closed_weekdays: originalClosedWeekdays ?? [] }).eq('branch_id', branchA)
+  await admin.from('booking_settings').update({ closed_weekdays: originalClosedWeekdays ?? [], table_choice: 'shop' }).eq('branch_id', branchA)
   await admin.from('bookings').delete().like('name', `${RUN}%`)
   await cleanupRun()
   await cleanupCustomers()
@@ -259,4 +260,105 @@ test('P2-C3-06 a booking code belonging to another customer 404s', async ({ page
   await withCustomerDouble(page, token)
   await page.goto(`/liff/${codeLower}/ticket/${(theirs as { code: string }).code}`)
   await expect(page.getByText('ไม่พบรายการจองนี้')).toBeVisible()
+})
+
+type T = { id: string; label: string }
+/**
+ * Guests pick their table (R-036) at branch A, with one zone of four tables for `night`: free,
+ * held by a staff booking that night, switched off for customers, and a 6–10 seater.
+ */
+async function planFixture(night: string, prefix: string) {
+  const { branchA } = fixtureIds()
+  await adminDb().from('booking_settings').update({ table_choice: 'customer', closed_weekdays: [] }).eq('branch_id', branchA)
+  const sfx = RUN.slice(-3)
+  const zone = await addBookableZone(branchA, `${RUN} ${prefix} เลือกโต๊ะ`, true)
+  const add = async (label: string, min: number, max: number, extra: Record<string, unknown> = {}): Promise<T> => {
+    const { data, error } = await adminDb()
+      .from('tables')
+      .insert({ branch_id: branchA, zone_id: zone, label: `${prefix}${label}${sfx}`, seats_min: min, seats_max: max, ...extra })
+      .select('id, label')
+      .single()
+    expect(error, error?.message).toBeNull()
+    return data!
+  }
+  const free = await add('F', 1, 4)
+  const taken = await add('K', 1, 4)
+  const closed = await add('X', 1, 4, { customer_bookable: false })
+  const big = await add('B', 6, 10)
+  const held = await dbAs('staff').rpc('create_booking', { p_branch: branchA, p_night: night, p_slot: '21:00:00', p_party: 2, p_name: `${RUN} ถือโต๊ะ`, p_table: taken.id } as never)
+  expect(held.error, held.error?.message).toBeNull()
+  return { zone, free, taken, closed, big }
+}
+
+const tile = (page: Page, label: string) => page.locator(`[data-testid="cx-table"][data-label="${label}"]`)
+
+test('P2-C3-07 guests pick their table: free / taken / blocked / too small on the plan, the picked table is booked', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const night = addDays(businessNight(), 2)
+  const t = await planFixture(night, 'P')
+  const me = await makeCustomer()
+  await withCustomerDouble(page, signCustomerToken(me.id, branchA))
+  await page.goto(`/liff/${codeLower}/book`)
+  await page.getByTestId(`cx-date-${night}`).click()
+
+  await expect(tile(page, t.free.label)).toHaveAttribute('data-state', 'free')
+  await expect(tile(page, t.taken.label)).toHaveAttribute('data-state', 'taken')
+  await expect(tile(page, t.closed.label)).toHaveAttribute('data-state', 'blocked')
+  await expect(tile(page, t.big.label)).toHaveAttribute('data-state', 'small') // a party of 2 at a 6–10 table
+  for (const x of [t.taken, t.closed, t.big]) await expect(tile(page, x.label)).toBeDisabled()
+  // the screen agrees with the database
+  const plan = (await adminDb().rpc('table_availability', { p_branch: branchA, p_night: night })).data as unknown as { zones: { tables: { id: string; state: string }[] }[] }
+  const db = Object.fromEntries(plan.zones.flatMap((z) => z.tables).map((x) => [x.id, x.state]))
+  expect([db[t.free.id], db[t.taken.id], db[t.closed.id], db[t.big.id]]).toEqual(['free', 'taken', 'blocked', 'free'])
+
+  await page.locator('.cx-slots button').first().click()
+  await expect(page.getByTestId('cx-book-submit')).toBeDisabled() // no table picked yet
+  await tile(page, t.free.label).click()
+  await expect(tile(page, t.free.label)).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByTestId('cx-table-picked')).toContainText(t.free.label)
+  await page.getByTestId('cx-book-name').fill(`${RUN} เลือกเอง`)
+  await page.getByTestId('cx-book-submit').click()
+
+  await page.waitForURL(new RegExp(`/liff/${codeLower}/ticket/BK-`))
+  const code = page.url().split('/ticket/')[1]
+  const { data: row } = await adminDb().from('bookings').select('table_id, zone_id, night').eq('code', code).eq('branch_id', branchA).single()
+  expect(row).toEqual({ table_id: t.free.id, zone_id: t.zone, night })
+  await expect(page.getByTestId('cx-ticket')).toContainText(t.free.label)
+})
+
+test('P2-C3-08 when the shop seats guests: zone chips and no plan; the tables API answers 403', async ({ page, request }) => {
+  const { branchA } = fixtureIds()
+  await adminDb().from('booking_settings').update({ table_choice: 'shop' }).eq('branch_id', branchA)
+  const me = await makeCustomer()
+  const token = signCustomerToken(me.id, branchA)
+  await withCustomerDouble(page, token)
+  await page.goto(`/liff/${codeLower}/book`)
+  await expect(page.getByTestId('cx-zone-any')).toBeVisible()
+  await expect(page.getByTestId('cx-table-section')).toHaveCount(0)
+  const res = await request.get(`${BASE_URL}/api/customer/tables?branch=${codeLower}&night=${addDays(businessNight(), 2)}`, { headers: { 'X-Customer-Token': token } })
+  expect(res.status()).toBe(403)
+  expect(await res.json()).toEqual({ error: 'table_choice_off' })
+})
+
+test('P2-C3-09 the picked table is taken before sending: a toast, the plan shows it taken, nothing booked', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const night = addDays(businessNight(), 2)
+  const t = await planFixture(night, 'R')
+  const me = await makeCustomer()
+  await withCustomerDouble(page, signCustomerToken(me.id, branchA))
+  await page.goto(`/liff/${codeLower}/book`)
+  await page.getByTestId(`cx-date-${night}`).click()
+  await page.locator('.cx-slots button').first().click()
+  await tile(page, t.free.label).click()
+  await page.getByTestId('cx-book-name').fill(`${RUN} ช้าไป`)
+
+  // someone else takes it first
+  const other = await dbAs('staff').rpc('create_booking', { p_branch: branchA, p_night: night, p_slot: '22:00:00', p_party: 2, p_name: `${RUN} คนอื่น`, p_table: t.free.id } as never)
+  expect(other.error, other.error?.message).toBeNull()
+  await page.getByTestId('cx-book-submit').click()
+
+  await expect(page.getByText('โต๊ะนี้เพิ่งถูกจองไป เลือกโต๊ะอื่นได้เลย')).toBeVisible()
+  await expect(tile(page, t.free.label)).toHaveAttribute('data-state', 'taken')
+  await expect(page.getByTestId('cx-table-picked')).toHaveCount(0)
+  expect((await adminDb().from('bookings').select('id').eq('name', `${RUN} ช้าไป`)).data).toHaveLength(0)
 })

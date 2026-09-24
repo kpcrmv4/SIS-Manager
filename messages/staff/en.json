@@ -597,7 +597,12 @@
       "Fr",
       "Sa",
       "Su"
-    ]
+    ],
+    "tableChoice": "Table choice",
+    "tableChoiceShop": "The shop seats guests",
+    "tableChoiceShopHelp": "Guests only say which zone they would like; staff pick the table when confirming",
+    "tableChoiceCustomer": "Guests pick their table",
+    "tableChoiceCustomerHelp": "Guests see the floor plan in LINE and pick a free table; set which tables they may take on the Tables page"
   },
   "settingsTables": {
     "title": "Floor plan",
@@ -609,8 +614,6 @@
     "colShape": "Shape",
     "colSeats": "Seats",
     "colBookable": "Customers can book on LINE",
-    "bookableOn": "On",
-    "bookableOff": "Staff only",
     "shape": {
       "square": "Square",
       "round": "Round",
@@ -622,10 +625,25 @@
     "seatsMax": "Max seats",
     "sort": "Order",
     "active": "Active",
-    "note": "Customers pick a zone only; the shop assigns the table. Table order here is the order on the plan",
+    "note": "The order in this table is the order on the floor plan",
     "empty": "No zones yet",
     "emptyBody": "Add a zone first, then add tables to it",
-    "labelTaken": "That table name is already used in this branch"
+    "labelTaken": "That table name is already used in this branch",
+    "tableBookable": "Guests can book",
+    "tableBookableHelp": "Off = guests can never pick this table themselves; staff can still seat guests here",
+    "blockedDates": "Closed on some nights",
+    "blockedDatesHelp": "Guests cannot pick this table on these nights — saved as soon as you press",
+    "addBlock": "Add night",
+    "removeBlock": "Remove {date}",
+    "noBlocks": "No closed nights yet",
+    "blockAdded": "Closed on {date}",
+    "blockRemoved": "Open again on {date}",
+    "tableOpen": "Bookable",
+    "tableClosed": "Not bookable",
+    "zoneClosed": "Zone closed",
+    "blockedCount": "Closed {count, plural, one {# night} other {# nights}}",
+    "noteShop": "Right now the shop seats guests and they only pick a zone — change it in Booking settings › Table choice",
+    "noteCustomer": "Guests pick their own table at this branch — set each table’s bookability and closed nights with its Edit button"
   },
   "settingsItems": {
     "title": "Liquor list",
@@ -982,6 +1000,10 @@
     "cancel_too_late": "It's too late to cancel yourself",
     "invalid": "Something in the form isn't right",
     "unauthenticated": "Session expired — log in again",
-    "unknown": "Something went wrong. Try again"
+    "unknown": "Something went wrong. Try again",
+    "table_required": "Pick a table",
+    "table_not_bookable": "Guests cannot book this table on that night",
+    "table_seats": "The party does not fit this table",
+    "TABLE_OTHER_BRANCH": "This table belongs to another branch"
   }
 }

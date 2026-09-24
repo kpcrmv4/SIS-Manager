@@ -112,7 +112,18 @@
       "五",
       "六",
       "日"
-    ]
+    ],
+    "table": "选择桌位",
+    "tableHint": "点选空闲的桌位",
+    "tableFree": "空闲",
+    "tablePicked": "已选",
+    "tableTaken": "已被预订",
+    "tableBlocked": "不开放预订",
+    "tableSeats": "{min}–{max} 人",
+    "tableSeatsOne": "{count} 人",
+    "tableSmall": "不适合 {count} 人",
+    "tableNone": "所选日期没有适合 {count} 人的空桌，请换个日期或人数",
+    "tableChosen": "桌位 {label} · {zone}"
   },
   "ticket": {
     "title": "您的订位",
@@ -174,7 +185,13 @@
     "BAD_ZONE": "该区域不可用",
     "BAD_RANGE": "日期范围不正确",
     "CUSTOMER_REQUIRED": "找不到客户账号，请重新登录",
-    "unknown": "出错了，请重试"
+    "unknown": "出错了，请重试",
+    "table_required": "请先选择桌位",
+    "table_taken": "该桌位刚被预订，请选择其他桌位",
+    "table_not_bookable": "该桌位在所选日期不开放预订",
+    "table_seats": "该桌位不适合所选人数",
+    "table_choice_off": "本店由店员安排桌位",
+    "BAD_TABLE": "找不到该桌位"
   },
   "line": {
     "depositConfirmed": "已为您寄存 {item} {count} 瓶 · 编号 {code} · 到期 {date}",

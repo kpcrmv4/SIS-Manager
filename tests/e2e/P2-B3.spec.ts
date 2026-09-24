@@ -4,6 +4,7 @@ import { adminDb, clearLocalLoginThrottle, fixtureIds } from './fixtures/db'
 import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { DEFAULT_SETTINGS, resetSettings, teardownZonesAndTables } from './fixtures/p2b-bookings'
 import { BRANCH_A_NAME } from './fixtures/users'
+import { addDays, bangkokDate } from '../../src/lib/date'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -255,6 +256,59 @@ test.describe('owner settings', () => {
     expect(data?.deposit_days).toBe(45)
     expect(data?.expiry_notice_days).toBe(5)
     expect(data?.withdrawal_blocked_days).toContain('Mon')
+  })
+
+  test('P2-B3-11 table choice: guests pick their table ↔ the shop seats them, saved and shown on the tables page', async ({ page }) => {
+    const choice = async () => (await admin().from('booking_settings').select('table_choice').eq('branch_id', branchA).single()).data?.table_choice
+    await page.goto('/settings/booking')
+    await expect(page.getByTestId('table-choice-shop')).toHaveAttribute('aria-checked', 'true')
+    await page.getByTestId('table-choice-customer').click()
+    await expect(page.getByTestId('table-choice-customer')).toHaveAttribute('aria-checked', 'true')
+    await page.getByTestId('booking-settings-save').click()
+    await expect(async () => expect(await choice()).toBe('customer')).toPass({ timeout: 10_000 })
+    await page.reload()
+    await expect(page.getByTestId('table-choice-customer')).toHaveAttribute('aria-checked', 'true')
+    await page.goto('/settings/tables')
+    await expect(page.getByTestId('tables-choice-note')).toHaveAttribute('data-choice', 'customer')
+
+    await page.goto('/settings/booking')
+    await page.getByTestId('table-choice-shop').click()
+    await page.getByTestId('booking-settings-save').click()
+    await expect(async () => expect(await choice()).toBe('shop')).toPass({ timeout: 10_000 })
+  })
+
+  test('P2-B3-12 a table: guests-can-book off, a closed night added and removed', async ({ page }) => {
+    const zone = await admin().from('table_zones').insert({ branch_id: branchA, name: `${RUN} โซนลูกค้า`, sort: 60 }).select('id').single()
+    const tbl = await admin().from('tables').insert({ branch_id: branchA, zone_id: zone.data!.id, label: `CB${RUN.slice(-3)}`, seats_min: 1, seats_max: 4 }).select('id, label').single()
+    const { id: tableId, label } = tbl.data!
+    const night = addDays(bangkokDate(), 5)
+    const blocks = async () => (await admin().from('table_blocks').select('id', { count: 'exact', head: true }).eq('table_id', tableId).eq('night', night)).count
+
+    await page.goto('/settings/tables')
+    const zoneCard = page.getByTestId('zone-card').filter({ hasText: `${RUN} โซนลูกค้า` })
+    const badge = zoneCard.locator(`[data-testid="table-book-badge"][data-label="${label}"]`).filter({ visible: true })
+    await expect(badge).toHaveAttribute('data-state', 'on')
+
+    await zoneCard.getByRole('button', { name: 'แก้ไข' }).last().click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByTestId('table-bookable-switch').click()
+    await expect(dialog.getByTestId('table-bookable-switch')).toHaveAttribute('aria-checked', 'false')
+    // a closed night saves at once
+    await dialog.getByTestId('table-block-date').fill(night)
+    await dialog.getByTestId('table-block-add').click()
+    await expect(dialog.locator(`[data-testid="table-block"][data-night="${night}"]`)).toBeVisible()
+    await expect(async () => expect(await blocks()).toBe(1)).toPass({ timeout: 10_000 })
+    await dialog.getByTestId('table-dialog-submit').click()
+    await expect(dialog).toHaveCount(0)
+    expect((await admin().from('tables').select('customer_bookable').eq('id', tableId).single()).data?.customer_bookable).toBe(false)
+    await expect(badge).toHaveAttribute('data-state', 'off')
+    await expect(zoneCard.locator(`[data-testid="table-blocks-badge"][data-label="${label}"]`).filter({ visible: true })).toHaveAttribute('data-count', '1')
+
+    // and open that night again
+    await zoneCard.getByRole('button', { name: 'แก้ไข' }).last().click()
+    await page.getByRole('dialog').getByRole('button', { name: /^ลบวันที่/ }).click()
+    await expect(page.getByRole('dialog').locator('[data-testid="table-block"]')).toHaveCount(0)
+    await expect(async () => expect(await blocks()).toBe(0)).toPass({ timeout: 10_000 })
   })
 })
 

@@ -38,6 +38,26 @@ export function BookingSettingsForm({ branchId, initial }: { branchId: string; i
       <Switch label={t('lineEnabled')} help={t('lineEnabledHelp')} checked={v.lineEnabled} onChange={(x) => setV((s) => ({ ...s, lineEnabled: x }))} />
       <Switch label={t('autoConfirm')} help={t('autoConfirmHelp')} checked={v.autoConfirm} onChange={(x) => setV((s) => ({ ...s, autoConfirm: x }))} />
 
+      <div>
+        <div className="label-base">{t('tableChoice')}</div>
+        <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={t('tableChoice')}>
+          {(['shop', 'customer'] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="radio"
+              aria-checked={v.tableChoice === k}
+              className="choice-card"
+              onClick={() => setV((s) => ({ ...s, tableChoice: k }))}
+              data-testid={`table-choice-${k}`}
+            >
+              <b>{t(k === 'shop' ? 'tableChoiceShop' : 'tableChoiceCustomer')}</b>
+              <span>{t(k === 'shop' ? 'tableChoiceShopHelp' : 'tableChoiceCustomerHelp')}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <Field label={t('advanceDays')}>
           <input type="number" min={0} max={365} className="input-base tnum" value={v.advanceDays} onChange={(e) => setV((s) => ({ ...s, advanceDays: Number(e.target.value) }))} />

@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ bookings: ((rows ?? []) as unknown as Row[]).map((r) => shape(r, settings)) })
 }
 
-type Body = { night?: string; slot?: string; party?: number; zone_id?: string | null; name?: string; phone?: string; note?: string }
+type Body = { night?: string; slot?: string; party?: number; zone_id?: string | null; table_id?: string | null; name?: string; phone?: string; note?: string }
 
 /** "ส่งคำขอจอง" (P2-C3) → create_booking, scoped to this customer + branch server-side. */
 export async function POST(req: NextRequest) {
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
   const parsed = await readJsonBody<Body>(req)
   if (!parsed.ok) return NextResponse.json({ error: 'invalid' }, { status: parsed.status })
-  const { night, slot, party, zone_id, name, phone, note } = parsed.body
+  const { night, slot, party, zone_id, table_id, name, phone, note } = parsed.body
 
   if (!night || !YMD.test(night)) return NextResponse.json({ error: 'invalid' }, { status: 400 })
   if (!slot || !HHMM.test(slot)) return NextResponse.json({ error: 'invalid' }, { status: 400 })
@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
   const cleanName = typeof name === 'string' ? name.trim().slice(0, 120) : ''
   if (!cleanName) return NextResponse.json({ error: 'name_required' }, { status: 400 })
   if (zone_id !== undefined && zone_id !== null && !UUID.test(zone_id)) return NextResponse.json({ error: 'invalid' }, { status: 400 })
+  if (table_id !== undefined && table_id !== null && !UUID.test(table_id)) return NextResponse.json({ error: 'invalid' }, { status: 400 })
 
   const { data, error } = await getSupabaseAdmin().rpc('create_booking', {
     p_branch: s.branch.id,
@@ -118,6 +119,8 @@ export async function POST(req: NextRequest) {
     p_zone: zone_id ?? undefined,
     p_note: typeof note === 'string' ? note.trim().slice(0, 300) || undefined : undefined,
     p_customer_id: s.customer.id,
+    // the database decides whether this branch lets customers pick a table, and whether this one is theirs to take
+    p_table: table_id ?? undefined,
   })
   if (error) return rpcError(error)
   after(() => dispatchSoon())

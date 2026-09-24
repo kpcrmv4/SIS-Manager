@@ -26,7 +26,7 @@ export default async function SettingsBookingPage() {
   const sb = await getSupabaseServer()
   const { data, error } = await sb
     .from('booking_settings')
-    .select('line_enabled, auto_confirm, advance_days, cutoff_time, slot_start, slot_end, slot_minutes, max_bookings_per_night, party_min, party_max, no_show_minutes, customer_cancel_hours, closed_weekdays')
+    .select('line_enabled, auto_confirm, advance_days, cutoff_time, slot_start, slot_end, slot_minutes, max_bookings_per_night, party_min, party_max, no_show_minutes, customer_cancel_hours, closed_weekdays, table_choice')
     .eq('branch_id', branch.id)
     .maybeSingle()
 
@@ -53,6 +53,7 @@ export default async function SettingsBookingPage() {
     noShowMinutes: data.no_show_minutes,
     customerCancelHours: data.customer_cancel_hours,
     closedWeekdays: data.closed_weekdays,
+    tableChoice: data.table_choice === 'customer' ? 'customer' : 'shop',
   }
 
   return (

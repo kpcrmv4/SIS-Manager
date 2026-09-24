@@ -72,6 +72,7 @@ export type Database = {
           slot_end: string
           slot_minutes: number
           slot_start: string
+          table_choice: string
           updated_at: string
         }
         Insert: {
@@ -89,6 +90,7 @@ export type Database = {
           slot_end?: string
           slot_minutes?: number
           slot_start?: string
+          table_choice?: string
           updated_at?: string
         }
         Update: {
@@ -106,6 +108,7 @@ export type Database = {
           slot_end?: string
           slot_minutes?: number
           slot_start?: string
+          table_choice?: string
           updated_at?: string
         }
         Relationships: [
@@ -1060,6 +1063,55 @@ export type Database = {
           },
         ]
       }
+      table_blocks: {
+        Row: {
+          branch_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          night: string
+          table_id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          night: string
+          table_id: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          night?: string
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_blocks_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "table_blocks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "table_blocks_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       table_zones: {
         Row: {
           active: boolean
@@ -1106,6 +1158,7 @@ export type Database = {
           active: boolean
           branch_id: string
           created_at: string
+          customer_bookable: boolean
           id: string
           label: string
           seats_max: number
@@ -1119,6 +1172,7 @@ export type Database = {
           active?: boolean
           branch_id: string
           created_at?: string
+          customer_bookable?: boolean
           id?: string
           label: string
           seats_max?: number
@@ -1132,6 +1186,7 @@ export type Database = {
           active?: boolean
           branch_id?: string
           created_at?: string
+          customer_bookable?: boolean
           id?: string
           label?: string
           seats_max?: number
@@ -1522,6 +1577,10 @@ export type Database = {
           p_quantity: number
           p_table?: string
         }
+        Returns: Json
+      }
+      table_availability: {
+        Args: { p_branch: string; p_night: string }
         Returns: Json
       }
     }

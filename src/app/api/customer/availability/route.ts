@@ -22,14 +22,16 @@ export async function GET(req: NextRequest) {
   if (!YMD.test(from) || !YMD.test(to)) return NextResponse.json({ error: 'BAD_RANGE' }, { status: 400 })
 
   const admin = getSupabaseAdmin()
-  const [avail, zones, deposits] = await Promise.all([
+  const [avail, zones, deposits, settings] = await Promise.all([
     admin.rpc('booking_availability', { p_branch: s.branch.id, p_from: from, p_to: to }),
     admin.from('table_zones').select('id, name').eq('branch_id', s.branch.id).eq('customer_bookable', true).eq('active', true).order('sort'),
     admin.from('deposits').select('id', { count: 'exact', head: true }).eq('customer_id', s.customer.id).eq('branch_id', s.branch.id).eq('status', 'in_store'),
+    admin.from('booking_settings').select('table_choice').eq('branch_id', s.branch.id).maybeSingle(),
   ])
   if (avail.error) return rpcError(avail.error)
   if (zones.error) return rpcError(zones.error)
   if (deposits.error) return rpcError(deposits.error)
+  if (settings.error) return rpcError(settings.error)
 
   // customers see open/closed, the closing reason the owner wrote for them, and slots —
   // never how many tables are booked or the nightly capacity
@@ -42,5 +44,7 @@ export async function GET(req: NextRequest) {
     nights: a.nights.map((n) => ({ night: n.night, closed: n.closed, reason: n.reason, blackout_reason: n.blackout_reason, full: n.full, slots: n.slots })),
     zones: zones.data ?? [],
     inStoreDeposits: deposits.count ?? 0,
+    // 'customer': the LIFF shows the floor plan and the customer picks a table (R-036)
+    tableChoice: settings.data?.table_choice === 'customer' ? 'customer' : 'shop',
   })
 }

@@ -175,6 +175,19 @@
   .cal button.past { color: var(--disabled-fg); cursor: default; }
   .cal button.full { background: var(--status-progress-bg); color: var(--status-progress); font-weight: 600; }
 
+  /* one of a few exclusive options, each with a line of explanation (radio cards) */
+  .choice-card {
+    display: flex; flex-direction: column; gap: 0.1875rem; border: 1.5px solid var(--line); border-radius: var(--r-lg);
+    background: var(--card); padding: 0.75rem 0.875rem; text-align: left; color: var(--ink);
+    transition: border-color 150ms, background-color 150ms;
+  }
+  .choice-card b { font-size: 0.875rem; font-weight: 600; }
+  .choice-card span { font-size: 0.75rem; line-height: 1.45; color: var(--muted); }
+  .choice-card:hover { border-color: var(--line-strong); }
+  .choice-card[aria-checked='true'] { border-color: var(--brand); background: var(--brand-tint); }
+  .choice-card[aria-checked='true'] b { color: var(--brand-on-tint); }
+  .choice-card[aria-checked='true'] span { color: var(--ink-2); }
+
   .days { display: flex; flex-wrap: wrap; gap: 0.375rem; }
   .days button { width: 42px; height: 38px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
   .days button.off, .days button[aria-pressed='true'] {
@@ -325,4 +338,41 @@
   .ticket .tear { margin: 0 1rem; border-top: 1.5px dashed var(--cx-line-strong); }
   .ticket .rows { display: grid; grid-template-columns: auto 1fr; gap: 0.375rem 0.75rem; padding: 0.75rem 1rem 1rem; font-size: 0.8125rem; }
   .ticket .rows > :nth-child(odd) { color: var(--cx-muted); }
+
+  /* "เลือกโต๊ะ" — the night's floor plan in the LIFF (R-036) */
+  .cx-legend { display: flex; flex-wrap: wrap; gap: 0.375rem 0.875rem; font-size: 0.71875rem; color: var(--cx-muted); }
+  .cx-legend i {
+    display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -2px;
+    border: 1px solid var(--cx-line-strong); border-radius: 4px; background: var(--cx-card);
+  }
+  .cx-legend i.picked { border-color: transparent; background: var(--cx-btn); }
+  .cx-legend i.off { border-style: dashed; background: transparent; }
+  .cx-zone-name {
+    display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;
+    font-size: 0.8125rem; font-weight: 600; color: var(--cx-gold);
+  }
+  .cx-zone-name::after { content: ''; flex: 1; height: 1px; background: var(--cx-line); }
+  .cx-plan { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 0.5rem; }
+  .cx-tbl {
+    position: relative; display: flex; min-height: 78px; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; border: 1.5px solid var(--cx-line-strong); border-radius: 14px; background: var(--cx-card);
+    padding: 0.5rem 0.25rem; text-align: center; color: var(--cx-ink); transition: transform 120ms, box-shadow 120ms;
+  }
+  .cx-tbl b { font-family: var(--font-serif); font-size: 1.0625rem; font-weight: 700; line-height: 1.15; }
+  .cx-tbl span { font-size: 0.6875rem; line-height: 1.2; color: var(--cx-muted); }
+  .cx-tbl .ok { position: absolute; top: 6px; right: 6px; width: 13px; height: 13px; }
+  .cx-tbl.round { justify-self: center; width: 100%; max-width: 92px; min-height: 0; aspect-ratio: 1; border-radius: 999px; }
+  .cx-tbl.round .ok { top: 9px; right: calc(50% - 6.5px); } /* inside the circle, not its square corner */
+  .cx-tbl.room { grid-column: span 2; }
+  .cx-tbl.free:active { transform: scale(0.96); }
+  .cx-tbl[aria-pressed='true'] { border-color: transparent; background: var(--cx-btn); color: var(--cx-on-btn); box-shadow: 0 6px 14px var(--cx-glow); }
+  .cx-tbl[aria-pressed='true'] span { color: var(--cx-on-btn); }
+  .cx-tbl.taken, .cx-tbl.blocked { border-style: dashed; background: transparent; color: var(--cx-muted); }
+  .cx-tbl.taken b, .cx-tbl.blocked b { text-decoration: line-through; opacity: 0.7; }
+  .cx-tbl.small { opacity: 0.45; }
+  .cx-tbl:disabled { cursor: not-allowed; }
+  .cx-picked {
+    display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--cx-gold); border-radius: 12px;
+    background: var(--cx-card-2); padding: 0.625rem 0.75rem; font-size: 0.875rem; font-weight: 600; color: var(--cx-gold);
+  }
 }

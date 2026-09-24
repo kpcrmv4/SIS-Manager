@@ -64,6 +64,7 @@ export type CreateTableInput = {
   seatsMin: number
   seatsMax: number
   sort: number
+  customerBookable: boolean
 }
 
 export async function createTable(input: CreateTableInput): Promise<SettingsResult<{ id: string }>> {
@@ -79,6 +80,7 @@ export async function createTable(input: CreateTableInput): Promise<SettingsResu
       seats_min: Math.trunc(input.seatsMin),
       seats_max: Math.trunc(input.seatsMax),
       sort: Math.trunc(input.sort),
+      customer_bookable: input.customerBookable,
     })
     .select('id')
     .single()
@@ -95,6 +97,7 @@ export type UpdateTableInput = {
   seatsMax?: number
   sort?: number
   active?: boolean
+  customerBookable?: boolean
 }
 
 export async function updateTable(id: string, patch: UpdateTableInput): Promise<SettingsResult> {
@@ -114,6 +117,7 @@ export async function updateTable(id: string, patch: UpdateTableInput): Promise<
   if (patch.seatsMax !== undefined) row.seats_max = Math.trunc(patch.seatsMax)
   if (patch.sort !== undefined) row.sort = Math.trunc(patch.sort)
   if (patch.active !== undefined) row.active = patch.active
+  if (patch.customerBookable !== undefined) row.customer_bookable = patch.customerBookable
   const { data, error } = await (await getSupabaseServer()).from('tables').update(row).eq('id', id).select('id').maybeSingle()
   if (error) return { ok: false, error: error.code === '23505' ? 'label_taken' : 'invalid' }
   if (!data) return { ok: false, error: 'forbidden' }
@@ -125,6 +129,28 @@ export async function deleteTable(id: string): Promise<SettingsResult> {
   if (!isUuid(id)) return { ok: false, error: 'invalid' }
   const { data, error } = await (await getSupabaseServer()).from('tables').delete().eq('id', id).select('id')
   if (error) return { ok: false, error: 'invalid' }
+  if (!data?.length) return { ok: false, error: 'forbidden' }
+  touched()
+  return { ok: true, data: undefined }
+}
+
+const YMD = /^\d{4}-\d{2}-\d{2}$/
+
+/** Close one table to customers on one night (R-036) — owner only, through RLS. */
+export async function addTableBlock(branchId: string, tableId: string, night: string): Promise<SettingsResult<{ id: string }>> {
+  if (!isUuid(branchId) || !isUuid(tableId) || !YMD.test(night)) return { ok: false, error: 'invalid' }
+  const { data, error } = await (await getSupabaseServer()).from('table_blocks').insert({ branch_id: branchId, table_id: tableId, night }).select('id').single()
+  if (error) return { ok: false, error: error.code === '42501' ? 'forbidden' : 'invalid' }
+  touched()
+  return { ok: true, data: { id: data.id } }
+}
+
+/** Open that night again. */
+export async function removeTableBlock(id: string): Promise<SettingsResult> {
+  if (!isUuid(id)) return { ok: false, error: 'invalid' }
+  const { data, error } = await (await getSupabaseServer()).from('table_blocks').delete().eq('id', id).select('id')
+  if (error) return { ok: false, error: 'invalid' }
+  // an RLS-refused delete matches zero rows and returns no error
   if (!data?.length) return { ok: false, error: 'forbidden' }
   touched()
   return { ok: true, data: undefined }

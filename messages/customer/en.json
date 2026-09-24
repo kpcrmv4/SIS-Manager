@@ -112,7 +112,18 @@
       "Fr",
       "Sa",
       "Su"
-    ]
+    ],
+    "table": "Pick a table",
+    "tableHint": "Tap a free table to pick it",
+    "tableFree": "Free",
+    "tablePicked": "Your pick",
+    "tableTaken": "Taken",
+    "tableBlocked": "Not bookable",
+    "tableSeats": "{min}–{max} seats",
+    "tableSeatsOne": "{count} seats",
+    "tableSmall": "Not for {count} guests",
+    "tableNone": "No free table for {count} on this date — try another date or party size",
+    "tableChosen": "Table {label} · {zone}"
   },
   "ticket": {
     "title": "Your booking",
@@ -174,7 +185,13 @@
     "BAD_ZONE": "That zone isn't available",
     "BAD_RANGE": "That date range isn't valid",
     "CUSTOMER_REQUIRED": "No customer account found — try signing in again",
-    "unknown": "Something went wrong. Try again"
+    "unknown": "Something went wrong. Try again",
+    "table_required": "Pick a table first",
+    "table_taken": "That table was just taken — pick another one",
+    "table_not_bookable": "That table is not bookable on this date",
+    "table_seats": "That table does not fit your party",
+    "table_choice_off": "The shop seats guests at this branch",
+    "BAD_TABLE": "Table not found"
   },
   "line": {
     "depositConfirmed": "We're storing {count} × {item} for you · code {code} · expires {date}",

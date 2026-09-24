@@ -32,10 +32,12 @@ export type BookingSettingsInput = {
   noShowMinutes: number
   customerCancelHours: number
   closedWeekdays: number[]
+  /** who picks the table: the shop when confirming, or the customer on the LIFF plan (R-036) */
+  tableChoice: 'shop' | 'customer'
 }
 
 export async function saveBookingSettings(input: BookingSettingsInput): Promise<SettingsResult> {
-  if (!isUuid(input.branchId)) return { ok: false, error: 'invalid' }
+  if (!isUuid(input.branchId) || (input.tableChoice !== 'shop' && input.tableChoice !== 'customer')) return { ok: false, error: 'invalid' }
   const sb = await getSupabaseServer()
   const { data, error } = await sb
     .from('booking_settings')
@@ -53,6 +55,7 @@ export async function saveBookingSettings(input: BookingSettingsInput): Promise<
       no_show_minutes: Math.trunc(input.noShowMinutes),
       customer_cancel_hours: Math.trunc(input.customerCancelHours),
       closed_weekdays: input.closedWeekdays,
+      table_choice: input.tableChoice,
     })
     .eq('branch_id', input.branchId)
     .select('branch_id')
