@@ -129,8 +129,8 @@ function DepositCard({ deposit: d, locale, onWithdraw }: { deposit: Deposit; loc
 
       {METERED.has(d.status) && <div className="cx-meter"><i style={{ width: `${d.remaining_percent}%` }} /></div>}
 
-      <div className="meta num flex justify-between gap-2 text-[12.5px] text-cx-muted">
-        <span>{d.code}</span>
+      <div className="meta num flex items-center justify-between gap-2 text-[12.5px] text-cx-muted">
+        <span className="cx-code">{d.code}</span>
         {terminal && <span>{t(`bottles.status.${d.status}`)}</span>}
         {METERED.has(d.status) &&
           (d.is_vip ? <span className="cx-gold">{t('bottles.noExpiry')}</span> : <span>{t('bottles.collectBy', { date: deadline ? formatShortDate(deadline, locale) : '—' })}</span>)}

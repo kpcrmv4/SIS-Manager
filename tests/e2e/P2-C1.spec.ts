@@ -51,6 +51,10 @@ test('P2-C1-03 the locale picker switches UI strings and saves customers.locale'
   await expect(page.getByTestId('cx-branch-name')).toHaveText(BRANCH_A_NAME)
 
   await page.getByTestId('cx-locale-trigger').click()
+  // the sheet fits its four languages — it once inherited the page root's full-screen height (R-035)
+  const sheet = page.getByTestId('cx-locale-sheet')
+  await expect(sheet).toBeVisible()
+  expect((await sheet.boundingBox())!.height).toBeLessThan(420)
   await page.getByTestId('cx-locale-en').click()
   await expect(page.getByRole('heading', { name: 'My bottles' })).toBeVisible()
 
@@ -59,7 +63,7 @@ test('P2-C1-03 the locale picker switches UI strings and saves customers.locale'
   expect(data?.locale).toBe('en')
 })
 
-test('P2-C1-04 the theme toggle switches to cream and back', async ({ page }) => {
+test('P2-C1-04 the theme toggle switches to cream and back; sheets follow it', async ({ page }) => {
   const { branchA } = fixtureIds()
   const customer = await makeCustomer()
   const token = signCustomerToken(customer.id, branchA)
@@ -69,11 +73,23 @@ test('P2-C1-04 the theme toggle switches to cream and back', async ({ page }) =>
   const root = page.locator('.cx')
   await expect(root).toBeVisible()
   await expect(root).not.toHaveAttribute('data-cx-theme', 'light')
+  // Davis's wine gradient by default (R-035), and a sheet on the dark wine surface
+  expect(await root.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('rgb(156, 5, 18)')
+  const sheet = page.getByTestId('cx-locale-sheet')
+  await page.getByTestId('cx-locale-trigger').click()
+  await expect(sheet).toHaveCSS('background-color', 'rgb(42, 11, 16)')
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
 
   await page.getByTestId('cx-theme-toggle').click()
   await expect(root).toHaveAttribute('data-cx-theme', 'light')
   const bg = await root.evaluate((el) => getComputedStyle(el).backgroundColor)
   expect(bg).toBe('rgb(251, 246, 238)')
+  // sheets portal into the themed root, so they turn cream too (they stayed dark before R-035)
+  await page.getByTestId('cx-locale-trigger').click()
+  await expect(sheet).toHaveCSS('background-color', 'rgb(255, 253, 248)')
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
 
   await page.getByTestId('cx-theme-toggle').click()
   await expect(root).not.toHaveAttribute('data-cx-theme', 'light')

@@ -41,6 +41,8 @@ export function FilterRow({ children }: { children: ReactNode }) {
 /**
  * Two or three exclusive options, all visible. Selected is INK — a filter is
  * never the brand colour (see list-toolbar.tsx for why the kit is strict here).
+ * Each option is a framed `.tab` pill, like ผังโต๊ะ / รายการ — an unselected
+ * option on a bare track read as plain text (owner, R-035).
  */
 export function SegmentedFilter({
   basePath,
@@ -58,18 +60,11 @@ export function SegmentedFilter({
   label: string
 }) {
   return (
-    <div role="group" aria-label={label} className="inline-flex rounded-sm bg-surface-3 p-0.5">
+    <div role="group" aria-label={label} className="tabs">
       {options.map((o) => {
         const active = o.value === value
         return (
-          <Link
-            key={o.value}
-            href={hrefWith(basePath, params, { [name]: o.value })}
-            aria-current={active ? 'true' : undefined}
-            className={`min-w-0 flex-1 whitespace-nowrap rounded-xs px-3 py-1.5 text-center text-sm font-medium transition-colors duration-100 ${
-              active ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'
-            }`}
-          >
+          <Link key={o.value} href={hrefWith(basePath, params, { [name]: o.value })} aria-current={active ? 'true' : undefined} className="tab">
             {o.label}
           </Link>
         )

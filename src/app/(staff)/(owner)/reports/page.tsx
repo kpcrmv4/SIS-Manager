@@ -83,17 +83,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
 
   const filter = (
     <form method="get" className="card-surface mb-5 p-4" data-testid="reports-filter">
-      <div role="group" aria-label={t('rangeLabel')} className="mb-3 inline-flex max-w-full flex-wrap rounded-sm bg-surface-3 p-0.5" data-testid="reports-ranges">
+      <div role="group" aria-label={t('rangeLabel')} className="tabs mb-3 flex-wrap" data-testid="reports-ranges">
         {ranges.map((r) => {
           const active = r.from === from && r.to === to
           return (
-            <Link
-              key={r.key}
-              href={rangeHref(r)}
-              aria-current={active ? 'true' : undefined}
-              data-range={r.key}
-              className={`whitespace-nowrap rounded-xs px-3 py-1.5 text-sm font-medium transition-colors duration-100 ${active ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'}`}
-            >
+            <Link key={r.key} href={rangeHref(r)} aria-current={active ? 'true' : undefined} data-range={r.key} className="tab">
               {r.label}
             </Link>
           )

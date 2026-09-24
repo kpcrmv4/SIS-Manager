@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
  * verify-contrast.mjs — WCAG AA (4.5:1) for every text × background pair the
- * app renders, in all four palettes: staff light, staff dark, LIFF Night Bar,
- * LIFF cream.
+ * app renders, in all four palettes: staff light, staff dark, LIFF wine & gold
+ * (Davis's customer page, R-035), LIFF cream. A translucent surface is judged
+ * over the stack that shows through it — glass card over the page's lightest
+ * gradient stop, chip over that card — never over white.
  *
  * Project version of thai-admin-page-kit/verify-contrast.mjs. The kit's copy
  * cannot read this stylesheet: our kit-only tokens are derived with var() and
@@ -68,7 +70,7 @@ export function resolve(value, tokens, depth = 0) {
 const over = (fg, bg) => fg.slice(0, 3).map((c, i) => c * fg[3] + bg[i] * (1 - fg[3]))
 
 /* ── the pairs that exist on screen ────────────────────────────────────── */
-// [fg, bg, backdrop-for-translucent-bg]
+// [fg, bg, …what shows through a translucent bg, down to an opaque base]
 const STAFF = [
   ['ink', 'canvas'], ['ink', 'card'], ['ink', 'surface-2'],
   ['ink-2', 'card'], ['ink-2', 'canvas'],
@@ -88,11 +90,32 @@ const STAFF = [
   ['status-info', 'card'], ['urgent', 'card'],
 ]
 const CX = [
-  ['cx-ink', 'cx-bg'], ['cx-ink', 'cx-card'], ['cx-ink', 'cx-card-2'],
-  ['cx-muted', 'cx-bg'], ['cx-muted', 'cx-card'], ['cx-muted', 'cx-card-2'],
-  ['cx-gold', 'cx-card'], ['cx-gold', 'cx-card-2'], ['cx-gold', 'cx-bg'],
-  ['cx-on-wine', 'cx-wine'], ['cx-warn', 'cx-card'],
+  // text straight on the page — cx-bg is the gradient's lightest stop
+  ['cx-ink', 'cx-bg'], ['cx-muted', 'cx-bg'], ['cx-gold', 'cx-bg'], ['cx-warn', 'cx-bg'],
+  // glass cards and bars over the page; chips and pressed states inside a card
+  ['cx-ink', 'cx-card', 'cx-bg'], ['cx-muted', 'cx-card', 'cx-bg'], ['cx-gold', 'cx-card', 'cx-bg'],
+  ['cx-ink', 'cx-card-2', 'cx-card', 'cx-bg'], ['cx-muted', 'cx-card-2', 'cx-card', 'cx-bg'],
+  ['cx-gold', 'cx-card-2', 'cx-card', 'cx-bg'], ['cx-warn', 'cx-warn-bg', 'cx-card', 'cx-bg'],
+  ['cx-ink', 'cx-bar', 'cx-bg'], ['cx-muted', 'cx-bar', 'cx-bg'], ['cx-gold', 'cx-bar', 'cx-bg'],
+  // dialogs and sheets (solid), and what sits on them
+  ['cx-ink', 'cx-sheet'], ['cx-muted', 'cx-sheet'], ['cx-gold', 'cx-sheet'], ['cx-warn', 'cx-sheet'],
+  ['cx-ink', 'cx-card', 'cx-sheet'], ['cx-gold', 'cx-card-2', 'cx-sheet'], ['cx-danger', 'cx-danger-bg', 'cx-sheet'],
+  // the filled button and the logo tile
+  ['cx-on-btn', 'cx-btn-solid'], ['cx-on-logo', 'cx-logo-from'],
 ]
+
+/** Contrast of fg over a stack of layers: [its own bg, …what shows through, the opaque base]. */
+export function pairRatio(t, fg, layers) {
+  let b = [255, 255, 255]
+  for (const layer of [...layers].reverse()) {
+    const c = resolve(t[layer], t)
+    if (!c) return null
+    b = over(c, b)
+  }
+  const f0 = fg === 'WHITE' ? [255, 255, 255, 1] : resolve(t[fg], t)
+  if (!f0) return null
+  return ratio(over(f0, b), b)
+}
 
 export function score(css) {
   const light = block(css, ':root')
@@ -102,19 +125,11 @@ export function score(css) {
   const themes = []
   if (light) themes.push(['STAFF LIGHT', light, STAFF])
   if (light && dark) themes.push(['STAFF DARK', { ...light, ...dark }, STAFF])
-  if (night) themes.push(['LIFF NIGHT BAR', night, CX])
+  if (night) themes.push(['LIFF WINE & GOLD', night, CX])
   if (night && cream) themes.push(['LIFF CREAM', { ...night, ...cream }, CX])
   const rows = []
   for (const [name, t, pairs] of themes) {
-    for (const [fg, bg, backdrop] of pairs) {
-      const base = backdrop ? resolve(t[backdrop], t) : [255, 255, 255, 1]
-      const b0 = resolve(t[bg], t)
-      const f0 = fg === 'WHITE' ? [255, 255, 255, 1] : resolve(t[fg], t)
-      if (!f0 || !b0 || !base) { rows.push({ theme: name, fg, bg, ratio: null }); continue }
-      const b = over(b0, base.slice(0, 3))
-      const f = over(f0, b)
-      rows.push({ theme: name, fg, bg, ratio: ratio(f, b) })
-    }
+    for (const [fg, ...layers] of pairs) rows.push({ theme: name, fg, bg: layers.join(' over '), ratio: pairRatio(t, fg, layers) })
   }
   return { themes: themes.length, rows }
 }
@@ -147,6 +162,9 @@ function selfTest() {
   const bad = readFileSync(new URL('../src/app/globals.css', import.meta.url), 'utf8')
     .replace('--on-brand: #230A0E;', '--on-brand: #FFFFFF;') // white on light-pink brand in dark
   cases.push(['white on dark-mode brand fails', report(bad) === 1])
+  // white on 10 % white glass: fine over black, invisible when the glass is judged over white
+  const glass = block(':root {\n  --ink: #FFFFFF;\n  --page: #000000;\n  --glass: rgba(255, 255, 255, 0.1);\n}', ':root')
+  cases.push(['glass is judged over what shows through it', pairRatio(glass, 'ink', ['glass', 'page']) > 10 && pairRatio(glass, 'ink', ['glass']) < 1.5])
   let failed = 0
   for (const [name, ok] of cases) { if (!ok) failed++; console.log(`${ok ? 'ok  ' : 'FAIL'} self-test: ${name}`) }
   return failed ? 1 : 0

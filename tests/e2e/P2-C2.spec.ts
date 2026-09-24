@@ -55,8 +55,13 @@ test('P2-C2-02 a withdraw request goes pending, by_customer true, and staff can 
   await page.goto(`/liff/${codeLower}`)
 
   await page.getByTestId('cx-withdraw-open').first().click()
+  // the sheet fits its content — it once inherited the page root's full-screen height (R-035)
+  const sheet = page.getByTestId('cx-withdraw-sheet')
+  await expect(sheet).toBeVisible()
+  expect((await sheet.boundingBox())!.height).toBeLessThan(page.viewportSize()!.height * 0.8)
   await page.getByTestId(`cx-bottle-${bs[0].bottle_no}`).check()
   await page.getByTestId('cx-type-take-home').click()
+  await expect(page.getByTestId('cx-type-take-home')).toHaveAttribute('aria-pressed', 'true')
   await page.getByLabel('โต๊ะของคุณ').fill('B5')
   await page.getByTestId('cx-withdraw-submit').click()
   await expect(page.getByText('ส่งคำขอเบิกแล้ว')).toBeVisible()

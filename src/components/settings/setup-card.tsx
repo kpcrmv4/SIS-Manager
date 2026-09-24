@@ -67,10 +67,7 @@ export function SetupCard({
       )}
 
       <details className="group mt-2">
-        <summary
-          className="flex cursor-pointer list-none items-center gap-1 py-1 text-xs font-medium text-brand select-none [&::-webkit-details-marker]:hidden"
-          data-testid="setup-all"
-        >
+        <summary className="btn-ghost btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden" data-testid="setup-all">
           {allLabel}
           <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden />
         </summary>
@@ -87,7 +84,7 @@ export function SetupCard({
                 {!i.done && <div className="text-xs leading-relaxed text-muted-token">{hints[i.key]}</div>}
               </div>
               {!i.done && (
-                <Link href={i.href} className="shrink-0 text-xs font-medium text-brand hover:underline">
+                <Link href={i.href} className="btn-ghost btn-sm shrink-0">
                   {go}
                 </Link>
               )}

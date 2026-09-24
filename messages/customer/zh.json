@@ -115,8 +115,8 @@
     ]
   },
   "ticket": {
-    "title": "您的订位券",
-    "confirmedSub": "已确认 · 到店时出示此券",
+    "title": "您的订位",
+    "confirmedSub": "已确认 · 到店时出示此页面",
     "pendingSub": "等待店家确认 · 将通过 LINE 通知",
     "arrivedSub": "已签到，祝您今晚愉快",
     "cancelledSub": "此订位已取消",
@@ -231,7 +231,7 @@
     "kwWithdraw": "从您的酒单中选择要取的酒 · 可在店内享用或带回家",
     "kwBottles": "查看寄存的酒、剩余量和到期日",
     "kwBook": "选择日期、时间和人数 · 店家会通过 LINE 确认",
-    "kwTickets": "查看所有预约及到店出示的 QR 预约券",
+    "kwTickets": "查看所有预约及到店出示的 QR 码",
     "kwMenu": "请选择您需要的服务",
     "kwNoApp": "店家尚未开通 LINE 应用 · 请询问店员",
     "btnDeposit": "寄存酒",

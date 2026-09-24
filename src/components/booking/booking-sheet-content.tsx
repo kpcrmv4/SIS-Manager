@@ -121,7 +121,7 @@ export function BookingSheetContent({
             <>
               {tableLabel ?? tk('unassigned')}
               {canChangeTable && (
-                <button type="button" className="ml-2 text-sm text-brand" onClick={() => setChanging(true)} data-testid="change-table-trigger">
+                <button type="button" className="btn-ghost btn-sm ml-2" onClick={() => setChanging(true)} data-testid="change-table-trigger">
                   {t('changeTable')}
                 </button>
               )}

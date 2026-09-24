@@ -93,7 +93,7 @@ export function TonightPanel({ tonight, t, nightLabel, planHref, className = '' 
           <GlassWater className="-ml-0.5 size-4 text-muted-token" aria-hidden />
           {t('tonightBottles', { in: tonight.bottles_in, out: tonight.bottles_out })}
         </span>
-        <Link href={planHref} className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
+        <Link href={planHref} className="btn-ghost btn-sm">
           {t('tonightPlan')}
           <ArrowRight className="size-3.5" aria-hidden />
         </Link>

@@ -38,7 +38,7 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Link href="/deposits" className="mb-1.5 inline-block text-[13px] text-muted-token no-underline hover:text-ink">
+      <Link href="/deposits" className="btn-ghost btn-sm mb-2">
         ‹ {t('back')}
       </Link>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">

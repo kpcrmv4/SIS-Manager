@@ -4,8 +4,9 @@ import { BellButton } from './bell'
 import { PrinterIndicator } from './printer-indicator'
 import { ThemeToggle } from './theme-toggle'
 
+// framed circles: every button in the app has a visible edge (R-035)
 const ICON_BTN =
-  'flex size-10 items-center justify-center rounded-full text-muted-token transition-colors hover:bg-surface-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand'
+  'flex size-10 items-center justify-center rounded-full border border-line bg-card text-muted-token transition-colors hover:bg-surface-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand'
 
 /** Global controls, top-right on every staff page: printer status · notifications · theme. */
 export function TopBar({ userId, branchId, owner }: { userId: string; branchId: string | null; owner: boolean }) {

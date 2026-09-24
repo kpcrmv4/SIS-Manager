@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { formatLongDate } from '@/lib/date'
 import { CxEmpty, CxErrorRetry, CxSkeleton } from './cx-states'
 import { errorText } from './error-text'
+import { useCxPortal } from './portal'
 import { customerFetch, useCxSession } from './session-context'
 
 type Booking = {
@@ -39,12 +40,13 @@ const SUB_KEY: Record<string, string> = {
 const QR_STATUSES = new Set(['confirmed', 'arrived'])
 const CANCELLABLE_STATUS = new Set(['pending', 'confirmed'])
 
-/** "บัตรจองของคุณ" (P2-C3): code, QR of the token (never the code), rows, cancel. */
+/** "รายการจองของคุณ" (P2-C3): code, QR of the token (never the code), rows, cancel. */
 export function TicketClient({ code }: { code: string }) {
   const t = useTranslations('cx')
   // dates follow the language on screen (the session's locale is only the one at sign-in)
   const locale = useLocale() as CustomerLocale
   const session = useCxSession()
+  const portal = useCxPortal()
   const [state, setState] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')
   const [booking, setBooking] = useState<Booking | null>(null)
   const [qr, setQr] = useState<string | null>(null)
@@ -171,18 +173,19 @@ export function TicketClient({ code }: { code: string }) {
       )}
 
       <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-30 bg-black/50" />
+        <Dialog.Portal container={portal}>
+          <Dialog.Overlay className="fixed inset-0 z-30 bg-cx-scrim" />
           <Dialog.Content
             aria-describedby={undefined}
-            className="cx fixed left-1/2 top-1/2 z-31 w-[90%] max-w-85 -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-cx-card p-4 text-cx-ink shadow-[0_20px_50px_rgba(0,0,0,.35)]"
+            className="fixed left-1/2 top-1/2 z-31 w-[calc(100%-2rem)] max-w-85 -translate-x-1/2 -translate-y-1/2 rounded-[18px] border border-cx-line-strong bg-cx-sheet p-4 text-cx-ink shadow-[0_20px_50px_rgba(0,0,0,.45)]"
+            data-testid="cx-ticket-cancel-dialog"
           >
             <Dialog.Title className="cx-serif mb-3 text-[15px] font-semibold">{t('ticket.cancelConfirm')}</Dialog.Title>
             <div className="flex gap-2">
               <button type="button" className="cx-btn ghost flex-1" onClick={() => setConfirmOpen(false)}>
                 {t('shell.close')}
               </button>
-              <button type="button" className="cx-btn flex-1" disabled={pending} onClick={() => void doCancel()} data-testid="cx-ticket-cancel-confirm">
+              <button type="button" className="cx-btn danger flex-1" disabled={pending} onClick={() => void doCancel()} data-testid="cx-ticket-cancel-confirm">
                 {t('ticket.cancel')}
               </button>
             </div>

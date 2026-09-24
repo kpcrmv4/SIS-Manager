@@ -140,40 +140,79 @@
   --sh-3: 0 8px 16px rgb(0 0 0 / 0.5), 0 24px 48px rgb(0 0 0 / 0.6);
 }
 
-/* ── Customer LIFF "Night Bar" (dark-first) — scoped under .cx ─────────── */
+/* ── Customer LIFF — Davis wine & gold (dark-first), scoped under .cx (R-035) ──
+   Davis's customer page: a wine gradient (--cx-page) with glass cards and bars over it and
+   gold gradient buttons. --cx-bg is the gradient's LIGHTEST stop — every text-on-page pair
+   is checked against it, and every translucent surface is checked over it
+   (scripts/verify-contrast.mjs). Davis dimmed text with 50–70 % gold, which drops below
+   4.5:1 on that stop; --cx-muted is the nearest solid that holds. */
 .cx {
   color-scheme: dark;
-  --cx-bg: #120C0D;
-  --cx-card: #1F1517;
-  --cx-card-2: #2A1D20;
-  --cx-ink: #F6EEE6;
-  --cx-muted: #B8A8A2;
-  --cx-line: #3A2B2D;
-  --cx-wine: #B3262F;
-  --cx-on-wine: #FFFFFF;
-  --cx-gold: #D9B26A;
-  --cx-warn: #F0A07F;
-  --cx-warn-line: #E07B53;
-  --cx-logo-from: #3A1A1E;
-  --cx-logo-to: #120C0D;
+  --cx-bg: #9C0512;
+  --cx-page: linear-gradient(160deg, #0E0000 0%, #64090C 40%, #9C0512 80%, #64090C 100%);
+  --cx-card: rgba(14, 0, 0, 0.5);
+  --cx-card-2: rgba(248, 215, 148, 0.15);
+  --cx-bar: rgba(14, 0, 0, 0.6);
+  --cx-sheet: #2A0B10;
+  --cx-scrim: rgba(0, 0, 0, 0.6);
+  --cx-ink: #F8D794;
+  --cx-muted: #E0BC8C;
+  --cx-line: rgba(248, 215, 148, 0.18);
+  --cx-line-strong: rgba(248, 215, 148, 0.4);
+  --cx-gold: #F8D794;
+  --cx-btn: linear-gradient(135deg, #F8D794 0%, #EFEACD 100%);
+  --cx-btn-solid: #F8D794;
+  --cx-on-btn: #64090C;
+  --cx-glow: rgba(248, 215, 148, 0.25);
+  --cx-ring: rgba(248, 215, 148, 0.2);
+  --cx-meter: linear-gradient(90deg, #C9973F, #F8D794);
+  --cx-danger: #FCA5A5;
+  --cx-danger-bg: rgba(239, 68, 68, 0.18);
+  --cx-danger-line: rgba(239, 68, 68, 0.45);
+  --cx-warn: #FCD34D;
+  --cx-warn-bg: rgba(245, 158, 11, 0.18);
+  --cx-warn-line: rgba(245, 158, 11, 0.45);
+  --cx-logo-from: #F8D794;
+  --cx-logo-to: #EFEACD;
+  --cx-on-logo: #64090C;
+  --cx-orb-1: radial-gradient(circle, #F8D794 0%, #9C0512 100%);
+  --cx-orb-2: radial-gradient(circle, #9C0512 0%, #64090C 100%);
+  --cx-orb-opacity: 0.4;
 }
 
 /* ── Customer LIFF "cream" — only when the customer picks light ────────── */
 .cx[data-cx-theme='light'] {
   color-scheme: light;
   --cx-bg: #FBF6EE;
-  --cx-card: #FFFFFF;
-  --cx-card-2: #F4ECE1;
+  --cx-page: linear-gradient(160deg, #FFFFFF 0%, #FFFAF2 45%, #FBF6EE 100%);
+  --cx-card: rgba(255, 255, 255, 0.85);
+  --cx-card-2: rgba(156, 5, 18, 0.07);
+  --cx-bar: rgba(255, 252, 246, 0.88);
+  --cx-sheet: #FFFDF8;
+  --cx-scrim: rgba(42, 26, 21, 0.45);
   --cx-ink: #2A1A15;
   --cx-muted: #6E5A53;
-  --cx-line: #EADFD3;
-  --cx-wine: #8E1B22;
-  --cx-on-wine: #FFFFFF;
+  --cx-line: rgba(100, 9, 12, 0.14);
+  --cx-line-strong: rgba(100, 9, 12, 0.32);
   --cx-gold: #80591A;
-  --cx-warn: #A6431C;
-  --cx-warn-line: #A6431C;
-  --cx-logo-from: #3A1A1E;
-  --cx-logo-to: #120C0D;
+  --cx-btn: linear-gradient(135deg, #9C0512 0%, #64090C 100%);
+  --cx-btn-solid: #9C0512;
+  --cx-on-btn: #FFF6E0;
+  --cx-glow: rgba(156, 5, 18, 0.22);
+  --cx-ring: rgba(156, 5, 18, 0.16);
+  --cx-meter: linear-gradient(90deg, #9C0512, #D9A441);
+  --cx-danger: #B91C1C;
+  --cx-danger-bg: rgba(220, 38, 38, 0.08);
+  --cx-danger-line: rgba(220, 38, 38, 0.4);
+  --cx-warn: #9A3412;
+  --cx-warn-bg: rgba(245, 158, 11, 0.14);
+  --cx-warn-line: rgba(194, 65, 12, 0.4);
+  --cx-logo-from: #9C0512;
+  --cx-logo-to: #64090C;
+  --cx-on-logo: #F8D794;
+  --cx-orb-1: radial-gradient(circle, #F8D794 0%, #FBF6EE 100%);
+  --cx-orb-2: radial-gradient(circle, #F4C9CC 0%, #FBF6EE 100%);
+  --cx-orb-opacity: 0.35;
 }
 
 @theme inline {
@@ -235,12 +274,15 @@
   --color-cx-bg: var(--cx-bg);
   --color-cx-card: var(--cx-card);
   --color-cx-card-2: var(--cx-card-2);
+  --color-cx-bar: var(--cx-bar);
+  --color-cx-sheet: var(--cx-sheet);
+  --color-cx-scrim: var(--cx-scrim);
   --color-cx-ink: var(--cx-ink);
   --color-cx-muted: var(--cx-muted);
   --color-cx-line: var(--cx-line);
-  --color-cx-wine: var(--cx-wine);
-  --color-cx-on-wine: var(--cx-on-wine);
+  --color-cx-line-strong: var(--cx-line-strong);
   --color-cx-gold: var(--cx-gold);
+  --color-cx-danger: var(--cx-danger);
   --color-cx-warn: var(--cx-warn);
 
   --radius-xs: var(--r-xs);

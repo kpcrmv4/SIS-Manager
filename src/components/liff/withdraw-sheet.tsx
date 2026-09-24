@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { errorText } from './error-text'
 import type { Deposit } from './my-bottles-client'
+import { useCxPortal } from './portal'
 import { customerFetch, useCxSession } from './session-context'
 
 /** "ขอเบิกเหล้า" bottom sheet (P2-C2): pick bottles, in-store/take-home, an optional table. */
@@ -22,6 +23,7 @@ export function WithdrawSheet({
 }) {
   const t = useTranslations('cx')
   const session = useCxSession()
+  const portal = useCxPortal()
   const bottles = deposit.deposit_bottles.filter((b) => b.status !== 'consumed')
   const [picked, setPicked] = useState<string[]>([])
   const [type, setType] = useState<'in_store' | 'take_home'>(blockedToday ? 'take_home' : 'in_store')
@@ -57,19 +59,20 @@ export function WithdrawSheet({
 
   return (
     <Dialog.Root open onOpenChange={(v) => !v && onClose()}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-30 bg-black/50" />
+      <Dialog.Portal container={portal}>
+        <Dialog.Overlay className="fixed inset-0 z-30 bg-cx-scrim" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="cx fixed inset-x-0 bottom-0 z-31 max-h-[85vh] overflow-auto rounded-t-[20px] bg-cx-card px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-2 text-cx-ink shadow-[0_-8px_30px_rgba(0,0,0,.35)]"
+          className="fixed inset-x-0 bottom-0 z-31 mx-auto max-h-[85dvh] max-w-120 overflow-auto rounded-t-[20px] border-t border-cx-line-strong bg-cx-sheet px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-2 text-cx-ink shadow-[0_-8px_30px_rgba(0,0,0,.35)]"
+          data-testid="cx-withdraw-sheet"
         >
-          <Dialog.Title className="cx-serif px-1 pb-2 pt-3 text-[15px] font-semibold">{t('withdraw.title')}</Dialog.Title>
-          <div className="mx-auto mb-3 h-1 w-10 rounded-sm bg-cx-line" aria-hidden />
+          <div className="mx-auto mt-1 h-1 w-10 rounded-sm bg-cx-line-strong" aria-hidden />
+          <Dialog.Title className="cx-serif px-1 pb-3 pt-2.5 text-[15px] font-semibold">{t('withdraw.title')}</Dialog.Title>
 
           <p className="cx-label">{t('withdraw.pick')}</p>
           <div className="mb-3 flex flex-col gap-2">
             {bottles.map((b) => (
-              <label key={b.id} className="flex items-center gap-2 text-sm">
+              <label key={b.id} className="cx-option justify-start text-sm">
                 <input type="checkbox" checked={picked.includes(b.id)} onChange={() => toggle(b.id)} data-testid={`cx-bottle-${b.bottle_no}`} />
                 {t('withdraw.bottleN', { n: b.bottle_no, percent: b.remaining_percent })}
               </label>

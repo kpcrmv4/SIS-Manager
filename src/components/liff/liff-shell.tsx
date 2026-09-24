@@ -9,6 +9,7 @@ import type { CustomerLocale } from '@/lib/i18n/config'
 import { CUSTOMER_LOCALE_COOKIE } from '@/lib/i18n/config'
 import { initLiff, liffOpenUrl } from './liff-client'
 import { LocaleSheet } from './locale-sheet'
+import { CxPortalContext } from './portal'
 import { SessionProvider, clearStoredToken, readStoredToken, storeToken, type CxSession } from './session-context'
 
 type Status = 'loading' | 'need_line' | 'login_failed' | 'ready'
@@ -105,6 +106,8 @@ export function LiffShell({
   const [status, setStatus] = useState<Status>('loading')
   const [session, setSession] = useState<CxSession | null>(null)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  // dialogs and sheets portal into the root below, so they follow its theme
+  const [portal, setPortal] = useState<HTMLDivElement | null>(null)
 
   const start = () => {
     setStatus('loading')
@@ -158,7 +161,9 @@ export function LiffShell({
       <Link
         href={href}
         aria-current={active ? 'page' : undefined}
-        className={`flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${active ? 'font-semibold text-cx-gold' : 'text-cx-muted'}`}
+        className={`relative flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${
+          active ? 'font-semibold text-cx-gold before:absolute before:inset-x-1/3 before:top-0 before:h-0.5 before:rounded-full before:bg-cx-gold' : 'text-cx-muted'
+        }`}
       >
         <Icon className="size-5" aria-hidden />
         <span>{label}</span>
@@ -167,81 +172,79 @@ export function LiffShell({
   }
 
   return (
-    <div className="cx font-sans" lang={locale} data-branch={branch.code} data-cx-theme={theme === 'light' ? 'light' : undefined}>
-      <div className="mx-auto flex min-h-dvh max-w-[480px] flex-col pb-[calc(64px+env(safe-area-inset-bottom,0px))]">
-        <header className="flex items-center gap-3 border-b border-cx-line px-4.5 pb-3 pt-4.5">
-          <div
-            className="grid size-[42px] flex-none place-items-center rounded-full border-[1.5px] border-cx-gold text-[14px] font-bold text-cx-gold"
-            style={{ background: 'radial-gradient(circle at 30% 30%, var(--cx-logo-from), var(--cx-logo-to))' }}
-            aria-hidden
+    <CxPortalContext.Provider value={portal}>
+      <div ref={setPortal} className="cx cx-page font-sans" lang={locale} data-branch={branch.code} data-cx-theme={theme === 'light' ? 'light' : undefined}>
+        {/* Davis's ambient glow behind everything (motionless under reduced motion) */}
+        <div className="cx-orbs" aria-hidden>
+          <i />
+          <i />
+          <i />
+        </div>
+        <div className="relative z-1 mx-auto flex min-h-dvh max-w-[480px] flex-col pb-[calc(64px+env(safe-area-inset-bottom,0px))]">
+          <header className="cx-bar sticky top-0 z-10 flex items-center gap-3 border-b border-cx-line px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top,0px))]">
+            <div className="cx-logo" aria-hidden>
+              SIS
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="cx-serif truncate text-[17px] font-semibold leading-tight">{t(title)}</h1>
+              {/* the branch name alone — it already carries the shop's name */}
+              <p className="truncate text-xs text-cx-muted" data-testid="cx-branch-name">
+                {branch.name}
+              </p>
+            </div>
+            {status === 'ready' && session && (
+              <div className="flex flex-none items-center gap-2">
+                {/* the language on screen, not the session's copy — that one is fixed at sign-in */}
+                <LocaleSheet session={session} current={locale} />
+                <button type="button" onClick={toggleTheme} aria-label={t('shell.theme')} data-testid="cx-theme-toggle" className="cx-icon-btn">
+                  {theme === 'dark' ? <Sun className="size-4.5" aria-hidden /> : <Moon className="size-4.5" aria-hidden />}
+                </button>
+              </div>
+            )}
+          </header>
+
+          <main className="flex-1 px-4 py-4">
+            {status === 'loading' && (
+              <div className="flex flex-col items-center gap-3 py-16 text-center text-sm text-cx-muted" data-testid="cx-loading">
+                <RotateCw className="size-5 animate-spin text-cx-gold" aria-hidden />
+                {t('shell.loading')}
+              </div>
+            )}
+            {status === 'need_line' && (
+              <div className="cx-card items-center gap-3 py-8 text-center" data-testid="cx-need-line">
+                <p className="text-sm">{t('shell.openInLine')}</p>
+                <p className="text-xs text-cx-muted">{t('shell.openInLineBody')}</p>
+                {branch.liffId && (
+                  <a href={liffOpenUrl(branch.liffId)} className="cx-btn mt-2">
+                    {t('shell.openInLine')}
+                  </a>
+                )}
+              </div>
+            )}
+            {status === 'login_failed' && (
+              <div className="cx-card items-center gap-3 py-8 text-center" data-testid="cx-login-failed">
+                <p className="text-sm">{t('shell.loginFailed')}</p>
+                <button type="button" onClick={start} className="cx-btn mt-2">
+                  {t('shell.retry')}
+                </button>
+              </div>
+            )}
+            {status === 'ready' && session && <SessionProvider value={session}>{children}</SessionProvider>}
+          </main>
+        </div>
+
+        {status === 'ready' && (
+          <nav
+            aria-label={t('nav.myBottles')}
+            data-testid="cx-bottom-nav"
+            className="cx-bar fixed inset-x-0 bottom-0 z-20 mx-auto grid h-[calc(64px+env(safe-area-inset-bottom,0px))] max-w-[480px] grid-cols-3 border-t border-cx-line pb-[env(safe-area-inset-bottom,0px)]"
           >
-            SIS
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="cx-serif truncate text-[17px] font-semibold leading-tight">{t(title)}</h1>
-            {/* the branch name alone — it already carries the shop's name */}
-            <p className="truncate text-xs text-cx-muted" data-testid="cx-branch-name">
-              {branch.name}
-            </p>
-          </div>
-          {status === 'ready' && session && (
-            <div className="flex flex-none items-center gap-1">
-              {/* the language on screen, not the session's copy — that one is fixed at sign-in */}
-              <LocaleSheet session={session} current={locale} />
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={t('shell.theme')}
-                data-testid="cx-theme-toggle"
-                className="grid size-9 place-items-center rounded-full text-cx-muted"
-              >
-                {theme === 'dark' ? <Sun className="size-5" aria-hidden /> : <Moon className="size-5" aria-hidden />}
-              </button>
-            </div>
-          )}
-        </header>
-
-        <main className="flex-1 px-4 py-4">
-          {status === 'loading' && (
-            <div className="flex flex-col items-center gap-3 py-16 text-center text-sm text-cx-muted" data-testid="cx-loading">
-              <RotateCw className="size-5 animate-spin text-cx-gold" aria-hidden />
-              {t('shell.loading')}
-            </div>
-          )}
-          {status === 'need_line' && (
-            <div className="cx-card items-center gap-3 py-8 text-center" data-testid="cx-need-line">
-              <p className="text-sm">{t('shell.openInLine')}</p>
-              <p className="text-xs text-cx-muted">{t('shell.openInLineBody')}</p>
-              {branch.liffId && (
-                <a href={liffOpenUrl(branch.liffId)} className="cx-btn mt-2">
-                  {t('shell.openInLine')}
-                </a>
-              )}
-            </div>
-          )}
-          {status === 'login_failed' && (
-            <div className="cx-card items-center gap-3 py-8 text-center" data-testid="cx-login-failed">
-              <p className="text-sm">{t('shell.loginFailed')}</p>
-              <button type="button" onClick={start} className="cx-btn mt-2">
-                {t('shell.retry')}
-              </button>
-            </div>
-          )}
-          {status === 'ready' && session && <SessionProvider value={session}>{children}</SessionProvider>}
-        </main>
+            {tab(`/liff/${branch.code.toLowerCase()}`, Wine, t('nav.myBottles'))}
+            {tab(`/liff/${branch.code.toLowerCase()}/book`, CalendarDays, t('nav.book'))}
+            {tab(`/liff/${branch.code.toLowerCase()}/tickets`, TicketIcon, t('nav.tickets'))}
+          </nav>
+        )}
       </div>
-
-      {status === 'ready' && (
-        <nav
-          aria-label={t('nav.myBottles')}
-          data-testid="cx-bottom-nav"
-          className="fixed inset-x-0 bottom-0 z-20 mx-auto grid h-[calc(64px+env(safe-area-inset-bottom,0px))] max-w-[480px] grid-cols-3 border-t border-cx-line bg-cx-card pb-[env(safe-area-inset-bottom,0px)]"
-        >
-          {tab(`/liff/${branch.code.toLowerCase()}`, Wine, t('nav.myBottles'))}
-          {tab(`/liff/${branch.code.toLowerCase()}/book`, CalendarDays, t('nav.book'))}
-          {tab(`/liff/${branch.code.toLowerCase()}/tickets`, TicketIcon, t('nav.tickets'))}
-        </nav>
-      )}
-    </div>
+    </CxPortalContext.Provider>
   )
 }
