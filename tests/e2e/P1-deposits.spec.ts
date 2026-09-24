@@ -244,8 +244,13 @@ test('P1-DEP-19 P1-DEP-20 expiry job: in_store past deadline expires; one with a
   expect((await deposit(a.id)).status).toBe('expired')
   expect((await deposit(b.id)).status).toBe('expired')
   expect((await deposit(held.id)).status).toBe('pending_withdrawal')
+  // the "expired" message waits for the branch's send time (R-044), and a deposit whose deadline
+  // passed weeks ago is not told late — the fresh case is P3-A4-03
   const { data: ob } = await admin().from('line_outbox').select('kind').eq('dedupe_key', `expired:${a.id}`)
-  expect(ob).toEqual([{ kind: 'expired' }])
+  expect(ob).toEqual([])
+  const { error: runErr } = await admin().rpc('run_expiry_notices', { p_branch: (await deposit(a.id)).branch_id, p_force: true })
+  expect(runErr, runErr?.message).toBeNull()
+  expect((await admin().from('line_outbox').select('kind').eq('dedupe_key', `expired:${a.id}`)).data).toEqual([])
   expired.push(a.id, b.id)
 })
 

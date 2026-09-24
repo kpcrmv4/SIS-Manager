@@ -26,6 +26,7 @@ export const DB_ERROR_CODES = [
   'BAD_DAYS',
   'NOT_EXPIRED',
   'NOT_YOURS',
+  'NOT_LINKED',
   'TERMS_REQUIRED',
   'WRONG_NIGHT',
   'BAD_ZONE',

@@ -178,6 +178,14 @@ export async function setVip(depositId: string, vip: boolean): Promise<ActionRes
   return res
 }
 
+/** This deposit's customer: LINE expiry reminders on or off, for every deposit of theirs (R-044, bar / owner). */
+export async function setCustomerReminders(depositId: string, enabled: boolean): Promise<ActionResult<{ customer_id: string; enabled: boolean }>> {
+  if (!isUuid(depositId) || typeof enabled !== 'boolean') return { ok: false, error: 'invalid' }
+  const res = await callRpc<{ customer_id: string; enabled: boolean }>((sb) => sb.rpc('set_customer_expiry_notices', { p_deposit: depositId, p_enabled: enabled }))
+  if (res.ok) touched(depositId)
+  return res
+}
+
 export async function disposeDeposits(depositIds: string[], reason?: string): Promise<ActionResult<{ count: number }>> {
   if (!depositIds.length || !depositIds.every(isUuid)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ count: number }>((sb) => sb.rpc('dispose_deposits', { p_deposit_ids: depositIds, p_reason: cleanText(reason, 200) }))

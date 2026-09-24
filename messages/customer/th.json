@@ -207,7 +207,7 @@
   "line": {
     "depositConfirmed": "ร้านรับฝาก {item} {count} ขวดแล้ว · รหัส {code} · หมดอายุ {date}",
     "depositRejected": "ร้านไม่สามารถรับฝาก {item} ได้ · {reason}",
-    "expirySoon": "{item} ({code}) จะหมดอายุ {date} · รับคืนได้ถึง {deadline}",
+    "expiryReminder": "{{item}} ({{code}}) จะหมดอายุ {{date}} (อีก {{day}} วัน) · รับคืนได้ถึง {{deadline}}",
     "expired": "{item} ({code}) หมดอายุแล้ว · ร้านจะจำหน่ายออกหากไม่มารับ",
     "disposed": "{item} ({code}) ถูกจำหน่ายออกแล้วเนื่องจากเลยกำหนดรับคืน",
     "withdrawCompleted": "เบิก {item} {count} ขวดเรียบร้อย · เหลือ {left} ขวด",

@@ -207,7 +207,7 @@
   "line": {
     "depositConfirmed": "{item} {count}병을 보관했습니다 · 코드 {code} · 만료 {date}",
     "depositRejected": "{item} 보관을 받을 수 없습니다 · {reason}",
-    "expirySoon": "{item}({code})이 {date}에 만료됩니다 · {deadline}까지 수령해 주세요",
+    "expiryReminder": "{{item}}({{code}})이 {{date}}에 만료됩니다 ({{day}}일 남음) · {{deadline}}까지 수령해 주세요",
     "expired": "{item}({code})이 만료되었습니다 · 수령하지 않으면 폐기됩니다",
     "disposed": "{item}({code})은 수령 기한이 지나 폐기되었습니다",
     "withdrawCompleted": "{item} {count}병을 꺼냈습니다 · {left}병 남음",

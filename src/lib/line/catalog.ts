@@ -30,6 +30,11 @@ export function customerLine(locale: unknown): CustomerLine {
   return CUSTOMER[isLineLocale(locale) ? locale : 'th']
 }
 
+/** The default wording of the expiry reminder in every LIFF language (R-044) — what a branch starts from. */
+export function expiryReminderDefaults(): Record<LineLocale, string> {
+  return { th: CUSTOMER.th.expiryReminder, en: CUSTOMER.en.expiryReminder, zh: CUSTOMER.zh.expiryReminder, ko: CUSTOMER.ko.expiryReminder }
+}
+
 /** Staff-group messages are always Thai (DESIGN.md: the staff group is one Thai chat per branch). */
 export function staffLine(): StaffLine {
   return staffTh.settingsLine.messages

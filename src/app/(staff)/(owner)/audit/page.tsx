@@ -17,6 +17,8 @@ const YMD = /^\d{4}-\d{2}-\d{2}$/
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const MAX_SPAN_DAYS = 366
 const SECRET_NAME: Record<string, string> = { channel_access_token: 'Channel access token', channel_secret: 'Channel secret' }
+// each language of the expiry reminder wording, in its own script (R-044)
+const TEMPLATE_LANG: Record<string, string> = { th: 'ไทย', en: 'English', zh: '中文', ko: '한국어' }
 
 /**
  * บันทึกการใช้งาน (R-038, owner only): who did what and when across the branches, filtered by
@@ -222,9 +224,11 @@ export default async function AuditPage({ searchParams }: { searchParams: Search
     field: (key) =>
       key.startsWith('receipt_settings.')
         ? t('field.receipt', { key: key.slice('receipt_settings.'.length) })
-        : t.has(`field.${key}`)
-          ? t(`field.${key}`)
-          : key,
+        : key.startsWith('expiry_reminder_templates.')
+          ? t('field.template', { lang: TEMPLATE_LANG[key.slice('expiry_reminder_templates.'.length)] ?? key.slice('expiry_reminder_templates.'.length) })
+          : t.has(`field.${key}`)
+            ? t(`field.${key}`)
+            : key,
     value: (key, v) => formatValue(key, v, valueFormat),
     details: t('details'),
   }

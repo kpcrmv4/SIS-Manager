@@ -149,7 +149,8 @@ test('P1-OUT-07 seven sis-* cron jobs on UTC schedules (P4-03 added sis-push-dis
   expect(rows).toEqual([
     { jobname: 'sis-booking-reminders', schedule: '0 9 * * *' },
     { jobname: 'sis-expire-deposits', schedule: '7 * * * *' },
-    { jobname: 'sis-expiry-notices', schedule: '0 5 * * *' },
+    // every 5 minutes: each branch runs once a day at its own send time (R-044)
+    { jobname: 'sis-expiry-notices', schedule: '*/5 * * * *' },
     { jobname: 'sis-line-dispatch', schedule: '* * * * *' },
     { jobname: 'sis-no-shows', schedule: '*/5 * * * *' },
     { jobname: 'sis-push-dispatch', schedule: '* * * * *' },

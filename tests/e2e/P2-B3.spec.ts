@@ -245,7 +245,7 @@ test.describe('owner settings', () => {
     await row.getByRole('button', { name: 'แก้ไข' }).click()
     const editDialog = page.getByRole('dialog', { name: `${RUN} สาขาทดสอบ` })
     await editDialog.getByLabel('อายุฝาก (วัน)').fill('45')
-    await editDialog.getByLabel('แจ้งเตือนก่อนหมดอายุ (วัน)').fill('5')
+    await editDialog.getByLabel('ใกล้หมดอายุเมื่อเหลือ (วัน)').fill('5')
     await editDialog.getByRole('group', { name: 'วันงดเบิกดื่มในร้าน' }).getByRole('button', { name: 'จันทร์', exact: true }).click()
     await editDialog.getByTestId('branch-form-save').click()
     // wait for the edit dialog itself to close — onSaved only fires after the write commits,

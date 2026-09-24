@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { BottlesGrid } from '@/components/deposit/bottles-grid'
 import { HistoryTimeline } from '@/components/deposit/history-timeline'
 import { DetailActions } from '@/components/deposit/detail-actions'
+import { CustomerReminders } from '@/components/deposit/customer-reminders'
 import { PrintStatusBadge } from '@/components/print/print-status-badge'
 import { getActorState } from '@/lib/auth/actor'
 import { getDepositDetail } from '@/lib/deposit/detail'
@@ -71,6 +72,19 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
               <dd>
                 <Badge tone={detail.customerId ? 'done' : 'pending'}>{detail.customerId ? t('lineLinked') : t('lineNotLinked')}</Badge>
               </dd>
+              {detail.customerReminders !== null && (
+                <>
+                  <dt>{t('reminders')}</dt>
+                  <dd>
+                    <CustomerReminders
+                      depositId={detail.id}
+                      enabled={detail.customerReminders}
+                      canEdit={actor.role === 'bar' || actor.role === 'owner'}
+                      branchOff={branchSettings?.expiryRemindersEnabled === false}
+                    />
+                  </dd>
+                </>
+              )}
               <dt>{t('depositedAt')}</dt>
               <dd className="num">
                 {t('depositedAtValue', {

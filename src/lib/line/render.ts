@@ -1,8 +1,9 @@
 import { SHOP_NAME } from '../constants'
 import { customerLine, isLineLocale, staffLine, type CustomerLine, type LineLocale } from './catalog'
+import { TEMPLATE_MAX, fillExpiryTemplate } from './expiry-template'
 import { bubble, type BubbleButton, type LineMessage } from './flex'
 import { KEYWORD_KINDS } from './keywords'
-import { clip, int, interpolate, lineDate, lineDateTime, lineTime, slotTime } from './format'
+import { clip, daysUntilBangkok, int, interpolate, lineDate, lineDateTime, lineTime, slotTime } from './format'
 
 export type { LineMessage } from './flex'
 
@@ -102,12 +103,8 @@ const CUSTOMER: Record<(typeof CUSTOMER_KINDS)[number], CustomerSpec> = {
     button: 'bottles',
   },
   withdraw_rejected: { title: 'withdrawRejected', sentence: 'withdrawRejected', vars: (p, l) => ({ item: item(p), reason: reason(p, l) }), button: 'bottles' },
-  expiry_soon: {
-    title: 'expirySoon',
-    sentence: 'expirySoon',
-    vars: (p, l, loc) => ({ item: item(p), code: code(p), date: lineDate(p.expires_at, loc) || l.noExpiry, deadline: lineDateTime(p.deadline, loc) }),
-    button: 'bottles',
-  },
+  // the branch's own wording or the default, filled by expirySentence (R-044)
+  expiry_soon: { title: 'expirySoon', sentence: 'expiryReminder', vars: () => ({}), button: 'bottles' },
   expired: { title: 'expired', sentence: 'expired', vars: (p) => ({ item: item(p), code: code(p) }), button: 'bottles' },
   disposed: { title: 'disposed', sentence: 'disposed', vars: (p) => ({ item: item(p), code: code(p) }), button: 'bottles' },
   booking_confirmed: { title: 'bookingConfirmed', sentence: 'bookingConfirmed', vars: booking, button: 'ticket' },
@@ -130,11 +127,29 @@ function customerButton(kind: CustomerSpec['button'], p: Payload, l: CustomerLin
   return null
 }
 
+/**
+ * The expiry reminder (R-044): the branch's wording for this language when the run put one in
+ * the payload, else the default; {{day}} is the days left the run counted (or, for an old row,
+ * counted here from the expiry date).
+ */
+function expirySentence(p: Payload, l: CustomerLine, loc: LineLocale, ctx: RenderContext): string {
+  const own = typeof p.template === 'string' ? clip(p.template, TEMPLATE_MAX) : ''
+  const days = typeof p.days === 'number' && Number.isFinite(p.days) ? Math.trunc(p.days) : daysUntilBangkok(p.expires_at)
+  return fillExpiryTemplate(own || l.expiryReminder, {
+    day: days === null ? '' : String(Math.max(0, days)),
+    item: item(p),
+    code: code(p),
+    date: lineDate(p.expires_at, loc) || l.noExpiry,
+    deadline: lineDateTime(p.deadline, loc),
+    branch: eyebrow(ctx),
+  })
+}
+
 function renderCustomer(kind: (typeof CUSTOMER_KINDS)[number], loc: LineLocale, p: Payload, ctx: RenderContext): LineMessage {
   const l = customerLine(loc)
   const spec = CUSTOMER[kind]
   const title = l.titles[spec.title]
-  const sentence = interpolate(l[spec.sentence] as string, spec.vars(p, l, loc))
+  const sentence = kind === 'expiry_soon' ? expirySentence(p, l, loc, ctx) : interpolate(l[spec.sentence] as string, spec.vars(p, l, loc))
   return bubble({
     theme: 'customer',
     eyebrow: eyebrow(ctx),

@@ -60,6 +60,16 @@ export function lineDateTime(v: unknown, locale: LineLocale): string {
   return date ? `${date} ${lineTime(v)}` : ''
 }
 
+const bangkokDay = (d: Date) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
+
+/** Whole Bangkok calendar days from `now` to `v` (0 = the same day), or null for a bad date. */
+export function daysUntilBangkok(v: unknown, now: Date = new Date()): number | null {
+  const d = toDate(v)
+  if (!d) return null
+  return Math.round((Date.parse(`${bangkokDay(d)}T00:00:00Z`) - Date.parse(`${bangkokDay(now)}T00:00:00Z`)) / 86_400_000)
+}
+
 /** "HH:MM" or "HH:MM:SS" slot text → "HH:MM", anything else → ''. */
 export function slotTime(v: unknown): string {
   return typeof v === 'string' && /^\d{2}:\d{2}/.test(v) ? v.slice(0, 5) : ''

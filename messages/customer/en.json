@@ -207,7 +207,7 @@
   "line": {
     "depositConfirmed": "We're storing {count} × {item} for you · code {code} · expires {date}",
     "depositRejected": "We couldn't accept {item} · {reason}",
-    "expirySoon": "{item} ({code}) expires {date} · collect by {deadline}",
+    "expiryReminder": "{{item}} ({{code}}) expires {{date}} (days left: {{day}}) · collect by {{deadline}}",
     "expired": "{item} ({code}) has expired · it will be disposed of if not collected",
     "disposed": "{item} ({code}) was disposed of after its collection deadline",
     "withdrawCompleted": "Collected {count} × {item} · {left} left",

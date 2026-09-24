@@ -119,3 +119,10 @@
 - หลักฐาน: src/app/ui.css .cx { min-height: 100dvh } · P2-C3-03 วัดความสูง dialog ได้เท่าจอเมื่อยังใช้ .cx · แยกเป็น .cx (token) + .cx-page (หน้า) และ portal เข้า root ของ LIFF
 - กฎ: คลาสที่ใช้ส่งต่อ token ให้ portal ต้องมีแต่ตัวแปรสีเท่านั้น ส่วนสไตล์ของหน้าต้องอยู่ในคลาสที่ใช้เฉพาะ root ของหน้า
 - status: project-only
+
+## L-013 · 2026-09-24 · kp-testing-cadence · flaky
+- อาการ: P3-A2-05 ผ่านตอนรันเดี่ยว แต่ล้มตอนรันทั้งชุด · mock LINE ได้รับ push แล้ว แต่แถว outbox ยังเป็น sending ไม่ใช่ sent
+- สาเหตุ: mock บันทึก request ทันทีที่มาถึง ก่อนที่ dispatcher จะได้คำตอบกลับไปแล้วเรียก finish_outbox · spec อ่านแถวครั้งเดียวทันทีหลัง mock เห็น push · เครื่องที่โหลดหนักทำให้ช่วงห่างนั้นยาวพอให้อ่านเจอ sending
+- หลักฐาน: tests/e2e/P3-A2.spec.ts:161 Expected "sent" Received "sending" (full run 2026-09-24, 331 passed) · เปลี่ยนเป็น expect.poll จนเป็น sent แล้วผ่าน
+- กฎ: เมื่อ mock เห็น request แล้ว สถานะฝั่งผู้ส่งยังอาจไม่อัปเดต ให้ poll สถานะสุดท้ายของผู้ส่ง อย่าอ่านครั้งเดียว
+- status: new

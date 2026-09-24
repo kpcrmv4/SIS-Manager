@@ -99,6 +99,7 @@ export function BranchForm({ branchId, initial, onSaved }: { branchId: string; i
           </label>
           <input id="bf-notice" type="number" min={0} max={60} className="input-base tnum" value={v.expiryNoticeDays} onChange={(e) => setV((s) => ({ ...s, expiryNoticeDays: Number(e.target.value) }))} />
         </div>
+        <p className="help-text col-span-2 -mt-1">{t('expiryNoticeDaysHelp')}</p>
       </div>
 
       <div>

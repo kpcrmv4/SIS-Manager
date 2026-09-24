@@ -41,6 +41,12 @@ export function args(s) {
   return [...found].sort()
 }
 
+// the {{name}} variables of wording the owner can rewrite (the LINE expiry reminder, R-044)
+export function doubleArgs(s) {
+  if (typeof s !== 'string') return []
+  return [...new Set([...s.matchAll(/\{\{\s*([A-Za-z_]+)\s*\}\}/g)].map((m) => m[1]))].sort()
+}
+
 export function compare(ref, refName, other, otherName) {
   const problems = []
   const a = flatten(ref)
@@ -52,6 +58,7 @@ export function compare(ref, refName, other, otherName) {
     const need = args(a[k])
     const have = args(b[k])
     for (const p of need) if (!have.includes(p)) problems.push(`${otherName}: ${k} lacks {${p}}`)
+    for (const p of doubleArgs(a[k])) if (!doubleArgs(b[k]).includes(p)) problems.push(`${otherName}: ${k} lacks {{${p}}}`)
     if (typeof b[k] === 'string' && b[k].trim() === '') problems.push(`${otherName}: ${k} is empty`)
   }
   for (const k of Object.keys(b)) if (!(k in a)) problems.push(`${otherName}: extra key ${k} (not in ${refName})`)
@@ -98,6 +105,7 @@ function selfTest() {
     ['extra key fails', compare(ref, 'ref', { ...ref, z: 'q' }, 'o').problems.some((p) => p.includes('extra key z'))],
     ['array length fails', compare(ref, 'ref', { a: { b: 'x {n}', c: ['1'] }, d: '{count}' }, 'o').problems.length === 1],
     ['plural inner braces are not args', args('{count, plural, one {# day} other {# days}}').join() === 'count'],
+    ['missing {{variable}} fails', compare({ x: 'a {{day}} {{item}}' }, 'ref', { x: 'a {{item}}' }, 'o').problems.some((p) => p.includes('lacks {{day}}'))],
   ]
   let failed = 0
   for (const [n, ok] of cases) { if (!ok) failed++; console.log(`${ok ? 'ok  ' : 'FAIL'} self-test: ${n}`) }

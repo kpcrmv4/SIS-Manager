@@ -597,6 +597,7 @@
         "Liquor name, deposit code, customer name and a status badge",
         "**Bottles**: each bottle with the % left",
         "**LINE** status (**LINE linked** or **LINE not linked**), **Deposited**, **Expires**, **Collect by** and **Received by**",
+        "**Expiry reminders**: **On** or **Off** for this customer (once linked to LINE)",
         "**Photos** taken when received and when confirmed",
         "Action buttons such as **Withdraw**, **Print receipt**, **Print bottle label**",
         "**History**: everything that happened to this deposit, with the time and who did it"
@@ -706,6 +707,18 @@
             "If the printer is online, press **Print**",
             "If the printer isn't running, press **Queue it anyway** — it prints once the shop computer is on",
             "Give the receipt to the customer and stick the label on the bottle"
+          ]
+        },
+        "reminders": {
+          "title": "How to turn expiry reminders off or on for one customer",
+          "roles": [
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Open one of that customer’s deposits",
+            "At **Expiry reminders**, press the switch — the badge turns **Off** or **On**",
+            "It applies to every deposit of this customer, in every branch"
           ]
         }
       },
@@ -1031,10 +1044,11 @@
       "onPage": [
         "The **Finish setting up the shop** card with progress and the **Next step**",
         "**Branch name**, the **Branch active** switch, **Opens at** and **Closes at**",
-        "**Deposit term (days)** and **Expiry reminder (days before)**",
+        "**Deposit term (days)** and **Expiring soon within (days)**",
         "**No in-store withdrawals on**, with days to tap",
         "**Deposit receipt**: **Receipt header**, **Receipt footer** and **Copies**",
-        "**Printer** and **Printer status**, with the latest print jobs"
+        "**Printer** and **Printer status**, with the latest print jobs",
+        "**Expiry reminders on LINE**: an on/off switch, **Send at**, up to 3 reminders under **Send before expiry**, and the **Reminder wording** in all 4 languages with a **Preview**"
       ],
       "howtos": {
         "setup": {
@@ -1055,7 +1069,7 @@
             "owner"
           ],
           "steps": [
-            "Change the fields you need, such as **Deposit term (days)** or **Expiry reminder (days before)**",
+            "Change the fields you need, such as **Deposit term (days)** or **Expiring soon within (days)**",
             "Under **No in-store withdrawals on**, tap days to turn them on or off",
             "Change **Receipt header**, **Receipt footer** and **Copies** if you like",
             "Press **Save**"
@@ -1095,17 +1109,34 @@
             "For a job showing **Failed**, press **Print again**",
             "Press **Try again** to reload the latest status"
           ]
+        },
+        "expiry": {
+          "title": "How to set up expiry reminders on LINE",
+          "roles": [
+            "owner"
+          ],
+          "steps": [
+            "Under **Expiry reminders on LINE**, turn on **Send expiry reminders to customers**",
+            "Set **Send at** — they go out once a day, within minutes of this time",
+            "Under **Send before expiry**, enter the days; **Add a reminder** allows up to 3, e.g. 15 · 7 · 3",
+            "Under **Reminder wording**, pick a language, edit the text and tap a variable such as {{day}} to insert it; check the **Preview**",
+            "Press **Save** — **Use the default** brings the original wording back"
+          ]
         }
       },
       "important": [
         "This page edits only the selected branch — switch branch before editing another",
         "Changing **Deposit term (days)** only affects new deposits",
-        "Pressing **Set up printer** again makes the old file stop working at once — install the new file on the shop computer"
+        "Pressing **Set up printer** again makes the old file stop working at once — install the new file on the shop computer",
+        "Messages go only for deposits linked to LINE that are not VIP; the **expired** message also goes out at **Send at**"
       ],
       "tips": [
         "On no-in-store-withdrawal days, customers can still take bottles home",
         "Keep the printer window on the shop computer open; if it gets closed, double-click START-PrintServer.bat in C:\\print-server",
-        "Turning off **Branch active** removes the branch from the branch picker — turn it back on under **Users & branches**, tab **Branches**"
+        "Turning off **Branch active** removes the branch from the branch picker — turn it back on under **Users & branches**, tab **Branches**",
+        "Variables: {{day}} days left · {{item}} liquor · {{code}} deposit code · {{date}} expiry date · {{deadline}} collect by · {{branch}} branch name",
+        "When several reminders fall due at once — say, a deposit just linked to LINE — the customer gets one message with the real days left",
+        "Reminders that fall due while the switch is off are skipped; turning it back on does not send them late"
       ]
     },
     "bookingSettings": {
@@ -1818,7 +1849,8 @@
       "tips": [
         "Thai, Chinese and Korean words work too, e.g. ฝาก, เบิก, จองโต๊ะ, เมนู",
         "After several wrong codes, the customer has to wait 15 minutes before trying again",
-        "If a customer types the DEP code from a bottle label, LINE replies asking for the 6-character code on the receipt"
+        "If a customer types the DEP code from a bottle label, LINE replies asking for the 6-character code on the receipt",
+        "The expiring-soon and expired messages follow the time, the number of reminders and the wording the shop set on **Branch details**"
       ]
     },
     "auditLog": {

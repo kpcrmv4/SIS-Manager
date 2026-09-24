@@ -355,6 +355,10 @@ export type Database = {
           created_at: string
           deposit_days: number
           expiry_notice_days: number
+          expiry_reminder_days: number[]
+          expiry_reminder_templates: Json
+          expiry_reminder_time: string
+          expiry_reminders_enabled: boolean
           id: string
           liff_id: string | null
           line_bot_user_id: string | null
@@ -377,6 +381,10 @@ export type Database = {
           created_at?: string
           deposit_days?: number
           expiry_notice_days?: number
+          expiry_reminder_days?: number[]
+          expiry_reminder_templates?: Json
+          expiry_reminder_time?: string
+          expiry_reminders_enabled?: boolean
           id?: string
           liff_id?: string | null
           line_bot_user_id?: string | null
@@ -399,6 +407,10 @@ export type Database = {
           created_at?: string
           deposit_days?: number
           expiry_notice_days?: number
+          expiry_reminder_days?: number[]
+          expiry_reminder_templates?: Json
+          expiry_reminder_time?: string
+          expiry_reminders_enabled?: boolean
           id?: string
           liff_id?: string | null
           line_bot_user_id?: string | null
@@ -420,6 +432,7 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          expiry_notices_enabled: boolean
           id: string
           line_user_id: string
           locale: Database["public"]["Enums"]["app_locale"]
@@ -430,6 +443,7 @@ export type Database = {
         Insert: {
           created_at?: string
           display_name?: string | null
+          expiry_notices_enabled?: boolean
           id?: string
           line_user_id: string
           locale?: Database["public"]["Enums"]["app_locale"]
@@ -440,6 +454,7 @@ export type Database = {
         Update: {
           created_at?: string
           display_name?: string | null
+          expiry_notices_enabled?: boolean
           id?: string
           line_user_id?: string
           locale?: Database["public"]["Enums"]["app_locale"]
@@ -574,6 +589,7 @@ export type Database = {
           expired_notice_sent_at: string | null
           expires_at: string | null
           expiry_notice_sent_at: string | null
+          expiry_reminders_sent: number[]
           id: string
           is_vip: boolean
           item_id: string | null
@@ -616,6 +632,7 @@ export type Database = {
           expired_notice_sent_at?: string | null
           expires_at?: string | null
           expiry_notice_sent_at?: string | null
+          expiry_reminders_sent?: number[]
           id?: string
           is_vip?: boolean
           item_id?: string | null
@@ -658,6 +675,7 @@ export type Database = {
           expired_notice_sent_at?: string | null
           expires_at?: string | null
           expiry_notice_sent_at?: string | null
+          expiry_reminders_sent?: number[]
           id?: string
           is_vip?: boolean
           item_id?: string | null
@@ -1618,9 +1636,17 @@ export type Database = {
         }
         Returns: Json
       }
+      run_expiry_notices: {
+        Args: { p_branch?: string; p_force?: boolean }
+        Returns: number
+      }
       send_booking_reminders: { Args: never; Returns: number }
       send_expiry_notices: { Args: never; Returns: number }
       send_line_test: { Args: { p_branch: string }; Returns: Json }
+      set_customer_expiry_notices: {
+        Args: { p_deposit: string; p_enabled: boolean }
+        Returns: Json
+      }
       set_vip: { Args: { p_deposit: string; p_vip: boolean }; Returns: Json }
       staff_receive_request: {
         Args: {

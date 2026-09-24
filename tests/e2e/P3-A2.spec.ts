@@ -157,8 +157,10 @@ test.describe('bar', () => {
     await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
     expect((await deposit(dep.id)).status).toBe('in_store')
     await expect.poll(() => mock.pushesTo(line).length, { timeout: 30_000 }).toBe(1)
-    const { data: row } = await adminDb().from('line_outbox').select('status, sent_at').eq('dedupe_key', `deposit_confirmed:${dep.id}`).single()
-    expect(row).toMatchObject({ status: 'sent' })
+    // the mock records the push before the dispatcher hears back and marks the row — wait for that
+    await expect
+      .poll(async () => (await adminDb().from('line_outbox').select('status').eq('dedupe_key', `deposit_confirmed:${dep.id}`).single()).data?.status, { timeout: 15_000 })
+      .toBe('sent')
     const msg = (mock.pushesTo(line)[0].body!.messages as { altText: string }[])[0]
     expect(msg.altText).toContain('รับฝากเรียบร้อย')
   })

@@ -39,6 +39,8 @@ export type DepositDetail = {
   remainingQty: number
   remainingPercent: number
   customerId: string | null
+  /** the LINE-linked customer's expiry-reminder switch (R-044); null when not linked */
+  customerReminders: boolean | null
   customerName: string
   customerPhone: string | null
   tableLabel: string | null
@@ -91,6 +93,7 @@ type DepositDetailRow = {
   dispose_reason: string | null
   received_by_profile: ProfileRef
   confirmed_by_profile: ProfileRef
+  customer: { expiry_notices_enabled: boolean } | null
 }
 
 type EventRow = {
@@ -122,7 +125,8 @@ export async function getDepositDetail(branchId: string, id: string): Promise<De
        customer_id, customer_name, customer_phone, table_label, created_at, received_at, expires_at, collect_deadline_at,
        photo_paths, confirm_photo_paths, notes, cancel_reason, dispose_reason,
        received_by_profile:profiles!deposits_received_by_fkey(display_name, role),
-       confirmed_by_profile:profiles!deposits_confirmed_by_fkey(display_name, role)`,
+       confirmed_by_profile:profiles!deposits_confirmed_by_fkey(display_name, role),
+       customer:customers!deposits_customer_id_fkey(expiry_notices_enabled)`,
     )
     .eq('id', id)
     .eq('branch_id', branchId)
@@ -166,6 +170,7 @@ export async function getDepositDetail(branchId: string, id: string): Promise<De
     remainingQty: dep.remaining_qty,
     remainingPercent: Number(dep.remaining_percent),
     customerId: dep.customer_id,
+    customerReminders: dep.customer_id ? (dep.customer?.expiry_notices_enabled ?? true) : null,
     customerName: dep.customer_name,
     customerPhone: dep.customer_phone,
     tableLabel: dep.table_label,

@@ -207,7 +207,7 @@
   "line": {
     "depositConfirmed": "已为您寄存 {item} {count} 瓶 · 编号 {code} · 到期 {date}",
     "depositRejected": "无法寄存 {item} · {reason}",
-    "expirySoon": "{item}（{code}）将于 {date} 到期 · 请于 {deadline} 前取回",
+    "expiryReminder": "{{item}}（{{code}}）将于 {{date}} 到期（还剩 {{day}} 天）· 请于 {{deadline}} 前取回",
     "expired": "{item}（{code}）已过期 · 未取回将被处理",
     "disposed": "{item}（{code}）已超过取回期限，已被处理",
     "withdrawCompleted": "已取出 {item} {count} 瓶 · 剩 {left} 瓶",

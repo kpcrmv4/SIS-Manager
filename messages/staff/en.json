@@ -341,6 +341,13 @@
     "line": "LINE",
     "lineLinked": "LINE linked",
     "lineNotLinked": "LINE not linked",
+    "reminders": "Expiry reminders",
+    "remindersOn": "On",
+    "remindersOff": "Off",
+    "remindersHelp": "Applies to every deposit of this customer",
+    "remindersBranchOff": "This branch has expiry reminders off for everyone",
+    "remindersOnDone": "Expiry reminders on for this customer",
+    "remindersOffDone": "Expiry reminders off for this customer",
     "depositedAt": "Deposited",
     "depositedAtValue": "{date} · {time} · table {table}",
     "expires": "Expires",
@@ -708,7 +715,8 @@
     "closesAt": "Closes at",
     "active": "Branch active",
     "depositDays": "Deposit term (days)",
-    "expiryNoticeDays": "Expiry reminder (days before)",
+    "expiryNoticeDays": "Expiring soon within (days)",
+    "expiryNoticeDaysHelp": "Used for the expiring-soon lists on Tonight and the overview; messages to customers are set under Expiry reminders on LINE",
     "withdrawalBlockedDays": "No in-store withdrawals on",
     "withdrawalBlockedHelp": "Take-home withdrawals are still allowed on these days",
     "receipt": "Deposit receipt",
@@ -723,7 +731,46 @@
       "Friday",
       "Saturday",
       "Sunday"
-    ]
+    ],
+    "expiry": {
+      "title": "Expiry reminders on LINE",
+      "hint": "Messages to customers who linked LINE: before a bottle expires, and once it has",
+      "enabled": "Send expiry reminders to customers",
+      "enabledHelp": "Off: no customer of this branch gets the reminders or the expired message. To turn one customer off, use that customer’s deposit page",
+      "time": "Send at",
+      "timeHelp": "Once a day, within minutes of this time (Bangkok); the expired message goes out then too",
+      "days": "Send before expiry",
+      "daysHelp": "Up to 3 reminders, 1–90 days before the expiry date each, e.g. 15 · 7 · 3",
+      "dayLabel": "Reminder {n} (days before)",
+      "dayUnit": "days",
+      "addDay": "Add a reminder",
+      "removeDay": "Remove reminder {n}",
+      "message": "Reminder wording",
+      "messageHelp": "Write it for every language customers can pick in LINE — each customer gets their own. Tap a variable to insert it",
+      "languages": {
+        "th": "ไทย",
+        "en": "English",
+        "zh": "中文",
+        "ko": "한국어"
+      },
+      "variables": {
+        "day": "days left",
+        "item": "liquor",
+        "code": "deposit code",
+        "date": "expiry date",
+        "deadline": "collect by",
+        "branch": "branch name"
+      },
+      "reset": "Use the default",
+      "isDefault": "Default wording",
+      "custom": "Edited",
+      "preview": "Preview",
+      "errDays": "Enter 1–90 days, no repeats, at least one reminder",
+      "errTime": "Invalid time",
+      "errUnknown": "Unknown variable {names}",
+      "errTooLong": "Longer than {max} characters",
+      "errEmpty": "The wording is empty — write one or press Use the default"
+    }
   },
   "settingsLine": {
     "title": "Branch LINE",
@@ -1012,6 +1059,7 @@
     "BAD_DAYS": "Days must be 1–365",
     "NOT_EXPIRED": "Some selected bottles haven't expired",
     "NOT_YOURS": "This doesn't belong to this customer",
+    "NOT_LINKED": "The customer hasn’t linked LINE yet",
     "TERMS_REQUIRED": "The deposit terms must be accepted",
     "WRONG_NIGHT": "This booking isn't for tonight",
     "BAD_ZONE": "That zone can't be used",
@@ -1134,6 +1182,10 @@
         "created": "User created",
         "updated": "User edited",
         "password_reset": "New password set"
+      },
+      "customer": {
+        "reminders_on": "Customer expiry reminders on",
+        "reminders_off": "Customer expiry reminders off"
       }
     },
     "field": {
@@ -1152,7 +1204,7 @@
       "code": "Branch code",
       "category": "Category",
       "deposit_days": "Deposit days",
-      "expiry_notice_days": "Expiry notice (days)",
+      "expiry_notice_days": "Expiring soon within (days)",
       "withdrawal_blocked_days": "No in-store withdrawals on",
       "liff_id": "LIFF ID",
       "line_channel_id": "Channel ID",
@@ -1181,7 +1233,13 @@
       "phone": "Phone",
       "note": "Note",
       "status": "Status",
-      "receipt": "Receipt: {key}"
+      "receipt": "Receipt: {key}",
+      "expiry_reminders_enabled": "Expiry reminders on LINE",
+      "expiry_reminder_days": "Send before expiry (days)",
+      "expiry_reminder_time": "Reminder time",
+      "template": "Reminder wording ({lang})",
+      "expiry_notices_enabled": "Expiry reminders",
+      "deposit": "Deposit"
     }
   }
 }
