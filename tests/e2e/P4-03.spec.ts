@@ -19,6 +19,13 @@ const LINE_USER = `U${'b0e2'.repeat(8)}`
 const ignoreRealInstallOffers = () =>
   window.addEventListener('beforeinstallprompt', (e) => (e.isTrusted ? e.stopImmediatePropagation() : undefined), true)
 
+/** Opened from the home screen: `display-mode: standalone` matches. */
+const installedApp = () => {
+  const real = window.matchMedia.bind(window)
+  window.matchMedia = (q: string) =>
+    q.includes('display-mode: standalone') ? ({ matches: true, media: q, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false } as MediaQueryList) : real(q)
+}
+
 /** Headless Chromium has no push service: a fake subscription the browser reports as its own. */
 async function fakeBrowserSubscription(page: Page, sub: { endpoint: string; p256dh: string; auth: string }, subscribed: boolean) {
   await page.addInitScript(
@@ -206,11 +213,7 @@ test.describe('staff · install and the icon count', () => {
     // opened from the home screen
     const home = await browser.newContext({ storageState: as('staff') })
     await home.addInitScript(ignoreRealInstallOffers)
-    await home.addInitScript(() => {
-      const real = window.matchMedia.bind(window)
-      window.matchMedia = (q: string) =>
-        q.includes('display-mode: standalone') ? ({ matches: true, media: q, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false } as MediaQueryList) : real(q)
-    })
+    await home.addInitScript(installedApp)
     const onHome = await home.newPage()
     await onHome.goto('/me')
     await expect(onHome.getByTestId('install-card')).toHaveAttribute('data-view', 'installed')
@@ -351,6 +354,54 @@ for (const role of ['staff', 'bar', 'owner'] as const) {
     })
   })
 }
+
+test.describe('staff · the bell in the installed app', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P4-03-11 notifications off → เปิดการแจ้งเตือน beside อ่านทั้งหมดแล้ว; blocked → where to allow; a browser tab → no button', async ({ page, browser }) => {
+    const staffId = fixtureIds().users.staff
+    const bell = (p: Page) => p.locator('[data-testid="bell-button"]:visible').click()
+    // one unread, so อ่านทั้งหมดแล้ว is there as well
+    const { error } = await adminDb().from('notifications').insert({ user_id: staffId, branch_id: fixtureIds().branchA, kind: 'deposit_requested', payload: { customer: `${RUN} bell push` }, link: '/deposits' })
+    expect(error, error?.message).toBeNull()
+
+    const endpoint = `${FAKE_ENDPOINT}/bell`
+    await page.addInitScript(installedApp)
+    await fakeBrowserSubscription(page, { endpoint, p256dh: FAKE_P256DH, auth: FAKE_AUTH }, false)
+    await page.goto('/tonight')
+    await bell(page)
+    const enable = page.getByTestId('bell-push-enable')
+    const markAll = page.getByTestId('bell-mark-all')
+    await expect(enable).toBeVisible()
+    await expect(markAll).toBeVisible()
+    const [a, b] = [await enable.boundingBox(), await markAll.boundingBox()]
+    expect(Math.abs(a!.y - b!.y), 'side by side').toBeLessThan(4)
+    await enable.click()
+    await expect(enable).toHaveCount(0)
+    expect((await adminDb().from('push_subscriptions').select('user_id').eq('endpoint', endpoint)).data).toEqual([{ user_id: staffId }])
+    await adminDb().from('push_subscriptions').delete().eq('endpoint', endpoint)
+
+    // blocked in the phone's settings: a note, no button that cannot work
+    const blocked = await browser.newContext({ storageState: as('staff') })
+    await blocked.addInitScript(installedApp)
+    await blocked.addInitScript(() => Object.defineProperty(Notification, 'permission', { get: () => 'denied' }))
+    const onBlocked = await blocked.newPage()
+    await onBlocked.goto('/tonight')
+    await bell(onBlocked)
+    await expect(onBlocked.getByTestId('bell-push-blocked')).toBeVisible()
+    await expect(onBlocked.getByTestId('bell-push-enable')).toHaveCount(0)
+    await blocked.close()
+
+    // a browser tab, not the installed app: /me is the place for it
+    const tab = await browser.newContext({ storageState: as('staff') })
+    const inTab = await tab.newPage()
+    await inTab.goto('/tonight')
+    await bell(inTab)
+    await expect(inTab.getByTestId('bell-mark-all')).toBeVisible()
+    await expect(inTab.getByTestId('bell-push-enable')).toHaveCount(0)
+    await tab.close()
+  })
+})
 
 test.describe('staff · test push', () => {
   test.use({ storageState: as('staff') })

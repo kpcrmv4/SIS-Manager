@@ -257,7 +257,8 @@
             "Press the bell at the top right; the red number is how many are unread",
             "Press an item to open its page; it then counts as read",
             "Press **Mark all read** to clear the number",
-            "Every role is told about withdrawal requests and LINE deposit requests; bar and owner are also told about bottles to confirm and new bookings waiting for confirmation"
+            "If the app is installed but this device has notifications off, a **Turn on notifications** button sits beside **Mark all read** — press it and allow",
+            "Every role is told about withdrawal requests and LINE deposit requests; bar and owner are also told about bottles to confirm, new bookings and bookings cancelled on LINE"
           ]
         },
         "printer": {

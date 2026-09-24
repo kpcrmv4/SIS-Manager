@@ -935,6 +935,8 @@
     "empty": "No notifications yet",
     "markAllRead": "Mark all read",
     "openWithCount": "Notifications, {count} unread",
+    "enablePush": "Turn on notifications",
+    "pushBlocked": "Notifications are blocked for this app — allow them in the phone’s settings, then come back",
     "kinds": {
       "deposit_received": "Bottles to confirm · {item} · table {table}",
       "deposit_withdrawal_requested": "Withdrawal requested · {item} · {customer}",

@@ -1,13 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Bell } from 'lucide-react'
+import { Bell, BellRing, Loader2 } from 'lucide-react'
 import { ResponsiveDialog } from '@/components/booking/responsive-dialog'
 import { ErrorRetry } from '@/components/ui/error-retry'
 import { EmptyState, ListSkeleton } from '@/components/ui/states'
 import { useLive } from '@/components/realtime/live-provider'
+import { appEnv, noSubscribe } from '@/components/pwa/platform'
+import { usePush } from '@/components/pwa/use-push'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { formatShortDate, formatTime } from '@/lib/date'
 import { textKind } from '@/lib/push/kinds'
@@ -58,6 +60,11 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
   const router = useRouter()
   const [rows, setRows] = useState<Row[] | null>(null)
   const [failed, setFailed] = useState(false)
+  // the installed app whose notifications are still off offers them right here (R-043)
+  const installed = useSyncExternalStore(noSubscribe, appEnv, () => null) === 'installed'
+  const push = usePush()
+  const offerPush = installed && push.state === 'off'
+  const pushBlocked = installed && push.state === 'denied'
 
   const load = useCallback(async () => {
     setFailed(false)
@@ -75,6 +82,9 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
   }, [userId])
 
   useEffect(() => {
+    // Fetch on open and on each new notification: load() clears the error flag synchronously
+    // before it asks the database — not the effect reacting to its own render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load, tick])
 
@@ -100,7 +110,40 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
 
   if (failed) return <ErrorRetry onRetry={() => void load()} />
   if (!rows) return <ListSkeleton rows={4} />
-  if (!rows.length) return <EmptyState icon={Bell} message={t('empty')} />
+
+  const unread = rows.some((r) => !r.read_at)
+  const toolbar = (offerPush || pushBlocked || unread) && (
+    <div className="mb-2 flex flex-col gap-2">
+      {pushBlocked && (
+        <p className="text-xs text-urgent" data-testid="bell-push-blocked">
+          {t('pushBlocked')}
+        </p>
+      )}
+      {(offerPush || unread) && (
+        <div className="flex flex-wrap justify-end gap-2">
+          {offerPush && (
+            <button type="button" className="btn-primary" onClick={push.enable} disabled={push.pending} data-testid="bell-push-enable">
+              {push.pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BellRing className="size-4" aria-hidden />}
+              {t('enablePush')}
+            </button>
+          )}
+          {unread && (
+            <button type="button" className="btn-ghost" onClick={() => void markAll()} data-testid="bell-mark-all">
+              {t('markAllRead')}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
+  if (!rows.length)
+    return (
+      <>
+        {toolbar}
+        <EmptyState icon={Bell} message={t('empty')} />
+      </>
+    )
 
   const text = (r: Row) => {
     const p = r.payload ?? {}
@@ -110,13 +153,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
 
   return (
     <div data-testid="bell-list">
-      {rows.some((r) => !r.read_at) && (
-        <div className="mb-2 flex justify-end">
-          <button type="button" className="btn-ghost" onClick={() => void markAll()} data-testid="bell-mark-all">
-            {t('markAllRead')}
-          </button>
-        </div>
-      )}
+      {toolbar}
       <ul className="panel">
         {rows.map((r) => (
           <li key={r.id} className="border-b border-line-soft last:border-b-0">

@@ -935,6 +935,8 @@
     "empty": "ยังไม่มีการแจ้งเตือน",
     "markAllRead": "อ่านทั้งหมดแล้ว",
     "openWithCount": "การแจ้งเตือน ยังไม่อ่าน {count} รายการ",
+    "enablePush": "เปิดการแจ้งเตือน",
+    "pushBlocked": "แอปนี้ถูกปิดการแจ้งเตือนไว้ เปิดได้ในการตั้งค่าของเครื่อง แล้วกลับมาที่แอป",
     "kinds": {
       "deposit_received": "เหล้ารอยืนยัน · {item} · โต๊ะ {table}",
       "deposit_withdrawal_requested": "ลูกค้าขอเบิก · {item} · {customer}",
