@@ -63,7 +63,7 @@ test.describe('owner settings', () => {
     await page.getByLabel('จำนวนคนขั้นต่ำ').fill('2')
     await page.getByLabel('จำนวนคนสูงสุด').fill('8')
     const days = page.getByRole('group', { name: 'วันปิดรับจองประจำสัปดาห์' })
-    await days.getByRole('button', { name: 'พ', exact: true }).click()
+    await days.getByRole('button', { name: 'พุธ', exact: true }).click()
     await page.getByTestId('booking-settings-save').click()
     await expect(page.getByText('บันทึกแล้ว')).toBeVisible()
 
@@ -246,7 +246,7 @@ test.describe('owner settings', () => {
     const editDialog = page.getByRole('dialog', { name: `${RUN} สาขาทดสอบ` })
     await editDialog.getByLabel('อายุฝาก (วัน)').fill('45')
     await editDialog.getByLabel('แจ้งเตือนก่อนหมดอายุ (วัน)').fill('5')
-    await editDialog.getByRole('group', { name: 'วันงดเบิกดื่มในร้าน' }).getByRole('button', { name: 'จันทร์'.slice(0, 3), exact: true }).click()
+    await editDialog.getByRole('group', { name: 'วันงดเบิกดื่มในร้าน' }).getByRole('button', { name: 'จันทร์', exact: true }).click()
     await editDialog.getByTestId('branch-form-save').click()
     // wait for the edit dialog itself to close — onSaved only fires after the write commits,
     // more reliable than matching "บันทึกแล้ว" text (the create step above shows the same toast)
@@ -309,6 +309,32 @@ test.describe('owner settings', () => {
     await page.getByRole('dialog').getByRole('button', { name: /^ลบวันที่/ }).click()
     await expect(page.getByRole('dialog').locator('[data-testid="table-block"]')).toHaveCount(0)
     await expect(async () => expect(await blocks()).toBe(0)).toPass({ timeout: 10_000 })
+  })
+
+  test('P2-B3-13 weekday chips: full names where all seven fit on one line, short ones on a phone; the button is always named in full', async ({ page }) => {
+    const FULL = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์']
+    const SHORT = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา']
+    for (const [path, group, wide] of [
+      ['/settings/branch', 'วันงดเบิกดื่มในร้าน', 1280],
+      ['/settings/booking', 'วันปิดรับจองประจำสัปดาห์', 1440],
+    ] as const) {
+      const chips = page.getByRole('group', { name: group }).getByRole('button')
+      const shown = () => chips.evaluateAll((els) => els.map((el) => (el as HTMLElement).innerText.trim()))
+      const lines = () => chips.evaluateAll((els) => new Set(els.map((el) => Math.round(el.getBoundingClientRect().top))).size)
+
+      await page.setViewportSize({ width: wide, height: 900 })
+      await page.goto(path)
+      await expect(chips).toHaveCount(7)
+      await expect.poll(shown, { message: `${path} wide` }).toEqual(FULL)
+      expect(await lines()).toBe(1)
+
+      for (const width of [390, 360]) {
+        await page.setViewportSize({ width, height: 844 })
+        await expect.poll(shown, { message: `${path} phone ${width}` }).toEqual(SHORT)
+        expect(await lines(), `${path} phone ${width}`).toBe(1)
+      }
+      for (const [i, name] of FULL.entries()) await expect(chips.nth(i)).toHaveAccessibleName(name)
+    }
   })
 })
 

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateBranch, type BranchDetailInput } from '@/lib/settings/branch-actions'
+import { DayToggles } from './day-toggles'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
 
@@ -27,7 +28,6 @@ export function BranchForm({ branchId, initial, onSaved }: { branchId: string; i
   const tc = useTranslations('common')
   const [v, setV] = useState(initial)
   const [pending, start] = useTransition()
-  const weekdaysLong: string[] = t.raw('weekdaysLong')
 
   function toggleDay(day: (typeof WEEKDAYS)[number]) {
     setV((s) => ({
@@ -103,13 +103,7 @@ export function BranchForm({ branchId, initial, onSaved }: { branchId: string; i
 
       <div>
         <label className="label-base">{t('withdrawalBlockedDays')}</label>
-        <div className="days" role="group" aria-label={t('withdrawalBlockedDays')}>
-          {WEEKDAYS.map((day, i) => (
-            <button key={day} type="button" aria-pressed={v.withdrawalBlockedDays.includes(day)} onClick={() => toggleDay(day)}>
-              {weekdaysLong[i]?.slice(0, 3)}
-            </button>
-          ))}
-        </div>
+        <DayToggles label={t('withdrawalBlockedDays')} isOn={(i) => v.withdrawalBlockedDays.includes(WEEKDAYS[i])} onToggle={(i) => toggleDay(WEEKDAYS[i])} />
         <p className="help-text">{t('withdrawalBlockedHelp')}</p>
       </div>
 

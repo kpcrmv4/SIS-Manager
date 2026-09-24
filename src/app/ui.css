@@ -188,8 +188,25 @@
   .choice-card[aria-checked='true'] b { color: var(--brand-on-tint); }
   .choice-card[aria-checked='true'] span { color: var(--ink-2); }
 
-  .days { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-  .days button { width: 42px; height: 38px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+  /* weekday chips: the full names where all seven fit on one line, the short ones where not (owner).
+     Short chips share the row, so a phone keeps all seven on one line. Seven full names measure
+     438px in Thai and 583px in English — hence one width per language. */
+  .days { display: flex; flex-wrap: wrap; gap: 0.375rem; container-type: inline-size; }
+  .days button {
+    flex: 1 1 0; min-width: 0; max-width: 56px; height: 38px; padding: 0 0.25rem; border: 1px solid var(--line);
+    border-radius: 10px; background: var(--card); color: var(--ink); white-space: nowrap;
+  }
+  .days .day-full { display: none; }
+  @container (min-width: 28rem) {
+    :lang(th) .days button { flex: none; max-width: none; padding: 0 0.625rem; }
+    :lang(th) .days .day-short { display: none; }
+    :lang(th) .days .day-full { display: inline; }
+  }
+  @container (min-width: 37rem) {
+    .days button { flex: none; max-width: none; padding: 0 0.625rem; }
+    .days .day-short { display: none; }
+    .days .day-full { display: inline; }
+  }
   .days button.off, .days button[aria-pressed='true'] {
     background: var(--urgent-bg); color: var(--urgent); border-color: var(--urgent); font-weight: 600; text-decoration: line-through;
   }

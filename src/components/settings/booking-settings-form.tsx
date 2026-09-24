@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { saveBookingSettings, type BookingSettingsInput } from '@/lib/booking/settings-actions'
+import { DayToggles } from './day-toggles'
 
 export type BookingSettingsValue = Omit<BookingSettingsInput, 'branchId'>
 
@@ -99,13 +100,7 @@ export function BookingSettingsForm({ branchId, initial }: { branchId: string; i
 
       <div>
         <label className="label-base">{t('closedWeekdays')}</label>
-        <div className="days" role="group" aria-label={t('closedWeekdays')}>
-          {t.raw('weekdays').map((label: string, i: number) => (
-            <button key={i} type="button" aria-pressed={v.closedWeekdays.includes(i)} onClick={() => toggleDay(i)}>
-              {label}
-            </button>
-          ))}
-        </div>
+        <DayToggles label={t('closedWeekdays')} isOn={(i) => v.closedWeekdays.includes(i)} onToggle={toggleDay} />
         <p className="help-text">{t('closedWeekdaysHelp')}</p>
       </div>
 
