@@ -561,7 +561,15 @@
     "rejectReason": "Reason for rejecting",
     "assigned": "Table assigned",
     "cancelBody": "The customer is told on LINE and the table is free again at once",
-    "customerHistory": "Customer history"
+    "customerHistory": "Customer history",
+    "noShow": "No-show · free the table",
+    "noShowBody": "Past its time: the guest counts as a no-show and the table is free for someone else now — if they turn up after all, Customer arrived (late) still works",
+    "noShowDone": "No-show — the table is free",
+    "checkInLate": "Customer arrived (late)",
+    "notePendingTonight": "This booking isn't confirmed yet — when the guest arrives, press Customer arrived and it is confirmed at the same time (check a table is still free)",
+    "notePendingLater": "Waiting for the shop · check-in opens on the night of {date}",
+    "noteOtherNight": "Check-in opens on the night of {date}",
+    "noteNoShowTonight": "Counted as a no-show and the table was freed — if the guest arrives, press Customer arrived (late) and seat them again"
   },
   "bookingForm": {
     "title": "Book for a customer",
@@ -1128,7 +1136,8 @@
     "table_not_bookable": "Guests cannot book this table on that night",
     "table_seats": "The party does not fit this table",
     "TABLE_OTHER_BRANCH": "This table belongs to another branch",
-    "NO_CUSTOMER_KEY": "This customer has no phone or LINE — make single bottles VIP instead"
+    "NO_CUSTOMER_KEY": "This customer has no phone or LINE — make single bottles VIP instead",
+    "NOT_LATE": "It isn't the booking's time yet — if the guest won't come, cancel the booking instead"
   },
   "audit": {
     "title": "Audit log",

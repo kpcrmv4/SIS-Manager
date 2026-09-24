@@ -99,6 +99,14 @@ export async function checkInBooking(branchId: string, ref: string): Promise<Act
   return res
 }
 
+/** ไม่มา · ปล่อยโต๊ะ (R-053, bar / owner): a confirmed booking past its time is a no-show now, its table free. */
+export async function markNoShow(bookingId: string): Promise<ActionResult<{ id: string; status: string }>> {
+  if (!isUuid(bookingId)) return { ok: false, error: 'invalid' }
+  const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('mark_booking_no_show', { p_booking: bookingId }))
+  if (res.ok) touched()
+  return res
+}
+
 export async function cancelBooking(bookingId: string, reason?: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(bookingId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('cancel_booking', { p_booking: bookingId, p_reason: cleanText(reason, 200) }))

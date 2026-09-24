@@ -3,10 +3,13 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ChevronRight, CircleX, Loader2, Wine } from 'lucide-react'
+import { ChevronRight, CircleCheck, CircleX, Info, Loader2, UserX, Wine } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { CancelDialog } from './cancel-dialog'
+import { ConfirmAssignDialog } from './confirm-assign-dialog'
+import { NoShowDialog } from './no-show-dialog'
+import { RejectDialog } from './reject-dialog'
 import { checkInBooking, assignTable } from '@/lib/booking/actions'
 import type { BookingDetail } from '@/lib/booking/actions'
 import { bookingBadgeTone, minutesLate, LIVE_STATUSES } from '@/lib/booking/format'
@@ -16,9 +19,13 @@ import { customerHrefForBooking } from '@/lib/customers/view'
 /**
  * The booking sheet's content — shared by the scan result (rendered inline,
  * no dialog chrome) and the /bookings detail dialog (P2-B2). Code, name,
- * phone/source, a late/status badge, the kv rows, the gold deposits box,
- * "ลูกค้ามาแล้ว" and — for bar / owner — "ยกเลิกการจอง" all live here so both
- * callers stay in lockstep. `onChanged` runs after a check-in or a cancel.
+ * phone/source, a late/status badge, the kv rows, the gold deposits box, and
+ * the actions the booking still has, here and now (R-053):
+ *   waiting   bar / owner: ยืนยัน + จัดโต๊ะ · ปฏิเสธ — tonight anyone may check it in at once
+ *   confirmed ลูกค้ามาแล้ว tonight; bar / owner: ไม่มา · ปล่อยโต๊ะ once its time has passed, ยกเลิกการจอง
+ *   no-show   ลูกค้ามาแล้ว (มาสาย) tonight
+ * No check-in on another night (a note says which), none on a cancelled or rejected one.
+ * `onChanged` runs after every change.
  */
 export function BookingSheetContent({
   detail,
@@ -51,10 +58,36 @@ export function BookingSheetContent({
   const [checkInPending, startCheckIn] = useTransition()
   const [assignPending, startAssign] = useTransition()
   const [cancelOpen, setCancelOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [rejectOpen, setRejectOpen] = useState(false)
+  const [noShowOpen, setNoShowOpen] = useState(false)
 
   const late = LIVE_STATUSES.includes(status) && status !== 'arrived' ? minutesLate(detail.night, detail.slotTime) : 0
-  const nightWord = detail.night === businessNight() ? t('tonight') : formatShortDate(detail.night, locale)
+  const isTonight = detail.night === businessNight()
+  const nightWord = isTonight ? t('tonight') : formatShortDate(detail.night, locale)
   const sourceText = detail.source === 'line' ? tk('sourceLineAt', { time: formatTime(detail.createdAt, locale) }) : tk('sourceStaff')
+
+  // what the booking can still become, here and now (R-053); the RPCs hold the same lines
+  const barOrOwner = canChangeTable
+  const canCheckIn = isTonight && (status === 'pending' || status === 'confirmed' || status === 'no_show')
+  const canDecide = barOrOwner && status === 'pending'
+  const canNoShow = barOrOwner && status === 'confirmed' && late > 0
+  const tableOpen = status === 'pending' || status === 'confirmed' || status === 'arrived'
+  const note =
+    status === 'pending'
+      ? isTonight
+        ? t('notePendingTonight')
+        : t('notePendingLater', { date: formatShortDate(detail.night, locale) })
+      : status === 'confirmed' && !isTonight
+        ? t('noteOtherNight', { date: formatShortDate(detail.night, locale) })
+        : status === 'no_show' && isTonight
+          ? t('noteNoShowTonight')
+          : null
+
+  const seat = (id: string | null) => {
+    setTableId(id)
+    setTableLabel(detail.tables.find((tb) => tb.id === id)?.label ?? null)
+  }
 
   function doCheckIn() {
     startCheckIn(async () => {
@@ -136,7 +169,7 @@ export function BookingSheetContent({
           ) : (
             <>
               {tableLabel ?? tk('unassigned')}
-              {canChangeTable && (
+              {canChangeTable && tableOpen && (
                 <button type="button" className="btn-ghost btn-sm ml-2" onClick={() => setChanging(true)} data-testid="change-table-trigger">
                   {t('changeTable')}
                 </button>
@@ -166,11 +199,79 @@ export function BookingSheetContent({
         </span>
       </div>
 
-      {canCancel && status === 'confirmed' && (
-        <button type="button" className="btn-danger btn-sm mb-3" onClick={() => setCancelOpen(true)} data-testid="cancel-booking-button">
-          <CircleX className="size-4" aria-hidden />
-          {t('cancel')}
-        </button>
+      {note && (
+        <p className="mb-3 flex items-start gap-2 rounded-lg bg-surface-2 px-3 py-2 text-sm text-ink-2" data-testid="booking-note" data-note={status}>
+          <Info className="mt-0.5 size-4 flex-none text-status-info" aria-hidden />
+          {note}
+        </p>
+      )}
+
+      {canDecide && (
+        <div className="mb-3 flex gap-2" data-testid="booking-decide">
+          <button type="button" className="btn-secondary flex-1 justify-center" onClick={() => setRejectOpen(true)} data-testid="reject-booking-button">
+            <CircleX className="size-4" aria-hidden />
+            {tc('reject')}
+          </button>
+          <button type="button" className="btn-primary flex-2 justify-center" onClick={() => setConfirmOpen(true)} data-testid="confirm-booking-button">
+            <CircleCheck className="size-4" aria-hidden />
+            {tk('confirmAssign')}
+          </button>
+        </div>
+      )}
+
+      {(canNoShow || (canCancel && status === 'confirmed')) && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {canNoShow && (
+            <button type="button" className="btn-secondary btn-sm" onClick={() => setNoShowOpen(true)} data-testid="no-show-button">
+              <UserX className="size-4" aria-hidden />
+              {t('noShow')}
+            </button>
+          )}
+          {canCancel && status === 'confirmed' && (
+            <button type="button" className="btn-danger btn-sm" onClick={() => setCancelOpen(true)} data-testid="cancel-booking-button">
+              <CircleX className="size-4" aria-hidden />
+              {t('cancel')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {confirmOpen && (
+        <ConfirmAssignDialog
+          open
+          onOpenChange={setConfirmOpen}
+          bookingId={detail.id}
+          tables={detail.tables}
+          onDone={(id) => {
+            setStatus('confirmed')
+            seat(id)
+            onChanged()
+          }}
+        />
+      )}
+      {rejectOpen && (
+        <RejectDialog
+          open
+          onOpenChange={setRejectOpen}
+          bookingId={detail.id}
+          onDone={() => {
+            setStatus('rejected')
+            seat(null)
+            onChanged()
+          }}
+        />
+      )}
+      {noShowOpen && (
+        <NoShowDialog
+          open
+          onOpenChange={setNoShowOpen}
+          bookingId={detail.id}
+          onDone={() => {
+            setStatus('no_show')
+            seat(null)
+            onChanged()
+          }}
+        />
       )}
       {cancelOpen && (
         <CancelDialog
@@ -179,8 +280,7 @@ export function BookingSheetContent({
           bookingId={detail.id}
           onDone={() => {
             setStatus('cancelled')
-            setTableId(null)
-            setTableLabel(null)
+            seat(null)
             onChanged()
           }}
         />
@@ -192,16 +292,18 @@ export function BookingSheetContent({
             {tc('close')}
           </button>
         )}
-        <button
-          type="button"
-          className="btn-ok flex-[2] justify-center"
-          disabled={status === 'arrived' || status === 'cancelled' || checkInPending}
-          onClick={doCheckIn}
-          data-testid="check-in-button"
-        >
-          {checkInPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-          {status === 'arrived' ? t('checkedIn') : t('checkIn')}
-        </button>
+        {(canCheckIn || status === 'arrived') && (
+          <button
+            type="button"
+            className="btn-ok flex-2 justify-center"
+            disabled={status === 'arrived' || checkInPending}
+            onClick={doCheckIn}
+            data-testid="check-in-button"
+          >
+            {checkInPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
+            {status === 'arrived' ? t('checkedIn') : status === 'no_show' ? t('checkInLate') : t('checkIn')}
+          </button>
+        )}
       </div>
     </div>
   )

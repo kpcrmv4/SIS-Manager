@@ -1660,6 +1660,7 @@ export type Database = {
         Args: { p_identifier: string; p_ip: string }
         Returns: boolean
       }
+      mark_booking_no_show: { Args: { p_booking: string }; Returns: Json }
       mark_no_shows: { Args: never; Returns: number }
       new_group_bind_code: { Args: { p_branch: string }; Returns: Json }
       owner_dashboard: { Args: never; Returns: Json }

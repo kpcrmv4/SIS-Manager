@@ -40,6 +40,7 @@ export const DB_ERROR_CODES = [
   'BAD_TYPE',
   'NO_GROUP',
   'NO_CUSTOMER_KEY',
+  'NOT_LATE',
   'line_disabled',
   'past',
   'closed_weekday',

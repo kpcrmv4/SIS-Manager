@@ -18,8 +18,9 @@ export function ConfirmAssignDialog({
   open: boolean
   onOpenChange: (v: boolean) => void
   bookingId: string
-  tables: TableRow[]
-  onDone: () => void
+  tables: Pick<TableRow, 'id' | 'label'>[]
+  /** gets the table it was seated at (or null) — the booking sheet shows it without a reload */
+  onDone: (tableId: string | null) => void
 }) {
   const t = useTranslations('booking')
   const tk = useTranslations('bookings')
@@ -36,9 +37,10 @@ export function ConfirmAssignDialog({
         return
       }
       toast.success(tc('saved'))
+      const seated = tableId || null
       setTableId('')
       onOpenChange(false)
-      onDone()
+      onDone(seated)
     })
   }
 

@@ -793,7 +793,8 @@
             "Look at **Waiting for confirmation** at the top of the page",
             "Press **Confirm + assign** at the end of the booking",
             "Pick a free **Table** and press **Confirm + assign**",
-            "The customer gets a confirmation on LINE and sees a QR on their booking page"
+            "The customer gets a confirmation on LINE and sees a QR on their booking page",
+            "Or open the booking (from the floor plan, the **List** tab or the scan page) and press **Confirm + assign** in its sheet"
           ]
         },
         "reject": {
@@ -803,7 +804,7 @@
             "owner"
           ],
           "steps": [
-            "Under **Waiting for confirmation** or in the **List** tab, press **Reject** at the end of the booking",
+            "In **Waiting for confirmation**, the **List** tab or the booking sheet, press **Reject**",
             "Write the **Reason for rejecting**",
             "Press **Reject** — the customer is told on LINE"
           ]
@@ -818,7 +819,7 @@
           "steps": [
             "On the floor plan, press a table showing a guest's name; in the **List** tab, press a booking row",
             "You'll see the booking number, name, phone, **Time**, **Party**, **Table** and a gold box saying whether the guest has bottles deposited",
-            "When the guest arrives, press **Customer arrived** — it turns into **Checked in**",
+            "When the guest arrives, press **Customer arrived**; it becomes **Checked in** — only tonight’s bookings have it, and a booking still waiting can be pressed too: it is confirmed at the same time",
             "Press **Close** to go back"
           ]
         },
@@ -846,12 +847,25 @@
             "Add a **Reason for cancelling** if there is one, then press **Cancel booking** again to confirm",
             "The status becomes **Cancelled**, the table is free at once and the customer is told on LINE"
           ]
+        },
+        "noShow": {
+          "title": "How to count a no-show and free the table",
+          "roles": [
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Open a confirmed booking whose time has passed",
+            "Press **No-show · free the table** and confirm",
+            "The table is free for someone else at once; if the guest turns up after all, press **Customer arrived (late)** and seat them again",
+            "The button appears only once the booking’s time has passed — before that, use **Cancel booking**"
+          ]
         }
       },
       "important": [
         "**Customer arrived** only works for tonight's bookings",
         "Bookings made by staff are confirmed at once, without waiting for the bar — but not on a night the shop is closed for bookings",
-        "Guests who don't come within the shop's time turn **No-show**; if they arrive later you can still press **Customer arrived**",
+        "A booking past its time by more than the shop allows (30 minutes by default) turns **No-show** and frees its table by itself, confirmed or still waiting — bar and owner can press **No-show · free the table** sooner, and a guest who turns up later can still be checked in with **Customer arrived (late)**",
         "**Cancel booking** is for confirmed bookings — while a booking is still waiting, use **Reject**"
       ],
       "tips": [
@@ -873,7 +887,7 @@
         "The camera frame with a **Start camera** button",
         "A **Booking no. (e.g. BK-0925), table or deposit code** box and a **Find** button",
         "The **Today's bookings** and **Tomorrow's bookings** shortcuts under the box — or a booking number typed only as far as the date, e.g. **BK-0925** — bring up that night's bookings as tiles straight away, no **Find** needed: the table in large type, who booked, the time, the party, the state, a crown for a VIP customer and the bottles they keep here",
-        "Booking result: name, time, party, table, the guest's deposited bottles and a **Customer arrived** button",
+        "Booking result: name, time, party, table, the guest’s deposited bottles and the buttons its state allows — **Customer arrived** (tonight’s bookings) · **Confirm + assign** and **Reject** (waiting, bar/owner) · **No-show · free the table** (past its time, bar/owner)",
         "Deposit result: liquor, what's left, expiry, and **Open deposit** and **Withdraw** buttons"
       ],
       "howtos": {
