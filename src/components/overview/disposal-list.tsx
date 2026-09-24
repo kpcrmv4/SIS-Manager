@@ -16,6 +16,9 @@ export function DisposalList({
   locale,
   working,
   showBranch,
+  title,
+  empty,
+  testId = 'overview-disposals',
   className = '',
 }: {
   items: RecentDisposal[]
@@ -24,16 +27,20 @@ export function DisposalList({
   locale: AppLocale
   working: string | null
   showBranch: boolean
+  /** defaults: the overview's "จำหน่ายออกล่าสุด" wording */
+  title?: string
+  empty?: string
+  testId?: string
   className?: string
 }) {
   return (
-    <Block title={t('recentDisposals')} className={className} bodyClassName="" testId="overview-disposals-block">
+    <Block title={title ?? t('recentDisposals')} className={className} bodyClassName="" testId={`${testId}-block`}>
       {items.length === 0 ? (
         <div className="p-4">
-          <EmptyState icon={Trash2} message={t('noDisposals')} />
+          <EmptyState icon={Trash2} message={empty ?? t('noDisposals')} />
         </div>
       ) : (
-        <div data-testid="overview-disposals">
+        <div data-testid={testId}>
           {items.map((d) => (
             <ListRow
               key={d.id}

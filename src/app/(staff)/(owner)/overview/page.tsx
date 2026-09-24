@@ -8,25 +8,24 @@ import { ActivityFeed } from '@/components/overview/activity-feed'
 import { BranchOverview } from '@/components/overview/branch-overview'
 import { DisposalList } from '@/components/overview/disposal-list'
 import { ExpiringList } from '@/components/overview/expiring-list'
-import { ExportMenu } from '@/components/overview/export-menu'
 import { KpiStrip, type KpiCell } from '@/components/overview/kpi-strip'
 import { OverviewLive } from '@/components/overview/overview-live'
-import { SetupChecklist } from '@/components/overview/setup-checklist'
 import { TonightPanel } from '@/components/overview/tonight-panel'
 import { TopList } from '@/components/overview/top-list'
 import { WeekdayChart } from '@/components/overview/weekday-chart'
 import { getActorState } from '@/lib/auth/actor'
 import { formatLongDate, formatShortDate, formatTime } from '@/lib/date'
 import { getDashboard, getTrends } from '@/lib/reports/dashboard'
-import { ACTION_KEYS, SETUP_KEYS, actionItems, delta, pointsDelta, setupItems, weeklyShowRate, type Delta, type TrendWeek } from '@/lib/reports/dashboard-view'
+import { ACTION_KEYS, actionItems, delta, pointsDelta, weeklyShowRate, type Delta, type TrendWeek } from '@/lib/reports/dashboard-view'
 import { getOverview, parsePeriod, periodRange, previousRange, showRate } from '@/lib/reports/overview'
 
 type Search = Promise<{ period?: string }>
 
 /**
  * Owner landing (P4-01, redesigned R-030): what needs doing → tonight → the business.
- * Setup checklist (until done) · ต้องจัดการ · five figures with trend · tonight + activity (live) ·
- * branches · expiring / disposals · busy weekdays · top customers / liquor.
+ * ต้องจัดการ · five figures with trend · tonight + activity (live) · branches · expiring /
+ * disposals · busy weekdays · top customers / liquor. Setup lives on /settings/branch and
+ * the exports on /reports (R-034).
  */
 export default async function OverviewPage({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams
@@ -152,14 +151,10 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
     },
   ]
 
-  // ── what needs doing ──
+  // ── what needs doing ── (setup lives on /settings/branch, exports on /reports — owner, R-034)
   const actions = actionItems(branches, working)
-  const setup = setupItems(branches, working)
-  const setupOpen = setup.some((s) => !s.done)
   const expiringTotal = branches.reduce((n, b) => n + b.expiring, 0)
   const actionLabels = Object.fromEntries(ACTION_KEYS.map((key) => [key, t(`action.${key}`)])) as Record<(typeof ACTION_KEYS)[number], string>
-  const setupLabels = Object.fromEntries(SETUP_KEYS.map((key) => [key, t(`setup.${key}`)])) as Record<(typeof SETUP_KEYS)[number], string>
-  const setupHints = Object.fromEntries(SETUP_KEYS.map((key) => [key, t(`setupHint.${key}`)])) as Record<(typeof SETUP_KEYS)[number], string>
 
   return (
     <>
@@ -168,41 +163,20 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
         title={t('title')}
         subtitle={t('nightLine', { date: formatLongDate(dash.night, locale), time: formatTime(dash.generated_at, locale) })}
         action={
-          <>
-            <SegmentedFilter
-              basePath="/overview"
-              params={{ period: sp.period }}
-              name="period"
-              value={period}
-              label={t('periodLabel')}
-              options={[
-                { value: 'month', label: t('periodThisMonth') },
-                { value: 'last', label: t('periodLastMonth') },
-                { value: '30', label: t('period30') },
-              ]}
-            />
-            <ExportMenu
-              label={t('export')}
-              excel={t('exportExcel')}
-              pdf={t('exportPdf')}
-              excelHref={`/api/reports/export?format=xlsx&from=${from}&to=${to}`}
-              pdfHref={`/api/reports/export?format=pdf&from=${from}&to=${to}`}
-            />
-          </>
+          <SegmentedFilter
+            basePath="/overview"
+            params={{ period: sp.period }}
+            name="period"
+            value={period}
+            label={t('periodLabel')}
+            options={[
+              { value: 'month', label: t('periodThisMonth') },
+              { value: 'last', label: t('periodLastMonth') },
+              { value: '30', label: t('period30') },
+            ]}
+          />
         }
       />
-
-      {setupOpen && (
-        <SetupChecklist
-          title={t('setupTitle')}
-          progress={t('setupProgress', { done: setup.filter((s) => s.done).length, total: setup.length })}
-          go={t('setupGo')}
-          items={setup}
-          labels={setupLabels}
-          hints={setupHints}
-          missing={(names) => (multi && names.length ? t('setupMissing', { branches: names.join(', ') }) : null)}
-        />
-      )}
 
       <ActionStrip title={t('actionsTitle')} none={t('actionsNone')} items={actions} labels={actionLabels} />
 

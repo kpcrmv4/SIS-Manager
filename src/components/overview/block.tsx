@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
 
-/** A titled card on the overview: header row (title + an aside such as a hint or a link), then the body. */
+/**
+ * A titled card on the overview: header row (title + an aside such as a hint or a link), then the body.
+ * min-w-0: as a grid / flex item it never grows to its content, so a wide chart scrolls inside it.
+ */
 export function Block({
   title,
   aside,
@@ -19,7 +22,7 @@ export function Block({
   id?: string
 }) {
   return (
-    <section id={id} aria-label={title} className={`panel flex scroll-mt-4 flex-col ${className}`} data-testid={testId}>
+    <section id={id} aria-label={title} className={`panel flex min-w-0 scroll-mt-4 flex-col ${className}`} data-testid={testId}>
       <header className="flex min-h-11 items-center justify-between gap-3 border-b border-line-soft px-4 py-2.5">
         <h2 className="truncate text-sm font-semibold text-ink">{title}</h2>
         {aside && <div className="flex shrink-0 items-center gap-2 text-xs text-muted-token">{aside}</div>}

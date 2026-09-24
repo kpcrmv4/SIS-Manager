@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
 import type { Delta } from '@/lib/reports/dashboard-view'
+import { DeltaChip } from './delta-chip'
 import { Sparkline, type SparkTone } from './sparkline'
 
 export type KpiCell = {
@@ -29,25 +29,6 @@ const VALUE_TONE: Record<SparkTone, string> = {
   progress: 'text-status-progress',
   done: 'text-status-done',
   info: 'text-status-info',
-}
-
-function DeltaChip({ c }: { c: KpiCell }) {
-  if (!c.delta || !c.deltaText) return null
-  const verdict = c.good === 'none' || c.delta.dir === 'same' ? 'neutral' : c.delta.dir === c.good ? 'good' : 'bad'
-  const cls =
-    verdict === 'good'
-      ? 'text-status-done bg-status-done-bg ring-status-done-ring'
-      : verdict === 'bad'
-        ? 'text-urgent bg-urgent-bg ring-urgent-ring'
-        : 'text-ink-2 bg-surface-2 ring-line'
-  const Icon = c.delta.dir === 'up' ? ArrowUpRight : c.delta.dir === 'down' ? ArrowDownRight : Minus
-  return (
-    <span className={`chip shrink-0 gap-0.5 px-1.5 ${cls}`} title={c.deltaTitle} data-testid="kpi-delta" data-kpi={c.key} data-dir={c.delta.dir} data-verdict={verdict}>
-      <Icon className="size-3" aria-hidden />
-      <span className="tnum">{c.deltaText}</span>
-      <span className="sr-only"> {c.deltaTitle}</span>
-    </span>
-  )
 }
 
 /**
@@ -81,7 +62,7 @@ export function KpiStrip({ cells }: { cells: KpiCell[] }) {
                 </span>
                 {c.unit && <span className="ml-1 text-sm font-normal tracking-normal text-muted-token">{c.unit}</span>}
               </span>
-              <DeltaChip c={c} />
+              <DeltaChip delta={c.delta} good={c.good} text={c.deltaText} title={c.deltaTitle} kpi={c.key} />
             </div>
             {c.hint && <div className="mt-0.5 truncate text-xs text-muted-token">{c.hint}</div>}
             <Sparkline values={c.series} tone={c.tone} label={c.seriesLabel} max={c.seriesMax} />

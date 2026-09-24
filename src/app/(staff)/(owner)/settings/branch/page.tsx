@@ -6,6 +6,9 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import { RefreshRetry } from '@/components/booking/refresh-retry'
 import { BranchForm, type BranchFormValue } from '@/components/settings/branch-form'
 import { PrintSettingsSection } from '@/components/settings/print-settings-section'
+import { SetupCard } from '@/components/settings/setup-card'
+import { getDashboard } from '@/lib/reports/dashboard'
+import { SETUP_KEYS, setupItems, type SetupKey } from '@/lib/reports/dashboard-view'
 
 // Built in P2-B3.
 export default async function SettingsBranchPage() {
@@ -39,6 +42,15 @@ export default async function SettingsBranchPage() {
     )
   }
 
+  // setup progress of this branch (R-034) — the page still works if the dashboard read fails
+  const to = await getTranslations('overview')
+  const setup = await getDashboard()
+    .then((d) => {
+      const row = d.branches.find((b) => b.id === branch.id)
+      return row ? setupItems([row], branch.id) : null
+    })
+    .catch(() => null)
+
   const receipt = (data.receipt_settings ?? {}) as { header?: string; footer?: string; copies?: number }
   const initial: BranchFormValue = {
     name: data.name,
@@ -56,6 +68,19 @@ export default async function SettingsBranchPage() {
   return (
     <>
       <PageHeader title={t('title')} subtitle={branch.name} />
+      {setup && (
+        <SetupCard
+          items={setup}
+          title={to('setupTitle')}
+          progress={to('setupProgress', { done: setup.filter((s) => s.done).length, total: setup.length })}
+          nextLabel={to('setupNext')}
+          allLabel={to('setupAll', { count: setup.length })}
+          doneLabel={to('setupDone')}
+          go={to('setupGo')}
+          labels={Object.fromEntries(SETUP_KEYS.map((k) => [k, to(`setup.${k}`)])) as Record<SetupKey, string>}
+          hints={Object.fromEntries(SETUP_KEYS.map((k) => [k, to(`setupHint.${k}`)])) as Record<SetupKey, string>}
+        />
+      )}
       <BranchForm branchId={branch.id} initial={initial} />
       <PrintSettingsSection branchId={branch.id} branchCode={branch.code} />
     </>

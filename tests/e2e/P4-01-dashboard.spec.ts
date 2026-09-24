@@ -131,9 +131,11 @@ test.describe('owner', () => {
     await expect(page).toHaveURL(/\/deposits\?tab=toConfirm$/)
   })
 
-  test('P4-01-12 the setup checklist ticks exactly what every active branch has', async ({ page }) => {
-    const flags = await sql<Record<string, boolean | string>>(`
-      select b.name,
+  test('P4-01-12 /settings/branch: the setup card ticks what the working branch has, names the next step, folds the rest', async ({ page, context }) => {
+    const { branchA } = fixtureIds()
+    await pin(context, branchA)
+    const [f] = await sql<Record<string, boolean>>(`
+      select
         coalesce(s.channel_access_token is not null and s.channel_secret is not null, false) as line_oa,
         (b.liff_id is not null and b.line_channel_id is not null) as liff,
         (b.staff_group_id is not null) as staff_group,
@@ -141,20 +143,25 @@ test.describe('owner', () => {
         exists (select 1 from public.tables t where t.branch_id = b.id and t.active) as tables,
         exists (select 1 from public.liquor_items i where (i.branch_id = b.id or i.branch_id is null) and i.active) as items,
         exists (select 1 from public.user_branches ub join public.profiles p on p.id = ub.user_id and p.active and p.role in ('staff', 'bar') where ub.branch_id = b.id) as staff
-      from public.branches b left join public.branch_line_secrets s on s.branch_id = b.id where b.active`)
+      from public.branches b left join public.branch_line_secrets s on s.branch_id = b.id where b.id = '${branchA}'`)
     const keys = ['line_oa', 'liff', 'staff_group', 'printer', 'tables', 'items', 'staff']
-    const done = Object.fromEntries(keys.map((k) => [k, flags.every((f) => f[k] === true)]))
+    await page.goto('/settings/branch')
+    const card = page.getByTestId('setup-card')
+    await expect(card).toHaveAttribute('data-done', String(keys.filter((k) => f[k]).length))
+    for (const k of keys) await expect(card.locator(`[data-testid="setup-item"][data-key="${k}"]`), k).toHaveAttribute('data-done', String(f[k]))
+    const next = keys.find((k) => !f[k])
+    if (next) await expect(card.getByTestId('setup-next')).toHaveAttribute('data-key', next)
+    else await expect(card.getByTestId('setup-done')).toBeVisible()
+    // the full list is folded until asked for
+    const first = card.getByTestId('setup-item').first()
+    await expect(first).toBeHidden()
+    await card.getByTestId('setup-all').click()
+    await expect(first).toBeVisible()
+    // the overview no longer carries it
     await page.goto('/overview')
-    if (Object.values(done).every(Boolean)) {
-      await expect(page.getByTestId('overview-setup')).toHaveCount(0)
-      return
-    }
-    for (const k of keys) await expect(page.locator(`[data-testid="setup-item"][data-key="${k}"]`), k).toHaveAttribute('data-done', String(done[k]))
-    // an open step links to the page that fixes it
-    const open = keys.find((k) => !done[k])!
-    const href = await page.locator(`[data-testid="setup-item"][data-key="${open}"] [data-testid="setup-go"]`).getAttribute('href')
-    const path = { line_oa: '/settings/line', liff: '/settings/line', staff_group: '/settings/line', printer: '/settings/branch', tables: '/settings/tables', items: '/settings/items', staff: '/settings/users' }[open]!
-    expect(decodeURIComponent(href!)).toContain(path)
+    await expect(page.getByTestId('overview-kpis')).toBeVisible()
+    await expect(page.getByTestId('setup-card')).toHaveCount(0)
+    await expect(page.getByTestId('overview-setup')).toHaveCount(0)
   })
 
   test('P4-01-13 tonight equals SQL, and another branch\'s deposit moves it without a reload', async ({ page, context }) => {
@@ -318,15 +325,16 @@ test.describe('owner', () => {
     }).toPass({ timeout: 45_000 })
   })
 
-  test('P4-01-21 at 390 px: no horizontal scroll, and the work comes before the figures', async ({ page }) => {
+  test('P4-01-21 at 390 px: no horizontal scroll, the work comes before the figures, no export here', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/overview')
     await expect(page.getByTestId('overview-kpis')).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0)
     const y = async (p: Page, id: string) => (await p.getByTestId(id).boundingBox())!.y
-    const kpis = await y(page, 'overview-kpis')
-    expect(await y(page, 'overview-actions')).toBeLessThan(kpis)
-    if (await page.getByTestId('overview-setup').count()) expect(await y(page, 'overview-setup')).toBeLessThan(kpis)
+    expect(await y(page, 'overview-actions')).toBeLessThan(await y(page, 'overview-kpis'))
+    // exports live on /reports (R-034)
+    await expect(page.getByTestId('overview-export')).toHaveCount(0)
+    await expect(page.getByTestId('overview-export-xlsx')).toHaveCount(0)
   })
 })
 

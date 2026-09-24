@@ -1,6 +1,7 @@
 import 'server-only'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { dbErrorCode } from '@/lib/errors'
+import type { ReportDetail } from './report-view'
 
 /** Owner overview + report aggregates (P4-01). Numbers come from the owner-only RPCs. */
 
@@ -69,6 +70,14 @@ export async function getOverview(from: string, to: string): Promise<Overview> {
   const { data, error } = await sb.rpc('owner_overview', { p_from: from, p_to: to })
   if (error) throw new Error(`overview: ${dbErrorCode(error)}`)
   return data as unknown as Overview
+}
+
+/** Day-by-day series, top liquor / customers, staff activity and disposals behind the report (R-034). */
+export async function getReportDetail(from: string, to: string, branchId?: string | null): Promise<ReportDetail> {
+  const sb = await getSupabaseServer()
+  const { data, error } = await sb.rpc('owner_report_detail', { p_from: from, p_to: to, p_branch: branchId ?? undefined })
+  if (error) throw new Error(`report detail: ${dbErrorCode(error)}`)
+  return data as unknown as ReportDetail
 }
 
 export async function getReport(from: string, to: string, branchId?: string | null): Promise<Report> {

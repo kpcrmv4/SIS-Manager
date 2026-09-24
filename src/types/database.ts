@@ -1467,6 +1467,10 @@ export type Database = {
         Args: { p_branch?: string; p_from: string; p_to: string }
         Returns: Json
       }
+      owner_report_detail: {
+        Args: { p_branch?: string; p_from: string; p_to: string }
+        Returns: Json
+      }
       owner_trends: {
         Args: {
           p_from: string
