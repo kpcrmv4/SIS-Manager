@@ -212,6 +212,12 @@ test.describe('owner', () => {
     expect(b).toEqual({ liff_id: LIFF_ID, line_channel_id: '2001234567', line_bot_user_id: '@e2e.sis' })
     const { data: s } = await adminDb().from('branch_line_secrets').select('channel_access_token, channel_secret').eq('branch_id', branchA).single()
     expect(s).toEqual({ channel_access_token: TOKEN, channel_secret: SECRET })
+    // P4-05-01: the audit log says which keys changed — and never holds them (R-038)
+    const { data: audit } = await adminDb().from('audit_log').select('details').eq('branch_id', branchA).eq('action', 'line.secrets_updated').order('id', { ascending: false }).limit(1)
+    expect(audit?.[0]?.details).toEqual({ fields: ['channel_access_token', 'channel_secret'] })
+    const { data: logged } = await adminDb().from('audit_log').select('details').eq('branch_id', branchA).range(0, 999)
+    expect(JSON.stringify(logged)).not.toContain(TOKEN)
+    expect(JSON.stringify(logged)).not.toContain(SECRET)
 
     const res = await page.goto('/settings/line')
     const html = await res!.text()

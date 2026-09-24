@@ -223,6 +223,30 @@
   .orline { display: flex; align-items: center; gap: 0.625rem; margin: 1rem 0; font-size: 0.78125rem; color: var(--muted); }
   .orline::before, .orline::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 
+  /* ── audit log (/audit, R-038) ────────────────────────────────────────── */
+  .audit-row { display: flex; align-items: flex-start; gap: 0.75rem; border-bottom: 1px solid var(--line-soft); padding: 0.75rem 1rem; }
+  .audit-row:last-child { border-bottom: 0; }
+  .audit-ic { display: grid; flex: none; place-items: center; width: 32px; height: 32px; margin-top: 1px; border-radius: 10px; }
+  .audit-ic.deposit { background: var(--brand-tint); color: var(--brand-on-tint); }
+  .audit-ic.withdrawal { background: var(--status-info-bg); color: var(--status-info); }
+  .audit-ic.booking { background: var(--status-done-bg); color: var(--status-done); }
+  .audit-ic.print { background: var(--surface-3); color: var(--ink-2); }
+  .audit-ic.settings { background: var(--gold-bg); color: var(--gold-ink); }
+  .audit-ic.users { background: var(--status-progress-bg); color: var(--status-progress); }
+  .audit-target {
+    border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); padding: 0 0.375rem;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem; color: var(--ink-2); overflow-wrap: anywhere;
+  }
+  .audit-details { margin-top: 0.5rem; }
+  .audit-changes {
+    display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 0.25rem 0.75rem; margin-top: 0.5rem;
+    border-radius: var(--r-md); background: var(--surface-2); padding: 0.625rem 0.75rem; font-size: 0.8125rem;
+  }
+  .audit-changes dt { color: var(--muted); }
+  .audit-changes dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+  .audit-changes .old { color: var(--muted); text-decoration: line-through; }
+  .audit-changes .new { font-weight: 600; }
+
   /* ── user manual (/manual) — plain text, easy on a phone (R-037) ─────────── */
   .man-card { border: 1px solid var(--line); border-radius: var(--r-xl); background: var(--card); padding: 1rem 1.0625rem; }
   .man-section { display: flex; flex-direction: column; gap: 0.875rem; scroll-margin-top: 1rem; }

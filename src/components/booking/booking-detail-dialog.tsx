@@ -50,7 +50,8 @@ export function BookingDetailDialog({
           branchId={branchId}
           locale={locale}
           canChangeTable={state.detail.canChangeTable}
-          onCheckedIn={onChanged}
+          canCancel={state.detail.canCancel}
+          onChanged={onChanged}
           onClose={() => onOpenChange(false)}
         />
       )}

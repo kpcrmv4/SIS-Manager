@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
 import { addDays, businessNight } from '../../src/lib/date'
-import { adminDb, fixtureIds } from './fixtures/db'
+import { adminDb, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
 import { clearBookings, resetSettings, setupZonesAndTables, teardownZonesAndTables, type ZoneTableSet } from './fixtures/p2b-bookings'
 
@@ -163,6 +163,26 @@ test.describe('scan + sheet', () => {
     const { data } = await admin().from('bookings').select('table_id').eq('id', b.id).single()
     expect(data?.table_id).toBe(zt.tableA2)
   })
+
+  test('P2-B2-07 bar cancels a confirmed booking from the sheet: cancelled, table freed, the customer told on LINE', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: NIGHT, slotTime: '20:00', status: 'confirmed', tableId: zt.tableA1, zoneId: zt.zoneStage })
+    await page.goto(`/bookings?night=${NIGHT}&view=plan`)
+    await page.getByTestId('table-cell').first().click()
+    const sheet = page.getByTestId('booking-sheet')
+    await expect(sheet).toContainText(b.code)
+    await sheet.getByTestId('cancel-booking-button').click()
+    await page.getByLabel('เหตุผลที่ยกเลิก').fill('ลูกค้าโทรมายกเลิก')
+    await page.getByTestId('cancel-booking-submit').click()
+    await expect(page.getByText('ยกเลิกการจองแล้ว')).toBeVisible()
+    await expect(sheet.getByTestId('cancel-booking-button')).toHaveCount(0)
+    await expect(sheet.getByTestId('check-in-button')).toBeDisabled()
+
+    const { data } = await admin().from('bookings').select('status, table_id, cancel_reason, cancelled_by_customer').eq('id', b.id).single()
+    expect(data).toEqual({ status: 'cancelled', table_id: null, cancel_reason: 'ลูกค้าโทรมายกเลิก', cancelled_by_customer: false })
+    const { count } = await admin().from('line_outbox').select('id', { count: 'exact', head: true }).eq('dedupe_key', `booking_cancelled:${b.id}`)
+    expect(count).toBe(1)
+  })
 })
 
 test.describe('staff cannot change table', () => {
@@ -176,5 +196,18 @@ test.describe('staff cannot change table', () => {
     await page.getByRole('button', { name: 'ค้นหา' }).click()
     await expect(page.getByTestId('booking-sheet')).toBeVisible()
     await expect(page.getByTestId('change-table-trigger')).toHaveCount(0)
+  })
+
+  test('P2-B2-08 staff: no ยกเลิกการจอง in the sheet, and cancel_booking answers BAR_ONLY', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: NIGHT, slotTime: '21:30', status: 'confirmed', tableId: zt.tableV1, zoneId: zt.zoneVip })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(b.code)
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+    await expect(page.getByTestId('booking-sheet')).toBeVisible()
+    await expect(page.getByTestId('cancel-booking-button')).toHaveCount(0)
+    const r = await dbAs('staff').rpc('cancel_booking', { p_booking: b.id } as never)
+    expect(r.error?.message).toContain('BAR_ONLY')
+    expect((await admin().from('bookings').select('status').eq('id', b.id).single()).data?.status).toBe('confirmed')
   })
 })

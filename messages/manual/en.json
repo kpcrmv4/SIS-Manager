@@ -69,7 +69,7 @@
         "Complete or reject withdrawals",
         "Extend, make or remove VIP, and set the expiry date when taking a deposit",
         "Dispose of expired bottles",
-        "Confirm or reject bookings, assign and change tables"
+        "Confirm, reject or cancel bookings, assign and change tables"
       ]
     },
     "owner": {
@@ -87,30 +87,64 @@
   "groups": {
     "start": {
       "title": "Getting started",
-      "sections": ["login", "appLayout", "myAccount"]
+      "sections": [
+        "login",
+        "appLayout",
+        "myAccount"
+      ]
     },
     "daily": {
       "title": "Daily work",
-      "sections": ["tonight", "deposits", "newDeposit", "depositDetail", "bookings", "scan"]
+      "sections": [
+        "tonight",
+        "deposits",
+        "newDeposit",
+        "depositDetail",
+        "bookings",
+        "scan"
+      ]
     },
     "owner": {
       "title": "For the owner",
-      "sections": ["overview", "reports"]
+      "sections": [
+        "overview",
+        "reports",
+        "auditLog"
+      ]
     },
     "settings": {
       "title": "Settings",
-      "sections": ["branchSettings", "bookingSettings", "floorPlan", "liquorList", "users", "branchLine"]
+      "sections": [
+        "branchSettings",
+        "bookingSettings",
+        "floorPlan",
+        "liquorList",
+        "users",
+        "branchLine"
+      ]
     },
     "customer": {
       "title": "Customer side in LINE",
-      "sections": ["cxStart", "cxBottles", "cxDeposit", "cxBook", "cxBookings", "cxLanguage", "cxChat"]
+      "sections": [
+        "cxStart",
+        "cxBottles",
+        "cxDeposit",
+        "cxBook",
+        "cxBookings",
+        "cxLanguage",
+        "cxChat"
+      ]
     }
   },
   "sections": {
     "login": {
       "title": "Log in",
       "path": "/login",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "The first screen when you open the app. Use the username and password the owner created for you.",
       "onPage": [
         "The shop logo and the SIS Manager name",
@@ -121,7 +155,11 @@
       "howtos": {
         "signIn": {
           "title": "How to log in",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the app in the browser, or from the icon on your home screen",
             "Type the **Username or e-mail** the owner gave you",
@@ -131,7 +169,11 @@
         },
         "forgot": {
           "title": "What to do if you forget your password",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Tell the owner",
             "The owner presses **Set new password** for you on **Users & branches**",
@@ -140,7 +182,11 @@
         },
         "signOut": {
           "title": "How to log out",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "On a phone, press **More** in the bottom bar, then **Log out**",
             "On a computer, press **Log out** at the bottom of the left menu"
@@ -159,7 +205,11 @@
     "appLayout": {
       "title": "App layout and menus",
       "path": "Every page",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "The menus and buttons on every page: move between pages, switch branch, read notifications, check the printer and change the colour mode.",
       "onPage": [
         "Phone: a 5-slot bottom bar — **Tonight** (the owner sees **Overview**) · **Deposits** · the dark round scan button in the middle · **Bookings** · **More**",
@@ -171,7 +221,11 @@
       "howtos": {
         "navigate": {
           "title": "How to move around on a phone",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press a slot in the bottom bar to open **Tonight**, **Deposits** or **Bookings**",
             "Press the dark round button in the middle to open **Scan QR**",
@@ -181,7 +235,11 @@
         },
         "switchBranch": {
           "title": "How to switch branch",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "On a phone, press **More**, then the branch name at the top of the sheet",
             "On a computer, press the branch name under the logo in the left menu",
@@ -190,7 +248,11 @@
         },
         "bell": {
           "title": "How to read notifications",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press the bell at the top right; the red number is how many are unread",
             "Press an item to open its page; it then counts as read",
@@ -200,7 +262,11 @@
         },
         "printer": {
           "title": "How to check the printer",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Look at the dot on the printer icon at the top right",
             "Green = **Online**, ready to print · red = **Offline** · grey = **Not set up**",
@@ -209,7 +275,11 @@
         },
         "theme": {
           "title": "How to switch light or dark mode",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press the moon button at the top right for dark mode",
             "Press the sun button to go back to light mode"
@@ -217,7 +287,11 @@
         },
         "homeScreen": {
           "title": "How to add the app to your home screen",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the app in your phone's browser",
             "iPhone: in Safari, press Share, then Add to Home Screen",
@@ -238,7 +312,11 @@
     "myAccount": {
       "title": "My account",
       "path": "/me",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "See your account, change language and theme, turn on notifications for this device and change your password. Open it from **More** on a phone or the left menu on a computer.",
       "onPage": [
         "**Profile**: display name, username, role and branch access",
@@ -250,7 +328,11 @@
       "howtos": {
         "language": {
           "title": "How to change the language",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Under **Language**, press **ไทย** or **English**",
             "Every page switches at once, and your account remembers it"
@@ -258,7 +340,11 @@
         },
         "push": {
           "title": "How to turn on notifications for this device",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Under **Notifications on this device**, press **Turn on**",
             "Allow notifications when the browser asks",
@@ -268,7 +354,11 @@
         },
         "password": {
           "title": "How to change your password",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Under **Change password**, fill in **Current password**",
             "Fill in a **New password** of at least 8 characters, then type it again in **Confirm new password**",
@@ -288,7 +378,10 @@
     "tonight": {
       "title": "Tonight",
       "path": "/tonight",
-      "roles": ["staff", "bar"],
+      "roles": [
+        "staff",
+        "bar"
+      ],
       "intro": "The home page for staff and bar: tonight's work at the selected branch — bookings, jobs waiting and bottles about to expire.",
       "onPage": [
         "The **Tonight** heading with the branch name, the date and opening hours",
@@ -300,7 +393,10 @@
       "howtos": {
         "checkIn": {
           "title": "How to check a guest in from this page",
-          "roles": ["staff", "bar"],
+          "roles": [
+            "staff",
+            "bar"
+          ],
           "steps": [
             "Look through **Tonight's bookings**",
             "When the guest arrives, press **Arrived** at the end of their row",
@@ -309,7 +405,10 @@
         },
         "work": {
           "title": "How to clear the to-do list",
-          "roles": ["staff", "bar"],
+          "roles": [
+            "staff",
+            "bar"
+          ],
           "steps": [
             "Look at **To do**",
             "Press an item to open that deposit",
@@ -319,7 +418,10 @@
         },
         "numbers": {
           "title": "How to use the summary numbers",
-          "roles": ["staff", "bar"],
+          "roles": [
+            "staff",
+            "bar"
+          ],
           "steps": [
             "Press a number to open the list behind it",
             "**Bookings tonight** opens **Bookings** · **Withdrawal requests** opens the **Withdrawals** tab · **Expiring in N days** opens the **In store** tab",
@@ -339,7 +441,11 @@
     "deposits": {
       "title": "Deposits",
       "path": "/deposits",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Every deposit at the branch, in tabs by status and searchable — and where new deposits start.",
       "onPage": [
         "The **New deposit** button at the top right",
@@ -351,7 +457,11 @@
       "howtos": {
         "tabs": {
           "title": "How to read each tab",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "**In store**: bottles on the shelf, including those with a withdrawal request pending",
             "**To confirm**: received, waiting for bar to enter % and a photo",
@@ -363,7 +473,11 @@
         },
         "search": {
           "title": "How to search",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Pick the tab first",
             "Type the customer name, phone or deposit code in the search box",
@@ -372,7 +486,10 @@
         },
         "dispose": {
           "title": "How to dispose of expired bottles",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the **Expired · to dispose** tab",
             "Take the bottles off the shelf first",
@@ -395,7 +512,11 @@
     "newDeposit": {
       "title": "New deposit",
       "path": "/deposits/new",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "The form for a bottle a customer brings in. After you save, the bar confirms each bottle's % again before it goes on the shelf.",
       "onPage": [
         "**Customer name** and **Phone**",
@@ -408,7 +529,11 @@
       "howtos": {
         "create": {
           "title": "How to take a deposit",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Go to **Deposits** and press **New deposit**",
             "Fill in **Customer name** and **Phone**",
@@ -420,7 +545,10 @@
         },
         "expiry": {
           "title": "How to set the expiry date yourself",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "In **Expires**, pick a new date from the calendar",
             "Fill in the rest and press **Save deposit** as usual"
@@ -441,7 +569,11 @@
     "depositDetail": {
       "title": "Deposit details",
       "path": "Deposits › tap a row",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "The page for one deposit: every bottle, the expiry and the history, and the buttons for what comes next. Which buttons you see depends on your role and the deposit's status.",
       "onPage": [
         "Liquor name, deposit code, customer name and a status badge",
@@ -454,7 +586,11 @@
       "howtos": {
         "receive": {
           "title": "How to receive bottles for a LINE deposit request",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the deposit from the **LINE requests** tab",
             "Take the bottles from the customer and press **Receive bottles**",
@@ -465,7 +601,10 @@
         },
         "confirm": {
           "title": "How to confirm bottles",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the deposit from the **To confirm** tab and press **Confirm bottles**",
             "Enter the % left for every bottle, e.g. **Bottle 1 remaining (%)**; a sealed bottle is 100",
@@ -475,7 +614,10 @@
         },
         "rejectDeposit": {
           "title": "How to reject a deposit",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Reject deposit** (shown on deposit requests and on deposits waiting to be confirmed)",
             "Write a **Reason** the customer will understand",
@@ -484,7 +626,11 @@
         },
         "withdraw": {
           "title": "How to create a withdrawal request",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Withdraw**",
             "Tick the bottles under **Bottles to withdraw**",
@@ -495,7 +641,10 @@
         },
         "completeWithdraw": {
           "title": "How to complete or reject a withdrawal",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open a deposit with a request — the **Complete withdrawal** box shows the bottles, the type and the table",
             "Bring the bottle to the customer, press **Complete withdrawal**, then **Withdraw now**",
@@ -505,7 +654,10 @@
         },
         "extend": {
           "title": "How to extend",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Extend**",
             "Enter the days in **Extend by (days)** and check the new expiry date under the field",
@@ -514,7 +666,10 @@
         },
         "vip": {
           "title": "How to make or remove VIP",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Make VIP**, then **Confirm** — VIP bottles never expire",
             "To undo, press **Remove VIP**, then **Confirm**",
@@ -523,7 +678,11 @@
         },
         "print": {
           "title": "How to print the receipt and the bottle label",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Print receipt** or **Print bottle label**",
             "If the printer is online, press **Print**",
@@ -546,7 +705,11 @@
     "bookings": {
       "title": "Bookings",
       "path": "/bookings",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "See each night's bookings as a floor plan or a list, book for customers, confirm LINE bookings and check guests in.",
       "onPage": [
         "The night picker (left/right arrows and a date) and the **New booking** button",
@@ -559,7 +722,11 @@
       "howtos": {
         "pickNight": {
           "title": "How to see another night and switch views",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press the left or right arrow to move one night, or press the date to pick from a calendar",
             "Press **Floor plan** to see free and booked tables",
@@ -568,7 +735,11 @@
         },
         "newBooking": {
           "title": "How to book for a customer",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **New booking**",
             "Fill in **Customer name** and **Phone**",
@@ -579,7 +750,10 @@
         },
         "confirm": {
           "title": "How to confirm a LINE booking",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Look at **Waiting for confirmation** at the top of the page",
             "Press **Confirm + assign** at the end of the booking",
@@ -589,7 +763,10 @@
         },
         "reject": {
           "title": "How to reject a booking",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Under **Waiting for confirmation** or in the **List** tab, press **Reject** at the end of the booking",
             "Write the **Reason for rejecting**",
@@ -598,7 +775,11 @@
         },
         "sheet": {
           "title": "How to open a booking and check the guest in",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "On the floor plan, press a table showing a guest's name; in the **List** tab, press a booking row",
             "You'll see the booking number, name, phone, **Time**, **Party**, **Table** and a gold box saying whether the guest has bottles deposited",
@@ -608,18 +789,35 @@
         },
         "changeTable": {
           "title": "How to assign or change a table",
-          "roles": ["bar", "owner"],
+          "roles": [
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the booking from the floor plan or the **List** tab",
             "Next to **Table**, press **Change table**",
             "Pick a table from the list — it saves at once and shows **Table assigned**"
+          ]
+        },
+        "cancel": {
+          "title": "How to cancel a confirmed booking",
+          "roles": [
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Open the booking from the floor plan or the **List** tab",
+            "Press **Cancel booking**",
+            "Add a **Reason for cancelling** if there is one, then press **Cancel booking** again to confirm",
+            "The status becomes **Cancelled**, the table is free at once and the customer is told on LINE"
           ]
         }
       },
       "important": [
         "**Customer arrived** only works for tonight's bookings",
         "Bookings made by staff are confirmed at once, without waiting for the bar — but not on a night the shop is closed for bookings",
-        "Guests who don't come within the shop's time turn **No-show**; if they arrive later you can still press **Customer arrived**"
+        "Guests who don't come within the shop's time turn **No-show**; if they arrive later you can still press **Customer arrived**",
+        "**Cancel booking** is for confirmed bookings — while a booking is still waiting, use **Reject**"
       ],
       "tips": [
         "**Waiting for confirmation** lists every night with bookings waiting — no need to step through the nights",
@@ -630,7 +828,11 @@
     "scan": {
       "title": "Scan QR",
       "path": "/scan",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Scan a customer's booking QR or the QR on a bottle label, or type a booking number, table or deposit code, to open it right away.",
       "onPage": [
         "The camera frame with a **Start camera** button",
@@ -641,7 +843,11 @@
       "howtos": {
         "scanBooking": {
           "title": "How to check in with a booking QR",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press the round scan button in the middle of the bottom bar, or **Scan QR** in the left menu",
             "Press **Start camera** and allow camera access",
@@ -652,7 +858,11 @@
         },
         "typeCode": {
           "title": "How to find something by typing",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Type a booking number such as BK-0924-003, a table such as A3, or a deposit code such as DEP-SRC-7K2QX",
             "Press **Find**",
@@ -661,7 +871,11 @@
         },
         "scanDeposit": {
           "title": "How to withdraw from a bottle label",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Scan the QR on the bottle label, or type the deposit code",
             "Check the customer name, liquor and what's left",
@@ -681,7 +895,9 @@
     "overview": {
       "title": "All branches",
       "path": "/overview",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "The owner's home page: what needs attention, how tonight is going, and the business numbers of every branch on one page.",
       "onPage": [
         "Period buttons **This month**, **Last month**, **Last 30 days**",
@@ -695,7 +911,9 @@
       "howtos": {
         "actions": {
           "title": "How to clear work from Needs attention",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Look at the chips in **Needs attention** — each number is the total across branches",
             "Press a chip to open the page where that work is done",
@@ -704,7 +922,9 @@
         },
         "period": {
           "title": "How to change the period of the figures",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **This month**, **Last month** or **Last 30 days** at the top right",
             "The figures follow the chosen period and compare it with the one before",
@@ -713,7 +933,9 @@
         },
         "drill": {
           "title": "How to look into a branch",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press an item in **Expiring soon**, **Recent disposals**, **Latest activity**, or a badge on a branch card",
             "The app switches to that branch and opens the right page for you",
@@ -733,7 +955,9 @@
     "reports": {
       "title": "Reports",
       "path": "/reports",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "Deposits and bookings for all branches or one branch over the period you choose, with Excel and PDF export.",
       "onPage": [
         "Quick ranges **This month**, **Last month**, **30 days**, **90 days**",
@@ -747,7 +971,9 @@
       "howtos": {
         "range": {
           "title": "How to pick the period and branch",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press a quick range such as **This month** or **90 days**",
             "Or pick the **From** and **To** dates yourself",
@@ -757,7 +983,9 @@
         },
         "export": {
           "title": "How to export Excel or PDF",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Set the period and branch first",
             "Press **Export** at the top right",
@@ -778,7 +1006,9 @@
     "branchSettings": {
       "title": "Branch details",
       "path": "/settings/branch",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "The basics of the selected branch: opening hours, deposit term, no-withdrawal days, receipt header and footer, and the printer.",
       "onPage": [
         "The **Finish setting up the shop** card with progress and the **Next step**",
@@ -791,7 +1021,9 @@
       "howtos": {
         "setup": {
           "title": "How to use the setup card",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Read the **Next step** on the card and press **Set up**",
             "Press **All steps (7)** to see which steps are done",
@@ -801,7 +1033,9 @@
         },
         "edit": {
           "title": "How to edit the branch",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Change the fields you need, such as **Deposit term (days)** or **Expiry reminder (days before)**",
             "Under **No in-store withdrawals on**, tap days to turn them on or off",
@@ -811,7 +1045,9 @@
         },
         "printer": {
           "title": "How to set up printing",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Turn on **Show the LINE QR on the receipt** so receipts carry the shop's LINE QR and a 6-character code for linking LINE (set up the branch LINE first)",
             "If you want, turn on **Limit printer working hours** and set **Start** and **End**",
@@ -821,7 +1057,9 @@
         },
         "install": {
           "title": "How to install the printer at the shop",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Open this page on the Windows computer connected to the shop's receipt printer",
             "Press **Set up printer**, then **Confirm** — a zip file downloads",
@@ -831,7 +1069,9 @@
         },
         "retry": {
           "title": "How to reprint a failed job",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Look at the jobs under **Printer status**",
             "For a job showing **Failed**, press **Print again**",
@@ -853,7 +1093,9 @@
     "bookingSettings": {
       "title": "Booking rules",
       "path": "/settings/booking",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "The booking rules of the selected branch and the calendar of closed dates. Everything applies to new bookings only.",
       "onPage": [
         "Switches **Take bookings on LINE** and **Confirm bookings automatically**",
@@ -866,7 +1108,9 @@
       "howtos": {
         "rules": {
           "title": "How to set the booking rules",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Turn on **Take bookings on LINE** to let customers book themselves; with it off, staff can still take bookings",
             "Turn on **Confirm bookings automatically** if customers should get their QR at once; leave it off if the shop confirms each one",
@@ -877,7 +1121,9 @@
         },
         "tableChoice": {
           "title": "How to choose who picks the table",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Under **Table choice**, pick **The shop seats guests** if guests only say which zone they'd like and staff pick the table when confirming",
             "Or pick **Guests pick their table** if guests should see the floor plan in LINE and pick a free table",
@@ -887,7 +1133,9 @@
         },
         "weekly": {
           "title": "How to set weekly closed days",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Under **Weekly closed days**, tap the days the shop takes no bookings — struck-through days are closed",
             "Tap a day again to open it",
@@ -896,7 +1144,9 @@
         },
         "blackout": {
           "title": "How to close single dates in the calendar",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Type the **Reason (shown to customers)** first, e.g. closed for a public holiday",
             "Use the arrows to find the month, then tap the date to close",
@@ -919,7 +1169,9 @@
     "floorPlan": {
       "title": "Floor plan",
       "path": "/settings/tables",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "Set up the zones and tables of the selected branch. The plan is used on Bookings and decides which zones or tables customers can book on LINE.",
       "onPage": [
         "**Add zone** and **Add table** buttons",
@@ -931,7 +1183,9 @@
       "howtos": {
         "addZone": {
           "title": "How to add a zone",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Add zone**",
             "Enter the **Zone name** and **Order**",
@@ -941,7 +1195,9 @@
         },
         "addTable": {
           "title": "How to add a table",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Add table** (you need a zone first)",
             "Enter the **Table name**, then choose the **Zone** and **Shape**",
@@ -951,7 +1207,9 @@
         },
         "tableBooking": {
           "title": "How to set whether guests can pick this table",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Edit** on the table",
             "Turn **Guests can book** on or off — off means guests can never pick this table themselves",
@@ -962,7 +1220,9 @@
         },
         "zoneSwitch": {
           "title": "How to open or close a zone for customers",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "At the foot of the zone card, tap the **Customers can book on LINE** switch",
             "When it's off, customers can't choose this zone in LINE and its tables show **Zone closed**"
@@ -970,7 +1230,9 @@
         },
         "retire": {
           "title": "How to stop using a table or zone",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Turn off a table's **Active** switch — it disappears from the plan and the booking forms",
             "Turn off the **Active** switch at the foot of a zone card to stop using the whole zone",
@@ -992,7 +1254,9 @@
     "liquorList": {
       "title": "Liquor list",
       "path": "/settings/items",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "The liquor names staff pick from when taking a deposit — for every branch or only some.",
       "onPage": [
         "The **Add item** button",
@@ -1002,7 +1266,9 @@
       "howtos": {
         "add": {
           "title": "How to add a liquor",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Add item**",
             "Enter the **Name**, then choose a **Category** such as **Whisky**, **Brandy** or **Wine**",
@@ -1012,7 +1278,9 @@
         },
         "edit": {
           "title": "How to edit or hide an item",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Edit** on the item, change it and press **Save**",
             "For a liquor you no longer accept, turn off **Active** — staff won't see it any more"
@@ -1031,7 +1299,9 @@
     "users": {
       "title": "Users & branches",
       "path": "/settings/users",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "Create staff accounts, set roles and branch access, set new passwords, and add or edit branches.",
       "onPage": [
         "Tabs **Users** and **Branches**",
@@ -1042,7 +1312,9 @@
       "howtos": {
         "addUser": {
           "title": "How to add a user",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Add user**",
             "Enter the **Username** they'll log in with (a–z 0–9 . _ -) and a **Display name**",
@@ -1054,7 +1326,9 @@
         },
         "editUser": {
           "title": "How to change a role or branches, or disable an account",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Edit** on the person",
             "Change the **Display name** or **Role**, or tick **Branch access**",
@@ -1064,7 +1338,9 @@
         },
         "resetPassword": {
           "title": "How to set a new password for someone",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press **Set new password** on the person",
             "Enter a new password of at least 8 characters and press **Save**",
@@ -1073,7 +1349,9 @@
         },
         "addBranch": {
           "title": "How to add a branch",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Open the **Branches** tab and press **Add branch**",
             "Enter a **Branch code** of 2–5 English letters and the **Branch name**",
@@ -1095,7 +1373,9 @@
     "branchLine": {
       "title": "Branch LINE",
       "path": "/settings/line",
-      "roles": ["owner"],
+      "roles": [
+        "owner"
+      ],
       "intro": "Connect the selected branch's LINE OA so the shop can message customers, open its pages inside LINE and send alerts to the staff group.",
       "onPage": [
         "**LINE OA channel**: **LIFF ID**, **Channel ID** and **Bot user ID**",
@@ -1107,7 +1387,9 @@
       "howtos": {
         "connect": {
           "title": "How to connect the LINE OA",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Open this branch's LINE Developers console in another window",
             "Copy the **LIFF ID**, **Channel ID** and **Bot user ID** in — each field shows an example of the format",
@@ -1117,7 +1399,9 @@
         },
         "urls": {
           "title": "How to set up the webhook and the customer pages",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Press the copy button next to **Webhook URL**, paste it into LINE Developers › Messaging API › Webhook URL, then turn on Use webhook",
             "Press the copy button next to **LIFF endpoint URL** and paste it into LINE Developers › LINE Login › LIFF › Endpoint URL",
@@ -1126,7 +1410,9 @@
         },
         "group": {
           "title": "How to bind the staff LINE group",
-          "roles": ["owner"],
+          "roles": [
+            "owner"
+          ],
           "steps": [
             "Invite the branch's LINE OA bot into the staff LINE group",
             "In the app, press **Make a group code** — you get a code starting with SIS-",
@@ -1150,7 +1436,11 @@
     "cxStart": {
       "title": "Opening the shop in LINE",
       "path": "The branch's LINE",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Customers use the branch's LINE account — no sign-up, no password. This part helps staff guide them.",
       "onPage": [
         "A 3-slot bottom bar: **My bottles** · **Book a table** · **My bookings**",
@@ -1161,7 +1451,11 @@
       "howtos": {
         "open": {
           "title": "How to open the shop in LINE",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "The customer adds the branch's LINE as a friend, e.g. by scanning the QR on the receipt",
             "They press a button in the chat's menu, or type “menu” and press a button on the reply card",
@@ -1170,7 +1464,11 @@
         },
         "link": {
           "title": "How a customer sees their deposit in LINE",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Give the customer the receipt",
             "The customer scans the QR on it to add the branch's LINE",
@@ -1193,7 +1491,11 @@
     "cxBottles": {
       "title": "My bottles",
       "path": "LINE › My bottles",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "The customer's first page in LINE: stored bottles, how much is left, the collect-by date, and requesting a bottle themselves.",
       "onPage": [
         "Tabs **Stored N** and **History**",
@@ -1205,7 +1507,11 @@
       "howtos": {
         "withdraw": {
           "title": "How a customer requests a bottle",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Request my bottle** on the card",
             "Tick the bottles under **Choose bottles**",
@@ -1216,7 +1522,11 @@
         },
         "status": {
           "title": "How to read the card messages",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "**Request sent — hand the bottle to staff**: the customer filled in a deposit request and should hand the bottle over",
             "**Waiting for the bar to confirm**: staff received the bottle; the bar still has to confirm",
@@ -1237,7 +1547,11 @@
     "cxDeposit": {
       "title": "Deposit another bottle",
       "path": "LINE › My bottles › Deposit another bottle",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Customers fill in a deposit request in LINE before handing the bottle over — the deposit goes faster and is linked to their LINE at once.",
       "onPage": [
         "Fields **Name**, **Phone**, **Liquor**, **Bottles** (− +), **Table** and **Notes**",
@@ -1247,7 +1561,11 @@
       "howtos": {
         "request": {
           "title": "How a customer sends a deposit request",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "In **My bottles**, press **Deposit another bottle** — or type “deposit” in the chat and press **Deposit**",
             "Fill in **Name**, **Liquor** and **Bottles**; add **Phone** and **Table** if they like",
@@ -1257,7 +1575,11 @@
         },
         "staffSide": {
           "title": "How staff receive the bottle",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "The request shows in the **LINE requests** tab, on the bell and in the staff LINE group",
             "Open it, press **Receive bottles**, set **Bottles**, take a photo and press **Receive bottles**",
@@ -1277,7 +1599,11 @@
     "cxBook": {
       "title": "Book a table",
       "path": "LINE › Book a table",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Customers pick the date, time, party size and a zone or table, and send a booking request themselves in LINE.",
       "onPage": [
         "A row of dates for the next 14 days; closed dates can't be tapped",
@@ -1290,7 +1616,11 @@
       "howtos": {
         "book": {
           "title": "How a customer books a table",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press **Book a table** in the bottom bar",
             "Tap a date, then an **Arrival time**",
@@ -1302,7 +1632,11 @@
         },
         "pickTable": {
           "title": "How a customer picks their own table (when the shop allows it)",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "After the date, time and party size, **Pick a table** appears instead of zones",
             "Tap a table marked **Free** — it becomes **Your pick**",
@@ -1324,7 +1658,11 @@
     "cxBookings": {
       "title": "My bookings",
       "path": "LINE › My bookings",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "The customer's bookings. Open one to see the booking number and the QR to show at the door, and to cancel it themselves.",
       "onPage": [
         "The **My bookings** page: upcoming bookings first, past ones under **History**",
@@ -1336,7 +1674,11 @@
       "howtos": {
         "showQr": {
           "title": "How to show a booking at the door",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "The customer presses **My bookings** in the bottom bar, then the booking for that night",
             "They show the QR for staff to scan on **Scan QR**",
@@ -1345,7 +1687,11 @@
         },
         "cancel": {
           "title": "How a customer cancels a booking",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open **Your booking** and press **Cancel booking**",
             "Press **Cancel booking** again to confirm, or **Close** to keep it",
@@ -1365,7 +1711,11 @@
     "cxLanguage": {
       "title": "Language and theme",
       "path": "LINE › top right",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Customers choose the language and the colour mode of the shop pages in LINE themselves.",
       "onPage": [
         "The language button (a letters icon) opens **ไทย** · **English** · **中文** · **한국어**",
@@ -1375,7 +1725,11 @@
       "howtos": {
         "language": {
           "title": "How a customer changes the language",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press the language button at the top right",
             "Choose **ไทย**, **English**, **中文** or **한국어**",
@@ -1384,7 +1738,11 @@
         },
         "theme": {
           "title": "How a customer changes the theme",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Press the sun button for the light look",
             "Press the moon button to go back to the night look"
@@ -1403,7 +1761,11 @@
     "cxChat": {
       "title": "Chat words in LINE",
       "path": "The branch's LINE chat",
-      "roles": ["staff", "bar", "owner"],
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
       "intro": "Customers type a short word in the branch's LINE chat and get a card with buttons to the page they need.",
       "onPage": [
         "“deposit” → a card with a **Deposit** button",
@@ -1417,7 +1779,11 @@
       "howtos": {
         "keyword": {
           "title": "How to use chat words",
-          "roles": ["staff", "bar", "owner"],
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
           "steps": [
             "Open the branch's LINE chat",
             "Type the word on its own, e.g. “book” (Thai polite endings such as ครับ or ค่ะ are fine)",
@@ -1433,6 +1799,61 @@
         "Thai, Chinese and Korean words work too, e.g. ฝาก, เบิก, จองโต๊ะ, เมนู",
         "After several wrong codes, the customer has to wait 15 minutes before trying again",
         "If a customer types the DEP code from a bottle label, LINE replies asking for the 6-character code on the receipt"
+      ]
+    },
+    "auditLog": {
+      "title": "Audit log",
+      "path": "/audit",
+      "roles": [
+        "owner"
+      ],
+      "intro": "See who did what, and when, across every branch — deposits, withdrawals, bookings, printing, settings and user management",
+      "onPage": [
+        "Kind-of-work buttons **All**, **Deposits**, **Withdrawals**, **Bookings**, **Printing**, **Settings** and **Users & access**, each with its count",
+        "Period buttons **Today**, **7 days**, **30 days** and the **From** and **To** dates",
+        "The **Branch** and **Done by** filters and a **Search** box for a code, table or customer name",
+        "The entries by day — each says what was done, the code or name it concerns, the time, who did it with their role, and the branch",
+        "A **Details** button under an edit shows the old and new value of every field that changed"
+      ],
+      "howtos": {
+        "byKind": {
+          "title": "How to see one kind of work",
+          "roles": [
+            "owner"
+          ],
+          "steps": [
+            "Press a kind-of-work button such as **Bookings**",
+            "Only that kind is listed; press **All** to see everything again"
+          ]
+        },
+        "trace": {
+          "title": "How to find who did what to one booking or deposit",
+          "roles": [
+            "owner"
+          ],
+          "steps": [
+            "Pick the period with **Today**, **7 days** or **30 days**, or set **From** and **To**",
+            "Pick a **Branch** and **Done by** if you want",
+            "Type the booking number, deposit code, table or customer name in **Search** and press **Show**"
+          ]
+        },
+        "details": {
+          "title": "How to see what an edit changed",
+          "roles": [
+            "owner"
+          ],
+          "steps": [
+            "Find an edit such as **Table edited** or **Booking settings changed**",
+            "Press **Details** to see every field that changed — the old value struck through, the new one in bold"
+          ]
+        }
+      },
+      "important": [
+        "Entries in the log cannot be edited or deleted, so it stands as a record of what happened"
+      ],
+      "tips": [
+        "What a customer did in LINE shows **Customer (LINE)** as who; what happens on its own in time — a deposit expiring, a no-show — shows **Automatic**",
+        "For a long list, use **Next** and **Previous** at the bottom to change page"
       ]
     }
   }

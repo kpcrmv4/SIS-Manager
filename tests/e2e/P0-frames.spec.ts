@@ -97,7 +97,7 @@ async function pin(context: BrowserContext, branchId: string) {
 }
 
 const OWNER_PAGES = [
-  '/overview', '/reports', '/deposits', '/deposits/new', '/bookings', '/bookings?view=list', '/scan',
+  '/overview', '/reports', '/audit', '/deposits', '/deposits/new', '/bookings', '/bookings?view=list', '/scan',
   '/settings/branch', '/settings/booking', '/settings/tables', '/settings/items', '/settings/users', '/settings/line', '/me', '/manual',
 ]
 

@@ -76,7 +76,8 @@
     "allBranches": "ทุกสาขา",
     "switchBranch": "เปลี่ยนสาขา",
     "notifications": "การแจ้งเตือน",
-    "manual": "คู่มือการใช้งาน"
+    "manual": "คู่มือการใช้งาน",
+    "audit": "บันทึกการใช้งาน"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -515,7 +516,8 @@
     "cancel": "ยกเลิกการจอง",
     "cancelReason": "เหตุผลที่ยกเลิก",
     "rejectReason": "เหตุผลที่ปฏิเสธ",
-    "assigned": "จัดโต๊ะแล้ว"
+    "assigned": "จัดโต๊ะแล้ว",
+    "cancelBody": "ลูกค้าจะได้รับข้อความแจ้งยกเลิกทาง LINE และโต๊ะจะว่างทันที"
   },
   "bookingForm": {
     "title": "รับจองแทนลูกค้า",
@@ -1006,5 +1008,145 @@
     "table_not_bookable": "โต๊ะนี้ไม่เปิดให้ลูกค้าจองในวันนั้น",
     "table_seats": "จำนวนคนไม่ตรงกับที่นั่งของโต๊ะ",
     "TABLE_OTHER_BRANCH": "โต๊ะนี้อยู่สาขาอื่น"
+  },
+  "audit": {
+    "title": "บันทึกการใช้งาน",
+    "subtitle": "ใครทำอะไร เมื่อไร · {from} – {to}",
+    "kindsLabel": "ประเภทงาน",
+    "kinds": {
+      "all": "ทั้งหมด",
+      "deposit": "ฝากเหล้า",
+      "withdrawal": "เบิกเหล้า",
+      "booking": "จองโต๊ะ",
+      "print": "การพิมพ์",
+      "settings": "ตั้งค่า",
+      "users": "ผู้ใช้และสิทธิ์"
+    },
+    "rangeLabel": "ช่วงเวลา",
+    "rangeToday": "วันนี้",
+    "range7": "7 วัน",
+    "range30": "30 วัน",
+    "from": "ตั้งแต่",
+    "to": "ถึง",
+    "branch": "สาขา",
+    "allBranches": "ทุกสาขา",
+    "actor": "คนทำ",
+    "anyone": "ทุกคน",
+    "customer": "ลูกค้า (LINE)",
+    "system": "ระบบอัตโนมัติ",
+    "search": "ค้นหา",
+    "searchPlaceholder": "รหัส ชื่อโต๊ะ หรือชื่อลูกค้า",
+    "apply": "ดู",
+    "empty": "ไม่มีรายการในช่วงนี้",
+    "emptyBody": "ลองเปลี่ยนช่วงเวลา ประเภทงาน หรือคนทำ",
+    "showing": "แสดง {from}–{to} จาก {total} รายการ",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "details": "รายละเอียด",
+    "unknownActor": "ไม่ทราบชื่อ",
+    "badRange": "วันที่เริ่มต้องไม่เกินวันที่สิ้นสุด",
+    "rangeTooLong": "เลือกช่วงได้ไม่เกิน 1 ปี",
+    "bookingLine": "{name} · {party} คน · {date} {time} น.",
+    "on": "เปิด",
+    "off": "ปิด",
+    "none": "—",
+    "action": {
+      "booking": {
+        "created": "รับจอง",
+        "pending": "กลับเป็นรอยืนยัน",
+        "confirmed": "ยืนยันการจอง",
+        "rejected": "ปฏิเสธการจอง",
+        "cancelled": "ยกเลิกการจอง",
+        "arrived": "ลูกค้ามาถึง (เช็กอิน)",
+        "no_show": "ไม่มาตามนัด",
+        "table": "จัดหรือเปลี่ยนโต๊ะ",
+        "updated": "แก้ไขการจอง"
+      },
+      "booking_settings": {
+        "updated": "แก้ไขตั้งค่าการจอง"
+      },
+      "blackout": {
+        "created": "ปิดรับจองวัน",
+        "deleted": "เปิดรับจองวัน"
+      },
+      "zone": {
+        "created": "เพิ่มโซน",
+        "updated": "แก้ไขโซน",
+        "deleted": "ลบโซน"
+      },
+      "table": {
+        "created": "เพิ่มโต๊ะ",
+        "updated": "แก้ไขโต๊ะ",
+        "deleted": "ลบโต๊ะ"
+      },
+      "table_block": {
+        "created": "ปิดจองโต๊ะวัน",
+        "deleted": "เปิดจองโต๊ะวัน"
+      },
+      "item": {
+        "created": "เพิ่มรายการเหล้า",
+        "updated": "แก้ไขรายการเหล้า",
+        "deleted": "ลบรายการเหล้า"
+      },
+      "branch": {
+        "created": "เพิ่มสาขา",
+        "updated": "แก้ไขข้อมูลสาขา"
+      },
+      "line": {
+        "secrets_updated": "เปลี่ยนคีย์ LINE"
+      },
+      "user": {
+        "created": "สร้างผู้ใช้",
+        "updated": "แก้ไขผู้ใช้",
+        "password_reset": "ตั้งรหัสผ่านใหม่"
+      }
+    },
+    "field": {
+      "name": "ชื่อ",
+      "label": "ชื่อโต๊ะ",
+      "shape": "รูปทรง",
+      "seats_min": "ที่นั่งต่ำสุด",
+      "seats_max": "ที่นั่งสูงสุด",
+      "sort": "ลำดับ",
+      "active": "ใช้งาน",
+      "customer_bookable": "ลูกค้าจองได้",
+      "zone": "โซน",
+      "night": "วันที่",
+      "reason": "เหตุผล",
+      "table": "โต๊ะ",
+      "code": "รหัสสาขา",
+      "category": "หมวด",
+      "deposit_days": "อายุฝาก (วัน)",
+      "expiry_notice_days": "แจ้งเตือนก่อนหมดอายุ (วัน)",
+      "withdrawal_blocked_days": "วันงดเบิกดื่มในร้าน",
+      "liff_id": "LIFF ID",
+      "line_channel_id": "Channel ID",
+      "line_bot_user_id": "LINE OA",
+      "staff_group_id": "กลุ่ม LINE พนักงาน",
+      "line_enabled": "เปิดรับจองผ่าน LINE",
+      "auto_confirm": "ยืนยันการจองอัตโนมัติ",
+      "advance_days": "เปิดจองล่วงหน้า (วัน)",
+      "cutoff_time": "ปิดรับจองของคืนนั้นเวลา",
+      "slot_start": "รอบแรก",
+      "slot_end": "รอบสุดท้าย",
+      "slot_minutes": "ทุก (นาที)",
+      "max_bookings_per_night": "จองได้สูงสุดต่อคืน",
+      "party_min": "จำนวนคนต่ำสุด",
+      "party_max": "จำนวนคนสูงสุด",
+      "no_show_minutes": "นับว่าไม่มาเมื่อเลย (นาที)",
+      "customer_cancel_hours": "ลูกค้ายกเลิกเองได้ก่อน (ชั่วโมง)",
+      "closed_weekdays": "วันปิดรับจองประจำ",
+      "table_choice": "การเลือกโต๊ะ",
+      "display_name": "ชื่อที่แสดง",
+      "role": "บทบาท",
+      "branches": "สาขา",
+      "fields": "คีย์ที่เปลี่ยน",
+      "slot_time": "เวลา",
+      "party_size": "จำนวนคน",
+      "phone": "เบอร์โทร",
+      "note": "หมายเหตุ",
+      "status": "สถานะ",
+      "receipt": "ใบรับฝาก: {key}"
+    }
   }
 }

@@ -86,7 +86,11 @@ async function main() {
       must(t, await admin.from(t).delete().in('branch_id', ids))
     }
     must('branches', await admin.from('branches').delete().in('id', ids)) // cascades settings, zones, tables, items, secrets, user_branches
+    // the audit rows of the fixture branches — including the ones that cascade just wrote (R-038)
+    must('audit_log', await admin.from('audit_log').delete().in('branch_id', ids))
   }
+  // and whatever the fixture accounts did anywhere else (e.g. an item for every branch)
+  if (users.length) must('audit_log', await admin.from('audit_log').delete().in('actor_id', users.map((u) => u.id)))
   for (const u of users) {
     const { error } = await admin.auth.admin.deleteUser(u.id)
     if (error) throw new Error(`delete user ${u.email}: ${error.message}`)

@@ -4,6 +4,7 @@ import { after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { getActorState } from '@/lib/auth/actor'
 import { callRpc, isUuid } from '@/lib/action'
+import { auditAs } from '@/lib/audit/write'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import type { ActionResult } from '@/lib/errors'
@@ -30,14 +31,16 @@ const FORMATS: Record<LineField, RegExp> = {
   channelSecret: /^[A-Za-z0-9]{16,128}$/,
 }
 
-async function ownerOf(branchId: string): Promise<boolean> {
-  if (!isUuid(branchId)) return false
+/** the owner acting on this branch, or null */
+async function ownerOf(branchId: string) {
+  if (!isUuid(branchId)) return null
   const state = await getActorState()
-  return state.status === 'ok' && state.actor.role === 'owner' && state.actor.branches.some((b) => b.id === branchId)
+  return state.status === 'ok' && state.actor.role === 'owner' && state.actor.branches.some((b) => b.id === branchId) ? state.actor : null
 }
 
 export async function saveLineSettings(branchId: string, input: LineSettingsInput): Promise<LineSettingsResult> {
-  if (!(await ownerOf(branchId))) return { ok: false, error: 'FORBIDDEN' }
+  const owner = await ownerOf(branchId)
+  if (!owner) return { ok: false, error: 'FORBIDDEN' }
 
   const clean = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
   const liffId = clean(input.liffId)
@@ -83,6 +86,15 @@ export async function saveLineSettings(branchId: string, input: LineSettingsInpu
     }
     const { error: secretError } = await getSupabaseAdmin().from('branch_line_secrets').upsert(row, { onConflict: 'branch_id' })
     if (secretError) return { ok: false, error: 'unknown' }
+    // which keys changed — never their values (R-038)
+    await auditAs(owner, {
+      category: 'settings',
+      action: 'line.secrets_updated',
+      target: owner.branches.find((b) => b.id === branchId)?.name ?? null,
+      targetId: branchId,
+      branchId,
+      details: { fields: [...(accessToken ? ['channel_access_token'] : []), ...(channelSecret ? ['channel_secret'] : [])] },
+    })
   }
   revalidatePath('/settings/line')
   return { ok: true }

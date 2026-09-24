@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getActorState } from '@/lib/auth/actor'
 import { USERNAME_RE, usernameEmail } from '@/lib/auth/identifier'
+import { auditAs } from '@/lib/audit/write'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const runtime = 'nodejs'
@@ -42,6 +43,20 @@ export async function POST(req: NextRequest) {
     if (error) return error.status === 404 ? false : null
     return Boolean(data.user?.app_metadata?.print_branch)
   }
+  // for the audit log (R-038): branch names, and a user's name / role / active / branches before a change
+  const branchNames = async (ids: string[]): Promise<string[]> => {
+    if (!ids.length) return []
+    const { data, error } = await admin.from('branches').select('name').in('id', ids).order('name')
+    return error ? ids : (data ?? []).map((b) => b.name)
+  }
+  const userNow = async (userId: string) => {
+    const [{ data: p, error: pError }, { data: ub, error: bError }] = await Promise.all([
+      admin.from('profiles').select('display_name, username, role, active').eq('id', userId).maybeSingle(),
+      admin.from('user_branches').select('branch_id').eq('user_id', userId).range(0, 199),
+    ])
+    if (pError || bError || !p) return null
+    return { ...p, branches: await branchNames((ub ?? []).map((r) => r.branch_id)) }
+  }
   const setBranches = async (userId: string, ids: string[]) => {
     const { error: delError } = await admin.from('user_branches').delete().eq('user_id', userId)
     if (delError) return delError
@@ -79,6 +94,13 @@ export async function POST(req: NextRequest) {
       await admin.auth.admin.deleteUser(id)
       return NextResponse.json({ error: 'unavailable' }, { status: 503 })
     }
+    await auditAs(me, {
+      category: 'users',
+      action: 'user.created',
+      target: `${displayName} (@${username})`,
+      targetId: id,
+      details: { role: body.role, branches: await branchNames(branches) },
+    })
     return NextResponse.json({ ok: true, id }, { status: 201 })
   }
 
@@ -103,6 +125,7 @@ export async function POST(req: NextRequest) {
       patch.role = body.role
     }
     if (body.active !== undefined) patch.active = Boolean(body.active)
+    const before = await userNow(body.userId)
     if (Object.keys(patch).length) {
       const { data, error } = await admin.from('profiles').update(patch).eq('id', body.userId).select('id').maybeSingle()
       if (error) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
@@ -113,6 +136,15 @@ export async function POST(req: NextRequest) {
       if (!branches) return NextResponse.json({ error: 'invalid' }, { status: 400 })
       const err = await setBranches(body.userId, branches)
       if (err) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+    }
+    const after = await userNow(body.userId)
+    if (before && after) {
+      const changed: Record<string, [unknown, unknown]> = {}
+      for (const k of ['display_name', 'role', 'active'] as const) if (before[k] !== after[k]) changed[k] = [before[k], after[k]]
+      if (before.branches.join('|') !== after.branches.join('|')) changed.branches = [before.branches, after.branches]
+      if (Object.keys(changed).length) {
+        await auditAs(me, { category: 'users', action: 'user.updated', target: `${after.display_name} (@${after.username})`, targetId: body.userId, details: changed })
+      }
     }
     // a deactivated user keeps a JWT until it expires, but the staff layout sends
     // inactive profiles to logout and every RLS helper returns nothing for them
@@ -126,6 +158,8 @@ export async function POST(req: NextRequest) {
     }
     const { error } = await admin.auth.admin.updateUserById(body.userId, { password: body.password })
     if (error) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+    const who = await userNow(body.userId)
+    await auditAs(me, { category: 'users', action: 'user.password_reset', target: who ? `${who.display_name} (@${who.username})` : null, targetId: body.userId })
     return NextResponse.json({ ok: true })
   }
 

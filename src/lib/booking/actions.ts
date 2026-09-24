@@ -156,6 +156,8 @@ export type BookingDetail = {
   customerId: string | null
   /** bar/owner only — the scan result has no separate role prop, so it reads this. */
   canChangeTable: boolean
+  /** bar/owner only: ยกเลิกการจอง on a confirmed booking (R-039) */
+  canCancel: boolean
   tables: { id: string; label: string }[]
   deposits: { itemName: string; remainingPercent: number; expiresAt: string | null }[]
 }
@@ -214,6 +216,7 @@ export async function getBookingDetail(branchId: string, bookingId: string): Pro
       qrToken: booking.qr_token,
       customerId: booking.customer_id,
       canChangeTable,
+      canCancel: canChangeTable,
       tables: (tables ?? []).map((t) => ({ id: t.id, label: t.label })),
       deposits: deposits.map((d) => ({ itemName: d.item_name, remainingPercent: d.remaining_percent, expiresAt: d.expires_at })),
     },

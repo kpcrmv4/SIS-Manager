@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
-import { Loader2, Wine } from 'lucide-react'
+import { CircleX, Loader2, Wine } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { CancelDialog } from './cancel-dialog'
 import { checkInBooking, assignTable } from '@/lib/booking/actions'
 import type { BookingDetail } from '@/lib/booking/actions'
 import { bookingBadgeTone, minutesLate, LIVE_STATUSES } from '@/lib/booking/format'
@@ -13,22 +14,25 @@ import { businessNight, formatShortDate, formatTime, type AppLocale } from '@/li
 /**
  * The booking sheet's content — shared by the scan result (rendered inline,
  * no dialog chrome) and the /bookings detail dialog (P2-B2). Code, name,
- * phone/source, a late/status badge, the kv rows, the gold deposits box and
- * "ลูกค้ามาแล้ว" all live here so both callers stay in lockstep.
+ * phone/source, a late/status badge, the kv rows, the gold deposits box,
+ * "ลูกค้ามาแล้ว" and — for bar / owner — "ยกเลิกการจอง" all live here so both
+ * callers stay in lockstep. `onChanged` runs after a check-in or a cancel.
  */
 export function BookingSheetContent({
   detail,
   branchId,
   locale,
   canChangeTable,
-  onCheckedIn,
+  canCancel,
+  onChanged,
   onClose,
 }: {
   detail: BookingDetail
   branchId: string
   locale: AppLocale
   canChangeTable: boolean
-  onCheckedIn: () => void
+  canCancel: boolean
+  onChanged: () => void
   onClose?: () => void
 }) {
   const t = useTranslations('booking')
@@ -44,6 +48,7 @@ export function BookingSheetContent({
   const [changing, setChanging] = useState(false)
   const [checkInPending, startCheckIn] = useTransition()
   const [assignPending, startAssign] = useTransition()
+  const [cancelOpen, setCancelOpen] = useState(false)
 
   const late = LIVE_STATUSES.includes(status) && status !== 'arrived' ? minutesLate(detail.night, detail.slotTime) : 0
   const nightWord = detail.night === businessNight() ? t('tonight') : formatShortDate(detail.night, locale)
@@ -57,7 +62,7 @@ export function BookingSheetContent({
         return
       }
       setStatus('arrived')
-      onCheckedIn()
+      onChanged()
     })
   }
 
@@ -150,6 +155,26 @@ export function BookingSheetContent({
         </span>
       </div>
 
+      {canCancel && status === 'confirmed' && (
+        <button type="button" className="btn-danger btn-sm mb-3" onClick={() => setCancelOpen(true)} data-testid="cancel-booking-button">
+          <CircleX className="size-4" aria-hidden />
+          {t('cancel')}
+        </button>
+      )}
+      {cancelOpen && (
+        <CancelDialog
+          open
+          onOpenChange={setCancelOpen}
+          bookingId={detail.id}
+          onDone={() => {
+            setStatus('cancelled')
+            setTableId(null)
+            setTableLabel(null)
+            onChanged()
+          }}
+        />
+      )}
+
       <div className="flex gap-2">
         {onClose && (
           <button type="button" className="btn-secondary flex-1 justify-center" onClick={onClose}>
@@ -159,7 +184,7 @@ export function BookingSheetContent({
         <button
           type="button"
           className="btn-ok flex-[2] justify-center"
-          disabled={status === 'arrived' || checkInPending}
+          disabled={status === 'arrived' || status === 'cancelled' || checkInPending}
           onClick={doCheckIn}
           data-testid="check-in-button"
         >

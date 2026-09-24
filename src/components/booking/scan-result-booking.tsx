@@ -43,9 +43,10 @@ export function ScanResultBooking({ bookingId, branchId, onDone }: { bookingId: 
           branchId={branchId}
           locale={locale}
           canChangeTable={state.detail.canChangeTable}
-          // check-in updates the card in place (the button becomes "เช็กอินแล้ว");
+          canCancel={state.detail.canCancel}
+          // check-in / cancel update the card in place (the button becomes "เช็กอินแล้ว");
           // only "ปิด" clears the result back to the search box (onDone)
-          onCheckedIn={() => router.refresh()}
+          onChanged={() => router.refresh()}
           onClose={onDone}
         />
       )}

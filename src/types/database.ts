@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_kind: string
+          actor_name: string | null
+          at: string
+          branch_id: string | null
+          category: string
+          details: Json
+          id: number
+          target: string | null
+          target_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_kind?: string
+          actor_name?: string | null
+          at?: string
+          branch_id?: string | null
+          category: string
+          details?: Json
+          id?: never
+          target?: string | null
+          target_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_kind?: string
+          actor_name?: string | null
+          at?: string
+          branch_id?: string | null
+          category?: string
+          details?: Json
+          id?: never
+          target?: string | null
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       booking_blackouts: {
         Row: {
           branch_id: string
@@ -1356,6 +1398,19 @@ export type Database = {
     Functions: {
       assign_table: {
         Args: { p_booking: string; p_table: string }
+        Returns: Json
+      }
+      audit_feed: {
+        Args: {
+          p_actor?: string
+          p_branch?: string
+          p_category?: string
+          p_from: string
+          p_limit?: number
+          p_offset?: number
+          p_q?: string
+          p_to: string
+        }
         Returns: Json
       }
       bind_staff_group: {

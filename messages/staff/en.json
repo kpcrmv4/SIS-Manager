@@ -76,7 +76,8 @@
     "allBranches": "All branches",
     "switchBranch": "Switch branch",
     "notifications": "Notifications",
-    "manual": "User manual"
+    "manual": "User manual",
+    "audit": "Audit log"
   },
   "login": {
     "title": "Log in",
@@ -515,7 +516,8 @@
     "cancel": "Cancel booking",
     "cancelReason": "Reason for cancelling",
     "rejectReason": "Reason for rejecting",
-    "assigned": "Table assigned"
+    "assigned": "Table assigned",
+    "cancelBody": "The customer is told on LINE and the table is free again at once"
   },
   "bookingForm": {
     "title": "Book for a customer",
@@ -1006,5 +1008,145 @@
     "table_not_bookable": "Guests cannot book this table on that night",
     "table_seats": "The party does not fit this table",
     "TABLE_OTHER_BRANCH": "This table belongs to another branch"
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Who did what, and when · {from} – {to}",
+    "kindsLabel": "Kind of work",
+    "kinds": {
+      "all": "All",
+      "deposit": "Deposits",
+      "withdrawal": "Withdrawals",
+      "booking": "Bookings",
+      "print": "Printing",
+      "settings": "Settings",
+      "users": "Users & access"
+    },
+    "rangeLabel": "Period",
+    "rangeToday": "Today",
+    "range7": "7 days",
+    "range30": "30 days",
+    "from": "From",
+    "to": "To",
+    "branch": "Branch",
+    "allBranches": "All branches",
+    "actor": "Done by",
+    "anyone": "Anyone",
+    "customer": "Customer (LINE)",
+    "system": "Automatic",
+    "search": "Search",
+    "searchPlaceholder": "Code, table or customer name",
+    "apply": "Show",
+    "empty": "Nothing in this period",
+    "emptyBody": "Try another period, kind of work or person",
+    "showing": "Showing {from}–{to} of {total}",
+    "prev": "Previous",
+    "next": "Next",
+    "details": "Details",
+    "unknownActor": "Unknown",
+    "badRange": "The start date must not be after the end date",
+    "rangeTooLong": "Pick a period of one year at most",
+    "bookingLine": "{name} · {party, plural, one {# person} other {# people}} · {date} {time}",
+    "on": "On",
+    "off": "Off",
+    "none": "—",
+    "action": {
+      "booking": {
+        "created": "Booking taken",
+        "pending": "Back to waiting",
+        "confirmed": "Booking confirmed",
+        "rejected": "Booking rejected",
+        "cancelled": "Booking cancelled",
+        "arrived": "Guest arrived (check-in)",
+        "no_show": "No-show",
+        "table": "Table set or changed",
+        "updated": "Booking edited"
+      },
+      "booking_settings": {
+        "updated": "Booking settings changed"
+      },
+      "blackout": {
+        "created": "Night closed for bookings",
+        "deleted": "Night open for bookings"
+      },
+      "zone": {
+        "created": "Zone added",
+        "updated": "Zone edited",
+        "deleted": "Zone deleted"
+      },
+      "table": {
+        "created": "Table added",
+        "updated": "Table edited",
+        "deleted": "Table deleted"
+      },
+      "table_block": {
+        "created": "Table closed on a night",
+        "deleted": "Table open again on a night"
+      },
+      "item": {
+        "created": "Liquor item added",
+        "updated": "Liquor item edited",
+        "deleted": "Liquor item deleted"
+      },
+      "branch": {
+        "created": "Branch added",
+        "updated": "Branch details changed"
+      },
+      "line": {
+        "secrets_updated": "LINE keys changed"
+      },
+      "user": {
+        "created": "User created",
+        "updated": "User edited",
+        "password_reset": "New password set"
+      }
+    },
+    "field": {
+      "name": "Name",
+      "label": "Table",
+      "shape": "Shape",
+      "seats_min": "Min seats",
+      "seats_max": "Max seats",
+      "sort": "Order",
+      "active": "Active",
+      "customer_bookable": "Guests can book",
+      "zone": "Zone",
+      "night": "Date",
+      "reason": "Reason",
+      "table": "Table",
+      "code": "Branch code",
+      "category": "Category",
+      "deposit_days": "Deposit days",
+      "expiry_notice_days": "Expiry notice (days)",
+      "withdrawal_blocked_days": "No in-store withdrawals on",
+      "liff_id": "LIFF ID",
+      "line_channel_id": "Channel ID",
+      "line_bot_user_id": "LINE OA",
+      "staff_group_id": "Staff LINE group",
+      "line_enabled": "LINE bookings",
+      "auto_confirm": "Auto-confirm",
+      "advance_days": "Book ahead (days)",
+      "cutoff_time": "Tonight's bookings close at",
+      "slot_start": "First slot",
+      "slot_end": "Last slot",
+      "slot_minutes": "Every (minutes)",
+      "max_bookings_per_night": "Max bookings a night",
+      "party_min": "Min party",
+      "party_max": "Max party",
+      "no_show_minutes": "No-show after (minutes)",
+      "customer_cancel_hours": "Guests cancel up to (hours)",
+      "closed_weekdays": "Closed every",
+      "table_choice": "Table choice",
+      "display_name": "Display name",
+      "role": "Role",
+      "branches": "Branches",
+      "fields": "Keys changed",
+      "slot_time": "Time",
+      "party_size": "Party",
+      "phone": "Phone",
+      "note": "Note",
+      "status": "Status",
+      "receipt": "Receipt: {key}"
+    }
   }
 }
