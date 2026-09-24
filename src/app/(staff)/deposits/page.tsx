@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { Plus } from 'lucide-react'
+import { Archive, ArrowUpFromLine, CalendarX, ClipboardCheck, MessageCircle, Plus, Wine, type LucideIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
 import { EmptyState } from '@/components/ui/states'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,19 @@ const TAB_LABEL_KEY: Record<DepositTab, string> = {
   requests: 'tabRequests',
   expired: 'tabExpired',
   closed: 'tabClosed',
+}
+
+/**
+ * Each filter card's icon and tone (R-046), in the status badges' colours: in store green, the two
+ * queues waiting for the bar amber, LINE requests blue, expired red, closed grey.
+ */
+const TAB_LOOK: Record<DepositTab, { icon: LucideIcon; tone: string }> = {
+  inStore: { icon: Wine, tone: 'done' },
+  toConfirm: { icon: ClipboardCheck, tone: 'progress' },
+  withdraw: { icon: ArrowUpFromLine, tone: 'progress' },
+  requests: { icon: MessageCircle, tone: 'info' },
+  expired: { icon: CalendarX, tone: 'urgent' },
+  closed: { icon: Archive, tone: 'neutral' },
 }
 
 const TAB_EMPTY_KEY: Record<DepositTab, string> = {
@@ -91,19 +104,29 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
         }
       />
 
-      <nav aria-label={t('title')} className="tabs mb-4">
-        {DEPOSIT_TABS.map((key) => (
-          <Link
-            key={key}
-            href={hrefWith('/deposits', sp, { tab: key === 'inStore' ? null : key, page: null })}
-            className={`tab ${tab === key ? 'on' : ''}`}
-            aria-selected={tab === key}
-            data-testid={`deposits-tab-${key}`}
-          >
-            {t(TAB_LABEL_KEY[key])}
-            <span className="c">{counts[key]}</span>
-          </Link>
-        ))}
+      <nav aria-label={t('title')} className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6" data-testid="deposits-filters">
+        {DEPOSIT_TABS.map((key) => {
+          const { icon: Icon, tone } = TAB_LOOK[key]
+          return (
+            <Link
+              key={key}
+              href={hrefWith('/deposits', sp, { tab: key === 'inStore' ? null : key, page: null })}
+              className="fcard"
+              aria-current={tab === key ? 'page' : undefined}
+              data-tone={tone}
+              data-count={counts[key]}
+              data-testid={`deposits-tab-${key}`}
+            >
+              <span className="top">
+                <span className="ic" aria-hidden>
+                  <Icon className="size-4.5" />
+                </span>
+                <span className="c">{counts[key]}</span>
+              </span>
+              <span className="l">{t(TAB_LABEL_KEY[key])}</span>
+            </Link>
+          )
+        })}
       </nav>
 
       <div className="mb-4">
@@ -172,7 +195,8 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
                     </>
                   }
                   aside={
-                    <div className="flex flex-col items-end gap-1">
+                    // a phone puts this on its own line: badge and amount side by side, flush left
+                    <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-1">
                       <Badge tone={spec.tone}>{badgeText(tRoot, spec)}</Badge>
                       <span className="num text-xs text-muted-token">{remainingText(tRoot, r.remainingQty, r.remainingPercent)}</span>
                     </div>

@@ -98,7 +98,7 @@ test.describe('desktop (1280px)', () => {
       await expect(tab.locator('.c')).toHaveText(String(expected[key]))
       await tab.click()
       await expect(page).toHaveURL(key === 'inStore' ? /\/deposits(\?.*)?$/ : new RegExp(`tab=${key}`))
-      await expect(tab).toHaveAttribute('aria-selected', 'true')
+      await expect(tab).toHaveAttribute('aria-current', 'page') // the chosen filter card (R-046)
     }
   })
 
