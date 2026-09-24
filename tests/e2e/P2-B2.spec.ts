@@ -257,6 +257,46 @@ test.describe('scan + sheet', () => {
       await resetSettings(admin(), branchA)
     }
   })
+
+  test('P2-B2-12 a waiting booking holding the table its customer picked: the note names it, ยืนยัน keeps it, the sheet still shows it', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: businessNight(), slotTime: '23:30', status: 'pending', tableId: zt.tableA2, zoneId: zt.zoneStage, name: 'P2B2 เลือกโต๊ะเอง' })
+    await page.goto('/scan')
+    await page.getByTestId('scan-input').fill(b.code)
+    await page.getByRole('button', { name: 'ค้นหา' }).click()
+    const sheet = page.getByTestId('booking-sheet')
+    await expect(sheet.getByTestId('booking-note')).toContainText('ที่โต๊ะ PA2')
+    await sheet.getByTestId('confirm-booking-button').click()
+    await expect(page.getByTestId('assign-table-select')).toHaveValue(zt.tableA2)
+    await page.getByTestId('assign-confirm-submit').click()
+    await expect(sheet.getByTestId('booking-decide')).toHaveCount(0)
+    await expect(sheet).toContainText('PA2')
+    await expect(sheet).not.toContainText('ยังไม่จัดโต๊ะ')
+    expect((await admin().from('bookings').select('status, table_id').eq('id', b.id).single()).data).toEqual({ status: 'confirmed', table_id: zt.tableA2 })
+  })
+
+  test('P2-B2-13 ไม่มา · ปล่อยโต๊ะ on a waiting booking past its time: a no-show, the table it held free', async ({ page }) => {
+    const bkk = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    const [h, m] = bkk.format(new Date()).split(':').map(Number)
+    test.skip(h === 6 && m < 12, 'straddles the 06:00 night rollover')
+    await clearBookings(admin(), [branchA])
+    await resetSettings(admin(), branchA, { slot_start: '00:00' })
+    try {
+      const b = await insertBooking({ night: businessNight(), slotTime: bkk.format(new Date(Date.now() - 10 * 60_000)), status: 'pending', tableId: zt.tableA1, zoneId: zt.zoneStage })
+      await page.goto('/scan')
+      await page.getByTestId('scan-input').fill(b.code)
+      await page.getByRole('button', { name: 'ค้นหา' }).click()
+      const sheet = page.getByTestId('booking-sheet')
+      await expect(sheet.getByTestId('booking-decide')).toBeVisible()
+      await sheet.getByTestId('no-show-button').click()
+      await page.getByTestId('no-show-submit').click()
+      await expect(sheet.getByTestId('check-in-button')).toHaveText('ลูกค้ามาแล้ว (มาสาย)')
+      await expect(sheet.getByTestId('booking-decide')).toHaveCount(0)
+      expect((await admin().from('bookings').select('status, table_id').eq('id', b.id).single()).data).toEqual({ status: 'no_show', table_id: null })
+    } finally {
+      await resetSettings(admin(), branchA)
+    }
+  })
 })
 
 test.describe('staff cannot change table', () => {

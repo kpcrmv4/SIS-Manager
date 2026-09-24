@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useTranslations } from 'next-intl'
-import { Loader2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+import { Loader2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { ResponsiveDialog } from './responsive-dialog'
-import { createStaffBooking } from '@/lib/booking/actions'
+import { createStaffBooking, setTableClosed } from '@/lib/booking/actions'
 import { slotOptions } from '@/lib/booking/format'
 import type { ZoneRow } from '@/lib/booking/queries'
+import { formatShortDate, type AppLocale } from '@/lib/date'
 
 export type BookingSettingsForForm = {
   slotStart: string
@@ -17,7 +18,11 @@ export type BookingSettingsForForm = {
   partyMax: number
 }
 
-/** รับจอง — staff books a table for a walk-in / phone caller (createStaffBooking). */
+/**
+ * รับจอง — staff books a table for a walk-in / phone caller (createStaffBooking). Opened from a
+ * table on the plan it starts on that table (R-055). With a table picked, bar / owner may close it
+ * for the night instead — ปิดการจองโต๊ะนี้, no customer details (R-056).
+ */
 export function BookingFormDialog({
   open,
   onOpenChange,
@@ -25,6 +30,9 @@ export function BookingFormDialog({
   night,
   zones,
   settings,
+  initialZoneId = '',
+  initialTableId = '',
+  canCloseTable = false,
   onCreated,
 }: {
   open: boolean
@@ -33,11 +41,16 @@ export function BookingFormDialog({
   night: string
   zones: ZoneRow[]
   settings: BookingSettingsForForm
+  initialZoneId?: string
+  initialTableId?: string
+  canCloseTable?: boolean
+  /** after a booking is saved or the table closed */
   onCreated: () => void
 }) {
   const t = useTranslations('bookingForm')
   const tc = useTranslations('common')
   const te = useTranslations('errors')
+  const locale = useLocale() as AppLocale
 
   const slots = slotOptions(settings.slotStart, settings.slotEnd, settings.slotMinutes)
   const [name, setName] = useState('')
@@ -45,12 +58,14 @@ export function BookingFormDialog({
   const [nightValue, setNightValue] = useState(night)
   const [slot, setSlot] = useState(slots[0] ?? '')
   const [party, setParty] = useState(Math.min(2, settings.partyMax) || settings.partyMin)
-  const [zoneId, setZoneId] = useState('')
-  const [tableId, setTableId] = useState('')
+  const [zoneId, setZoneId] = useState(initialZoneId)
+  const [tableId, setTableId] = useState(initialTableId)
   const [note, setNote] = useState('')
   const [pending, start] = useTransition()
+  const [closing, startClosing] = useTransition()
 
   const tables = zones.find((z) => z.id === zoneId)?.tables ?? []
+  const tableLabel = tables.find((tbl) => tbl.id === tableId)?.label ?? null
 
   function reset() {
     setName('')
@@ -58,9 +73,24 @@ export function BookingFormDialog({
     setNightValue(night)
     setSlot(slots[0] ?? '')
     setParty(Math.min(2, settings.partyMax) || settings.partyMin)
-    setZoneId('')
-    setTableId('')
+    setZoneId(initialZoneId)
+    setTableId(initialTableId)
     setNote('')
+  }
+
+  function closeTable() {
+    if (!tableId || !tableLabel) return
+    startClosing(async () => {
+      const res = await setTableClosed(tableId, nightValue, true)
+      if (!res.ok) {
+        toast.error(te(res.error))
+        return
+      }
+      toast.success(t('closedDone', { table: tableLabel, date: formatShortDate(nightValue, locale) }))
+      reset()
+      onOpenChange(false)
+      onCreated()
+    })
   }
 
   function submit() {
@@ -92,7 +122,16 @@ export function BookingFormDialog({
   }
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title={t('title')} width={480}>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange} title={tableLabel ? t('titleTable', { table: tableLabel }) : t('title')} width={480}>
+      {canCloseTable && tableLabel && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-dashed border-line-strong bg-surface-2 px-3 py-2.5" data-testid="close-table-box">
+          <p className="min-w-0 flex-1 basis-48 text-sm text-ink-2">{t('closeTableHint')}</p>
+          <button type="button" className="btn-secondary btn-sm" disabled={closing || pending} onClick={closeTable} data-testid="close-table-button">
+            {closing ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Lock className="size-4" aria-hidden />}
+            {t('closeTable')}
+          </button>
+        </div>
+      )}
       <div className="flex flex-col gap-3">
         <div>
           <label className="label-base" htmlFor="bf-name">

@@ -22,10 +22,11 @@ import { customerHrefForBooking } from '@/lib/customers/view'
  * phone/source, a late/status badge, the kv rows, the gold deposits box, and
  * the actions the booking still has, here and now (R-053):
  *   waiting   bar / owner: ยืนยัน + จัดโต๊ะ · ปฏิเสธ — tonight anyone may check it in at once
- *   confirmed ลูกค้ามาแล้ว tonight; bar / owner: ไม่มา · ปล่อยโต๊ะ once its time has passed, ยกเลิกการจอง
+ *   confirmed ลูกค้ามาแล้ว tonight; bar / owner: ยกเลิกการจอง
  *   no-show   ลูกค้ามาแล้ว (มาสาย) tonight
- * No check-in on another night (a note says which), none on a cancelled or rejected one.
- * `onChanged` runs after every change.
+ * Past its time, waiting or confirmed, bar / owner also get ไม่มา · ปล่อยโต๊ะ (R-054: a waiting
+ * booking may hold the table its customer picked). No check-in on another night (a note says
+ * which), none on a cancelled or rejected one. `onChanged` runs after every change.
  */
 export function BookingSheetContent({
   detail,
@@ -71,12 +72,14 @@ export function BookingSheetContent({
   const barOrOwner = canChangeTable
   const canCheckIn = isTonight && (status === 'pending' || status === 'confirmed' || status === 'no_show')
   const canDecide = barOrOwner && status === 'pending'
-  const canNoShow = barOrOwner && status === 'confirmed' && late > 0
+  const canNoShow = barOrOwner && (status === 'pending' || status === 'confirmed') && late > 0
   const tableOpen = status === 'pending' || status === 'confirmed' || status === 'arrived'
   const note =
     status === 'pending'
       ? isTonight
-        ? t('notePendingTonight')
+        ? tableLabel
+          ? t('notePendingTonightSeated', { table: tableLabel })
+          : t('notePendingTonight')
         : t('notePendingLater', { date: formatShortDate(detail.night, locale) })
       : status === 'confirmed' && !isTonight
         ? t('noteOtherNight', { date: formatShortDate(detail.night, locale) })
@@ -242,6 +245,7 @@ export function BookingSheetContent({
           onOpenChange={setConfirmOpen}
           bookingId={detail.id}
           tables={detail.tables}
+          currentTableId={tableId}
           onDone={(id) => {
             setStatus('confirmed')
             seat(id)

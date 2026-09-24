@@ -91,7 +91,8 @@ export function PendingBookings({
                 const meta = (
                   <span className="tnum">
                     {b.slotTime.slice(0, 5)}
-                    {b.zoneName && ` · ${b.zoneName}`} · <span className="code">{b.code}</span> · {source}
+                    {b.zoneName && ` · ${b.zoneName}`}
+                    {b.tableLabel && ` · ${t('tableShort', { table: b.tableLabel })}`} · <span className="code">{b.code}</span> · {source}
                   </span>
                 )
                 const aside = isBarOrOwner ? (
@@ -146,7 +147,14 @@ export function PendingBookings({
 
       {detailId && <BookingDetailDialog bookingId={detailId} branchId={branchId} locale={locale} onOpenChange={(v) => !v && setDetailId(null)} onChanged={onDone} />}
       {confirmId && (
-        <ConfirmAssignDialog open={Boolean(confirmId)} onOpenChange={(v) => !v && setConfirmId(null)} bookingId={confirmId} tables={tablesForConfirm} onDone={onDone} />
+        <ConfirmAssignDialog
+          open={Boolean(confirmId)}
+          onOpenChange={(v) => !v && setConfirmId(null)}
+          bookingId={confirmId}
+          tables={tablesForConfirm}
+          currentTableId={confirmTarget?.tableId ?? null}
+          onDone={onDone}
+        />
       )}
       {rejectId && <RejectDialog open={Boolean(rejectId)} onOpenChange={(v) => !v && setRejectId(null)} bookingId={rejectId} onDone={onDone} />}
     </section>

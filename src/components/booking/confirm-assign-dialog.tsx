@@ -8,25 +8,34 @@ import { ResponsiveDialog } from './responsive-dialog'
 import { confirmBooking } from '@/lib/booking/actions'
 import type { TableRow } from '@/lib/booking/queries'
 
+/**
+ * ยืนยัน + จัดโต๊ะ. A booking that already holds a table — the customer picked it (R-036) or bar
+ * seated it early — starts on that table, and there is no "none": confirm_booking keeps a held
+ * table when none is named, so offering none would say one thing and do another (R-054).
+ */
 export function ConfirmAssignDialog({
   open,
   onOpenChange,
   bookingId,
   tables,
+  currentTableId = null,
   onDone,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   bookingId: string
   tables: Pick<TableRow, 'id' | 'label'>[]
-  /** gets the table it was seated at (or null) — the booking sheet shows it without a reload */
+  /** the table the booking holds now, if any */
+  currentTableId?: string | null
+  /** gets the table it is seated at now (or null) — the booking sheet shows it without a reload */
   onDone: (tableId: string | null) => void
 }) {
   const t = useTranslations('booking')
   const tk = useTranslations('bookings')
   const tc = useTranslations('common')
   const te = useTranslations('errors')
-  const [tableId, setTableId] = useState('')
+  const held = currentTableId && tables.some((tbl) => tbl.id === currentTableId) ? currentTableId : ''
+  const [tableId, setTableId] = useState(held)
   const [pending, start] = useTransition()
 
   function submit() {
@@ -37,8 +46,8 @@ export function ConfirmAssignDialog({
         return
       }
       toast.success(tc('saved'))
-      const seated = tableId || null
-      setTableId('')
+      const seated = tableId || currentTableId || null
+      setTableId(held)
       onOpenChange(false)
       onDone(seated)
     })
@@ -56,7 +65,7 @@ export function ConfirmAssignDialog({
         onChange={(e) => setTableId(e.target.value)}
         data-testid="assign-table-select"
       >
-        <option value="">{tc('none')}</option>
+        {!held && <option value="">{tc('none')}</option>}
         {tables.map((tbl) => (
           <option key={tbl.id} value={tbl.id}>
             {tbl.label}

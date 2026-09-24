@@ -119,7 +119,7 @@
     "tableHint": "Tap a free table to pick it",
     "tableFree": "Free",
     "tablePicked": "Your pick",
-    "tableTaken": "Taken",
+    "tableTaken": "Booked",
     "tableBlocked": "Not bookable",
     "tableSeats": "{min}–{max} seats",
     "tableSeatsOne": "{count} seats",

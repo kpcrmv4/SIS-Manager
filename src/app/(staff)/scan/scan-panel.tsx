@@ -43,6 +43,8 @@ export function ScanPanel({ branchId, tonight }: { branchId: string; tonight: st
   const [board, setBoard] = useState<BoardLookup | null>(null)
   const [boardPending, startBoard] = useTransition()
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // the latest tiles lookup: an answer to an older one — the box has moved on — is dropped
+  const boardReq = useRef(0)
   const boardRef = useRef<HTMLDivElement>(null)
   const codes = shortcutCodes(tonight)
 
@@ -55,6 +57,7 @@ export function ScanPanel({ branchId, tonight }: { branchId: string; tonight: st
   function fetchBoard(raw: string, scroll = false) {
     const q = raw.trim()
     replaceQuery({ q: q || null })
+    const req = ++boardReq.current
     startBoard(async () => {
       let r: BoardLookup
       try {
@@ -62,6 +65,7 @@ export function ScanPanel({ branchId, tonight }: { branchId: string; tonight: st
       } catch {
         r = { kind: 'error' }
       }
+      if (req !== boardReq.current) return
       setBoard(r)
       if (scroll && r.kind === 'board') requestAnimationFrame(() => boardRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
     })
@@ -84,6 +88,7 @@ export function ScanPanel({ branchId, tonight }: { branchId: string; tonight: st
     if (bookingCode(next)) {
       timer.current = setTimeout(() => fetchBoard(next), DEBOUNCE_MS)
     } else {
+      boardReq.current += 1
       setBoard(null)
       replaceQuery({ q: null })
     }

@@ -114,6 +114,14 @@ export async function nightBookings(branchId: string, night: string): Promise<{ 
   return { bookings: (data ?? []).map((b) => toNightBooking(b as BookingRowWithRefs)), error: null }
 }
 
+/** The tables closed to bookings on one night (table_blocks: the plan's ปิดจอง, R-056, and /settings/tables). */
+export async function closedTables(branchId: string, night: string): Promise<{ tableIds: string[]; error: string | null }> {
+  const sb = await getSupabaseServer()
+  const { data, error } = await sb.from('table_blocks').select('table_id').eq('branch_id', branchId).eq('night', night).order('table_id').range(0, 999)
+  if (error) return { tableIds: [], error: error.message }
+  return { tableIds: (data ?? []).map((r) => r.table_id), error: null }
+}
+
 /** Every booking still waiting for the shop from `fromNight` on (tonight + later), night then slot order. */
 export async function pendingBookings(branchId: string, fromNight: string): Promise<{ bookings: NightBooking[]; error: string | null }> {
   const sb = await getSupabaseServer()

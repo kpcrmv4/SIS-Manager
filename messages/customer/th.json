@@ -119,7 +119,7 @@
     "tableHint": "แตะโต๊ะที่ว่างเพื่อเลือก",
     "tableFree": "ว่าง",
     "tablePicked": "ที่เลือก",
-    "tableTaken": "ไม่ว่าง",
+    "tableTaken": "จองแล้ว",
     "tableBlocked": "ปิดจอง",
     "tableSeats": "{min}–{max} ที่นั่ง",
     "tableSeatsOne": "{count} ที่นั่ง",

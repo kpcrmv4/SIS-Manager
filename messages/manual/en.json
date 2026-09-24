@@ -751,7 +751,7 @@
         "**Waiting for confirmation**: bookings waiting for the shop from tonight on, grouped under **Tonight**, **Tomorrow** and dates",
         "Tabs **Floor plan** and **List**",
         "A summary of the night: tables, guests, and how many are booked out of the total",
-        "The floor plan by zone, coloured **Free**, **Booked**, **Arrived** and **Late**",
+        "The floor plan by zone, coloured **Free**, **Waiting** (violet), **Booked**, **Arrived**, **Late** and **Closed** (dashed) — tap a free table to book it, one with a booking to open it",
         "A **Closed for bookings tonight** banner when the shop takes no bookings that night"
       ],
       "howtos": {
@@ -780,7 +780,21 @@
             "Fill in **Customer name** and **Phone**",
             "Choose the **Night** and **Arrival time**, then enter **People**",
             "Choose a **Zone** and **Table** if you know them, or leave them as **Any**",
-            "Add a **Note** if needed and press **Save booking** — you'll see the booking number"
+            "Add a **Note** if needed and press **Save booking** — you'll see the booking number",
+            "Or tap a free table on the floor plan — the form opens on that night, zone and table"
+          ]
+        },
+        "closeTable": {
+          "title": "How to close a table for one night",
+          "roles": [
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "On the floor plan, tap a free table (or press **New booking** and pick the zone and table)",
+            "Press **Close this table** at the top of the form — no customer details needed; it closes that night only",
+            "The table reads **Closed** on the plan, and guests who pick their own table in LINE see it as **Booked**",
+            "To open it again, tap the **Closed** table and press **Open for booking**"
           ]
         },
         "confirm": {
@@ -794,7 +808,8 @@
             "Press **Confirm + assign** at the end of the booking",
             "Pick a free **Table** and press **Confirm + assign**",
             "The customer gets a confirmation on LINE and sees a QR on their booking page",
-            "Or open the booking (from the floor plan, the **List** tab or the scan page) and press **Confirm + assign** in its sheet"
+            "Or open the booking (from the floor plan, the **List** tab or the scan page) and press **Confirm + assign** in its sheet",
+            "On the floor plan, a table marked **Waiting** (violet) is held by a booking the shop hasn't confirmed yet — say the guest picked it — tap it, then **Confirm + assign** or **Reject**; the table box starts on that table"
           ]
         },
         "reject": {
@@ -817,7 +832,7 @@
             "owner"
           ],
           "steps": [
-            "On the floor plan, press a table showing a guest's name; in the **List** tab, press a booking row",
+            "On the floor plan, tap a table with a booking; in the **List** tab, press a booking row",
             "You'll see the booking number, name, phone, **Time**, **Party**, **Table** and a gold box saying whether the guest has bottles deposited",
             "When the guest arrives, press **Customer arrived**; it becomes **Checked in** — only tonight’s bookings have it, and a booking still waiting can be pressed too: it is confirmed at the same time",
             "Press **Close** to go back"
@@ -855,10 +870,10 @@
             "owner"
           ],
           "steps": [
-            "Open a confirmed booking whose time has passed",
+            "Open a booking whose time has passed — confirmed or still waiting",
             "Press **No-show · free the table** and confirm",
             "The table is free for someone else at once; if the guest turns up after all, press **Customer arrived (late)** and seat them again",
-            "The button appears only once the booking’s time has passed — before that, use **Cancel booking**"
+            "The button appears only once the booking’s time has passed — before that, use **Cancel booking** (or **Reject** while it is still waiting)"
           ]
         }
       },
@@ -866,7 +881,8 @@
         "**Customer arrived** only works for tonight's bookings",
         "Bookings made by staff are confirmed at once, without waiting for the bar — but not on a night the shop is closed for bookings",
         "A booking past its time by more than the shop allows (30 minutes by default) turns **No-show** and frees its table by itself, confirmed or still waiting — bar and owner can press **No-show · free the table** sooner, and a guest who turns up later can still be checked in with **Customer arrived (late)**",
-        "**Cancel booking** is for confirmed bookings — while a booking is still waiting, use **Reject**"
+        "**Cancel booking** is for confirmed bookings — while a booking is still waiting, use **Reject**",
+        "Closing a table is for one night; other nights stay open — nights the owner closes under **Closed on some nights** in table settings show as **Closed** on the plan too"
       ],
       "tips": [
         "**Waiting for confirmation** lists every night with bookings waiting — no need to step through the nights",
@@ -1393,7 +1409,7 @@
           "steps": [
             "Press **Edit** on the table",
             "Turn **Guests can book** on or off — off means guests can never pick this table themselves",
-            "To close it only on some nights, under **Closed on some nights** pick a date and press **Add night**",
+            "To close it only on some nights, under **Closed on some nights** pick a date and press **Add night** — or close it from the bookings floor plan with **Close this table**",
             "To open that night again, press the ✕ next to the date",
             "Press **Save** to keep any other changes in the window"
           ]
@@ -1422,7 +1438,7 @@
       },
       "important": [
         "This page edits only the selected branch, and table names must be unique within a branch",
-        "**Guests can book** and **Closed on some nights** apply to guests picking tables in LINE; staff can still seat guests at that table",
+        "**Guests can book** and **Closed on some nights** apply to guests picking tables in LINE; staff can still seat guests at that table — on a closed night, guests see the table as **Booked**",
         "Nights under **Closed on some nights** save the moment you press **Add night** or ✕"
       ],
       "tips": [
@@ -1821,7 +1837,7 @@
           "steps": [
             "After the date, time and party size, **Pick a table** appears instead of zones",
             "Tap a table marked **Free** — it becomes **Your pick**",
-            "**Taken** and **Not bookable** tables can't be tapped; tables too small or too big for the party are dimmed",
+            "**Booked** and **Not bookable** tables can't be tapped (a table the shop closed for that night reads **Booked** too); tables too small or too big for the party are dimmed",
             "Fill in the name and press **Send booking request**"
           ]
         }

@@ -1,7 +1,7 @@
 import { join } from 'node:path'
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { addDays, bangkokParts, businessNight } from '../../src/lib/date'
-import { adminDb, fixtureIds } from './fixtures/db'
+import { adminDb, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { BRANCH_B_NAME } from './fixtures/users'
 import { clearBookings, resetSettings, setupZonesAndTables, teardownZonesAndTables, type ZoneTableSet } from './fixtures/p2b-bookings'
@@ -259,5 +259,117 @@ test.describe('pending panel', () => {
     await expect(row.getByRole('button', { name: 'ยืนยัน + จัดโต๊ะ' })).toBeVisible()
     await row.click()
     await expect(page.getByRole('dialog')).toContainText(b.code)
+  })
+})
+
+const cell = (page: Page, label: string) => page.locator(`[data-testid="table-cell"][data-label="${label}"]`)
+
+test.describe('plan: tap a table', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P2-B1-11 a waiting booking that holds a table reads รอยืนยัน on the plan; tapping it confirms it on that table', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    const b = await insertBooking({ night: NIGHT, slotTime: '21:00', status: 'pending', tableId: zt.tableA1, zoneId: zt.zoneStage, name: 'P2B เลือกโต๊ะเอง' })
+    await page.goto(`/bookings?night=${NIGHT}&view=plan`)
+    for (const word of ['รอยืนยัน', 'ปิดจอง']) await expect(page.locator('.legend')).toContainText(word)
+    const a1 = cell(page, 'PA1')
+    await expect(a1).toHaveAttribute('data-state', 'pending')
+    await expect(a1).toContainText('รอยืนยัน')
+    await a1.click()
+    const sheet = page.getByTestId('booking-sheet')
+    await expect(sheet).toContainText(b.code)
+    await expect(sheet.getByTestId('reject-booking-button')).toBeVisible()
+    await sheet.getByTestId('confirm-booking-button').click()
+    // starts on the table the booking holds, and offers no "none" (confirm_booking would keep it anyway)
+    await expect(page.getByTestId('assign-table-select')).toHaveValue(zt.tableA1)
+    await expect(page.getByTestId('assign-table-select').locator('option[value=""]')).toHaveCount(0)
+    await page.getByTestId('assign-confirm-submit').click()
+    await expect(sheet.getByTestId('booking-decide')).toHaveCount(0)
+    await expect(sheet).toContainText('PA1')
+    expect((await admin().from('bookings').select('status, table_id').eq('id', b.id).single()).data).toEqual({ status: 'confirmed', table_id: zt.tableA1 })
+    await page.keyboard.press('Escape')
+    await expect(a1).toHaveAttribute('data-state', 'booked')
+  })
+
+  test('P2-B1-12 tapping a free table opens รับจอง on that night and table; on a past night a free table does nothing', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    await page.goto(`/bookings?night=${NIGHT}&view=plan`)
+    const a2 = cell(page, 'PA2')
+    await expect(a2).toHaveAttribute('data-action', 'book')
+    await a2.click()
+    await expect(page.getByRole('dialog')).toContainText('รับจองโต๊ะ PA2')
+    await expect(page.locator('#bf-night')).toHaveValue(NIGHT)
+    await expect(page.locator('#bf-zone')).toHaveValue(zt.zoneStage)
+    await expect(page.locator('#bf-table')).toHaveValue(zt.tableA2)
+    await page.getByLabel('ชื่อลูกค้า').fill('P2B จากผังโต๊ะ')
+    await page.getByLabel('จำนวนคน').fill('2')
+    await page.getByTestId('booking-form-submit').click()
+    await expect(page.getByText(/บันทึกการจองแล้ว/)).toBeVisible()
+    await expect(a2).toHaveAttribute('data-state', 'booked')
+    await expect(a2).toContainText('P2B จากผังโต๊ะ')
+    const { data } = await admin().from('bookings').select('table_id, status, night').eq('branch_id', branchA).eq('name', 'P2B จากผังโต๊ะ').single()
+    expect(data).toEqual({ table_id: zt.tableA2, status: 'confirmed', night: NIGHT })
+
+    await page.goto(`/bookings?night=${addDays(businessNight(), -1)}&view=plan`)
+    const past = cell(page, 'PA1')
+    await expect(past).toHaveAttribute('data-state', 'free')
+    expect(await past.getAttribute('data-action')).toBeNull()
+    await past.click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+
+  test('P2-B1-13 bar closes a free table for the night with no customer details — ปิดจอง here, booked to customers — and opens it again', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    await admin().from('table_blocks').delete().eq('branch_id', branchA)
+    await page.goto(`/bookings?night=${NIGHT}&view=plan`)
+    const a1 = cell(page, 'PA1')
+    await a1.click()
+    await expect(page.getByTestId('close-table-box')).toBeVisible()
+    await page.getByTestId('close-table-button').click()
+    await expect(page.getByText(/ปิดการจองโต๊ะ PA1/)).toBeVisible()
+    await expect(a1).toHaveAttribute('data-state', 'closed')
+    await expect(a1).toContainText('ปิดจอง')
+    const blocks = async () => (await admin().from('table_blocks').select('night, created_by').eq('table_id', zt.tableA1)).data
+    expect(await blocks()).toEqual([{ night: NIGHT, created_by: fixtureIds().users.bar }])
+    type Plan = { zones: { tables: { id: string; state: string }[] }[] }
+    const plan = (await admin().rpc('table_availability', { p_branch: branchA, p_night: NIGHT })).data as unknown as Plan
+    expect(plan.zones.flatMap((z) => z.tables).find((x) => x.id === zt.tableA1)?.state).toBe('taken')
+
+    await a1.click()
+    await expect(page.getByRole('dialog')).toContainText('โต๊ะ PA1 · ปิดจอง')
+    await page.getByTestId('reopen-table-button').click()
+    await expect(page.getByText('เปิดให้จองโต๊ะ PA1 แล้ว')).toBeVisible()
+    await expect(a1).toHaveAttribute('data-state', 'free')
+    expect(await blocks()).toEqual([])
+
+    // set_table_closed's own lines: not a booked table, not a past night, not staff
+    await insertBooking({ night: NIGHT, slotTime: '22:00', status: 'confirmed', tableId: zt.tableA2, zoneId: zt.zoneStage })
+    expect((await dbAs('bar').rpc('set_table_closed', { p_table: zt.tableA2, p_night: NIGHT, p_closed: true })).error?.message).toBe('table_taken')
+    expect((await dbAs('bar').rpc('set_table_closed', { p_table: zt.tableA1, p_night: addDays(businessNight(), -1), p_closed: true })).error?.message).toBe('past')
+    expect((await dbAs('staff').rpc('set_table_closed', { p_table: zt.tableA1, p_night: NIGHT, p_closed: true })).error?.message).toBe('BAR_ONLY')
+    expect(await blocks()).toEqual([])
+  })
+})
+
+test.describe('plan as staff', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P2-B1-14 staff: a free table opens รับจอง without ปิดการจองโต๊ะนี้; a closed table offers nothing', async ({ page }) => {
+    await clearBookings(admin(), [branchA])
+    await admin().from('table_blocks').delete().eq('branch_id', branchA)
+    const block = await admin().from('table_blocks').insert({ branch_id: branchA, table_id: zt.tableA2, night: NIGHT })
+    expect(block.error, block.error?.message).toBeNull()
+    try {
+      await page.goto(`/bookings?night=${NIGHT}&view=plan`)
+      await cell(page, 'PA1').click()
+      await expect(page.getByRole('dialog')).toContainText('รับจองโต๊ะ PA1')
+      await expect(page.getByTestId('close-table-box')).toHaveCount(0)
+      await page.keyboard.press('Escape')
+      const a2 = cell(page, 'PA2')
+      await expect(a2).toHaveAttribute('data-state', 'closed')
+      expect(await a2.getAttribute('data-action')).toBeNull()
+    } finally {
+      await admin().from('table_blocks').delete().eq('branch_id', branchA)
+    }
   })
 })

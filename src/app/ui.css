@@ -206,6 +206,12 @@
   }
   .t-cell b { font-size: 0.9375rem; }
   .t-cell .who { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .t-cell[data-action] { cursor: pointer; }
+  .t-cell[data-action]:hover { box-shadow: var(--shadow-e1); }
+  .t-cell.pending { border-color: var(--status-violet); background: var(--status-violet-bg); }
+  .t-cell.pending .who { color: var(--status-violet); font-weight: 600; }
+  .t-cell.closed { border-style: dashed; border-color: var(--line-strong); background: var(--surface-2); }
+  .t-cell.closed .who { color: var(--ink-2); font-weight: 600; }
   .t-cell.booked { border-color: var(--info); background: var(--info-bg); }
   .t-cell.arrived { border-color: var(--status-done); background: var(--status-done-bg); }
   .t-cell.late { border-color: var(--status-progress); background: var(--status-progress-bg); }

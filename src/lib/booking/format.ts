@@ -27,11 +27,16 @@ export function minutesLate(night: string, slotTime: string, now: number = Date.
   return Math.floor((now - slotInstant(night, slotTime)) / 60000)
 }
 
-export type CellState = 'free' | 'booked' | 'arrived' | 'late'
+export type CellState = 'free' | 'pending' | 'booked' | 'arrived' | 'late'
 
-/** The floor-plan cell state for a single booking (only called for live statuses). */
+/**
+ * The floor-plan cell state for a single booking (only called for live statuses). A booking still
+ * waiting for the shop that holds a table — the customer picked it, or bar seated it early — reads
+ * รอยืนยัน even once late (R-055): it wants a decision first.
+ */
 export function cellState(status: BookingStatus, night: string, slotTime: string, now: number = Date.now()): CellState {
   if (status === 'arrived') return 'arrived'
+  if (status === 'pending') return 'pending'
   if (!LIVE_STATUSES.includes(status)) return 'free'
   return minutesLate(night, slotTime, now) > 0 ? 'late' : 'booked'
 }

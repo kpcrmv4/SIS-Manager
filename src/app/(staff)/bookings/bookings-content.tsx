@@ -2,10 +2,11 @@ import 'server-only'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { AlertTriangle } from 'lucide-react'
-import { nightBookings, nightStats } from '@/lib/booking/queries'
+import { closedTables, nightBookings, nightStats } from '@/lib/booking/queries'
 import type { ZoneRow } from '@/lib/booking/queries'
 import { bookingAvailability } from '@/lib/booking/actions'
 import { BookingsBoard } from '@/components/booking/bookings-board'
+import type { BookingSettingsForForm } from '@/components/booking/booking-form-dialog'
 import { RefreshRetry } from '@/components/booking/refresh-retry'
 import type { Role } from '@/lib/auth/actor'
 import { isBarOrOwner } from '@/lib/auth/actor'
@@ -25,6 +26,7 @@ export async function BookingsContent({
   locale,
   isOwner,
   zones,
+  settings,
 }: {
   branchId: string
   night: string
@@ -33,20 +35,24 @@ export async function BookingsContent({
   locale: AppLocale
   isOwner: boolean
   zones: ZoneRow[]
+  settings: BookingSettingsForForm
 }) {
   const t = await getTranslations('bookings')
   const tErr = await getTranslations('bookingErrors')
 
-  const [{ bookings, error: bError }, availabilityRes] = await Promise.all([
+  const [{ bookings, error: bError }, availabilityRes, closed] = await Promise.all([
     nightBookings(branchId, night),
     bookingAvailability(branchId, night, night),
+    closedTables(branchId, night),
   ])
 
-  if (bError || !availabilityRes.ok) {
+  if (bError || !availabilityRes.ok || closed.error) {
     return <RefreshRetry />
   }
 
   const nightInfo = availabilityRes.data.nights[0]
+  // the shop may still take a booking on this night — the LINE-only rules (cutoff, too far) don't bind staff
+  const canBook = !(nightInfo?.closed && (nightInfo.reason === 'past' || nightInfo.reason === 'closed_weekday' || nightInfo.reason === 'blackout'))
   const totalTables = zones.flatMap((z) => z.tables).length
   const stats = nightStats(bookings, totalTables)
 
@@ -87,6 +93,9 @@ export async function BookingsContent({
         locale={locale}
         zones={zones}
         bookings={bookings}
+        closedTableIds={closed.tableIds}
+        settings={settings}
+        canBook={canBook}
         isBarOrOwner={isBarOrOwner(role)}
         emptyZones={emptyZones}
       />

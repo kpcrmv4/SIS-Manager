@@ -285,9 +285,13 @@ async function planFixture(night: string, prefix: string) {
   const taken = await add('K', 1, 4)
   const closed = await add('X', 1, 4, { customer_bookable: false })
   const big = await add('B', 6, 10)
+  // closed by the shop for this night only (R-056): the customer sees it booked
+  const nightOff = await add('N', 1, 4)
+  const block = await adminDb().from('table_blocks').insert({ branch_id: branchA, table_id: nightOff.id, night })
+  expect(block.error, block.error?.message).toBeNull()
   const held = await dbAs('staff').rpc('create_booking', { p_branch: branchA, p_night: night, p_slot: '21:00:00', p_party: 2, p_name: `${RUN} ถือโต๊ะ`, p_table: taken.id } as never)
   expect(held.error, held.error?.message).toBeNull()
-  return { zone, free, taken, closed, big }
+  return { zone, free, taken, closed, big, nightOff }
 }
 
 const tile = (page: Page, label: string) => page.locator(`[data-testid="cx-table"][data-label="${label}"]`)
@@ -305,11 +309,15 @@ test('P2-C3-07 guests pick their table: free / taken / blocked / too small on th
   await expect(tile(page, t.taken.label)).toHaveAttribute('data-state', 'taken')
   await expect(tile(page, t.closed.label)).toHaveAttribute('data-state', 'blocked')
   await expect(tile(page, t.big.label)).toHaveAttribute('data-state', 'small') // a party of 2 at a 6–10 table
-  for (const x of [t.taken, t.closed, t.big]) await expect(tile(page, x.label)).toBeDisabled()
+  // a table the shop closed for the night reads booked, the same as one a booking holds (R-056)
+  await expect(tile(page, t.nightOff.label)).toHaveAttribute('data-state', 'taken')
+  await expect(tile(page, t.nightOff.label)).toContainText('จองแล้ว')
+  await expect(tile(page, t.taken.label)).toContainText('จองแล้ว')
+  for (const x of [t.taken, t.closed, t.big, t.nightOff]) await expect(tile(page, x.label)).toBeDisabled()
   // the screen agrees with the database
   const plan = (await adminDb().rpc('table_availability', { p_branch: branchA, p_night: night })).data as unknown as { zones: { tables: { id: string; state: string }[] }[] }
   const db = Object.fromEntries(plan.zones.flatMap((z) => z.tables).map((x) => [x.id, x.state]))
-  expect([db[t.free.id], db[t.taken.id], db[t.closed.id], db[t.big.id]]).toEqual(['free', 'taken', 'blocked', 'free'])
+  expect([db[t.free.id], db[t.taken.id], db[t.closed.id], db[t.big.id], db[t.nightOff.id]]).toEqual(['free', 'taken', 'blocked', 'free', 'taken'])
 
   await page.locator('.cx-slots button').first().click()
   await expect(page.getByTestId('cx-book-submit')).toBeDisabled() // no table picked yet

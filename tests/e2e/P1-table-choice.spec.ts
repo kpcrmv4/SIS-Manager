@@ -129,7 +129,8 @@ test('P1-BK-29 the night\'s plan: free / taken / blocked per table, no names; ot
   expect(service.error, service.error?.message).toBeNull()
   const plan = service.data as unknown as Plan
   expect(plan.table_choice).toBe('customer')
-  expect(states(plan)).toMatchObject({ [T.one]: 'blocked', [T.two]: 'taken', [T.off]: 'blocked', [T.zoneOff]: 'blocked', [T.big]: 'free' })
+  // T.one is closed that night (P1-BK-26): customers see it taken like a booked one (R-056); switched off for good = blocked
+  expect(states(plan)).toMatchObject({ [T.one]: 'taken', [T.two]: 'taken', [T.off]: 'blocked', [T.zoneOff]: 'blocked', [T.big]: 'free' })
   // never who holds a table: no booking name anywhere, and a table carries only these fields
   expect(JSON.stringify(plan)).not.toContain(`${RUN} ลูกค้า`)
   for (const x of plan.zones.flatMap((z) => z.tables)) expect(Object.keys(x).sort()).toEqual(['id', 'label', 'seats_max', 'seats_min', 'shape', 'state'])

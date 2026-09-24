@@ -99,10 +99,20 @@ export async function checkInBooking(branchId: string, ref: string): Promise<Act
   return res
 }
 
-/** ไม่มา · ปล่อยโต๊ะ (R-053, bar / owner): a confirmed booking past its time is a no-show now, its table free. */
+/** ไม่มา · ปล่อยโต๊ะ (R-053/R-054, bar / owner): a booking past its time — confirmed or still waiting — is a no-show now, its table free. */
 export async function markNoShow(bookingId: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(bookingId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('mark_booking_no_show', { p_booking: bookingId }))
+  if (res.ok) touched()
+  return res
+}
+
+/** ปิดการจองโต๊ะนี้ / เปิดให้จองอีกครั้ง (R-056, bar / owner): one table, one night, no customer. */
+export async function setTableClosed(tableId: string, night: string, closed: boolean): Promise<ActionResult<{ table_id: string; night: string; closed: boolean }>> {
+  if (!isUuid(tableId) || !isDate(night)) return { ok: false, error: 'invalid' }
+  const res = await callRpc<{ table_id: string; night: string; closed: boolean }>((sb) =>
+    sb.rpc('set_table_closed', { p_table: tableId, p_night: night, p_closed: closed }),
+  )
   if (res.ok) touched()
   return res
 }

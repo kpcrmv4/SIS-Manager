@@ -82,7 +82,7 @@ export default async function BookingsPage({
         action={
           <>
             <NightPicker night={night} params={params} />
-            <NewBookingButton branchId={branch.id} night={night} zones={zones} settings={settings} />
+            <NewBookingButton branchId={branch.id} night={night} zones={zones} settings={settings} canCloseTable={isBarOrOwner(actor.role)} />
           </>
         }
       />
@@ -100,7 +100,16 @@ export default async function BookingsPage({
       )}
       <ViewTabs view={view} params={params} planLabel={t('viewPlan')} listLabel={t('viewList')} />
       <Suspense key={`${branch.id}:${night}:${view}`} fallback={view === 'plan' ? <PlanSkeleton /> : <div className="panel h-64 animate-pulse" />}>
-        <BookingsContent branchId={branch.id} night={night} view={view} role={actor.role} locale={actor.locale} isOwner={actor.role === 'owner'} zones={zones} />
+        <BookingsContent
+          branchId={branch.id}
+          night={night}
+          view={view}
+          role={actor.role}
+          locale={actor.locale}
+          isOwner={actor.role === 'owner'}
+          zones={zones}
+          settings={settings}
+        />
       </Suspense>
     </>
   )

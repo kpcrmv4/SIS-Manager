@@ -13,11 +13,13 @@ export function NewBookingButton({
   night,
   zones,
   settings,
+  canCloseTable,
 }: {
   branchId: string
   night: string
   zones: ZoneRow[]
   settings: BookingSettingsForForm
+  canCloseTable: boolean
 }) {
   const t = useTranslations('bookings')
   const router = useRouter()
@@ -36,6 +38,7 @@ export function NewBookingButton({
         night={night}
         zones={zones}
         settings={settings}
+        canCloseTable={canCloseTable}
         onCreated={() => router.refresh()}
       />
     </>

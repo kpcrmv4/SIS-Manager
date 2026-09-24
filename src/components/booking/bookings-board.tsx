@@ -9,7 +9,9 @@ import { BookingList } from './booking-list'
 import { ConfirmAssignDialog } from './confirm-assign-dialog'
 import { RejectDialog } from './reject-dialog'
 import { BookingDetailDialog } from './booking-detail-dialog'
-import type { NightBooking, ZoneRow } from '@/lib/booking/queries'
+import { BookingFormDialog, type BookingSettingsForForm } from './booking-form-dialog'
+import { TableClosedDialog } from './table-closed-dialog'
+import type { NightBooking, TableRow, ZoneRow } from '@/lib/booking/queries'
 import type { AppLocale } from '@/lib/date'
 
 export function BookingsBoard({
@@ -19,6 +21,9 @@ export function BookingsBoard({
   locale,
   zones,
   bookings,
+  closedTableIds,
+  settings,
+  canBook,
   isBarOrOwner,
   emptyZones,
 }: {
@@ -28,6 +33,10 @@ export function BookingsBoard({
   locale: AppLocale
   zones: ZoneRow[]
   bookings: NightBooking[]
+  closedTableIds: string[]
+  settings: BookingSettingsForForm
+  /** the shop still takes bookings on this night (not past, not closed) — a free table opens รับจอง */
+  canBook: boolean
   isBarOrOwner: boolean
   emptyZones?: ReactNode
 }) {
@@ -35,6 +44,9 @@ export function BookingsBoard({
   const sp = useSearchParams()
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [rejectId, setRejectId] = useState<string | null>(null)
+  // a free table tapped on the plan: รับจอง for it (R-055); a closed one: open it again (R-056)
+  const [bookTable, setBookTable] = useState<TableRow | null>(null)
+  const [closedTable, setClosedTable] = useState<TableRow | null>(null)
   // the open booking stays in the address (?b=, R-050): Back from its customer page reopens it
   const [detailId, setDetail] = useState<string | null>(() => uuidParam(sp.get('b')))
   const setDetailId = (id: string | null) => {
@@ -51,7 +63,16 @@ export function BookingsBoard({
   return (
     <>
       {view === 'plan' ? (
-        <FloorPlan zones={zones} bookings={bookings} night={night} emptyZones={emptyZones} onSelectBooking={setDetailId} />
+        <FloorPlan
+          zones={zones}
+          bookings={bookings}
+          night={night}
+          closedTableIds={closedTableIds}
+          emptyZones={emptyZones}
+          onSelectBooking={setDetailId}
+          onSelectFree={canBook ? setBookTable : undefined}
+          onSelectClosed={isBarOrOwner ? setClosedTable : undefined}
+        />
       ) : (
         <BookingList
           bookings={bookings}
@@ -74,12 +95,39 @@ export function BookingsBoard({
         />
       )}
 
+      {bookTable && (
+        <BookingFormDialog
+          key={bookTable.id}
+          open
+          onOpenChange={(v) => !v && setBookTable(null)}
+          branchId={branchId}
+          night={night}
+          zones={zones}
+          settings={settings}
+          initialZoneId={bookTable.zoneId}
+          initialTableId={bookTable.id}
+          canCloseTable={isBarOrOwner}
+          onCreated={onDone}
+        />
+      )}
+      {closedTable && (
+        <TableClosedDialog
+          open
+          onOpenChange={(v) => !v && setClosedTable(null)}
+          tableId={closedTable.id}
+          tableLabel={closedTable.label}
+          night={night}
+          onDone={onDone}
+        />
+      )}
+
       {confirmId && (
         <ConfirmAssignDialog
           open={Boolean(confirmId)}
           onOpenChange={(v) => !v && setConfirmId(null)}
           bookingId={confirmId}
           tables={tablesForConfirm}
+          currentTableId={confirmTarget?.tableId ?? null}
           onDone={onDone}
         />
       )}

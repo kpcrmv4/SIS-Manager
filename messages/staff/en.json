@@ -536,7 +536,14 @@
     "pendingCount": "{count} bookings",
     "pendingNone": "No bookings waiting for confirmation",
     "pendingTonight": "Tonight",
-    "pendingTomorrow": "Tomorrow"
+    "pendingTomorrow": "Tomorrow",
+    "legendPending": "Waiting",
+    "legendClosed": "Closed",
+    "tableShort": "Table {table}",
+    "closedTitle": "Table {table} · closed",
+    "closedBody": "Closed to bookings on the night of {date} — guests who pick their own table in LINE see it as booked. Open it to take bookings for it again.",
+    "reopen": "Open for booking",
+    "reopened": "Table {table} is open for booking"
   },
   "booking": {
     "time": "Time",
@@ -569,7 +576,8 @@
     "notePendingTonight": "This booking isn't confirmed yet — when the guest arrives, press Customer arrived and it is confirmed at the same time (check a table is still free)",
     "notePendingLater": "Waiting for the shop · check-in opens on the night of {date}",
     "noteOtherNight": "Check-in opens on the night of {date}",
-    "noteNoShowTonight": "Counted as a no-show and the table was freed — if the guest arrives, press Customer arrived (late) and seat them again"
+    "noteNoShowTonight": "Counted as a no-show and the table was freed — if the guest arrives, press Customer arrived (late) and seat them again",
+    "notePendingTonightSeated": "This booking isn't confirmed yet — when the guest arrives, press Customer arrived: it is confirmed at the same time, at table {table}"
   },
   "bookingForm": {
     "title": "Book for a customer",
@@ -582,7 +590,11 @@
     "table": "Table",
     "note": "Note",
     "submit": "Save booking",
-    "created": "Booking saved · {code}"
+    "created": "Booking saved · {code}",
+    "titleTable": "Book table {table}",
+    "closeTable": "Close this table",
+    "closeTableHint": "Not taking bookings for this table on the chosen night? Close it — no customer details needed",
+    "closedDone": "Table {table} is closed on the night of {date}"
   },
   "bookingErrors": {
     "closed_weekday": "Bookings are closed on this weekday",

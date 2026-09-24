@@ -1725,6 +1725,10 @@ export type Database = {
         Args: { p_branch: string; p_key: string; p_vip: boolean }
         Returns: Json
       }
+      set_table_closed: {
+        Args: { p_closed: boolean; p_night: string; p_table: string }
+        Returns: Json
+      }
       set_vip: { Args: { p_deposit: string; p_vip: boolean }; Returns: Json }
       staff_receive_request: {
         Args: {
