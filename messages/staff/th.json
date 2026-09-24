@@ -75,7 +75,8 @@
     "branch": "สาขา",
     "allBranches": "ทุกสาขา",
     "switchBranch": "เปลี่ยนสาขา",
-    "notifications": "การแจ้งเตือน"
+    "notifications": "การแจ้งเตือน",
+    "manual": "คู่มือการใช้งาน"
   },
   "login": {
     "title": "เข้าสู่ระบบ",

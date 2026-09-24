@@ -98,7 +98,7 @@ async function pin(context: BrowserContext, branchId: string) {
 
 const OWNER_PAGES = [
   '/overview', '/reports', '/deposits', '/deposits/new', '/bookings', '/bookings?view=list', '/scan',
-  '/settings/branch', '/settings/booking', '/settings/tables', '/settings/items', '/settings/users', '/settings/line', '/me',
+  '/settings/branch', '/settings/booking', '/settings/tables', '/settings/items', '/settings/users', '/settings/line', '/me', '/manual',
 ]
 
 test.describe('owner', () => {
@@ -158,7 +158,7 @@ test.describe('bar', () => {
   test('P0-UI-05 every button on the bar\'s own pages has a frame', async ({ page }) => {
     await page.setViewportSize(PHONE)
     const misses: string[] = []
-    for (const path of ['/tonight', '/deposits', '/bookings', `/deposits/${pendingId}`]) {
+    for (const path of ['/tonight', '/deposits', '/bookings', `/deposits/${pendingId}`, '/manual']) {
       await page.goto(path)
       await settle(page)
       for (const m of await unframed(page)) misses.push(`${path} · ${m}`)

@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   CalendarCheck2,
   CalendarDays,
   LayoutDashboard,
@@ -52,6 +53,7 @@ export const NAV: readonly NavItem[] = [
   { key: 'settingsBranch', href: '/settings/branch', label: 'settingsBranch', icon: Store, roles: OWNER, section: 'catSettings' },
   { key: 'settingsLine', href: '/settings/line', label: 'settingsLine', icon: MessageCircle, roles: OWNER, section: 'catSettings' },
   { key: 'me', href: '/me', label: 'me', icon: UserRound, roles: ALL, section: 'catAccount' },
+  { key: 'manual', href: '/manual', label: 'manual', icon: BookOpen, roles: ALL, section: 'catAccount' },
 ]
 
 export function navFor(role: Role) {

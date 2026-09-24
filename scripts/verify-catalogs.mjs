@@ -6,7 +6,7 @@
  * A key present in th.json but missing in en.json renders the raw key
  * ("deposits.tabExpired") on the English screen and no build step notices.
  *
- *   node scripts/verify-catalogs.mjs            # messages/staff + messages/customer
+ *   node scripts/verify-catalogs.mjs            # messages/staff + messages/customer + messages/manual
  *   node scripts/verify-catalogs.mjs --self-test
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
@@ -75,7 +75,8 @@ function check(dir, ref) {
 function main() {
   let total = 0
   let scanned = 0
-  for (const sub of ['staff', 'customer']) {
+  // manual: the /manual text (R-037), kept out of the staff catalog — same key-for-key rule
+  for (const sub of ['staff', 'customer', 'manual']) {
     const dir = join(root, 'messages', sub)
     if (!existsSync(dir)) { console.log(`FAIL: ${dir} missing`); return 1 }
     const { problems, keys, files } = check(dir, 'th')
