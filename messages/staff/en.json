@@ -595,7 +595,7 @@
     "subtitle": "Works for booking tickets and the QR on deposit receipts",
     "hint": "Point the camera at the customer's QR",
     "or": "or type it",
-    "placeholder": "Booking no., table or deposit code",
+    "placeholder": "Booking no. (e.g. BK-0925), table or deposit code",
     "submit": "Find",
     "cameraDenied": "Camera unavailable. Allow camera access or type instead",
     "cameraStart": "Start camera",

@@ -74,10 +74,6 @@ export type Board = { night: string; rows: BoardTile[] }
 export type BoardFilter = 'live' | 'pending' | 'confirmed' | 'arrived' | 'no_show' | 'cancelled'
 export const BOARD_FILTERS: BoardFilter[] = ['live', 'pending', 'confirmed', 'arrived', 'no_show', 'cancelled']
 
-export function parseBoardFilter(raw: string | undefined): BoardFilter {
-  return (BOARD_FILTERS as string[]).includes(raw ?? '') ? (raw as BoardFilter) : 'live'
-}
-
 export function inBoardFilter(status: BookingStatus, f: BoardFilter): boolean {
   if (f === 'live') return status !== 'cancelled' && status !== 'rejected'
   if (f === 'cancelled') return status === 'cancelled' || status === 'rejected'

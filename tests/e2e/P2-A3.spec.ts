@@ -12,6 +12,7 @@ test.describe.configure({ mode: 'serial' })
 
 let confirmedBookingId = ''
 let confirmedBookingCode = ''
+let tomorrowBookingCode = ''
 let toConfirmDep: { id: string; code: string }
 let withdrawDep: { id: string; code: string }
 let lineRequestDep: { id: string; code: string }
@@ -34,6 +35,17 @@ test.beforeAll(async () => {
   const b = booking as { id: string; code: string }
   confirmedBookingId = b.id
   confirmedBookingCode = b.code
+
+  // R-052: a booking tomorrow for the จองพรุ่งนี้ shortcut on the scan page
+  const { data: later, error: laterError } = await dbAs('staff').rpc('create_booking', {
+    p_branch: branchA,
+    p_night: addDays(night, 1),
+    p_slot: '20:30:00',
+    p_party: 2,
+    p_name: `${RUN} คุณพรุ่งนี้`,
+  })
+  expect(laterError, laterError?.message).toBeNull()
+  tomorrowBookingCode = (later as { code: string }).code
 
   toConfirmDep = await mustCreate('staff', { qty: 1 })
 
@@ -183,5 +195,71 @@ test.describe('staff', () => {
     await page.getByTestId('scan-input').fill(branchBDep.code)
     await page.getByRole('button', { name: 'ค้นหา', exact: true }).click()
     await expect(page.getByText(`ไม่พบการจองหรือรายการฝากที่ตรงกับ "${branchBDep.code}"`, { exact: true })).toBeVisible()
+  })
+
+  test('P2-A3-09 scan: a booking code brings up the night as tiles while typing; the whole code leaves one; a tile opens the booking; ปิด returns to the tiles', async ({ page }) => {
+    const night = businessNight()
+    const code = `BK-${night.slice(5, 7)}${night.slice(8, 10)}`
+    await page.goto('/scan')
+    const box = page.getByTestId('scan-input')
+    const tiles = page.getByTestId('booking-tile')
+
+    await box.pressSequentially(code, { delay: 40 }) // no ค้นหา
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', night)
+    await expect(tiles.and(page.locator(`[data-code="${confirmedBookingCode}"]`))).toBeVisible()
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${code}(&|$)`))
+
+    await box.pressSequentially(`-${confirmedBookingCode.split('-')[2]}`, { delay: 40 })
+    await expect(tiles).toHaveCount(1)
+    await tiles.first().click()
+    const result = page.getByTestId('scan-result-booking')
+    await expect(result).toContainText(confirmedBookingCode)
+    await expect(page).toHaveURL(new RegExp(`[?&]b=${confirmedBookingId}`))
+    await expect(page.getByTestId('booking-board')).toHaveCount(0)
+
+    await result.getByRole('button', { name: 'ปิด', exact: true }).click()
+    await expect(result).toHaveCount(0)
+    await expect(tiles).toHaveCount(1)
+    await expect(box).toHaveValue(confirmedBookingCode)
+
+    // a deposit code still waits for ค้นหา — no tiles for it
+    await box.fill(scanDep.code)
+    await expect(page.getByTestId('booking-board')).toHaveCount(0)
+    await box.fill('BK-09')
+    await expect(page.getByTestId('scan-hint')).toContainText('พิมพ์วันที่ให้ครบ')
+  })
+
+  test('P2-A3-10 scan: จองวันนี้ · จองพรุ่งนี้ as tiles equal to SQL; the states narrow them; Back from a customer page returns to the open booking and its tiles', async ({ page }) => {
+    const night = businessNight()
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/scan')
+    await page.getByTestId('scan-shortcut-today').click()
+    await expect(page.getByTestId('scan-input')).toHaveValue(`BK-${night.slice(5, 7)}${night.slice(8, 10)}`)
+    await expect(page.getByTestId('scan-shortcut-today')).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', night)
+
+    const { data: tonight, error } = await adminDb().from('bookings').select('code, status').eq('branch_id', fixtureIds().branchA).eq('night', night).range(0, 999)
+    expect(error, error?.message).toBeNull()
+    const tiles = page.getByTestId('booking-tile')
+    await expect(tiles).toHaveCount(tonight!.filter((b) => b.status !== 'cancelled' && b.status !== 'rejected').length)
+    await page.getByTestId('board-filter-arrived').click()
+    await expect(tiles).toHaveCount(tonight!.filter((b) => b.status === 'arrived').length)
+    await page.getByTestId('board-filter-live').click()
+
+    // a tile → the booking → ประวัติลูกค้า → ‹ สแกน QR: the same booking, and ปิด shows the tiles again
+    await tiles.and(page.locator(`[data-code="${confirmedBookingCode}"]`)).click()
+    await page.getByTestId('booking-customer-history').click()
+    await expect(page).toHaveURL(/\/customers\//)
+    await page.getByTestId('back-link').click()
+    await expect(page).toHaveURL(new RegExp(`/scan\\?.*b=${confirmedBookingId}`))
+    const result = page.getByTestId('scan-result-booking')
+    await expect(result).toContainText(confirmedBookingCode)
+    await result.getByRole('button', { name: 'ปิด', exact: true }).click()
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', night)
+
+    await page.getByTestId('scan-shortcut-tomorrow').click()
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', addDays(night, 1))
+    await expect(tiles.and(page.locator(`[data-code="${tomorrowBookingCode}"]`))).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   })
 })

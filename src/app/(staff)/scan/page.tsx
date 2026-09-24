@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { PageHeader } from '@/components/shell/page-header'
 import { EmptyState } from '@/components/ui/states'
 import { getActorState } from '@/lib/auth/actor'
+import { businessNight } from '@/lib/date'
 import { ScanPanel } from './scan-panel'
 
 export default async function ScanPage() {
@@ -12,7 +13,7 @@ export default async function ScanPage() {
   return (
     <>
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
-      {branch ? <ScanPanel branchId={branch.id} /> : <EmptyState message={tn('switchBranch')} />}
+      {branch ? <ScanPanel branchId={branch.id} tonight={businessNight()} /> : <EmptyState message={tn('switchBranch')} />}
     </>
   )
 }

@@ -10,7 +10,7 @@ import { CustomerRows } from '@/components/customers/customer-rows'
 import { SmartSearch } from '@/components/customers/smart-search'
 import { getActorState } from '@/lib/auth/actor'
 import { getBookingBoard, listCustomers } from '@/lib/customers/queries'
-import { parseBoardFilter, parseSmartQuery, shortcutCodes } from '@/lib/customers/smart'
+import { parseSmartQuery, shortcutCodes } from '@/lib/customers/smart'
 import { CUSTOMER_FILTERS, parseCustomerFilter, type CustomerFilter } from '@/lib/customers/view'
 import { businessNight } from '@/lib/date'
 
@@ -81,7 +81,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <Link
               key={key}
               // a card lists customers: it keeps a name or phone search, not a booking code
-              href={hrefWith('/customers', sp, { filter: key, page: null, st: null, q: textQ || null })}
+              href={hrefWith('/customers', sp, { filter: key, page: null, q: textQ || null })}
               className="fcard"
               aria-current={filter === key && smart.kind === 'text' ? 'page' : undefined}
               data-tone={tone}
@@ -115,7 +115,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       </div>
 
       {smart.kind === 'booking' && board ? (
-        <BookingBoard board={board} code={smart.code} seq={smart.seq} filter={parseBoardFilter(sp.st)} tonight={tonight} locale={actor.locale} params={sp} />
+        // keyed by what was asked: a new night or number starts on "all" again
+        <BookingBoard key={`${board.night}:${smart.seq ?? ''}`} board={board} code={smart.code} seq={smart.seq} tonight={tonight} locale={actor.locale} />
       ) : smart.kind === 'bookingHint' ? (
         <p className="panel flex items-start gap-2 px-4 py-3 text-sm text-ink-2" data-testid="customers-hint">
           <Info className="mt-0.5 size-4 flex-none text-status-info" aria-hidden />

@@ -56,7 +56,7 @@ export function SmartSearch({
     const trimmed = next.trim()
     setPushed(trimmed)
     startTransition(() => {
-      router.replace(hrefWith('/customers', params, { q: trimmed || null, page: null, st: null }), { scroll: false })
+      router.replace(hrefWith('/customers', params, { q: trimmed || null, page: null }), { scroll: false })
     })
   }
 

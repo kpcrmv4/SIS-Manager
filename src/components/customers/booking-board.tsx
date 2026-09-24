@@ -1,8 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { useTranslations } from 'next-intl'
 import { Crown, Wine } from 'lucide-react'
 import type { BadgeTone } from '@/components/ui/badge'
-import { hrefWith } from '@/components/ui/filter-href'
 import { EmptyTab } from '@/components/deposit/empty-tab'
 import type { BookingStatus } from '@/lib/booking/format'
 import { BOARD_FILTERS, inBoardFilter, type Board, type BoardFilter, type BoardTile } from '@/lib/customers/smart'
@@ -28,28 +30,29 @@ const FILTER_KEY: Record<BoardFilter, string> = {
 }
 
 /**
- * A night's bookings as tiles (R-049) — what BK-0925, BK-0925-001, จองวันนี้ and จองพรุ่งนี้ bring up.
- * A row of states narrows them; each tile opens the customer who booked.
+ * A night's bookings as tiles (R-049) — what BK-0925, BK-0925-001, จองวันนี้ and จองพรุ่งนี้ bring
+ * up on the customers page and on the scan page (R-052). A row of states narrows them. On the
+ * customers page a tile opens the customer who booked; on the scan page (`onSelect`) it opens the
+ * booking itself, ready to check in.
  */
-export async function BookingBoard({
+export function BookingBoard({
   board,
   code,
   seq,
-  filter,
   tonight,
   locale,
-  params,
+  onSelect,
 }: {
   board: Board
   code: string
   seq: string | null
-  filter: BoardFilter
   tonight: string
   locale: AppLocale
-  params: Record<string, string | undefined>
+  onSelect?: (tile: BoardTile) => void
 }) {
-  const t = await getTranslations('customers')
-  const ts = await getTranslations('status')
+  const t = useTranslations('customers')
+  const ts = useTranslations('status')
+  const [filter, setFilter] = useState<BoardFilter>('live')
   const count = (f: BoardFilter) => board.rows.filter((r) => inBoardFilter(r.status, f)).length
   const rows = board.rows.filter((r) => inBoardFilter(r.status, filter))
   const title =
@@ -64,29 +67,28 @@ export async function BookingBoard({
         </span>
       </div>
 
-      <nav aria-label={t('boardStates')} className="tabs mb-3" data-testid="board-filters">
+      <div role="group" aria-label={t('boardStates')} className="tabs mb-3" data-testid="board-filters">
         {BOARD_FILTERS.map((f) => (
-          <Link
+          <button
             key={f}
-            href={hrefWith('/customers', params, { st: f === 'live' ? null : f })}
-            replace
-            scroll={false}
-            className="tab"
-            aria-current={filter === f ? 'page' : undefined}
+            type="button"
+            className={`tab ${filter === f ? 'on' : ''}`}
+            aria-pressed={filter === f}
+            onClick={() => setFilter(f)}
             data-testid={`board-filter-${f}`}
           >
             {t(FILTER_KEY[f])}
             <span className="c">{count(f)}</span>
-          </Link>
+          </button>
         ))}
-      </nav>
+      </div>
 
       {rows.length === 0 ? (
         <EmptyTab title={seq ? t('boardNoCode', { code: `${code}-${seq}` }) : t('boardEmpty')} />
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6" data-testid="booking-tiles">
           {rows.map((r) => (
-            <Tile key={r.id} tile={r} status={ts(`booking.${r.status}`)} t={t} />
+            <Tile key={r.id} tile={r} status={ts(`booking.${r.status}`)} onSelect={onSelect} />
           ))}
         </div>
       )}
@@ -94,16 +96,10 @@ export async function BookingBoard({
   )
 }
 
-function Tile({ tile, status, t }: { tile: BoardTile; status: string; t: Awaited<ReturnType<typeof getTranslations>> }) {
-  return (
-    <Link
-      href={`/customers/${tile.key ?? `b-${tile.id}`}`}
-      className="btile"
-      data-tone={TONE[tile.status]}
-      data-status={tile.status}
-      data-code={tile.code}
-      data-testid="booking-tile"
-    >
+function Tile({ tile, status, onSelect }: { tile: BoardTile; status: string; onSelect?: (tile: BoardTile) => void }) {
+  const t = useTranslations('customers')
+  const body = (
+    <>
       <span className="top">
         <span className={`tbl ${tile.table ? '' : 'none'}`}>{tile.table ?? t('noTable')}</span>
         {tile.is_vip && (
@@ -126,6 +122,16 @@ function Tile({ tile, status, t }: { tile: BoardTile; status: string; t: Awaited
           </span>
         )}
       </span>
+    </>
+  )
+  const data = { 'data-tone': TONE[tile.status], 'data-status': tile.status, 'data-code': tile.code, 'data-testid': 'booking-tile' }
+  return onSelect ? (
+    <button type="button" className="btile text-left" onClick={() => onSelect(tile)} {...data}>
+      {body}
+    </button>
+  ) : (
+    <Link href={`/customers/${tile.key ?? `b-${tile.id}`}`} className="btile" {...data}>
+      {body}
     </Link>
   )
 }

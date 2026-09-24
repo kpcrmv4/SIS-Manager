@@ -63,13 +63,14 @@ async function scanThereAndBack(page: Page) {
   await page.getByTestId('scan-input').fill(bk.code)
   await page.getByRole('button', { name: 'ค้นหา', exact: true }).click()
   await expect(page.getByTestId('scan-result-booking')).toContainText(bk.code)
-  await expect(page).toHaveURL(new RegExp(`/scan\\?b=${bk.id}$`))
+  // the typed code rides along too (?q=, R-052)
+  await expect(page).toHaveURL(new RegExp(`/scan\\?.*b=${bk.id}`))
   await page.getByTestId('booking-customer-history').click()
   await expect(page).toHaveURL(new RegExp(`/customers/p-${KEY}$`))
   const back = page.getByTestId('back-link')
   await expect(back).toHaveText('‹ สแกน QR')
   await back.click()
-  await expect(page).toHaveURL(new RegExp(`/scan\\?b=${bk.id}$`))
+  await expect(page).toHaveURL(new RegExp(`/scan\\?.*b=${bk.id}`))
   await expect(page.getByTestId('scan-result-booking')).toContainText(bk.code)
 }
 

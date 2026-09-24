@@ -871,7 +871,8 @@
       "intro": "Scan a customer's booking QR or the QR on a bottle label, or type a booking number, table or deposit code, to open it right away.",
       "onPage": [
         "The camera frame with a **Start camera** button",
-        "A **Booking no., table or deposit code** box and a **Find** button",
+        "A **Booking no. (e.g. BK-0925), table or deposit code** box and a **Find** button",
+        "The **Today's bookings** and **Tomorrow's bookings** shortcuts under the box — or a booking number typed only as far as the date, e.g. **BK-0925** — bring up that night's bookings as tiles straight away, no **Find** needed: the table in large type, who booked, the time, the party, the state, a crown for a VIP customer and the bottles they keep here",
         "Booking result: name, time, party, table, the guest's deposited bottles and a **Customer arrived** button",
         "Deposit result: liquor, what's left, expiry, and **Open deposit** and **Withdraw** buttons"
       ],
@@ -889,6 +890,21 @@
             "Point the camera at the QR on the booking page on the guest's phone",
             "Check the name, time and party, then press **Customer arrived**",
             "Press **Close** to scan the next guest"
+          ]
+        },
+        "checkInTonight": {
+          "title": "How to check guests in from tonight's bookings",
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Press **Today's bookings** under the box",
+            "Find the guest's tile by table or name — press a state such as **Confirmed** to see only those not here yet",
+            "Tap the tile; the booking opens — press **Customer arrived**",
+            "Press **Close** to go back to tonight's tiles and check in the next guest",
+            "Know the booking number? Type it in full, e.g. **BK-0925-001**, and only that tile is left"
           ]
         },
         "typeCode": {
@@ -925,7 +941,8 @@
       "tips": [
         "The booking QR appears on the guest's page once the shop confirms; if they have no QR yet, type the booking number",
         "Guest can't remember the booking number? Typing the table they were given works too",
-        "Opened a deposit or a customer from a scan? **‹ Scan QR** brings the same result back — no need to scan again"
+        "Opened a deposit or a customer from a scan? **‹ Scan QR** brings the same result back — no need to scan again",
+        "Opened **Customer history** from a booking? **‹ Scan QR** brings the same booking back, and **Close** returns to that night's tiles"
       ]
     },
     "customers": {
