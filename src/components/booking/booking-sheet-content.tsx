@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { CircleX, Loader2, Wine } from 'lucide-react'
+import { ChevronRight, CircleX, Loader2, Wine } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { CancelDialog } from './cancel-dialog'
@@ -10,6 +11,7 @@ import { checkInBooking, assignTable } from '@/lib/booking/actions'
 import type { BookingDetail } from '@/lib/booking/actions'
 import { bookingBadgeTone, minutesLate, LIVE_STATUSES } from '@/lib/booking/format'
 import { businessNight, formatShortDate, formatTime, type AppLocale } from '@/lib/date'
+import { customerHrefForBooking } from '@/lib/customers/view'
 
 /**
  * The booking sheet's content — shared by the scan result (rendered inline,
@@ -90,6 +92,15 @@ export function BookingSheetContent({
             {detail.phone && `${t('phone', { phone: detail.phone })} · `}
             {sourceText}
           </div>
+          {/* every booking and deposit of this customer (R-048) */}
+          <Link
+            href={customerHrefForBooking(detail.id)}
+            className="mt-1 inline-flex items-center gap-0.5 text-sm font-medium text-brand hover:underline"
+            data-testid="booking-customer-history"
+          >
+            {t('customerHistory')}
+            <ChevronRight className="size-4" aria-hidden />
+          </Link>
         </div>
         {status === 'arrived' ? (
           <Badge tone="done">{ts('booking.arrived')}</Badge>

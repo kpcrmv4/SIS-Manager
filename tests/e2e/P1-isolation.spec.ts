@@ -13,8 +13,11 @@ test.describe.configure({ mode: 'serial' })
 
 const BRANCH_TABLES = [
   'deposits', 'withdrawals', 'deposit_events', 'bookings', 'table_zones', 'tables',
-  'booking_settings', 'booking_blackouts', 'print_jobs', 'liquor_items',
+  'booking_settings', 'booking_blackouts', 'print_jobs', 'liquor_items', 'customer_vips',
 ] as const
+
+/** a VIP phone for branch B that no deposit uses (R-048) */
+const VIP_PHONE = `09${String(Date.now() % 100_000_000).padStart(8, '0')}`
 
 test.beforeAll(async () => {
   const { branchB } = fixtureIds()
@@ -30,6 +33,8 @@ test.beforeAll(async () => {
   await admin.from('booking_blackouts').insert({ branch_id: branchB, night: addDays(businessNight(), 30), reason: RUN })
   await admin.from('print_jobs').insert({ branch_id: branchB, job_type: 'receipt', payload: { run: RUN } })
   await admin.from('liquor_items').insert({ branch_id: branchB, name: `${RUN}-item` })
+  const vip = await admin.from('customer_vips').insert({ branch_id: branchB, phone_key: VIP_PHONE })
+  expect(vip.error, vip.error?.message).toBeNull()
   const bk = await dbAs('staffB').rpc('create_booking', { p_branch: branchB, p_night: businessNight(), p_slot: '21:00', p_party: 2, p_name: `${RUN} booking` } as never)
   expect(bk.error, bk.error?.message).toBeNull()
 })
@@ -44,6 +49,7 @@ test.afterAll(async () => {
   await admin.from('booking_blackouts').delete().eq('branch_id', branchB)
   await admin.from('print_jobs').delete().eq('branch_id', branchB)
   await admin.from('liquor_items').delete().like('name', `${RUN}%`)
+  await admin.from('customer_vips').delete().eq('branch_id', branchB).eq('phone_key', VIP_PHONE)
 })
 
 test('P1-RLS-01 cross-branch sweep: every branch table has a B row, staff@A and bar@A see none', async () => {
@@ -93,11 +99,13 @@ test('P1-CON-01 generated types carry every table and RPC of the contract', () =
     'create_booking', 'confirm_booking', 'reject_booking', 'assign_table', 'check_in_booking',
     'cancel_booking', 'mark_no_shows', 'booking_availability', 'send_booking_reminders',
     'claim_outbox', 'finish_outbox', 'login_throttle', 'login_record',
+    'customer_list', 'customer_detail', 'set_customer_vip',
   ]
   const tables = [
     'branches', 'branch_line_secrets', 'profiles', 'user_branches', 'liquor_items', 'customers', 'deposits',
     'deposit_bottles', 'withdrawals', 'deposit_events', 'table_zones', 'tables', 'booking_settings',
     'booking_blackouts', 'bookings', 'line_outbox', 'notifications', 'push_subscriptions', 'print_jobs', 'print_stations',
+    'customer_vips',
   ]
   for (const name of [...rpcs, ...tables]) expect(types, name).toMatch(new RegExp(`\\n\\s{6}${name}: \\{`))
 })

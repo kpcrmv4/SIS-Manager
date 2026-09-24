@@ -116,6 +116,7 @@
   .fcard[data-tone='violet'] .ic { background: var(--status-violet-bg); color: var(--status-violet); }
   .fcard[data-tone='urgent'] .ic { background: var(--urgent-bg); color: var(--urgent); }
   .fcard[data-tone='pending'] .ic { background: var(--status-pending-bg); color: var(--status-pending); }
+  .fcard[data-tone='gold'] .ic { background: var(--gold-bg); color: var(--gold-ink); }
   .fcard .c { font-size: 1.375rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
   .fcard[data-count='0'] .c { color: var(--muted); font-weight: 600; }
   .fcard .l { font-size: 0.8125rem; line-height: 1.35; color: var(--ink-2); }

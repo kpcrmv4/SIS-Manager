@@ -77,7 +77,8 @@
     "switchBranch": "เปลี่ยนสาขา",
     "notifications": "การแจ้งเตือน",
     "manual": "คู่มือการใช้งาน",
-    "audit": "บันทึกการใช้งาน"
+    "audit": "บันทึกการใช้งาน",
+    "customers": "ลูกค้า"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -387,7 +388,10 @@
       "disposed": "จำหน่ายออก · {reason}",
       "printed": "พิมพ์ใบรับฝาก",
       "line_linked": "ลูกค้าเชื่อม LINE",
-      "cancelled": "ยกเลิก"
+      "cancelled": "ยกเลิก",
+      "vip_on_auto": "เป็น VIP อัตโนมัติ (ลูกค้า VIP)",
+      "vip_on_customer": "ตั้งลูกค้าเป็น VIP",
+      "vip_off_customer": "ยกเลิก VIP ของลูกค้า"
     },
     "eventMeta": "{date} · {time} น. · {actor}",
     "lineSent": "แจ้ง LINE ลูกค้าแล้ว",
@@ -424,7 +428,8 @@
       "withdrawn": "เบิกครบทุกขวดแล้ว",
       "reason": "เหตุผล: {reason}"
     },
-    "depositTerm": "อายุฝาก {days} วัน"
+    "depositTerm": "อายุฝาก {days} วัน",
+    "customerHistory": "ดูประวัติลูกค้า"
   },
   "depositForm": {
     "title": "รับฝากเหล้า",
@@ -555,7 +560,8 @@
     "cancelReason": "เหตุผลที่ยกเลิก",
     "rejectReason": "เหตุผลที่ปฏิเสธ",
     "assigned": "จัดโต๊ะแล้ว",
-    "cancelBody": "ลูกค้าจะได้รับข้อความแจ้งยกเลิกทาง LINE และโต๊ะจะว่างทันที"
+    "cancelBody": "ลูกค้าจะได้รับข้อความแจ้งยกเลิกทาง LINE และโต๊ะจะว่างทันที",
+    "customerHistory": "ประวัติลูกค้า"
   },
   "bookingForm": {
     "title": "รับจองแทนลูกค้า",
@@ -1121,7 +1127,8 @@
     "table_required": "ต้องเลือกโต๊ะ",
     "table_not_bookable": "โต๊ะนี้ไม่เปิดให้ลูกค้าจองในวันนั้น",
     "table_seats": "จำนวนคนไม่ตรงกับที่นั่งของโต๊ะ",
-    "TABLE_OTHER_BRANCH": "โต๊ะนี้อยู่สาขาอื่น"
+    "TABLE_OTHER_BRANCH": "โต๊ะนี้อยู่สาขาอื่น",
+    "NO_CUSTOMER_KEY": "ลูกค้าคนนี้ไม่มีเบอร์โทรหรือ LINE — ตั้ง VIP ทีละขวดแทน"
   },
   "audit": {
     "title": "บันทึกการใช้งาน",
@@ -1216,7 +1223,9 @@
       },
       "customer": {
         "reminders_on": "เปิดแจ้งเตือนหมดอายุของลูกค้า",
-        "reminders_off": "ปิดแจ้งเตือนหมดอายุของลูกค้า"
+        "reminders_off": "ปิดแจ้งเตือนหมดอายุของลูกค้า",
+        "vip_on": "ตั้งลูกค้าเป็น VIP",
+        "vip_off": "ยกเลิก VIP ของลูกค้า"
       }
     },
     "field": {
@@ -1270,7 +1279,97 @@
       "expiry_reminder_time": "เวลาส่งแจ้งเตือน",
       "template": "ข้อความแจ้งเตือน ({lang})",
       "expiry_notices_enabled": "แจ้งเตือนหมดอายุ",
-      "deposit": "รายการฝาก"
+      "deposit": "รายการฝาก",
+      "deposits_changed": "ขวดที่เปลี่ยน"
     }
+  },
+  "customers": {
+    "title": "ลูกค้า",
+    "subtitle": "สาขา{branch} · ลูกค้า {count} คน",
+    "back": "ลูกค้า",
+    "filterAll": "ลูกค้าทั้งหมด",
+    "filterInStore": "มีเหล้าฝากอยู่",
+    "filterVip": "ลูกค้า VIP",
+    "filterLine": "เชื่อม LINE แล้ว",
+    "searchPlaceholder": "ค้นหาชื่อ เบอร์โทร รหัสฝาก หรือเลขจอง",
+    "colCustomer": "ลูกค้า",
+    "colLine": "LINE",
+    "colInStore": "เหล้าในร้าน",
+    "colDeposits": "ฝาก (ครั้ง)",
+    "colBookings": "จอง (ครั้ง)",
+    "colLast": "ล่าสุด",
+    "vip": "ลูกค้า VIP",
+    "lineLinked": "เชื่อม LINE แล้ว",
+    "lineNotLinked": "ยังไม่เชื่อม LINE",
+    "inStoreValue": "{bottles} ขวด · {deposits} รายการ",
+    "bookingsNext": "{count} · ครั้งถัดไป {date}",
+    "rowDeposits": "ฝาก {count} ครั้ง",
+    "rowBookings": "จอง {count} ครั้ง",
+    "noBottles": "ไม่มีเหล้าในร้าน",
+    "nextBooking": "จองคืน {date}",
+    "lastSeen": "ล่าสุด {date}",
+    "emptyAll": "ยังไม่มีลูกค้า",
+    "emptyAllBody": "ลูกค้าจะขึ้นที่นี่ตั้งแต่ฝากเหล้าหรือจองโต๊ะครั้งแรก",
+    "emptyInStore": "ไม่มีลูกค้าที่มีเหล้าฝากอยู่",
+    "emptyInStoreBody": "ลูกค้าที่มีเหล้าอยู่ในร้านจะขึ้นที่นี่",
+    "emptyVip": "ยังไม่มีลูกค้า VIP",
+    "emptyVipBody": "bar หรือ owner ตั้งลูกค้าเป็น VIP ได้จากหน้าของลูกค้าคนนั้น",
+    "emptyLine": "ยังไม่มีลูกค้าที่เชื่อม LINE",
+    "emptyLineBody": "ลูกค้าที่ฝากหรือจองผ่าน LINE หรือสแกน QR บนใบรับฝาก จะขึ้นที่นี่",
+    "emptySearch": "ไม่พบลูกค้าที่ตรงกับ \"{q}\"",
+    "since": "ลูกค้าตั้งแต่ {date}",
+    "statInStore": "เหล้าในร้าน",
+    "unitBottles": "ขวด",
+    "statInStoreSub": "{count} รายการฝาก",
+    "statDeposits": "ฝากทั้งหมด",
+    "unitTimes": "ครั้ง",
+    "statDepositsSub": "เบิกไปแล้ว {count} ขวด",
+    "statBookings": "จองโต๊ะ",
+    "statBookingsSub": "มาแล้ว {arrived} · ไม่มา {noShow}",
+    "statLast": "ล่าสุด",
+    "statFirstSub": "ครั้งแรก {date}",
+    "statNext": "จองครั้งถัดไป",
+    "statNextSub": "เวลา {time} น.",
+    "contactTitle": "ติดต่อ",
+    "noPhone": "ไม่มีเบอร์โทร",
+    "call": "โทร",
+    "line": "LINE",
+    "lineAs": "เชื่อมแล้ว · {name}",
+    "reminders": "แจ้งเตือนเหล้าใกล้หมดอายุ",
+    "remindersOn": "เปิดอยู่",
+    "remindersOff": "ปิดอยู่",
+    "otherNames": "ชื่ออื่นที่เคยใช้",
+    "depositsTitle": "ประวัติฝากเหล้า",
+    "bookingsTitle": "ประวัติการจอง",
+    "noDeposits": "ยังไม่เคยฝากเหล้าที่สาขานี้",
+    "noBookings": "ยังไม่เคยจองโต๊ะที่สาขานี้",
+    "colCode": "รหัสฝาก",
+    "colItem": "เหล้า",
+    "colRemaining": "คงเหลือ",
+    "colStatus": "สถานะ",
+    "colBookingCode": "เลขจอง",
+    "colNight": "วันและเวลา",
+    "colParty": "จำนวนคน",
+    "colWhere": "โซน · โต๊ะ",
+    "nightValue": "{date} · {time} น.",
+    "partyValue": "{count} คน",
+    "tableValue": "โต๊ะ {table}",
+    "vipTitle": "สถานะ VIP",
+    "vipOn": "ลูกค้า VIP",
+    "vipOff": "ลูกค้าทั่วไป",
+    "vipOnSinceBy": "ตั้งแต่ {date} โดย {name} · เหล้าของลูกค้าคนนี้ไม่หมดอายุ",
+    "vipOnSince": "ตั้งแต่ {date} · เหล้าของลูกค้าคนนี้ไม่หมดอายุ",
+    "vipOnBody": "เหล้าของลูกค้าคนนี้ไม่หมดอายุ",
+    "vipOffBody": "เหล้าหมดอายุตามอายุฝากของสาขา ({days} วัน)",
+    "vipMake": "ตั้งเป็นลูกค้า VIP",
+    "vipCancel": "ยกเลิก VIP",
+    "vipMakeTitle": "ตั้งเป็นลูกค้า VIP?",
+    "vipMakeBody": "เหล้าที่ฝากอยู่ {count} รายการจะไม่หมดอายุทันที (ที่หมดอายุแล้วแต่ยังไม่จำหน่ายออกจะกลับมาอยู่ในร้าน) และเหล้าที่ลูกค้าคนนี้ฝากเพิ่มด้วย LINE หรือเบอร์เดิมจะเป็น VIP เอง",
+    "vipCancelTitle": "ยกเลิก VIP ของลูกค้าคนนี้?",
+    "vipCancelBody": "เหล้า VIP {count} รายการจะกลับมานับอายุฝาก {days} วันนับจากวันนี้ และเหล้าที่ฝากทีหลังจะหมดอายุตามปกติ",
+    "vipMade": "ตั้งเป็นลูกค้า VIP แล้ว · เปลี่ยน {count} รายการ",
+    "vipCancelled": "ยกเลิก VIP แล้ว · เปลี่ยน {count} รายการ",
+    "vipNeedsKey": "ลูกค้าคนนี้ไม่มีเบอร์โทรและไม่ได้เชื่อม LINE จึงตั้ง VIP ทั้งคนไม่ได้ — ตั้ง VIP ทีละขวดได้ที่หน้าขวด",
+    "vipBarOnly": "ตั้งหรือยกเลิก VIP ได้เฉพาะ bar และ owner"
   }
 }

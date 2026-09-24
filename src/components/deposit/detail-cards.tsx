@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { Phone } from 'lucide-react'
+import { ChevronRight, Phone } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { daysUntil, formatShortDate, formatTime, type AppLocale } from '@/lib/date'
 import type { DepositDetail } from '@/lib/deposit/detail'
+import { customerHrefForDeposit } from '@/lib/customers/view'
 import { CustomerReminders } from './customer-reminders'
 
 /** The deposit page's cards (R-045): a glanceable summary, then who, then the facts, then the photos. */
@@ -77,6 +79,11 @@ export async function CustomerCard({ detail, canEditReminders, branchRemindersOf
         {detail.customerReminders !== null && (
           <CustomerReminders depositId={detail.id} enabled={detail.customerReminders} canEdit={canEditReminders} branchOff={branchRemindersOff} />
         )}
+        {/* every deposit and booking of this customer, and their VIP (R-048) */}
+        <Link href={customerHrefForDeposit(detail.id)} className="btn-ghost btn-sm -mx-1 justify-between" data-testid="deposit-customer-history">
+          {t('customerHistory')}
+          <ChevronRight className="size-4" aria-hidden />
+        </Link>
       </div>
     </section>
   )

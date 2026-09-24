@@ -101,7 +101,8 @@
         "newDeposit",
         "depositDetail",
         "bookings",
-        "scan"
+        "scan",
+        "customers"
       ]
     },
     "owner": {
@@ -229,7 +230,7 @@
           "steps": [
             "Press a slot in the bottom bar to open **Tonight**, **Deposits** or **Bookings**",
             "Press the dark round button in the middle to open **Scan QR**",
-            "Press **More** — a sheet slides up from the bottom with **My account** and **Log out**",
+            "Press **More** — a sheet slides up from the bottom with **Customers**, **My account** and **Log out**",
             "The owner also sees **Overview & reports** and **Branch settings** in this sheet"
           ]
         },
@@ -599,7 +600,7 @@
         "A status box: where the deposit stands and what to do next, with the main button such as **Confirm bottles** or **Withdraw**",
         "**Tools** in the same box: **Print receipt**, **Print bottle label**, **Extend**, **Make VIP** and the printer’s status",
         "**Bottles**: each bottle with the % left",
-        "**Customer**: the name, the phone with a **Call** button, **LINE** status and **Expiry reminders** (once linked to LINE)",
+        "**Customer**: the name, the phone with a **Call** button, **LINE** status, **Expiry reminders** (once linked to LINE) and **Customer history**, which opens this customer's page",
         "**Deposit details**: **Deposited**, **Table**, **Expires**, **Collect by**, **Received by** and **Confirmed by**",
         "**Photos** taken when received and when confirmed — tap one to see it full size",
         "**History**: everything that happened to this deposit, with the time and who did it — in the right column on a computer"
@@ -923,6 +924,85 @@
       "tips": [
         "The booking QR appears on the guest's page once the shop confirms; if they have no QR yet, type the booking number",
         "Guest can't remember the booking number? Typing the table they were given works too"
+      ]
+    },
+    "customers": {
+      "title": "Customers",
+      "path": "/customers",
+      "roles": [
+        "staff",
+        "bar",
+        "owner"
+      ],
+      "intro": "Every customer of the branch — who keeps bottles here, how often they come, all their deposits and bookings, and whether they're VIP.",
+      "onPage": [
+        "Four summary cards — **All customers** · **With bottles here** · **VIP customers** · **LINE linked** — each with its count; tap one to list only that group",
+        "A search box for a name, a phone (with or without dashes), a deposit code or a booking code",
+        "Each row shows the name, phone, LINE, a **VIP customer** badge, the bottles in store, how many deposits and bookings, and the last activity (or the night they booked)",
+        "A customer's page: a summary — **In store** · **Deposits** · **Bookings** (came / no-show) · **Last activity** — the **VIP** box, **Contact** (**Call**, LINE, other names used), and the full **Deposit history** and **Booking history**"
+      ],
+      "howtos": {
+        "find": {
+          "title": "How to find a customer",
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Press **Customers** in the left menu; on a phone, press **More**, then **Customers**",
+            "Type a name, phone, deposit code or booking code in the search box and press **Search**",
+            "Press a customer's row to open their page",
+            "From a deposit, press **Customer history**; from a booking's details, press **Customer history** — both land on the same page"
+          ]
+        },
+        "history": {
+          "title": "How to read a customer's history",
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "**Deposit history**: every deposit, newest first, with its status and what is left; press one to open it",
+            "**Booking history**: every booking, latest night first, with the time, party, zone · table and status",
+            "More than 20? Use the ‹ › buttons under the list"
+          ]
+        },
+        "vipOn": {
+          "title": "How to make a customer VIP",
+          "roles": [
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Open the customer's page",
+            "Press **Make VIP** in the **VIP** box",
+            "Read how many deposits will change, then press **Confirm**",
+            "Every deposit they have here stops expiring (an expired one not yet disposed goes back in store), and whatever they deposit later with the same LINE or phone is VIP by itself"
+          ]
+        },
+        "vipOff": {
+          "title": "How to cancel a customer's VIP",
+          "roles": [
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Open the VIP customer's page",
+            "Press **Cancel VIP**, then **Confirm**",
+            "Their VIP deposits count again from today, and later deposits expire as usual"
+          ]
+        }
+      },
+      "important": [
+        "One customer = one LINE account or one phone number (dashes and spaces ignored); with neither, the name",
+        "VIP is per branch, and only bar and owner can change it — staff can only see it",
+        "A customer with no phone and no LINE can't be VIP as a person — make single bottles VIP on their deposit pages instead"
+      ],
+      "tips": [
+        "Take every deposit with the customer's phone — their history comes together and VIP is remembered",
+        "You can still make a single bottle VIP, or cancel it, on its deposit page"
       ]
     },
     "overview": {

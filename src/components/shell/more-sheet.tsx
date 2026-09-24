@@ -14,6 +14,7 @@ const TILE =
   'flex aspect-square min-w-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface-2 p-2 text-center text-[12.5px] leading-tight text-ink transition-colors active:bg-line'
 
 const HEADING: Partial<Record<NavSection, string>> = {
+  catDaily: 'catDaily',
   catReports: 'moreOverview',
   catSettings: 'moreSettings',
   catAccount: 'catAccount',
@@ -34,7 +35,8 @@ export function MoreSheet({
   branch: BranchRef | null
 }) {
   const t = useTranslations('nav')
-  const groups = (['catReports', 'catSettings', 'catAccount'] as const).map((s) => ({
+  // catDaily: the daily pages without a bottom-bar slot (ลูกค้า)
+  const groups = (['catDaily', 'catReports', 'catSettings', 'catAccount'] as const).map((s) => ({
     section: s,
     items: items.filter((i) => i.section === s),
   }))

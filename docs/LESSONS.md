@@ -126,3 +126,10 @@
 - หลักฐาน: tests/e2e/P3-A2.spec.ts:161 Expected "sent" Received "sending" (full run 2026-09-24, 331 passed) · เปลี่ยนเป็น expect.poll จนเป็น sent แล้วผ่าน
 - กฎ: เมื่อ mock เห็น request แล้ว สถานะฝั่งผู้ส่งยังอาจไม่อัปเดต ให้ poll สถานะสุดท้ายของผู้ส่ง อย่าอ่านครั้งเดียว
 - status: new
+
+## L-014 · 2026-09-24 · kp-e2e-playwright-real-db · env-drift
+- อาการ: `playwright test` หยุดตั้งแต่ global-setup ด้วย "http://127.0.0.1:3000 is not SIS Manager (another app owns the port)" ทั้งที่ /login ตอบ 200
+- สาเหตุ: โปรเจกต์อื่นบนเครื่องเดียวกัน (C:\projects\huay, `next start -p 3000`) จองพอร์ต 3000 ไว้ · reuseExistingServer จึงไปเกาะแอปนั้นแทนที่จะเปิด dev server ของเรา
+- หลักฐาน: netstat → PID 14684 = node …\huay\node_modules\next start -p 3000 · รันด้วย E2E_PORT=3100 แล้วผ่าน (mock LINE ย้ายตามไป 4100 เอง)
+- กฎ: พอร์ตไม่ใช่ของเรา — ห้ามปิด process ของคนอื่น ให้รันเทสต์ด้วย E2E_PORT ที่ว่าง; guard ใน global-setup ที่เช็กชื่อแอปคือสิ่งที่กันเทสต์ไม่ให้ไปยิงแอปผิดตัว
+- status: new

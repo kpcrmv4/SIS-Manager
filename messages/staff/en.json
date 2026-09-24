@@ -77,7 +77,8 @@
     "switchBranch": "Switch branch",
     "notifications": "Notifications",
     "manual": "User manual",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "customers": "Customers"
   },
   "login": {
     "title": "Log in",
@@ -387,7 +388,10 @@
       "disposed": "Disposed · {reason}",
       "printed": "Receipt printed",
       "line_linked": "Customer linked LINE",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "vip_on_auto": "VIP by itself — a VIP customer",
+      "vip_on_customer": "Customer made VIP",
+      "vip_off_customer": "Customer's VIP cancelled"
     },
     "eventMeta": "{date} · {time} · {actor}",
     "lineSent": "Customer told on LINE",
@@ -424,7 +428,8 @@
       "withdrawn": "Every bottle has been withdrawn",
       "reason": "Reason: {reason}"
     },
-    "depositTerm": "{days, plural, one {# day} other {# days}} term"
+    "depositTerm": "{days, plural, one {# day} other {# days}} term",
+    "customerHistory": "Customer history"
   },
   "depositForm": {
     "title": "New deposit",
@@ -555,7 +560,8 @@
     "cancelReason": "Reason for cancelling",
     "rejectReason": "Reason for rejecting",
     "assigned": "Table assigned",
-    "cancelBody": "The customer is told on LINE and the table is free again at once"
+    "cancelBody": "The customer is told on LINE and the table is free again at once",
+    "customerHistory": "Customer history"
   },
   "bookingForm": {
     "title": "Book for a customer",
@@ -1121,7 +1127,8 @@
     "table_required": "Pick a table",
     "table_not_bookable": "Guests cannot book this table on that night",
     "table_seats": "The party does not fit this table",
-    "TABLE_OTHER_BRANCH": "This table belongs to another branch"
+    "TABLE_OTHER_BRANCH": "This table belongs to another branch",
+    "NO_CUSTOMER_KEY": "This customer has no phone or LINE — make single bottles VIP instead"
   },
   "audit": {
     "title": "Audit log",
@@ -1216,7 +1223,9 @@
       },
       "customer": {
         "reminders_on": "Customer expiry reminders on",
-        "reminders_off": "Customer expiry reminders off"
+        "reminders_off": "Customer expiry reminders off",
+        "vip_on": "Customer made VIP",
+        "vip_off": "Customer's VIP cancelled"
       }
     },
     "field": {
@@ -1270,7 +1279,97 @@
       "expiry_reminder_time": "Reminder time",
       "template": "Reminder wording ({lang})",
       "expiry_notices_enabled": "Expiry reminders",
-      "deposit": "Deposit"
+      "deposit": "Deposit",
+      "deposits_changed": "Deposits changed"
     }
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "{branch} · {count, plural, one {# customer} other {# customers}}",
+    "back": "Customers",
+    "filterAll": "All customers",
+    "filterInStore": "With bottles here",
+    "filterVip": "VIP customers",
+    "filterLine": "LINE linked",
+    "searchPlaceholder": "Search a name, phone, deposit code or booking code",
+    "colCustomer": "Customer",
+    "colLine": "LINE",
+    "colInStore": "In store",
+    "colDeposits": "Deposits",
+    "colBookings": "Bookings",
+    "colLast": "Last activity",
+    "vip": "VIP customer",
+    "lineLinked": "LINE linked",
+    "lineNotLinked": "LINE not linked",
+    "inStoreValue": "{bottles, plural, one {# bottle} other {# bottles}} · {deposits, plural, one {# deposit} other {# deposits}}",
+    "bookingsNext": "{count} · next {date}",
+    "rowDeposits": "{count, plural, one {# deposit} other {# deposits}}",
+    "rowBookings": "{count, plural, one {# booking} other {# bookings}}",
+    "noBottles": "No bottles here",
+    "nextBooking": "Booked for {date}",
+    "lastSeen": "Last {date}",
+    "emptyAll": "No customers yet",
+    "emptyAllBody": "A customer shows here from their first deposit or booking",
+    "emptyInStore": "No customer has bottles here",
+    "emptyInStoreBody": "Customers with bottles in store show here",
+    "emptyVip": "No VIP customers yet",
+    "emptyVipBody": "Bar or owner can make a customer VIP from their page",
+    "emptyLine": "No customers on LINE yet",
+    "emptyLineBody": "Customers who deposit or book on LINE, or scan the QR on their receipt, show here",
+    "emptySearch": "No customer matches \"{q}\"",
+    "since": "Customer since {date}",
+    "statInStore": "In store",
+    "unitBottles": "bottles",
+    "statInStoreSub": "{count, plural, one {# deposit} other {# deposits}}",
+    "statDeposits": "Deposits",
+    "unitTimes": "times",
+    "statDepositsSub": "{count, plural, one {# bottle} other {# bottles}} withdrawn",
+    "statBookings": "Bookings",
+    "statBookingsSub": "Came {arrived} · no-show {noShow}",
+    "statLast": "Last activity",
+    "statFirstSub": "First {date}",
+    "statNext": "Next booking",
+    "statNextSub": "at {time}",
+    "contactTitle": "Contact",
+    "noPhone": "No phone number",
+    "call": "Call",
+    "line": "LINE",
+    "lineAs": "Linked · {name}",
+    "reminders": "Expiry reminders",
+    "remindersOn": "On",
+    "remindersOff": "Off",
+    "otherNames": "Other names used",
+    "depositsTitle": "Deposit history",
+    "bookingsTitle": "Booking history",
+    "noDeposits": "No deposits at this branch yet",
+    "noBookings": "No bookings at this branch yet",
+    "colCode": "Code",
+    "colItem": "Liquor",
+    "colRemaining": "Left",
+    "colStatus": "Status",
+    "colBookingCode": "Booking",
+    "colNight": "Night",
+    "colParty": "Party",
+    "colWhere": "Zone · table",
+    "nightValue": "{date} · {time}",
+    "partyValue": "{count, plural, one {# person} other {# people}}",
+    "tableValue": "Table {table}",
+    "vipTitle": "VIP",
+    "vipOn": "VIP customer",
+    "vipOff": "Regular customer",
+    "vipOnSinceBy": "Since {date}, by {name} · this customer's bottles don't expire",
+    "vipOnSince": "Since {date} · this customer's bottles don't expire",
+    "vipOnBody": "This customer's bottles don't expire",
+    "vipOffBody": "Bottles expire after the branch's deposit period ({days} days)",
+    "vipMake": "Make VIP",
+    "vipCancel": "Cancel VIP",
+    "vipMakeTitle": "Make this customer VIP?",
+    "vipMakeBody": "{count, plural, one {# deposit stops} other {# deposits stop}} expiring now (an expired one not yet disposed goes back in store), and whatever this customer deposits later with the same LINE or phone is VIP by itself",
+    "vipCancelTitle": "Cancel this customer's VIP?",
+    "vipCancelBody": "{count, plural, one {# VIP deposit counts} other {# VIP deposits count}} again from today ({days} days), and later deposits expire as usual",
+    "vipMade": "VIP now · {count, plural, one {# deposit} other {# deposits}} changed",
+    "vipCancelled": "VIP cancelled · {count, plural, one {# deposit} other {# deposits}} changed",
+    "vipNeedsKey": "This customer has no phone and no LINE, so they can't be VIP as a person — make single bottles VIP on their deposit pages",
+    "vipBarOnly": "Only bar and owner can change VIP"
   }
 }

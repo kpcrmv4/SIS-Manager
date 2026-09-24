@@ -161,7 +161,8 @@ test.describe('desktop (1280px)', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(page.getByTestId('bottle-1')).toBeVisible()
     await expect(page.getByTestId('bottle-2')).toBeVisible()
-    await expect(page.getByText('ลูกค้า', { exact: true })).toBeVisible()
+    // the card's heading — the sidebar has a ลูกค้า link of its own since R-048
+    await expect(page.getByTestId('deposit-customer').getByRole('heading', { name: 'ลูกค้า', exact: true })).toBeVisible()
     const events = page.getByTestId('history-event')
     await expect(events).toHaveCount(2) // received, confirmed
     await expect(events.first().locator('.s.num')).toContainText('E2E bar') // newest = confirmed, by bar (actor name)

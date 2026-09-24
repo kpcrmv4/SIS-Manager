@@ -91,10 +91,11 @@ export function eventText(t: Translator, e: { action: string; payload: Record<st
       return t('deposit.event.withdrawal_rejected', { reason: String(p.reason ?? '') })
     case 'extended':
       return t('deposit.event.extended', { date: p.expires_at ? formatShortDate(String(p.expires_at), locale) : '' })
+    // R-048: VIP set for the whole customer, or given to a VIP customer's new deposit by itself
     case 'vip_on':
-      return t('deposit.event.vip_on')
+      return t(p.auto === 'customer' ? 'deposit.event.vip_on_auto' : p.customer ? 'deposit.event.vip_on_customer' : 'deposit.event.vip_on')
     case 'vip_off':
-      return t('deposit.event.vip_off')
+      return t(p.customer ? 'deposit.event.vip_off_customer' : 'deposit.event.vip_off')
     case 'expired':
       return t('deposit.event.expired')
     case 'disposed':

@@ -428,6 +428,55 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_vips: {
+        Row: {
+          branch_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          phone_key: string | null
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          phone_key?: string | null
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          phone_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_vips_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_vips_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_vips_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           created_at: string
@@ -1539,6 +1588,26 @@ export type Database = {
         }
         Returns: Json
       }
+      customer_detail: {
+        Args: {
+          p_bk_offset?: number
+          p_branch: string
+          p_dep_offset?: number
+          p_key: string
+          p_page?: number
+        }
+        Returns: Json
+      }
+      customer_list: {
+        Args: {
+          p_branch: string
+          p_filter?: string
+          p_limit?: number
+          p_offset?: number
+          p_q?: string
+        }
+        Returns: Json
+      }
       customer_request_deposit: {
         Args: {
           p_branch: string
@@ -1645,6 +1714,10 @@ export type Database = {
       send_line_test: { Args: { p_branch: string }; Returns: Json }
       set_customer_expiry_notices: {
         Args: { p_deposit: string; p_enabled: boolean }
+        Returns: Json
+      }
+      set_customer_vip: {
+        Args: { p_branch: string; p_key: string; p_vip: boolean }
         Returns: Json
       }
       set_vip: { Args: { p_deposit: string; p_vip: boolean }; Returns: Json }

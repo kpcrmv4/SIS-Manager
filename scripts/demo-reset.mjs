@@ -153,6 +153,7 @@ async function wipe(branchIds, userIds) {
   must('tables', await admin.from('tables').delete().in('branch_id', b))
   must('zones', await admin.from('table_zones').delete().in('branch_id', b))
   must('items', await admin.from('liquor_items').delete().in('branch_id', b))
+  must('customer VIPs', await admin.from('customer_vips').delete().in('branch_id', b))
   must('customers', await admin.from('customers').delete().like('line_user_id', `${DEMO_LINE_PREFIX}%`))
 }
 
@@ -240,10 +241,10 @@ async function seedDeposits(c, branchIds, photos, customers) {
   await confirm(near.id, [40])
   must('near notice', await admin.from('deposits').update({ expiry_notice_sent_at: new Date().toISOString() }).eq('id', near.id))
 
-  // VIP (never expires)
+  // a VIP customer (R-048): every bottle of theirs never expires, and neither will the next one
   const vip = await create(c.staff, RMI, 'คุณวรวุฒิ สายทอง', '062-510-8844', 'Chivas Regal 12 ปี', 3, 'V1')
   await confirm(vip.id, [100, 100, 100])
-  await rpc(c.bar, 'set_vip', { p_deposit: vip.id, p_vip: true })
+  await rpc(c.bar, 'set_customer_vip', { p_branch: RMI, p_key: 'p-0625108844', p_vip: true })
 
   // waiting for bar to confirm
   await create(c.staff, RMI, 'คุณภานุวัฒน์ ใจดี', '086-102-4477', 'Regency', 1, 'A5')
