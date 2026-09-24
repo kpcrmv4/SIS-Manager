@@ -5,7 +5,7 @@
     "theme": "테마",
     "themeNight": "나이트",
     "themeCream": "라이트",
-    "loading": "불러오는 중…",
+    "loading": "불러오는 중",
     "openInLine": "LINE 앱에서 열어 주세요",
     "openInLineBody": "이 페이지는 매장 LINE을 통해서만 이용할 수 있습니다",
     "loginFailed": "LINE 로그인에 실패했습니다",
@@ -22,6 +22,7 @@
   },
   "bottles": {
     "title": "내 보관 술",
+    "loading": "맡긴 술을 찾는 중",
     "tabActive": "보관 중 {count}",
     "tabHistory": "기록",
     "count": "{count}병",
@@ -34,7 +35,8 @@
     "awaitingConfirm": "바 확인 대기 중",
     "requested": "보관 요청 완료 · 직원에게 병을 전달해 주세요",
     "depositMore": "한 병 더 보관하기",
-    "empty": "보관 중인 술이 없습니다",
+    "depositCta": "술 맡기기",
+    "depositCtaBody": "아직 맡긴 술이 없어요 · 눌러서 시작하세요",
     "emptyBody": "매장에서 술을 맡긴 뒤 보관증의 QR을 스캔하면 여기에서 볼 수 있습니다",
     "historyEmpty": "기록이 없습니다",
     "status": {
@@ -62,7 +64,7 @@
     "sent": "요청 완료 · 직원이 가져다 드립니다"
   },
   "depositRequest": {
-    "title": "한 병 더 보관하기",
+    "title": "술 맡기기",
     "body": "정보를 입력하고 직원에게 병을 전달해 주세요. 확인 후 LINE으로 알려 드립니다",
     "name": "이름",
     "phone": "전화번호",
@@ -127,6 +129,7 @@
   },
   "ticket": {
     "title": "예약 내역",
+    "loading": "예약을 찾는 중",
     "confirmedSub": "확정 · 입장 시 이 화면을 보여 주세요",
     "pendingSub": "매장 확인 대기 · LINE으로 알려 드립니다",
     "arrivedSub": "체크인 완료 · 즐거운 밤 되세요",
@@ -151,7 +154,15 @@
     "cancelled": "예약이 취소되었습니다",
     "notFound": "예약을 찾을 수 없습니다",
     "list": "내 예약",
-    "listEmpty": "예약이 없습니다"
+    "listEmpty": "예약이 없습니다",
+    "status": {
+      "pending": "매장 확인 대기",
+      "confirmed": "확정됨",
+      "arrived": "체크인 완료",
+      "cancelled": "취소됨",
+      "rejected": "예약 불가",
+      "no_show": "시간 지남"
+    }
   },
   "errors": {
     "closed_weekday": "이 요일은 예약을 받지 않습니다",

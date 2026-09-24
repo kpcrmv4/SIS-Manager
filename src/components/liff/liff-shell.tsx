@@ -4,9 +4,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { CalendarDays, Moon, RotateCw, Sun, Ticket as TicketIcon, Wine } from 'lucide-react'
+import { CalendarDays, ChevronLeft, Moon, Sun, Ticket as TicketIcon, Wine } from 'lucide-react'
 import type { CustomerLocale } from '@/lib/i18n/config'
 import { CUSTOMER_LOCALE_COOKIE } from '@/lib/i18n/config'
+import { CxLoader } from './cx-states'
 import { initLiff, liffOpenUrl } from './liff-client'
 import { LocaleSheet } from './locale-sheet'
 import { CxPortalContext } from './portal'
@@ -23,11 +24,12 @@ declare global {
 
 const THEME_KEY = 'sis_cx_theme'
 
-function titleFor(pathname: string, branchCode: string): { title: string; body?: string } {
-  const rest = pathname.split(`/liff/${branchCode.toLowerCase()}`)[1] ?? ''
-  if (rest.startsWith('/deposit')) return { title: 'depositRequest.title' }
+/** The header of each page: its title, and for a page under a tab, the tab it goes back to. */
+function headerFor(pathname: string, home: string): { title: string; back?: string } {
+  const rest = pathname.split(home)[1] ?? ''
+  if (rest.startsWith('/deposit')) return { title: 'depositRequest.title', back: home }
   if (rest.startsWith('/book')) return { title: 'book.title' }
-  if (rest.startsWith('/ticket/')) return { title: 'ticket.title' }
+  if (rest.startsWith('/ticket/')) return { title: 'ticket.title', back: `${home}/tickets` }
   if (rest.startsWith('/tickets')) return { title: 'ticket.list' }
   return { title: 'bottles.title' }
 }
@@ -154,9 +156,10 @@ export function LiffShell({
     }
   }
 
-  const { title } = titleFor(pathname, branch.code)
+  const home = `/liff/${branch.code.toLowerCase()}`
+  const { title, back } = headerFor(pathname, home)
   const tab = (href: string, Icon: typeof Wine, label: string) => {
-    const active = href === `/liff/${branch.code.toLowerCase()}` ? pathname === href : pathname.startsWith(href)
+    const active = href === home ? pathname === href : pathname.startsWith(href)
     return (
       <Link
         href={href}
@@ -182,9 +185,11 @@ export function LiffShell({
         </div>
         <div className="relative z-1 mx-auto flex min-h-dvh max-w-[480px] flex-col pb-[calc(64px+env(safe-area-inset-bottom,0px))]">
           <header className="cx-bar sticky top-0 z-10 flex items-center gap-3 border-b border-cx-line px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top,0px))]">
-            <div className="cx-logo" aria-hidden>
-              SIS
-            </div>
+            {back && (
+              <Link href={back} aria-label={t('shell.back')} data-testid="cx-back" className="cx-icon-btn">
+                <ChevronLeft className="size-5" aria-hidden />
+              </Link>
+            )}
             <div className="min-w-0 flex-1">
               <h1 className="cx-serif truncate text-[17px] font-semibold leading-tight">{t(title)}</h1>
               {/* the branch name alone — it already carries the shop's name */}
@@ -204,12 +209,7 @@ export function LiffShell({
           </header>
 
           <main className="flex-1 px-4 py-4">
-            {status === 'loading' && (
-              <div className="flex flex-col items-center gap-3 py-16 text-center text-sm text-cx-muted" data-testid="cx-loading">
-                <RotateCw className="size-5 animate-spin text-cx-gold" aria-hidden />
-                {t('shell.loading')}
-              </div>
-            )}
+            {status === 'loading' && <CxLoader label={t('shell.loading')} testId="cx-loading" />}
             {status === 'need_line' && (
               <div className="cx-card items-center gap-3 py-8 text-center" data-testid="cx-need-line">
                 <p className="text-sm">{t('shell.openInLine')}</p>
@@ -239,9 +239,9 @@ export function LiffShell({
             data-testid="cx-bottom-nav"
             className="cx-bar fixed inset-x-0 bottom-0 z-20 mx-auto grid h-[calc(64px+env(safe-area-inset-bottom,0px))] max-w-[480px] grid-cols-3 border-t border-cx-line pb-[env(safe-area-inset-bottom,0px)]"
           >
-            {tab(`/liff/${branch.code.toLowerCase()}`, Wine, t('nav.myBottles'))}
-            {tab(`/liff/${branch.code.toLowerCase()}/book`, CalendarDays, t('nav.book'))}
-            {tab(`/liff/${branch.code.toLowerCase()}/tickets`, TicketIcon, t('nav.tickets'))}
+            {tab(home, Wine, t('nav.myBottles'))}
+            {tab(`${home}/book`, CalendarDays, t('nav.book'))}
+            {tab(`${home}/tickets`, TicketIcon, t('nav.tickets'))}
           </nav>
         )}
       </div>

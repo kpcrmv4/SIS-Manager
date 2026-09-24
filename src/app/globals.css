@@ -172,9 +172,6 @@
   --cx-warn: #FCD34D;
   --cx-warn-bg: rgba(245, 158, 11, 0.18);
   --cx-warn-line: rgba(245, 158, 11, 0.45);
-  --cx-logo-from: #F8D794;
-  --cx-logo-to: #EFEACD;
-  --cx-on-logo: #64090C;
   --cx-orb-1: radial-gradient(circle, #F8D794 0%, #9C0512 100%);
   --cx-orb-2: radial-gradient(circle, #9C0512 0%, #64090C 100%);
   --cx-orb-opacity: 0.4;
@@ -207,9 +204,6 @@
   --cx-warn: #9A3412;
   --cx-warn-bg: rgba(245, 158, 11, 0.14);
   --cx-warn-line: rgba(194, 65, 12, 0.4);
-  --cx-logo-from: #9C0512;
-  --cx-logo-to: #64090C;
-  --cx-on-logo: #F8D794;
   --cx-orb-1: radial-gradient(circle, #F8D794 0%, #FBF6EE 100%);
   --cx-orb-2: radial-gradient(circle, #F4C9CC 0%, #FBF6EE 100%);
   --cx-orb-opacity: 0.35;

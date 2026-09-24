@@ -5,7 +5,7 @@
     "theme": "主题",
     "themeNight": "夜间",
     "themeCream": "浅色",
-    "loading": "加载中…",
+    "loading": "加载中",
     "openInLine": "请在 LINE 中打开此页面",
     "openInLineBody": "此页面只能通过本店的 LINE 使用",
     "loginFailed": "LINE 登录失败",
@@ -22,6 +22,7 @@
   },
   "bottles": {
     "title": "我的存酒",
+    "loading": "正在查找您的存酒",
     "tabActive": "寄存中 {count}",
     "tabHistory": "记录",
     "count": "{count} 瓶",
@@ -34,7 +35,8 @@
     "awaitingConfirm": "等待酒吧确认",
     "requested": "已提交存酒申请，请将酒交给店员",
     "depositMore": "再存一瓶",
-    "empty": "暂无存酒",
+    "depositCta": "存酒",
+    "depositCtaBody": "暂无存酒 · 点此开始存酒",
     "emptyBody": "在店内存酒后，扫描存酒单上的二维码即可在此查看",
     "historyEmpty": "暂无记录",
     "status": {
@@ -62,7 +64,7 @@
     "sent": "已提交，店员会为您送酒"
   },
   "depositRequest": {
-    "title": "再存一瓶",
+    "title": "存酒",
     "body": "填写信息后将酒交给店员，店家确认后会在 LINE 通知您",
     "name": "姓名",
     "phone": "电话",
@@ -127,6 +129,7 @@
   },
   "ticket": {
     "title": "您的订位",
+    "loading": "正在查找您的订位",
     "confirmedSub": "已确认 · 到店时出示此页面",
     "pendingSub": "等待店家确认 · 将通过 LINE 通知",
     "arrivedSub": "已签到，祝您今晚愉快",
@@ -151,7 +154,15 @@
     "cancelled": "已取消订位",
     "notFound": "找不到此订位",
     "list": "我的订位",
-    "listEmpty": "暂无订位"
+    "listEmpty": "暂无订位",
+    "status": {
+      "pending": "等待店家确认",
+      "confirmed": "已确认",
+      "arrived": "已签到",
+      "cancelled": "已取消",
+      "rejected": "店家未接受",
+      "no_show": "已逾时"
+    }
   },
   "errors": {
     "closed_weekday": "店家当天不接受订位",

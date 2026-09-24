@@ -163,3 +163,85 @@ test('P2-C1-08 after switching to Thai, dates on the bookings list and the ticke
   await expect(page.getByTestId('cx-ticket-date')).toHaveText(formatLongDate(night, 'th'))
   await adminDb().from('bookings').delete().eq('branch_id', branchA).eq('code', code)
 })
+
+test('P2-C1-09 no logo in the header; a page under a tab has a framed back button to that tab, a tab has none', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const customer = await makeCustomer()
+  const { adminDb } = await import('./fixtures/db')
+  const { addDays, businessNight } = await import('../../src/lib/date')
+  const { data: booking, error } = await adminDb().rpc('create_booking', {
+    p_branch: branchA,
+    p_night: addDays(businessNight(), 5),
+    p_slot: '21:00:00',
+    p_party: 2,
+    p_name: 'E2EC back button',
+    p_customer_id: customer.id,
+  } as never)
+  expect(error, error?.message).toBeNull()
+  const code = (booking as { code: string }).code
+  await withCustomerDouble(page, signCustomerToken(customer.id, branchA))
+  const base = `/liff/${BRANCH_A_CODE.toLowerCase()}`
+  const back = page.getByTestId('cx-back')
+
+  try {
+    for (const path of ['', '/book', '/tickets']) {
+      await page.goto(`${base}${path}`)
+      await expect(page.getByTestId('cx-bottom-nav')).toBeVisible()
+      await expect(back, path || '/').toHaveCount(0)
+      await expect(page.locator('header').getByText('SIS', { exact: true })).toHaveCount(0)
+    }
+
+    await page.goto(`${base}/deposit`)
+    await expect(page.getByRole('heading', { name: 'ฝากเหล้า', exact: true })).toBeVisible()
+    await expect(back).toHaveAttribute('aria-label', 'ย้อนกลับ')
+    await expect(back).toHaveCSS('border-top-style', 'solid') // framed like the language and theme buttons
+    await back.click()
+    await expect(page.getByRole('heading', { name: 'เหล้าของฉัน', exact: true })).toBeVisible()
+    expect(new URL(page.url()).pathname).toBe(base)
+
+    await page.goto(`${base}/ticket/${code}`)
+    await expect(page.getByTestId('cx-ticket')).toBeVisible()
+    await back.click()
+    await page.waitForURL(`**${base}/tickets`)
+    await expect(page.getByRole('heading', { name: 'การจองของฉัน', exact: true })).toBeVisible()
+  } finally {
+    await adminDb().from('bookings').delete().eq('branch_id', branchA).eq('code', code)
+  }
+})
+
+test('P2-C1-10 a wait shows Davis\'s bottle loader: turning rings, a label whose dots count up; still under reduced motion', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const customer = await makeCustomer()
+  await withCustomerDouble(page, signCustomerToken(customer.id, branchA))
+  // hold the list's answer until the loader has been looked at
+  let release = () => {}
+  const held = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  await page.route(
+    (url) => url.pathname === '/api/customer/deposits',
+    async (route) => {
+      await held
+      await route.continue()
+    },
+  )
+
+  await page.goto(`/liff/${BRANCH_A_CODE.toLowerCase()}`)
+  const loader = page.getByTestId('cx-skeleton')
+  await expect(loader).toBeVisible()
+  await expect(loader).toHaveAttribute('role', 'status')
+  await expect(loader.locator('.cx-loader-ring')).toHaveCSS('animation-name', 'cx-spin')
+  await expect(loader.locator('.cx-loader-icon')).toBeVisible()
+  // the label carries no "…" of its own — its dots are CSS
+  const label = loader.locator('.cx-loader-text')
+  await expect(label).toHaveText('กำลังค้นหาเหล้าของคุณ')
+  expect(await label.evaluate((el) => getComputedStyle(el, '::after').animationName)).toBe('cx-dots')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(loader.locator('.cx-loader-ring')).toHaveCSS('animation-name', 'none')
+  await expect(loader.locator('.cx-loader-scan')).toBeHidden()
+
+  release()
+  await expect(loader).toHaveCount(0)
+  await expect(page.getByTestId('cx-deposit-cta')).toBeVisible()
+})

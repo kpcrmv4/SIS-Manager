@@ -44,7 +44,7 @@ async function unframed(page: Page): Promise<string[]> {
       return border || alpha(s.backgroundColor) > 0.05 || s.backgroundImage !== 'none' || s.boxShadow !== 'none'
     }
     const out: string[] = []
-    for (const el of document.querySelectorAll('button, summary, a[class*="btn-"], a.cx-btn, a.tab, .sec-head a')) {
+    for (const el of document.querySelectorAll('button, summary, a[class*="btn-"], a.cx-btn, a.cx-icon-btn, a.cx-add-card, a.tab, .sec-head a')) {
       const r = el.getBoundingClientRect()
       if (r.width < 4 || r.height < 4 || getComputedStyle(el).visibility === 'hidden') continue
       if (el.closest('nav, [data-sonner-toaster], .chip, .tg')) continue

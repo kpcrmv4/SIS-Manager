@@ -9,12 +9,12 @@ import { toast } from 'sonner'
 import { errorText } from './error-text'
 import { TERMS_VERSION } from './constants'
 import { customerFetch, useCxSession } from './session-context'
-import { CxErrorRetry, CxSkeleton } from './cx-states'
+import { CxErrorRetry, CxLoader } from './cx-states'
 import { blockedDaysText } from './weekday-names'
 
 type Policy = { depositDays: number; blockedDays: string[] }
 
-/** "ฝากเหล้าเพิ่ม" (P2-C2): form + the 6-item terms, then customer_request_deposit. */
+/** "ฝากเหล้า" (P2-C2): form + the 6-item terms, then customer_request_deposit. */
 export function DepositRequestClient() {
   const t = useTranslations('cx')
   // the language on screen: the terms the customer reads and accepts, the weekday names
@@ -57,7 +57,7 @@ export function DepositRequestClient() {
   const [termsError, setTermsError] = useState(false)
   const [pending, setPending] = useState(false)
 
-  if (state === 'loading') return <CxSkeleton rows={2} />
+  if (state === 'loading') return <CxLoader label={t('shell.loading')} />
   if (state === 'error' || !policy) return <CxErrorRetry message={t('shell.errorGeneric')} onRetry={load} />
 
   const submit = async () => {

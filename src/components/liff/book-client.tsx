@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Armchair, Minus, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { addDays, bangkokDate, weekdayIndex } from '@/lib/date'
-import { CxErrorRetry, CxSkeleton } from './cx-states'
+import { CxErrorRetry, CxLoader } from './cx-states'
 import { errorText } from './error-text'
 import { customerFetch, useCxSession } from './session-context'
 import { TablePlan, type PlanZone } from './table-plan'
@@ -111,7 +111,7 @@ export function BookClient() {
     loadPlan(planNight)
   }, [customerPicks, planNight, loadPlan])
 
-  if (state === 'loading') return <CxSkeleton rows={3} />
+  if (state === 'loading') return <CxLoader label={t('shell.loading')} />
   if (state === 'error' || !data) return <CxErrorRetry message={t('shell.errorGeneric')} onRetry={load} />
 
   if (!data.line_enabled) return <CxErrorRetry message={t('book.lineDisabled')} onRetry={load} />
@@ -232,7 +232,7 @@ export function BookClient() {
             <div data-testid="cx-table-section">
               <p className="cx-label">{t('book.table')}</p>
               {planState === 'loading' ? (
-                <CxSkeleton rows={1} />
+                <CxLoader label={t('shell.loading')} size="sm" />
               ) : planState === 'error' || !plan ? (
                 <CxErrorRetry message={t('shell.errorGeneric')} onRetry={() => loadPlan(night.night)} />
               ) : (

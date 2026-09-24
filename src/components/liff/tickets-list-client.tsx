@@ -3,23 +3,45 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
+import { CalendarX, CircleCheck, CircleX, Clock, DoorOpen, type LucideIcon } from 'lucide-react'
 import type { CustomerLocale } from '@/lib/i18n/config'
 import { daysUntil, formatShortDate } from '@/lib/date'
-import { CxEmpty, CxErrorRetry, CxSkeleton } from './cx-states'
+import { CxEmpty, CxErrorRetry, CxLoader } from './cx-states'
 import { customerFetch, useCxSession } from './session-context'
 
-type Booking = { id: string; code: string; night: string; slotTime: string; party: number; status: string }
+type Status = 'pending' | 'confirmed' | 'arrived' | 'cancelled' | 'rejected' | 'no_show'
+type Booking = { id: string; code: string; night: string; slotTime: string; party: number; status: Status; zone: string | null; table: string | null }
 
-function Row({ b, branchCode, locale }: { b: Booking; branchCode: string; locale: 'th' | 'en' | 'zh' | 'ko' }) {
+/** Each booking says where it stands on its card, so no one has to open it to know (owner). */
+const STATUS: Record<Status, { tone: string; Icon: LucideIcon }> = {
+  pending: { tone: 'warn', Icon: Clock },
+  confirmed: { tone: '', Icon: CircleCheck },
+  arrived: { tone: '', Icon: DoorOpen },
+  cancelled: { tone: 'danger', Icon: CircleX },
+  rejected: { tone: 'danger', Icon: CircleX },
+  no_show: { tone: 'muted', Icon: CalendarX },
+}
+
+function Row({ b, branchCode, locale }: { b: Booking; branchCode: string; locale: CustomerLocale }) {
   const t = useTranslations('cx')
+  const { tone, Icon } = STATUS[b.status] ?? STATUS.pending
   return (
     <Link href={`/liff/${branchCode.toLowerCase()}/ticket/${b.code}`} className="cx-card" data-testid="cx-booking-row" data-code={b.code} data-status={b.status}>
-      <span className="num text-[15px] font-semibold">{b.code}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="num text-[15px] font-semibold">{b.code}</span>
+        <span className={`cx-pill ${tone}`} data-testid="cx-booking-status">
+          <Icon className="size-3.5" aria-hidden />
+          {t(`ticket.status.${b.status}`)}
+        </span>
+      </div>
       <div className="meta num flex justify-between gap-2 text-[12.5px] text-cx-muted">
         <span>
           {formatShortDate(b.night, locale)} · {b.slotTime}
         </span>
-        <span>{t('book.partyValue', { count: b.party })}</span>
+        <span className="truncate">
+          {b.zone ? t('ticket.partyValue', { count: b.party, zone: b.zone }) : t('ticket.partyNoZone', { count: b.party })}
+          {b.table && ` · ${t('ticket.table')} ${b.table}`}
+        </span>
       </div>
     </Link>
   )
@@ -53,7 +75,7 @@ export function TicketsListClient() {
     load()
   }, [load])
 
-  if (state === 'loading') return <CxSkeleton />
+  if (state === 'loading') return <CxLoader label={t('ticket.loading')} />
   if (state === 'error') return <CxErrorRetry message={t('shell.errorGeneric')} onRetry={load} />
   if (bookings.length === 0) return <CxEmpty title={t('ticket.listEmpty')} />
 

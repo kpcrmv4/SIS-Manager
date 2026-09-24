@@ -1,19 +1,28 @@
 'use client'
 
-import { RotateCw } from 'lucide-react'
+import { RotateCw, Wine } from 'lucide-react'
 
 /** The four data states (CLAUDE.md §3), styled for the `.cx` scope. */
 
-export function CxSkeleton({ rows = 3 }: { rows?: number }) {
+/**
+ * Loading (R-040): Davis's bottle loader where the staff app has a skeleton — two gold rings turn
+ * against each other, the bottle breathes, a scan line sweeps and sparks blink. The label's dots
+ * count up in CSS, so labels carry none. `sm` sits inside a form section.
+ */
+export function CxLoader({ label, size, testId = 'cx-skeleton' }: { label: string; size?: 'sm'; testId?: string }) {
   return (
-    <div className="flex flex-col gap-3" data-testid="cx-skeleton">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="cx-card animate-pulse">
-          <div className="h-4 w-2/5 rounded bg-cx-card-2" />
-          <div className="h-1.5 w-full rounded bg-cx-card-2" />
-          <div className="h-3 w-3/5 rounded bg-cx-card-2" />
-        </div>
-      ))}
+    <div className={`flex flex-col items-center justify-center gap-2 ${size === 'sm' ? 'py-3' : 'min-h-[40dvh]'}`} role="status" data-testid={testId}>
+      <div className={size === 'sm' ? 'cx-loader is-sm' : 'cx-loader'} aria-hidden>
+        <i className="cx-loader-ring" />
+        <i className="cx-loader-orbit" />
+        <Wine className="cx-loader-icon" strokeWidth={1.5} />
+        <i className="cx-loader-scan" />
+        <span className="cx-loader-spark" />
+        <span className="cx-loader-spark" />
+        <span className="cx-loader-spark" />
+        <span className="cx-loader-spark" />
+      </div>
+      <p className="cx-loader-text">{label}</p>
     </div>
   )
 }

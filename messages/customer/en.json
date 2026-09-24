@@ -5,7 +5,7 @@
     "theme": "Theme",
     "themeNight": "Night",
     "themeCream": "Light",
-    "loading": "Loading…",
+    "loading": "Loading",
     "openInLine": "Open this page in LINE",
     "openInLineBody": "This page only works through the shop's LINE account",
     "loginFailed": "Couldn't sign in with LINE",
@@ -22,6 +22,7 @@
   },
   "bottles": {
     "title": "My bottles",
+    "loading": "Finding your bottles",
     "tabActive": "Stored {count}",
     "tabHistory": "History",
     "count": "{count, plural, one {# bottle} other {# bottles}}",
@@ -34,7 +35,8 @@
     "awaitingConfirm": "Waiting for the bar to confirm",
     "requested": "Request sent — hand the bottle to staff",
     "depositMore": "Deposit another bottle",
-    "empty": "No bottles stored yet",
+    "depositCta": "Deposit a bottle",
+    "depositCtaBody": "Nothing stored yet · tap to start",
     "emptyBody": "Deposit a bottle at the bar, then scan the QR on your receipt to see it here",
     "historyEmpty": "No history yet",
     "status": {
@@ -62,7 +64,7 @@
     "sent": "Request sent — staff will bring your bottle"
   },
   "depositRequest": {
-    "title": "Deposit another bottle",
+    "title": "Deposit a bottle",
     "body": "Fill this in and hand the bottle to staff. The bar confirms and replies on LINE",
     "name": "Name",
     "phone": "Phone",
@@ -127,6 +129,7 @@
   },
   "ticket": {
     "title": "Your booking",
+    "loading": "Finding your bookings",
     "confirmedSub": "Confirmed · show this at the door",
     "pendingSub": "Waiting for the shop · we'll tell you on LINE",
     "arrivedSub": "Checked in — enjoy your night",
@@ -151,7 +154,15 @@
     "cancelled": "Booking cancelled",
     "notFound": "Booking not found",
     "list": "My bookings",
-    "listEmpty": "No bookings yet"
+    "listEmpty": "No bookings yet",
+    "status": {
+      "pending": "Waiting for the shop",
+      "confirmed": "Confirmed",
+      "arrived": "Checked in",
+      "cancelled": "Cancelled",
+      "rejected": "Declined by the shop",
+      "no_show": "Missed"
+    }
   },
   "errors": {
     "closed_weekday": "The shop isn't taking bookings that day",

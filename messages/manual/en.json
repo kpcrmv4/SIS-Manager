@@ -1445,6 +1445,7 @@
       "onPage": [
         "A 3-slot bottom bar: **My bottles** · **Book a table** · **My bookings**",
         "The top of the page shows the page name and the branch name",
+        "Top left: a back button on the **Deposit a bottle** and **Your booking** pages",
         "Top right: a language button and a theme button",
         "Opened outside the LINE app, it shows **Open this page in LINE**"
       ],
@@ -1502,7 +1503,7 @@
         "A card per deposit: liquor, deposit code, a level bar and the **Collect by** date",
         "A **VIP** or **N days left** badge when expiry is near",
         "A **Request my bottle** button on stored deposits",
-        "A **Deposit another bottle** button at the end"
+        "A **Deposit another bottle** button at the end — with nothing stored yet, a dashed **Deposit a bottle** frame instead"
       ],
       "howtos": {
         "withdraw": {
@@ -1545,8 +1546,8 @@
       ]
     },
     "cxDeposit": {
-      "title": "Deposit another bottle",
-      "path": "LINE › My bottles › Deposit another bottle",
+      "title": "Deposit a bottle",
+      "path": "LINE › My bottles › Deposit a bottle",
       "roles": [
         "staff",
         "bar",
@@ -1567,7 +1568,7 @@
             "owner"
           ],
           "steps": [
-            "In **My bottles**, press **Deposit another bottle** — or type “deposit” in the chat and press **Deposit**",
+            "In **My bottles**, press **Deposit another bottle** (or the **Deposit a bottle** frame when nothing is stored yet) — or type “deposit” in the chat and press **Deposit**",
             "Fill in **Name**, **Liquor** and **Bottles**; add **Phone** and **Table** if they like",
             "Read the **Bottle Storage and Collection Terms** and tick to accept",
             "Press **Send deposit request**, then hand the bottle to staff"
@@ -1666,6 +1667,7 @@
       "intro": "The customer's bookings. Open one to see the booking number and the QR to show at the door, and to cancel it themselves.",
       "onPage": [
         "The **My bookings** page: upcoming bookings first, past ones under **History**",
+        "Each card shows its status — **Waiting for the shop**, **Confirmed**, **Checked in** or **Cancelled** — with the date, time, party and the table once assigned",
         "The **Your booking** page: the **Booking no.** and the QR",
         "**Date**, **Time** (with the arrive-by time), **Party**, **Name**, and **Table** once assigned",
         "A status line under the booking, such as confirmed or waiting for the shop",

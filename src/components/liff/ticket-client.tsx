@@ -7,7 +7,7 @@ import type { CustomerLocale } from '@/lib/i18n/config'
 import QRCode from 'qrcode'
 import { toast } from 'sonner'
 import { formatLongDate } from '@/lib/date'
-import { CxEmpty, CxErrorRetry, CxSkeleton } from './cx-states'
+import { CxEmpty, CxErrorRetry, CxLoader } from './cx-states'
 import { errorText } from './error-text'
 import { useCxPortal } from './portal'
 import { customerFetch, useCxSession } from './session-context'
@@ -115,7 +115,7 @@ export function TicketClient({ code }: { code: string }) {
     }
   }
 
-  if (state === 'loading') return <CxSkeleton rows={1} />
+  if (state === 'loading') return <CxLoader label={t('shell.loading')} />
   if (state === 'error') return <CxErrorRetry message={t('shell.errorGeneric')} onRetry={load} />
   if (state === 'empty' || !booking) return <CxEmpty title={t('ticket.notFound')} />
 

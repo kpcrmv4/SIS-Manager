@@ -149,3 +149,31 @@ test('P2-C2-05 the history tab shows a withdrawn deposit', async ({ page }) => {
   await expect(card).toBeVisible()
   await expect(card).toHaveAttribute('data-status', 'withdrawn')
 })
+
+test('P2-C2-06 nothing stored: a faint dashed "ฝากเหล้า" frame opens the form; with a bottle, a dashed "ฝากเหล้าเพิ่ม" button', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const me = await makeCustomer()
+  await withCustomerDouble(page, signCustomerToken(me.id, branchA))
+  await page.goto(`/liff/${codeLower}`)
+
+  const cta = page.getByTestId('cx-deposit-cta')
+  const more = page.getByTestId('cx-deposit-more')
+  await expect(cta).toContainText('ฝากเหล้า')
+  await expect(cta).toHaveCSS('border-top-style', 'dashed')
+  await expect(more).toHaveCount(0)
+  await cta.click()
+  await page.waitForURL(`**/liff/${codeLower}/deposit`)
+  await expect(page.getByRole('heading', { name: 'ฝากเหล้า', exact: true })).toBeVisible()
+
+  const dep = await mustCreate('staff', { qty: 1, customerId: me.id })
+  await confirmAll(dep.id, [100])
+  await page.goto(`/liff/${codeLower}`)
+  await expect(page.getByTestId('cx-deposit-card')).toHaveCount(1)
+  await expect(cta).toHaveCount(0)
+  await expect(more).toHaveText('ฝากเหล้าเพิ่ม')
+  await expect(more).toHaveCSS('border-top-style', 'dashed')
+  // it no longer looks like the filled withdraw button above it
+  await expect(page.getByTestId('cx-withdraw-open')).toHaveCSS('border-top-style', 'solid')
+  await more.click()
+  await page.waitForURL(`**/liff/${codeLower}/deposit`)
+})

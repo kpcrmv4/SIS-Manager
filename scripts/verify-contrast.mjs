@@ -96,12 +96,13 @@ const CX = [
   ['cx-ink', 'cx-card', 'cx-bg'], ['cx-muted', 'cx-card', 'cx-bg'], ['cx-gold', 'cx-card', 'cx-bg'],
   ['cx-ink', 'cx-card-2', 'cx-card', 'cx-bg'], ['cx-muted', 'cx-card-2', 'cx-card', 'cx-bg'],
   ['cx-gold', 'cx-card-2', 'cx-card', 'cx-bg'], ['cx-warn', 'cx-warn-bg', 'cx-card', 'cx-bg'],
+  ['cx-danger', 'cx-danger-bg', 'cx-card', 'cx-bg'],
   ['cx-ink', 'cx-bar', 'cx-bg'], ['cx-muted', 'cx-bar', 'cx-bg'], ['cx-gold', 'cx-bar', 'cx-bg'],
   // dialogs and sheets (solid), and what sits on them
   ['cx-ink', 'cx-sheet'], ['cx-muted', 'cx-sheet'], ['cx-gold', 'cx-sheet'], ['cx-warn', 'cx-sheet'],
   ['cx-ink', 'cx-card', 'cx-sheet'], ['cx-gold', 'cx-card-2', 'cx-sheet'], ['cx-danger', 'cx-danger-bg', 'cx-sheet'],
-  // the filled button and the logo tile
-  ['cx-on-btn', 'cx-btn-solid'], ['cx-on-logo', 'cx-logo-from'],
+  // the filled button
+  ['cx-on-btn', 'cx-btn-solid'],
 ]
 
 /** Contrast of fg over a stack of layers: [its own bg, …what shows through, the opaque base]. */

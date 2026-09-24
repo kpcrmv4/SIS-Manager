@@ -362,3 +362,46 @@ test('P2-C3-09 the picked table is taken before sending: a toast, the plan shows
   await expect(page.getByTestId('cx-table-picked')).toHaveCount(0)
   expect((await adminDb().from('bookings').select('id').eq('name', `${RUN} ช้าไป`)).data).toHaveLength(0)
 })
+
+test('P2-C3-10 each card on my bookings says where it stands: waiting, confirmed with its table, cancelled', async ({ page }) => {
+  const { branchA } = fixtureIds()
+  const admin = adminDb()
+  // the shop seats guests here (an earlier test left the plan on), every weekday open
+  await admin.from('booking_settings').update({ table_choice: 'shop', closed_weekdays: [] }).eq('branch_id', branchA)
+  const zone = await addBookableZone(branchA, `${RUN} สถานะ`, true)
+  const label = `ST${RUN.slice(-3)}`
+  const table = (await admin.from('tables').insert({ branch_id: branchA, zone_id: zone, label, seats_min: 1, seats_max: 4 }).select('id').single()).data!
+  const me = await makeCustomer()
+  const book = async (days: number, status: 'pending' | 'confirmed' | 'cancelled', extra: { zone_id?: string; table_id?: string } = {}) => {
+    const { data, error } = await admin.rpc('create_booking', {
+      p_branch: branchA,
+      p_night: addDays(businessNight(), days),
+      p_slot: '21:00:00',
+      p_party: 3,
+      p_name: `${RUN} ${status}`,
+      p_customer_id: me.id,
+    } as never)
+    expect(error, error?.message).toBeNull()
+    const b = data as { id: string; code: string }
+    const up = await admin.from('bookings').update({ status, ...extra }).eq('id', b.id)
+    expect(up.error, up.error?.message).toBeNull()
+    return b.code
+  }
+  const waiting = await book(9, 'pending')
+  const confirmed = await book(10, 'confirmed', { zone_id: zone, table_id: table.id })
+  const cancelled = await book(11, 'cancelled')
+
+  await withCustomerDouble(page, signCustomerToken(me.id, branchA))
+  await page.goto(`/liff/${codeLower}/tickets`)
+  const row = (code: string) => page.locator(`[data-testid="cx-booking-row"][data-code="${code}"]`)
+  const pill = (code: string) => row(code).getByTestId('cx-booking-status')
+  await expect(pill(waiting)).toHaveText('รอร้านยืนยัน')
+  await expect(pill(waiting)).toHaveClass(/\bwarn\b/)
+  await expect(pill(confirmed)).toHaveText('ยืนยันแล้ว')
+  await expect(row(confirmed)).toContainText(`โต๊ะ ${label}`)
+  await expect(pill(cancelled)).toHaveText('ยกเลิกแล้ว')
+  await expect(pill(cancelled)).toHaveClass(/\bdanger\b/)
+  // readable without opening it, and it still opens
+  await row(waiting).click()
+  await page.waitForURL(`**/liff/${codeLower}/ticket/${waiting}`)
+})

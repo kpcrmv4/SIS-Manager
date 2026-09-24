@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
+import { Plus } from 'lucide-react'
 import type { CustomerLocale } from '@/lib/i18n/config'
 import { daysUntil, formatShortDate } from '@/lib/date'
-import { CxEmpty, CxErrorRetry, CxSkeleton } from './cx-states'
+import { CxEmpty, CxErrorRetry, CxLoader } from './cx-states'
 import { customerFetch, useCxSession } from './session-context'
 import { WithdrawSheet } from './withdraw-sheet'
 
@@ -61,13 +62,16 @@ export function MyBottlesClient() {
     load()
   }, [load])
 
-  if (state === 'loading') return <CxSkeleton />
+  if (state === 'loading') return <CxLoader label={t('bottles.loading')} />
   if (state === 'error') return <CxErrorRetry message={t('shell.errorGeneric')} onRetry={load} />
 
   const deposits = data?.deposits ?? []
   const active = deposits.filter((d) => ACTIVE.has(d.status))
   const history = deposits.filter((d) => !ACTIVE.has(d.status))
   const list = tab === 'active' ? active : history
+  const depositHref = `/liff/${session.branch.code.toLowerCase()}/deposit`
+  // nothing stored: the empty state is itself the way to deposit (a faint dashed frame, owner)
+  const nothingStored = tab === 'active' && active.length === 0
 
   return (
     <div className="flex flex-col gap-3">
@@ -80,17 +84,31 @@ export function MyBottlesClient() {
         </button>
       </div>
 
-      {list.length === 0 ? (
-        <CxEmpty title={t(tab === 'active' ? 'bottles.empty' : 'bottles.historyEmpty')} body={tab === 'active' ? t('bottles.emptyBody') : undefined} />
+      {nothingStored ? (
+        <>
+          <Link href={depositHref} className="cx-add-card" data-testid="cx-deposit-cta">
+            <i className="cx-add-icon">
+              <Plus className="size-6" aria-hidden />
+            </i>
+            <b>{t('bottles.depositCta')}</b>
+            <span>{t('bottles.depositCtaBody')}</span>
+          </Link>
+          <p className="px-3 text-center text-xs leading-relaxed text-cx-muted">{t('bottles.emptyBody')}</p>
+        </>
+      ) : list.length === 0 ? (
+        <CxEmpty title={t('bottles.historyEmpty')} />
       ) : (
         list.map((d) => (
           <DepositCard key={d.id} deposit={d} locale={locale} onWithdraw={() => setWithdrawFor(d)} />
         ))
       )}
 
-      <Link href={`/liff/${session.branch.code.toLowerCase()}/deposit`} className="cx-btn ghost">
-        {t('bottles.depositMore')}
-      </Link>
+      {!nothingStored && (
+        <Link href={depositHref} className="cx-btn add" data-testid="cx-deposit-more">
+          <Plus className="size-4.5" aria-hidden />
+          {t('bottles.depositMore')}
+        </Link>
+      )}
 
       {withdrawFor && (
         <WithdrawSheet
