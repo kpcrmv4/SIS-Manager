@@ -198,4 +198,28 @@ test.describe('phone (390px)', () => {
     await expect(card).toBeVisible()
     await expect(card.getByText('อยู่ในร้าน', { exact: true })).toBeVisible()
   })
+
+  test('P2-A1-12 detail at a glance (R-045): summary strip, the state card, a call link, the facts; no sideways scroll', async ({ page }) => {
+    await page.goto(`/deposits/${inStoreDep.id}`)
+    await expect(page.getByTestId('summary-left')).toContainText('2/2')
+    await expect(page.getByTestId('summary-expiry')).toContainText('อีก')
+    await expect(page.getByTestId('summary-expiry')).toHaveAttribute('data-tone', 'normal')
+    await expect(page.getByTestId('summary-table')).toContainText('A3')
+    const next = page.getByTestId('deposit-next')
+    await expect(next).toHaveAttribute('data-status', 'in_store')
+    await expect(next).toContainText('เหล้าอยู่ในร้าน')
+    await expect(next.getByTestId('action-withdraw')).toBeVisible()
+    await expect(page.getByTestId('customer-call')).toHaveAttribute('href', 'tel:0812345678')
+    await expect(page.getByTestId('deposit-facts')).toContainText('A3')
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0)
+
+    // close to expiry turns the countdown amber; a VIP never expires; one waiting for the bar says so
+    await page.goto(`/deposits/${urgentDep.id}`)
+    await expect(page.getByTestId('summary-expiry')).toHaveAttribute('data-tone', 'warn')
+    await page.goto(`/deposits/${vipDep.id}`)
+    await expect(page.getByTestId('summary-expiry')).toHaveAttribute('data-tone', 'gold')
+    await page.goto(`/deposits/${toConfirmDep.id}`)
+    await expect(page.getByTestId('deposit-next')).toHaveAttribute('data-status', 'pending_confirm')
+    await expect(page.getByTestId('deposit-next')).toContainText('รอ bar หรือ owner ยืนยัน')
+  })
 })

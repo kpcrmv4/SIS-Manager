@@ -70,6 +70,8 @@
     margin: 1.375rem 0 0.625rem; display: flex; align-items: center; gap: 0.5rem;
     font-size: 0.9375rem; font-weight: 600; color: var(--ink);
   }
+  /* a card's own heading: the card's padding is the space above it */
+  .card-surface > .sec-head:first-child, .panel > .sec-head:first-child { margin-top: 0; }
   .sec-head .count, .sec-head .more { margin-left: auto; font-size: 0.8125rem; font-weight: 500; }
   .sec-head .count { color: var(--muted); }
   .sec-head .more {

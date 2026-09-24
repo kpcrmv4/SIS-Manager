@@ -15,7 +15,6 @@ import type { PendingWithdrawal } from '@/lib/deposit/detail'
 export function WithdrawalPanel({ depositId, pending: rows }: { depositId: string; pending: PendingWithdrawal[] }) {
   const t = useTranslations('deposit')
   const tw = useTranslations('withdrawDialog')
-  const ts = useTranslations('status')
   const [completeOpen, setCompleteOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
 
@@ -24,8 +23,8 @@ export function WithdrawalPanel({ depositId, pending: rows }: { depositId: strin
   const table = rows[0]?.tableLabel
 
   return (
-    <div className="panel p-4" data-testid="withdrawal-panel">
-      <h2 className="sec-head">{t('actionCompleteWithdraw')}</h2>
+    <div className="rounded-lg border border-status-pending-ring bg-status-pending-bg p-3" data-testid="withdrawal-panel">
+      <h2 className="sec-head mt-0">{t('actionCompleteWithdraw')}</h2>
       <ul className="mb-3 space-y-1 text-sm text-ink-2">
         {rows.map((r) => (
           <li key={r.id}>

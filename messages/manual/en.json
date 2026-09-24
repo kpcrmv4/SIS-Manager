@@ -595,12 +595,14 @@
       "intro": "The page for one deposit: every bottle, the expiry and the history, and the buttons for what comes next. Which buttons you see depends on your role and the deposit's status.",
       "onPage": [
         "Liquor name, deposit code, customer name and a status badge",
+        "A 3-part summary: bottles **Left** · days until it **Expires** (amber when close, gold for VIP) · **Table**",
+        "A status box: where the deposit stands and what to do next, with the main button such as **Confirm bottles** or **Withdraw**",
+        "**Tools** in the same box: **Print receipt**, **Print bottle label**, **Extend**, **Make VIP** and the printer’s status",
         "**Bottles**: each bottle with the % left",
-        "**LINE** status (**LINE linked** or **LINE not linked**), **Deposited**, **Expires**, **Collect by** and **Received by**",
-        "**Expiry reminders**: **On** or **Off** for this customer (once linked to LINE)",
-        "**Photos** taken when received and when confirmed",
-        "Action buttons such as **Withdraw**, **Print receipt**, **Print bottle label**",
-        "**History**: everything that happened to this deposit, with the time and who did it"
+        "**Customer**: the name, the phone with a **Call** button, **LINE** status and **Expiry reminders** (once linked to LINE)",
+        "**Deposit details**: **Deposited**, **Table**, **Expires**, **Collect by**, **Received by** and **Confirmed by**",
+        "**Photos** taken when received and when confirmed — tap one to see it full size",
+        "**History**: everything that happened to this deposit, with the time and who did it — in the right column on a computer"
       ],
       "howtos": {
         "receive": {

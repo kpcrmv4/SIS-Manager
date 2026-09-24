@@ -5,16 +5,19 @@ import { Badge } from '@/components/ui/badge'
 import { BottlesGrid } from '@/components/deposit/bottles-grid'
 import { HistoryTimeline } from '@/components/deposit/history-timeline'
 import { DetailActions } from '@/components/deposit/detail-actions'
-import { CustomerReminders } from '@/components/deposit/customer-reminders'
-import { PrintStatusBadge } from '@/components/print/print-status-badge'
+import { CustomerCard, DetailSummary, FactsCard, PhotosCard } from '@/components/deposit/detail-cards'
 import { getActorState } from '@/lib/auth/actor'
 import { getDepositDetail } from '@/lib/deposit/detail'
 import { getBranchSettings, DOW_NAMES } from '@/lib/deposit/branch'
 import { depositBadgeSpec, badgeText } from '@/lib/deposit/format'
-import { formatShortDate, formatTime, businessNight, weekdayIndex } from '@/lib/date'
+import { businessNight, weekdayIndex } from '@/lib/date'
 import { signedPhotoUrls } from '@/lib/photos-server'
 import { isUuid } from '@/lib/action'
 
+/**
+ * One deposit (R-045): the summary a glance needs, what to do next, then the bottles, the
+ * customer, the facts and the photos; the history beside them on a wide screen, last on a phone.
+ */
 export default async function DepositDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   if (!isUuid(id)) notFound()
@@ -39,108 +42,30 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Link href="/deposits" className="btn-ghost btn-sm mb-2">
+      <Link href="/deposits" className="btn-ghost btn-sm mb-3">
         ‹ {t('back')}
       </Link>
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold text-ink">{detail.itemName}</h1>
-          <div className="mt-0.5 text-sm text-muted-token">
-            <span className="code">{detail.code}</span> · {detail.customerName}
-          </div>
+      <header className="mb-4">
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="min-w-0 wrap-break-word text-2xl font-bold leading-tight text-ink">{detail.itemName}</h1>
+          <Badge tone={spec.tone}>{badgeText(tRoot, spec)}</Badge>
         </div>
-        <Badge tone={spec.tone}>{badgeText(tRoot, spec)}</Badge>
-      </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-token">
+          <span className="code">{detail.code}</span>
+          <span aria-hidden>·</span>
+          <span className="min-w-0 truncate">{detail.customerName}</span>
+        </div>
+      </header>
 
-      <div className="grid gap-4 nav:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <BottlesGrid bottles={detail.bottles} total={detail.quantity} />
-
-          <div className="card-surface p-4">
-            <dl className="kv">
-              <dt>{t('customer')}</dt>
-              <dd>
-                {detail.customerName}
-                {detail.customerPhone && (
-                  <>
-                    {' · '}
-                    <span className="num">{detail.customerPhone}</span>
-                  </>
-                )}
-              </dd>
-              <dt>{t('line')}</dt>
-              <dd>
-                <Badge tone={detail.customerId ? 'done' : 'pending'}>{detail.customerId ? t('lineLinked') : t('lineNotLinked')}</Badge>
-              </dd>
-              {detail.customerReminders !== null && (
-                <>
-                  <dt>{t('reminders')}</dt>
-                  <dd>
-                    <CustomerReminders
-                      depositId={detail.id}
-                      enabled={detail.customerReminders}
-                      canEdit={actor.role === 'bar' || actor.role === 'owner'}
-                      branchOff={branchSettings?.expiryRemindersEnabled === false}
-                    />
-                  </dd>
-                </>
-              )}
-              <dt>{t('depositedAt')}</dt>
-              <dd className="num">
-                {t('depositedAtValue', {
-                  date: formatShortDate(detail.createdAt, actor.locale),
-                  time: formatTime(detail.createdAt, actor.locale),
-                  table: detail.tableLabel ?? '—',
-                })}
-              </dd>
-              <dt>{t('expires')}</dt>
-              <dd className="num">
-                {detail.isVip || !detail.expiresAt
-                  ? tRoot('deposits.noExpiry')
-                  : t('expiresValue', { date: formatShortDate(detail.expiresAt, actor.locale), days: depositDays })}
-              </dd>
-              {detail.collectDeadlineAt && (
-                <>
-                  <dt>{t('collectUntil')}</dt>
-                  <dd className="num">
-                    {t('collectUntilValue', { date: formatShortDate(detail.collectDeadlineAt, actor.locale), time: formatTime(detail.collectDeadlineAt, actor.locale) })}
-                  </dd>
-                </>
-              )}
-              {detail.receivedByName && (
-                <>
-                  <dt>{t('receivedBy')}</dt>
-                  <dd>
-                    {detail.confirmedByName
-                      ? t('receivedByValue', { received: detail.receivedByName, confirmed: detail.confirmedByName })
-                      : t('receivedByOnly', { received: detail.receivedByName })}
-                  </dd>
-                </>
-              )}
-              {detail.notes && (
-                <>
-                  <dt>{t('notes')}</dt>
-                  <dd>{detail.notes}</dd>
-                </>
-              )}
-            </dl>
-            {Object.keys(photoUrls).length > 0 && (
-              <div className="mt-3.5">
-                <div className="label-base">{t('photos')}</div>
-                <div className="flex flex-wrap gap-2">
-                  {Object.values(photoUrls).map((url) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={url} src={url} alt="" className="size-16 rounded-md border border-line object-cover" />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
+      <div className="grid items-start gap-4 nav:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <DetailSummary detail={detail} noticeDays={branchSettings?.expiryNoticeDays ?? 7} locale={actor.locale} />
           <DetailActions deposit={detail} role={actor.role} branchId={branch.id} depositDays={depositDays} blockedTonight={blockedTonight} locale={actor.locale} />
-          <PrintStatusBadge branchId={branch.id} />
+          <BottlesGrid bottles={detail.bottles} total={detail.quantity} />
+          <CustomerCard detail={detail} canEditReminders={actor.role === 'bar' || actor.role === 'owner'} branchRemindersOff={branchSettings?.expiryRemindersEnabled === false} />
+          <FactsCard detail={detail} depositDays={depositDays} locale={actor.locale} />
+          <PhotosCard urls={Object.values(photoUrls)} />
         </div>
-
         <HistoryTimeline events={detail.events} locale={actor.locale} />
       </div>
     </>

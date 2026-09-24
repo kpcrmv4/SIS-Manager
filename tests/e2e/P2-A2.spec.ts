@@ -161,7 +161,9 @@ test.describe('detail dialogs', () => {
       await expect(page.getByText('ปฏิเสธแล้ว', { exact: true })).toBeVisible()
       const row = await deposit(dep.id)
       expect(row.status).toBe('cancelled')
-      await expect(page.getByText(`${RUN} เหตุผลทดสอบ`, { exact: false })).toBeVisible()
+      await expect(page.getByTestId('history-event').filter({ hasText: `${RUN} เหตุผลทดสอบ` })).toBeVisible()
+      // and the state card says why (R-045)
+      await expect(page.getByTestId('deposit-next')).toContainText(`${RUN} เหตุผลทดสอบ`)
     })
 
     test('P2-A2-09 complete a pending withdrawal from the detail page', async ({ page }) => {

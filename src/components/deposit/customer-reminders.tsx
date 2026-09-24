@@ -30,14 +30,17 @@ export function CustomerReminders({ depositId, enabled, canEdit, branchOff }: { 
   }
 
   return (
-    <div className="flex flex-col gap-1" data-testid="customer-reminders" data-on={on ? 'true' : 'false'}>
-      <div className="flex items-center gap-2">
-        {canEdit ? (
-          <button type="button" role="switch" aria-checked={on} aria-label={t('reminders')} className="tg" onClick={toggle} disabled={pending} data-testid="customer-reminders-switch" />
-        ) : null}
-        <Badge tone={on ? 'done' : 'pending'}>{on ? t('remindersOn') : t('remindersOff')}</Badge>
+    <div data-testid="customer-reminders" data-on={on ? 'true' : 'false'}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm text-muted-token">{t('reminders')}</span>
+        <div className="flex items-center gap-2">
+          {canEdit && (
+            <button type="button" role="switch" aria-checked={on} aria-label={t('reminders')} className="tg" onClick={toggle} disabled={pending} data-testid="customer-reminders-switch" />
+          )}
+          <Badge tone={on ? 'done' : 'pending'}>{on ? t('remindersOn') : t('remindersOff')}</Badge>
+        </div>
       </div>
-      <span className="text-xs text-muted-token">{branchOff ? t('remindersBranchOff') : t('remindersHelp')}</span>
+      <p className="mt-1 text-xs text-muted-token">{branchOff ? t('remindersBranchOff') : t('remindersHelp')}</p>
     </div>
   )
 }
