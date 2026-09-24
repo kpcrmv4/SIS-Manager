@@ -17,6 +17,8 @@ const ICON: Record<ActionKey, LucideIcon> = {
 
 const TONE: Record<ActionItem['tone'], string> = {
   progress: 'text-status-progress bg-status-progress-bg ring-status-progress-ring',
+  info: 'text-status-info bg-status-info-bg ring-status-info-ring',
+  violet: 'text-status-violet bg-status-violet-bg ring-status-violet-ring',
   urgent: 'text-urgent bg-urgent-bg ring-urgent-ring',
 }
 

@@ -51,7 +51,7 @@ export default async function TonightPage() {
       <MetricBar>
         <Metric label={t('kpiBookings')} value={data.bookings.length} hint={t('kpiBookingsHint', { people: data.bookingPeople, arrived: data.bookingArrived })} href="/bookings" />
         {barOrOwner && <Metric label={t('kpiToConfirm')} value={data.toConfirmCount} hint={t('kpiToConfirmHint')} tone="progress" href="/deposits?tab=toConfirm" />}
-        <Metric label={t('kpiWithdrawals')} value={data.withdrawCount} hint={t('kpiWithdrawalsHint')} tone="info" href="/deposits?tab=withdraw" />
+        <Metric label={t('kpiWithdrawals')} value={data.withdrawCount} hint={t('kpiWithdrawalsHint')} tone="violet" href="/deposits?tab=withdraw" />
         <Metric
           label={t('kpiExpiring', { days: expiryNoticeDays })}
           value={data.expiring.length}
@@ -61,7 +61,8 @@ export default async function TonightPage() {
         />
       </MetricBar>
 
-      <div className="grid gap-6 nav:grid-cols-2">
+      {/* grid-cols-1 = minmax(0,1fr): a long nowrap row must truncate, not widen the page past a phone */}
+      <div className="grid grid-cols-1 gap-6 nav:grid-cols-2">
         <div>
           <h2 className="sec-head">
             <span>{t('bookingsTonight')}</span>
@@ -179,7 +180,7 @@ function TaskRow({ task, t, ts }: { task: PendingTask; t: Awaited<ReturnType<typ
           <div className="truncate text-base font-semibold leading-6 text-ink">{t('taskWithdraw', { item: task.itemName, count: task.count })}</div>
           <div className="truncate text-sm leading-5 text-muted-token">{t('taskWithdrawMeta', { customer: task.customerName, table, time: formatTime(task.createdAt) })}</div>
         </div>
-        <Badge tone="info">{ts('deposit.pending_withdrawal')}</Badge>
+        <Badge tone="violet">{ts('deposit.pending_withdrawal')}</Badge>
       </Link>
     )
   }
@@ -189,7 +190,7 @@ function TaskRow({ task, t, ts }: { task: PendingTask; t: Awaited<ReturnType<typ
         <div className="truncate text-base font-semibold leading-6 text-ink">{t('taskRequest', { customer: task.customerName })}</div>
         <div className="truncate text-sm leading-5 text-muted-token">{t('taskRequestMeta', { table })}</div>
       </div>
-      <Badge tone="pending">{ts('deposit.requested')}</Badge>
+      <Badge tone="info">{ts('deposit.requested')}</Badge>
     </Link>
   )
 }

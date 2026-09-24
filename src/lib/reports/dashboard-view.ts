@@ -123,12 +123,13 @@ export function branchHref(branchId: string, path: string, working: string | nul
 
 export const ACTION_KEYS = ['to_confirm', 'requests', 'withdrawals', 'bookings_pending', 'expiring', 'to_dispose', 'printers_offline', 'line_failed'] as const
 export type ActionKey = (typeof ACTION_KEYS)[number]
-export type ActionItem = { key: ActionKey; count: number; tone: 'progress' | 'urgent'; href: string }
+export type ActionItem = { key: ActionKey; count: number; tone: 'progress' | 'info' | 'violet' | 'urgent'; href: string }
 
+// a chip that opens a deposit group wears that group's hue (R-047)
 const ACTIONS: Record<ActionKey, { tone: ActionItem['tone']; count: (b: DashBranch) => number; path: (b: DashBranch) => string }> = {
   to_confirm: { tone: 'progress', count: (b) => b.to_confirm, path: () => '/deposits?tab=toConfirm' },
-  requests: { tone: 'progress', count: (b) => b.requests, path: () => '/deposits?tab=requests' },
-  withdrawals: { tone: 'progress', count: (b) => b.withdrawals, path: () => '/deposits?tab=withdraw' },
+  requests: { tone: 'info', count: (b) => b.requests, path: () => '/deposits?tab=requests' },
+  withdrawals: { tone: 'violet', count: (b) => b.withdrawals, path: () => '/deposits?tab=withdraw' },
   bookings_pending: { tone: 'progress', count: (b) => b.bookings_pending, path: (b) => `/bookings?night=${b.bookings_pending_night ?? ''}&view=list` },
   expiring: { tone: 'progress', count: (b) => b.expiring, path: () => '#overview-expiring' },
   to_dispose: { tone: 'urgent', count: (b) => b.to_dispose, path: () => '/deposits?tab=expired' },

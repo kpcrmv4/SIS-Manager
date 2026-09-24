@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { Archive, ArrowUpFromLine, CalendarX, ClipboardCheck, MessageCircle, Plus, Wine, type LucideIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
 import { EmptyState } from '@/components/ui/states'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { ListRow } from '@/components/ui/list-row'
 import { SearchBox } from '@/components/ui/filter-bar'
 import { hrefWith } from '@/components/ui/filter-href'
@@ -25,16 +25,17 @@ const TAB_LABEL_KEY: Record<DepositTab, string> = {
 }
 
 /**
- * Each filter card's icon and tone (R-046), in the status badges' colours: in store green, the two
- * queues waiting for the bar amber, LINE requests blue, expired red, closed grey.
+ * Each filter card's icon and tone (R-046), the same BadgeTone its rows' badges get — six groups,
+ * six hues (R-047): in store green, to confirm amber, withdrawals violet, LINE requests blue,
+ * expired red, closed grey.
  */
-const TAB_LOOK: Record<DepositTab, { icon: LucideIcon; tone: string }> = {
+const TAB_LOOK: Record<DepositTab, { icon: LucideIcon; tone: BadgeTone }> = {
   inStore: { icon: Wine, tone: 'done' },
   toConfirm: { icon: ClipboardCheck, tone: 'progress' },
-  withdraw: { icon: ArrowUpFromLine, tone: 'progress' },
+  withdraw: { icon: ArrowUpFromLine, tone: 'violet' },
   requests: { icon: MessageCircle, tone: 'info' },
   expired: { icon: CalendarX, tone: 'urgent' },
-  closed: { icon: Archive, tone: 'neutral' },
+  closed: { icon: Archive, tone: 'pending' },
 }
 
 const TAB_EMPTY_KEY: Record<DepositTab, string> = {

@@ -19,12 +19,15 @@ import { WithdrawalPanel } from './withdrawal-panel'
 
 type DialogKind = 'confirm' | 'reject' | 'withdraw' | 'extend' | 'vip' | 'receive' | null
 
-/** What the deposit's state means for whoever is looking (R-045): an icon and its tone. */
+/**
+ * What the deposit's state means for whoever is looking (R-045): an icon and its tone — the same hue
+ * as the state's filter card and badge on /deposits (R-047).
+ */
 const STATE: Record<DepositStatus, { icon: LucideIcon; tone: string }> = {
-  requested: { icon: Inbox, tone: 'bg-status-pending-bg text-status-pending' },
-  pending_confirm: { icon: ClipboardCheck, tone: 'bg-status-pending-bg text-status-pending' },
+  requested: { icon: Inbox, tone: 'bg-status-info-bg text-status-info' },
+  pending_confirm: { icon: ClipboardCheck, tone: 'bg-status-progress-bg text-status-progress' },
   in_store: { icon: Wine, tone: 'bg-status-done-bg text-status-done' },
-  pending_withdrawal: { icon: ArrowUpFromLine, tone: 'bg-status-pending-bg text-status-pending' },
+  pending_withdrawal: { icon: ArrowUpFromLine, tone: 'bg-status-violet-bg text-status-violet' },
   expired: { icon: CalendarX, tone: 'bg-urgent-bg text-urgent' },
   withdrawn: { icon: CheckCheck, tone: 'bg-surface-2 text-muted-token' },
   disposed: { icon: Trash2, tone: 'bg-surface-2 text-muted-token' },

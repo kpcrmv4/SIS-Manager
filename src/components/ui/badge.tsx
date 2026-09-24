@@ -1,6 +1,14 @@
 import type { ReactNode } from 'react'
 
-export type BadgeTone = 'pending' | 'progress' | 'done' | 'info' | 'urgent' | 'brand' | 'gold'
+export type BadgeTone =
+  | 'pending'
+  | 'progress'
+  | 'done'
+  | 'info'
+  | 'violet'
+  | 'urgent'
+  | 'brand'
+  | 'gold'
 
 /**
  * THREE VALUES, ALWAYS: text / background / ring.
@@ -17,6 +25,8 @@ export type BadgeTone = 'pending' | 'progress' | 'done' | 'info' | 'urgent' | 'b
  *   progress  waiting · expiring soon
  *   urgent    overdue · short · blocked
  *   info      a distinct CATEGORY of record, not a state
+ *   violet    a withdrawal asked for — the bottle is still in store, so it must
+ *             never share "done" green with the ones nobody has asked for (R-047)
  *   pending   not started
  *   brand     the item currently open, or the category the brand stands for
  */
@@ -25,6 +35,7 @@ const TONE: Record<BadgeTone, string> = {
   progress: 'text-status-progress bg-status-progress-bg ring-status-progress-ring',
   done: 'text-status-done bg-status-done-bg ring-status-done-ring',
   info: 'text-status-info bg-status-info-bg ring-status-info-ring',
+  violet: 'text-status-violet bg-status-violet-bg ring-status-violet-ring',
   urgent: 'text-urgent bg-urgent-bg ring-urgent-ring',
   brand: 'text-brand-on-tint bg-brand-tint ring-brand-tint-strong',
   gold: 'text-gold-ink bg-gold-bg ring-gold-ring',
@@ -35,6 +46,7 @@ const DOT: Record<BadgeTone, string> = {
   progress: 'bg-status-progress',
   done: 'bg-status-done',
   info: 'bg-status-info',
+  violet: 'bg-status-violet',
   urgent: 'bg-urgent',
   brand: 'bg-brand',
   gold: 'bg-accent',

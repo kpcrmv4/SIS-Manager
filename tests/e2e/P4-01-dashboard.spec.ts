@@ -87,6 +87,9 @@ test('P4-01-11 P4-01-12 P4-01-13 the working branch wins the link; setup names t
   expect(actionItems([a, b], null).find((i) => i.key === 'to_confirm')!.href).toBe(`/api/branch/go?b=b&to=${encodeURIComponent('/deposits?tab=toConfirm')}`)
   expect(items.find((i) => i.key === 'printers_offline')).toMatchObject({ count: 1, tone: 'urgent' })
   expect(items.find((i) => i.key === 'requests')).toBeUndefined() // zero → no chip
+  // a chip that opens a deposit group wears that group's hue (R-047)
+  const busy = Object.fromEntries(actionItems([{ ...base, to_confirm: 1, requests: 1, withdrawals: 1, to_dispose: 1 }], 'a').map((i) => [i.key, i.tone]))
+  expect(busy).toMatchObject({ to_confirm: 'progress', requests: 'info', withdrawals: 'violet', to_dispose: 'urgent' })
   const setup = setupItems([a, b], 'a')
   expect(setup.find((s) => s.key === 'staff_group')).toMatchObject({ done: false, missing: ['B'] })
   expect(setup.find((s) => s.key === 'line_oa')).toMatchObject({ done: true, missing: [] })

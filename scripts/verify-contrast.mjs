@@ -85,9 +85,10 @@ const STAFF = [
   ['accent', 'sidebar'], // raised scan FAB icon
   ['status-pending', 'status-pending-bg'], ['status-progress', 'status-progress-bg'],
   ['status-done', 'status-done-bg'], ['status-info', 'status-info-bg'], ['urgent', 'urgent-bg'],
+  ['status-violet', 'status-violet-bg'],
   ['gold-ink', 'gold-bg'],
   ['status-pending', 'card'], ['status-progress', 'card'], ['status-done', 'card'],
-  ['status-info', 'card'], ['urgent', 'card'],
+  ['status-info', 'card'], ['urgent', 'card'], ['status-violet', 'card'],
 ]
 const CX = [
   // text straight on the page — cx-bg is the gradient's lightest stop

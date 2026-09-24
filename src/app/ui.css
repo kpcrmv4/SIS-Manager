@@ -99,8 +99,8 @@
   }
   .tab .c { font-variant-numeric: tabular-nums; opacity: 0.75; margin-left: 0.25rem; }
 
-  /* filter cards (/deposits, R-046): an icon in its kind's tone, the count, the name; the chosen
-     one is drawn in INK like a selected tab — a filter is not an action */
+  /* filter cards (/deposits, R-046): an icon in its group's badge tone — six groups, six hues (R-047) —
+     the count, the name; the chosen one is drawn in INK like a selected tab — a filter is not an action */
   .fcard {
     display: flex; min-width: 0; flex-direction: column; gap: 0.5rem; padding: 0.75rem;
     border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--card); color: var(--ink);
@@ -113,7 +113,9 @@
   .fcard[data-tone='done'] .ic { background: var(--status-done-bg); color: var(--status-done); }
   .fcard[data-tone='progress'] .ic { background: var(--status-progress-bg); color: var(--status-progress); }
   .fcard[data-tone='info'] .ic { background: var(--status-info-bg); color: var(--status-info); }
+  .fcard[data-tone='violet'] .ic { background: var(--status-violet-bg); color: var(--status-violet); }
   .fcard[data-tone='urgent'] .ic { background: var(--urgent-bg); color: var(--urgent); }
+  .fcard[data-tone='pending'] .ic { background: var(--status-pending-bg); color: var(--status-pending); }
   .fcard .c { font-size: 1.375rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
   .fcard[data-count='0'] .c { color: var(--muted); font-weight: 600; }
   .fcard .l { font-size: 0.8125rem; line-height: 1.35; color: var(--ink-2); }

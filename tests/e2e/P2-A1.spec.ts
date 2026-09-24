@@ -4,6 +4,7 @@ import { adminDb, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
 import { RUN, cleanupRun, confirmAll, createDeposit, mustCreate } from './fixtures/deposits'
 import { addDays, bangkokDate } from '../../src/lib/date'
+import { depositBadgeSpec, type DepositStatus } from '../../src/lib/deposit/format'
 
 const as = (role: string) => join(AUTH_DIR, `${role}.json`)
 const PHONE = { width: 390, height: 844 }
@@ -74,6 +75,27 @@ test.describe('desktop (1280px)', () => {
     await expect(row(urgentDep.code).getByText('อีก 2 วัน', { exact: true })).toBeVisible()
     await expect(row(progressDep.code).getByText('อีก 5 วัน', { exact: true })).toBeVisible()
     await expect(row(inStoreDep.code).getByText('อยู่ในร้าน', { exact: true })).toBeVisible()
+  })
+
+  test('P2-A1-13 six groups, six hues (R-047): each filter card wears its badge tone and no two groups share one', async ({ page }) => {
+    const tone = (status: DepositStatus) => depositBadgeSpec({ status, isVip: false, expiresAt: null }).tone
+    const groups = {
+      inStore: tone('in_store'),
+      toConfirm: tone('pending_confirm'),
+      withdraw: tone('pending_withdrawal'),
+      requests: tone('requested'),
+      expired: tone('expired'),
+      closed: tone('withdrawn'),
+    }
+    expect(groups).toEqual({ inStore: 'done', toConfirm: 'progress', withdraw: 'violet', requests: 'info', expired: 'urgent', closed: 'pending' })
+    expect(new Set(Object.values(groups)).size).toBe(6)
+    await page.goto('/deposits')
+    for (const [tab, t] of Object.entries(groups)) {
+      await expect(page.getByTestId(`deposits-tab-${tab}`)).toHaveAttribute('data-tone', t)
+    }
+    // the withdrawal card's icon is not the in-store card's colour
+    const iconColour = (tab: string) => page.getByTestId(`deposits-tab-${tab}`).locator('.ic').evaluate((el) => getComputedStyle(el).color)
+    expect(await iconColour('withdraw')).not.toBe(await iconColour('inStore'))
   })
 
   test('P2-A1-03 tabs change the URL and each count matches the DB', async ({ page }) => {

@@ -27,14 +27,15 @@ export function depositBadgeSpec(
       if (days <= 2) return { tone: 'urgent', key: 'status.daysLeft', count: Math.max(days, 0) }
       if (days <= 7) return { tone: 'progress', key: 'status.daysLeft', count: days }
     }
-    return { tone: 'done', key: `status.deposit.${row.status}` }
+    // a withdrawal asked for is still in store, but it must not read as the ones nobody asked for (R-047)
+    return { tone: row.status === 'pending_withdrawal' ? 'violet' : 'done', key: `status.deposit.${row.status}` }
   }
   if (row.status === 'expired') {
     const days = row.expiresAt ? Math.max(-daysUntil(row.expiresAt, opts.now), 0) : 0
     return { tone: 'urgent', key: 'status.daysOver', count: days }
   }
   if (row.status === 'pending_confirm') return { tone: 'progress', key: 'status.deposit.pending_confirm' }
-  if (row.status === 'requested') return { tone: 'pending', key: 'status.deposit.requested' }
+  if (row.status === 'requested') return { tone: 'info', key: 'status.deposit.requested' }
   return { tone: 'pending', key: `status.deposit.${row.status}` }
 }
 

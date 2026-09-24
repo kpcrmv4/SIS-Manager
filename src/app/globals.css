@@ -36,6 +36,9 @@
   --urgent-bg: #FDECEA;
   --info: #1D5FA8;
   --info-bg: #E6EFFA;
+  /* a withdrawal asked for (R-047) — its own hue, never read as "in store" */
+  --status-violet: #6B3FA0;
+  --status-violet-bg: #F1EAFB;
   --gold-ink: #7D5A12;
   --gold-bg: #F8EFD9;
   --placeholder: #786E70;
@@ -73,6 +76,7 @@
   --status-progress-ring: color-mix(in srgb, var(--status-progress) 28%, var(--status-progress-bg));
   --status-done-ring: color-mix(in srgb, var(--status-done) 28%, var(--status-done-bg));
   --status-info-ring: color-mix(in srgb, var(--info) 28%, var(--info-bg));
+  --status-violet-ring: color-mix(in srgb, var(--status-violet) 28%, var(--status-violet-bg));
   --urgent-ring: color-mix(in srgb, var(--urgent) 28%, var(--urgent-bg));
   --gold-ring: color-mix(in srgb, var(--gold-ink) 28%, var(--gold-bg));
   --brand-ring: color-mix(in srgb, var(--brand) 28%, var(--brand-soft));
@@ -119,6 +123,8 @@
   --urgent-bg: #3A1E1C;
   --info: #8AB8F2;
   --info-bg: #1A2638;
+  --status-violet: #C4A5F5;
+  --status-violet-bg: #2A2238;
   --gold-ink: #E2B865;
   --gold-bg: #33291A;
   --placeholder: #958A8C;
@@ -260,6 +266,9 @@
   --color-status-info: var(--status-info);
   --color-status-info-bg: var(--status-info-bg);
   --color-status-info-ring: var(--status-info-ring);
+  --color-status-violet: var(--status-violet);
+  --color-status-violet-bg: var(--status-violet-bg);
+  --color-status-violet-ring: var(--status-violet-ring);
   --color-urgent: var(--urgent);
   --color-urgent-bg: var(--urgent-bg);
   --color-urgent-ring: var(--urgent-ring);

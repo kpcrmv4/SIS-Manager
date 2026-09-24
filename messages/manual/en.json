@@ -469,7 +469,7 @@
         "The **New deposit** button at the top right",
         "Six filter cards — **In store** · **To confirm** · **Withdrawals** · **LINE requests** · **Expired · to dispose** · **Closed** — each with its count; tap one to list only that group (two per row on a phone)",
         "A search box for customer name, phone or deposit code, and a **Search** button",
-        "Each row shows the deposit code, customer, liquor, what's left, the expiry date and a status badge",
+        "Each row shows the deposit code, customer, liquor, what's left, the expiry date and a status badge in its group's colour — in store **green** · to confirm **amber** · withdrawals **violet** · LINE requests **blue** · expired **red** · closed **grey** (a bottle close to expiry shows its days left in amber or red instead, a VIP in gold)",
         "**Previous** and **Next** buttons at the end when there are several pages"
       ],
       "howtos": {

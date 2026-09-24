@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
-export type MetricTone = 'default' | 'urgent' | 'progress' | 'done' | 'info'
+export type MetricTone = 'default' | 'urgent' | 'progress' | 'done' | 'info' | 'violet'
 
 const VALUE_TONE: Record<MetricTone, string> = {
   default: 'text-ink',
@@ -10,6 +10,7 @@ const VALUE_TONE: Record<MetricTone, string> = {
   progress: 'text-status-progress',
   done: 'text-status-done',
   info: 'text-status-info',
+  violet: 'text-status-violet',
 }
 
 /**

@@ -27,7 +27,7 @@ import { bangkokDate, formatShortDate, formatTime, type AppLocale } from '@/lib/
 import { branchHref, type FeedItem } from '@/lib/reports/dashboard-view'
 import { Block } from './block'
 
-type Tone = 'done' | 'progress' | 'urgent' | 'info' | 'pending'
+type Tone = 'done' | 'progress' | 'urgent' | 'info' | 'violet' | 'pending'
 
 const ICON: Record<string, LucideIcon> = {
   requested: MessageSquarePlus,
@@ -61,8 +61,9 @@ const TONE: Record<string, Tone> = {
   booking_created: 'done',
   booking_confirmed: 'done',
   booking_arrived: 'done',
-  requested: 'progress',
-  withdrawal_requested: 'progress',
+  // the deposit groups' hues (R-047): a LINE request blue, a withdrawal asked for violet
+  requested: 'info',
+  withdrawal_requested: 'violet',
   booking_requested: 'progress',
   rejected: 'urgent',
   withdrawal_rejected: 'urgent',
@@ -79,6 +80,7 @@ const TONE_CLS: Record<Tone, string> = {
   progress: 'bg-status-progress-bg text-status-progress',
   urgent: 'bg-urgent-bg text-urgent',
   info: 'bg-status-info-bg text-status-info',
+  violet: 'bg-status-violet-bg text-status-violet',
   pending: 'bg-status-pending-bg text-status-pending',
 }
 

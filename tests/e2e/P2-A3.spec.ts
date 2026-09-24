@@ -113,6 +113,21 @@ test.describe('bar', () => {
     await requestRow.click()
     await expect(page).toHaveURL(new RegExp(`/deposits/${lineRequestDep.id}`))
   })
+
+  test('P2-A3-08 on a phone: no sideways scroll; a long task row truncates and keeps its badge, in its group hue (R-047)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/tonight')
+    await expect(page.getByTestId('tonight-task-withdraw').first()).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+    const hues = [['confirm', 'text-status-progress'], ['withdraw', 'text-status-violet'], ['request', 'text-status-info']] as const
+    for (const [kind, hue] of hues) {
+      const chip = page.getByTestId(`tonight-task-${kind}`).first().locator('.chip')
+      await expect(chip).toHaveClass(new RegExp(hue))
+      const box = await chip.boundingBox()
+      expect(box!.x + box!.width, `${kind} badge inside the screen`).toBeLessThanOrEqual(390)
+    }
+    await expect(page.locator('a', { hasText: 'คำขอเบิก' }).locator('.text-status-violet')).toBeVisible()
+  })
 })
 
 test.describe('staff', () => {
