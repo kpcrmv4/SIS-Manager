@@ -1638,6 +1638,13 @@ export type Database = {
         Args: { p_branch: string; p_night: string }
         Returns: Json
       }
+      unread_counts: {
+        Args: { p_users: string[] }
+        Returns: {
+          unread: number
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_locale: "th" | "en" | "zh" | "ko"

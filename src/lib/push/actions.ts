@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getActorState } from '@/lib/auth/actor'
+import { dispatchPush } from './dispatch'
 
 export type PushResult = { ok: true } | { ok: false; error: 'invalid' | 'unauthenticated' | 'failed' }
 
@@ -54,4 +55,36 @@ export async function deletePushSubscription(endpoint: string): Promise<PushResu
   if (typeof endpoint !== 'string' || !endpoint.startsWith('https://')) return { ok: false, error: 'invalid' }
   const { error } = await (await getSupabaseServer()).from('push_subscriptions').delete().eq('endpoint', endpoint)
   return error ? { ok: false, error: 'failed' } : { ok: true }
+}
+
+export type TestPushResult = { ok: true } | { ok: false; error: 'unauthenticated' | 'no_device' | 'too_soon' | 'not_configured' | 'failed' }
+
+const TEST_GAP_MS = 15_000
+
+/**
+ * /me ส่งแจ้งเตือนทดสอบ (R-042): one notification of kind `test` to the signed-in user's own
+ * devices, sent at once. It is stored read — it proves the device, it is not work — so the bell
+ * count and the icon count leave it out. One every 15 seconds.
+ */
+export async function sendTestPush(): Promise<TestPushResult> {
+  const state = await getActorState()
+  if (state.status !== 'ok') return { ok: false, error: 'unauthenticated' }
+  const userId = state.actor.id
+  const admin = getSupabaseAdmin()
+  const since = new Date(Date.now() - TEST_GAP_MS).toISOString()
+  const [devices, recent] = await Promise.all([
+    admin.from('push_subscriptions').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    admin.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('kind', 'test').gte('created_at', since),
+  ])
+  if (devices.error || recent.error) return { ok: false, error: 'failed' }
+  if (!devices.count) return { ok: false, error: 'no_device' }
+  if (recent.count) return { ok: false, error: 'too_soon' }
+  const { error } = await admin.from('notifications').insert({ user_id: userId, kind: 'test', link: '/me', read_at: new Date().toISOString() })
+  if (error) return { ok: false, error: 'failed' }
+  try {
+    const sent = await dispatchPush()
+    return sent.skipped === 'vapid_not_configured' ? { ok: false, error: 'not_configured' } : { ok: true }
+  } catch {
+    return { ok: false, error: 'failed' }
+  }
 }

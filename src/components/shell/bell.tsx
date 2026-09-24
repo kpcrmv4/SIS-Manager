@@ -10,10 +10,10 @@ import { EmptyState, ListSkeleton } from '@/components/ui/states'
 import { useLive } from '@/components/realtime/live-provider'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { formatShortDate, formatTime } from '@/lib/date'
+import { textKind } from '@/lib/push/kinds'
 
 type Row = { id: string; kind: string; payload: Record<string, unknown>; link: string | null; read_at: string | null; created_at: string }
 
-const KINDS = ['deposit_received', 'deposit_withdrawal_requested', 'deposit_requested', 'booking_pending'] as const
 const LIMIT = 30
 
 /**
@@ -105,8 +105,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
   const text = (r: Row) => {
     const p = r.payload ?? {}
     const v = (k: string) => (p[k] == null ? '' : String(p[k]))
-    const kind = (KINDS as readonly string[]).includes(r.kind) ? r.kind : 'other'
-    return t(`kinds.${kind}` as never, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') } as never)
+    return t(`kinds.${textKind(r.kind)}` as never, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') } as never)
   }
 
   return (

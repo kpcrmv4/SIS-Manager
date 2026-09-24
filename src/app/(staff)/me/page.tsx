@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/shell/page-header'
 import { getActorState } from '@/lib/auth/actor'
 import { AccountSettings } from './account-settings'
 import { PasswordForm } from './password-form'
+import { InstallCard } from '@/components/pwa/install-card'
 import { PushToggle } from '@/components/pwa/push-toggle'
 
 export default async function MePage() {
@@ -30,8 +31,9 @@ export default async function MePage() {
             <dd>{actor.branches.map((b) => b.name).join(', ') || '—'}</dd>
           </dl>
         </section>
+        <InstallCard />
+        <PushToggle role={actor.role} />
         <AccountSettings locale={actor.locale} />
-        <PushToggle />
         <PasswordForm />
       </div>
     </>

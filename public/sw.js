@@ -13,17 +13,23 @@ self.addEventListener('push', (event) => {
     data = { title: 'SIS Manager', body: event.data ? event.data.text() : '' }
   }
   const title = data.title || 'SIS Manager'
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body: data.body || '',
-      icon: '/android-chrome-192x192.png',
-      badge: '/favicon-32x32.png',
-      tag: data.tag || undefined,
-      // in-app paths only — '//host' is protocol-relative and would leave the app
-      data: { url: typeof data.url === 'string' && /^\/(?![/\\])/.test(data.url) ? data.url : '/' },
-    }),
-  )
+  const shown = self.registration.showNotification(title, {
+    body: data.body || '',
+    icon: '/android-chrome-192x192.png',
+    badge: '/favicon-32x32.png',
+    tag: data.tag || undefined,
+    // in-app paths only — '//host' is protocol-relative and would leave the app
+    data: { url: typeof data.url === 'string' && /^\/(?![/\\])/.test(data.url) ? data.url : '/' },
+  })
+  event.waitUntil(Promise.all([shown, setIconCount(data.badge)]))
 })
+
+// the unread count on the app icon (R-042) — installed apps where the platform shows one
+// (iPhone home-screen apps, Windows / macOS / ChromeOS); elsewhere a quiet no-op
+function setIconCount(count) {
+  if (!Number.isInteger(count) || count < 0 || !('setAppBadge' in self.navigator)) return Promise.resolve()
+  return (count > 0 ? self.navigator.setAppBadge(count) : self.navigator.clearAppBadge()).catch(() => undefined)
+}
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()

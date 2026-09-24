@@ -791,6 +791,18 @@
     "passwordMismatch": "The new passwords don't match",
     "passwordWrong": "Current password is wrong",
     "passwordTooShort": "At least 8 characters",
+    "install": "Install the app",
+    "installHint": "Put SIS Manager on your home screen: it opens like any app, can notify you and shows your unread count on its icon",
+    "installButton": "Install",
+    "installed": "Installed — open it from the SIS icon on your home screen",
+    "installAccepted": "App installed",
+    "installIosSteps": [
+      "Tap Safari’s Share button (a square with an arrow up, or tap … first, then Share)",
+      "Choose “Add to Home Screen”, then tap “Add”",
+      "Open the app from the SIS icon and come back here to turn notifications on"
+    ],
+    "installInApp": "Open this page in Chrome or Safari first, then install (apps cannot be installed from inside LINE)",
+    "installManual": "Open the browser menu (⋮ or …) and choose “Install app” or “Add to Home screen”",
     "push": "Notifications on this device",
     "pushOn": "Turn on",
     "pushOff": "Turn off",
@@ -798,7 +810,25 @@
     "pushDenied": "Notifications are blocked for this site. Allow them in the browser settings",
     "pushEnabled": "Notifications are on for this device",
     "pushDisabled": "Notifications are off for this device",
-    "pushHint": "Get notified about bottles to confirm, withdrawal requests and new bookings even when the app is closed (on iPhone, add the app to the Home Screen first)"
+    "pushHint": "Get notified of your work on this device, even when the app is closed",
+    "pushIosInstall": "On iPhone and iPad, install the app to the home screen first, then turn notifications on from inside the app",
+    "pushWhat": "What you are notified of · {scope}",
+    "pushScopeOwner": "every branch",
+    "pushScopeMember": "your branches",
+    "pushKinds": {
+      "deposit_received": "Staff take in a bottle that waits for the bar to confirm",
+      "deposit_withdrawal_requested": "A customer asks to withdraw a bottle",
+      "deposit_requested": "A customer sends a deposit request on LINE",
+      "booking_pending": "A new booking waits to be confirmed",
+      "booking_new": "A customer books on LINE and it is confirmed automatically",
+      "booking_cancelled": "A customer cancels a booking on LINE"
+    },
+    "pushBadge": "The number on the app icon is how many notifications are unread",
+    "pushTest": "Send a test notification",
+    "pushTestSent": "Sent — it should appear in a few seconds",
+    "pushTestNoDevice": "No device is registered — turn notifications off and on again",
+    "pushTestTooSoon": "Wait a moment, then try again",
+    "pushNotConfigured": "Sending notifications is not set up on the server"
   },
   "reports": {
     "title": "Reports",
@@ -910,6 +940,9 @@
       "deposit_withdrawal_requested": "Withdrawal requested · {item} · {customer}",
       "deposit_requested": "Deposit request from LINE · {customer}",
       "booking_pending": "New booking to confirm · {name} · {party} people · {time}",
+      "booking_new": "New booking, confirmed · {name} · {party} people · {time}",
+      "booking_cancelled": "Booking cancelled by the customer · {name} · {party} people · {time}",
+      "test": "Test notification · this device receives notifications",
       "other": "Something new needs you"
     }
   },

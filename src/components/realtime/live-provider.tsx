@@ -19,9 +19,17 @@ export const useLive = () => useContext(Ctx)
 
 const REFRESH_DEBOUNCE_MS = 800
 
+/** The unread count on the icon of the installed app (R-042); a plain browser tab ignores it. */
+function setIconCount(count: number) {
+  const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> }
+  if (!nav.setAppBadge || !nav.clearAppBadge) return
+  void (count > 0 ? nav.setAppBadge(count) : nav.clearAppBadge()).catch(() => undefined)
+}
+
 export function LiveProvider({ userId, branchId, children }: { userId: string; branchId: string | null; children: ReactNode }) {
   const router = useRouter()
-  const [unread, setUnread] = useState(0)
+  // null until the first count arrives — the icon is left alone until then
+  const [unread, setUnread] = useState<number | null>(null)
   const [notificationTick, setNotificationTick] = useState(0)
   const [joined, setJoined] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -59,6 +67,10 @@ export function LiveProvider({ userId, branchId, children }: { userId: string; b
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [refreshUnread, router])
+
+  useEffect(() => {
+    if (unread !== null) setIconCount(unread)
+  }, [unread])
 
   useEffect(() => {
     const sb = getSupabaseBrowser()
@@ -107,7 +119,7 @@ export function LiveProvider({ userId, branchId, children }: { userId: string; b
   }, [branchId, userId, scheduleRefresh, refreshUnread])
 
   return (
-    <Ctx.Provider value={{ unread, refreshUnread, notificationTick, joined }}>
+    <Ctx.Provider value={{ unread: unread ?? 0, refreshUnread, notificationTick, joined }}>
       {/* data-live: specs wait for the branch channel before changing data */}
       <div data-live={joined ? 'joined' : 'connecting'} className="contents">
         {children}

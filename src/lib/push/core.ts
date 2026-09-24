@@ -15,7 +15,8 @@ export type PushRow = {
   auth: string
 }
 
-export type PushMessage = { title: string; body: string; url: string; tag: string }
+/** `badge`: the user's unread count — the service worker puts it on the app icon (R-042). */
+export type PushMessage = { title: string; body: string; url: string; tag: string; badge?: number }
 export type SendResult = { statusCode: number }
 
 export async function deliver(

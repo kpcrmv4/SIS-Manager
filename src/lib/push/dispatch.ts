@@ -3,8 +3,7 @@ import webpush from 'web-push'
 import { getTranslations } from 'next-intl/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { deliver, type PushMessage, type PushRow } from './core'
-
-const KINDS = ['deposit_received', 'deposit_withdrawal_requested', 'deposit_requested', 'booking_pending']
+import { textKind } from './kinds'
 
 let configured = false
 function configure(): boolean {
@@ -44,18 +43,29 @@ export async function dispatchPush(limit = 50): Promise<{ sent: number; removed:
 
 async function deliverClaimed(admin: ReturnType<typeof getSupabaseAdmin>, rows: PushRow[]) {
   const userIds = [...new Set(rows.map((r) => r.user_id))]
-  const { data: profiles, error: pErr } = await admin.from('profiles').select('id, locale').in('id', userIds)
+  const [{ data: profiles, error: pErr }, { data: counts, error: cErr }] = await Promise.all([
+    admin.from('profiles').select('id, locale').in('id', userIds),
+    // the number the icon shows once this push lands (R-042)
+    admin.rpc('unread_counts', { p_users: userIds }),
+  ])
   if (pErr) throw new Error(`push profiles: ${pErr.code ?? pErr.message}`)
+  if (cErr) throw new Error(`unread_counts: ${cErr.code ?? cErr.message}`)
   const localeOf = new Map((profiles ?? []).map((p) => [p.id, p.locale === 'en' ? 'en' : 'th']))
+  const unreadOf = new Map((counts ?? []).map((c) => [c.user_id, c.unread]))
   const [tTh, tEn] = await Promise.all([getTranslations({ locale: 'th', namespace: 'bell' }), getTranslations({ locale: 'en', namespace: 'bell' })])
 
   const render = (row: PushRow): PushMessage => {
     const t = localeOf.get(row.user_id) === 'en' ? tEn : tTh
     const p = row.payload ?? {}
     const v = (k: string) => (p[k] == null ? '' : String(p[k]))
-    const kind = KINDS.includes(row.kind) ? row.kind : 'other'
-    const body = t(`kinds.${kind}` as never, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') } as never)
-    return { title: t('title'), body, url: row.link && /^\/(?![/\\])/.test(row.link) ? row.link : '/', tag: row.notification_id }
+    const body = t(`kinds.${textKind(row.kind)}` as never, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') } as never)
+    return {
+      title: t('title'),
+      body,
+      url: row.link && /^\/(?![/\\])/.test(row.link) ? row.link : '/',
+      tag: row.notification_id,
+      badge: unreadOf.get(row.user_id) ?? 0,
+    }
   }
 
   return deliver(

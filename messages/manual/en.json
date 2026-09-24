@@ -317,25 +317,27 @@
         "bar",
         "owner"
       ],
-      "intro": "See your account, change language and theme, turn on notifications for this device and change your password. Open it from **More** on a phone or the left menu on a computer.",
+      "intro": "See your account, install the app, turn on notifications for this device, and change language, theme and password. Open it from **More** on a phone or the left menu on a computer.",
       "onPage": [
         "**Profile**: display name, username, role and branch access",
+        "**Install the app**: an **Install** button, or how to add the app to the home screen on your device",
+        "**Notifications on this device**: what your role is notified of, **Turn on** or **Turn off**, and **Send a test notification**",
         "**Language**: **ไทย** or **English**",
         "**Theme**: **Light mode** or **Dark mode**",
-        "**Notifications on this device**",
         "**Change password**"
       ],
       "howtos": {
-        "language": {
-          "title": "How to change the language",
+        "install": {
+          "title": "How to install the app",
           "roles": [
             "staff",
             "bar",
             "owner"
           ],
           "steps": [
-            "Under **Language**, press **ไทย** or **English**",
-            "Every page switches at once, and your account remembers it"
+            "On Android or a computer (Chrome, Edge), under **Install the app** press **Install**, then install in the window the browser opens",
+            "On iPhone or iPad, open this page in Safari, tap Share, choose **Add to Home Screen**, then tap **Add**",
+            "Open the app from the SIS icon on your home screen — **Install the app** now says it is installed"
           ]
         },
         "push": {
@@ -346,10 +348,22 @@
             "owner"
           ],
           "steps": [
-            "Under **Notifications on this device**, press **Turn on**",
-            "Allow notifications when the browser asks",
-            "This device now alerts you about bottles to confirm, withdrawal requests and new bookings, even when the app is closed",
+            "Under **Notifications on this device**, see what you will be notified of",
+            "Press **Turn on** and allow notifications when the browser asks",
+            "Press **Send a test notification** — it should appear in a few seconds",
             "To stop them, press **Turn off**"
+          ]
+        },
+        "language": {
+          "title": "How to change the language",
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Under **Language**, press **ไทย** or **English**",
+            "Every page switches at once, and your account remembers it"
           ]
         },
         "password": {
@@ -368,11 +382,14 @@
       },
       "important": [
         "Notifications are turned on per device — if you use several devices, turn them on on each one",
-        "On an iPhone, add the app to the Home Screen first; then notifications can be turned on"
+        "On iPhone and iPad, install the app to the home screen first, then turn notifications on from inside the app",
+        "Each role is told only about its own work: **staff** — withdrawal requests and deposit requests from LINE · **bar** — also bottles to confirm, new bookings and bookings cancelled on LINE · **owner** — all of it, in every branch"
       ],
       "tips": [
         "If it says notifications are blocked for this site, allow them in the browser settings and press again",
-        "Language is remembered by your account; theme is remembered by each device"
+        "Language is remembered by your account; theme is remembered by each device",
+        "The number on the app icon is your unread notifications; press **Mark all read** in the bell to clear it. Android shows a dot instead",
+        "The app cannot be installed from inside LINE — open the link in Chrome or Safari first"
       ]
     },
     "tonight": {
