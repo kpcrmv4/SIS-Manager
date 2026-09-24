@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Loader2, Search } from 'lucide-react'
 import { toast } from 'sonner'
@@ -8,15 +9,30 @@ import { Scanner } from '@/components/scan/scanner'
 import { ScanResultBooking } from '@/components/booking/scan-result-booking'
 import { ScanResultDeposit } from '@/components/deposit/scan-result-deposit'
 import { lookupScan, type ScanHit } from '@/lib/scan/actions'
+import { replaceQuery, uuidParam } from '@/lib/url-state'
 
-/** Scan or type → one lookup → the deposit or booking result slot (filled by workers A and B). */
+/**
+ * Scan or type → one lookup → the deposit or booking result slot (filled by workers A and B).
+ * The result's id stays in the address (?b= booking · ?d= deposit, R-050): coming Back from the
+ * customer or deposit page it opened shows the same result again.
+ */
 export function ScanPanel({ branchId }: { branchId: string }) {
   const t = useTranslations('scan')
   const tc = useTranslations('common')
+  const sp = useSearchParams()
   const [query, setQuery] = useState('')
-  const [hit, setHit] = useState<ScanHit | null>(null)
+  const [hit, setHit] = useState<ScanHit | null>(() => {
+    const booking = uuidParam(sp.get('b'))
+    const deposit = uuidParam(sp.get('d'))
+    return booking ? { kind: 'booking', id: booking } : deposit ? { kind: 'deposit', id: deposit } : null
+  })
   const [missed, setMissed] = useState<string | null>(null)
   const [pending, start] = useTransition()
+
+  const show = (next: ScanHit | null) => {
+    setHit(next)
+    replaceQuery({ b: next?.kind === 'booking' ? next.id : null, d: next?.kind === 'deposit' ? next.id : null })
+  }
 
   function resolve(raw: string) {
     const q = raw.trim()
@@ -30,17 +46,17 @@ export function ScanPanel({ branchId }: { branchId: string }) {
         r = { kind: 'error' }
       }
       if (r.kind === 'error') {
-        setHit(null)
+        show(null)
         toast.error(tc('errorTitle'), { action: { label: tc('retry'), onClick: () => resolve(q) } })
         return
       }
-      setHit(r.kind === 'none' ? null : r)
+      show(r.kind === 'none' ? null : r)
       if (r.kind === 'none') setMissed(q)
     })
   }
 
   const reset = () => {
-    setHit(null)
+    show(null)
     setQuery('')
   }
 

@@ -214,7 +214,7 @@
       "intro": "The menus and buttons on every page: move between pages, switch branch, read notifications, check the printer and change the colour mode.",
       "onPage": [
         "Phone: a 5-slot bottom bar — **Tonight** (the owner sees **Overview**) · **Deposits** · the dark round scan button in the middle · **Bookings** · **More**",
-        "Computer: a left menu with **Daily** and **Account** (the owner also has **Reports** and **Settings**)",
+        "Computer: a left menu with **Daily**, **Reports** (with **Customers**) and **Account** (the owner also has **Settings**)",
         "Top right of every page: the printer icon, the **Notifications** bell and the moon or sun button",
         "The selected branch name, and a branch picker for people who work in several branches",
         "Lists are cards on a phone and tables on a computer"
@@ -231,7 +231,7 @@
             "Press a slot in the bottom bar to open **Tonight**, **Deposits** or **Bookings**",
             "Press the dark round button in the middle to open **Scan QR**",
             "Press **More** — a sheet slides up from the bottom with **Customers**, **My account** and **Log out**",
-            "The owner also sees **Overview & reports** and **Branch settings** in this sheet"
+            "**Customers** sits under **Overview & reports** · the owner also sees **Reports** and **Audit log** there, and **Branch settings**"
           ]
         },
         "switchBranch": {
@@ -308,7 +308,8 @@
       "tips": [
         "Pages update by themselves when new work arrives — no need to refresh",
         "The branch picker only appears for people with more than one branch",
-        "On a phone, sheets and windows slide up from the bottom; tap the dark area outside to close them"
+        "On a phone, sheets and windows slide up from the bottom; tap the dark area outside to close them",
+        "The **‹** button on a deposit or customer page goes back to the page you came from and names it, e.g. **‹ Scan QR** — opened directly, it goes to the list instead"
       ]
     },
     "myAccount": {
@@ -923,7 +924,8 @@
       ],
       "tips": [
         "The booking QR appears on the guest's page once the shop confirms; if they have no QR yet, type the booking number",
-        "Guest can't remember the booking number? Typing the table they were given works too"
+        "Guest can't remember the booking number? Typing the table they were given works too",
+        "Opened a deposit or a customer from a scan? **‹ Scan QR** brings the same result back — no need to scan again"
       ]
     },
     "customers": {
@@ -937,7 +939,8 @@
       "intro": "Every customer of the branch — who keeps bottles here, how often they come, all their deposits and bookings, and whether they're VIP.",
       "onPage": [
         "Four summary cards — **All customers** · **With bottles here** · **VIP customers** · **LINE linked** — each with its count; tap one to list only that group",
-        "A search box for a name, a phone (with or without dashes), a deposit code or a booking code",
+        "A search box that searches as you type, no button needed — a name, a phone (with or without dashes), a deposit code or a booking code — with the **Today’s bookings** and **Tomorrow’s bookings** shortcuts",
+        "Booking tiles: type a booking code or press a shortcut and that night’s bookings come up as tiles — the **table** in large type, **who booked**, the time, the party, the state (the bar across the top), a crown for a VIP customer and the bottles they keep here",
         "Each row shows the name, phone, LINE, a **VIP customer** badge, the bottles in store, how many deposits and bookings, and the last activity (or the night they booked)",
         "A customer's page: a summary — **In store** · **Deposits** · **Bookings** (came / no-show) · **Last activity** — the **VIP** box, **Contact** (**Call**, LINE, other names used), and the full **Deposit history** and **Booking history**"
       ],
@@ -950,10 +953,25 @@
             "owner"
           ],
           "steps": [
-            "Press **Customers** in the left menu; on a phone, press **More**, then **Customers**",
-            "Type a name, phone, deposit code or booking code in the search box and press **Search**",
+            "Press **Customers** under **Reports** in the left menu; on a phone, press **More**, then **Customers** under **Overview & reports**",
+            "Type a name, phone or deposit code in the search box — the list follows as you type",
             "Press a customer's row to open their page",
             "From a deposit, press **Customer history**; from a booking's details, press **Customer history** — both land on the same page"
+          ]
+        },
+        "bookingsOfNight": {
+          "title": "How to see the bookings of a night",
+          "roles": [
+            "staff",
+            "bar",
+            "owner"
+          ],
+          "steps": [
+            "Press **Today’s bookings** or **Tomorrow’s bookings** — or type BK and the month and day, e.g. **BK-0925** for 25 Sep",
+            "That night’s bookings come up as tiles straight away, in time order",
+            "Type on to the whole code, e.g. **BK-0925-001** (**BK-0925-1** works too), and only that booking is left",
+            "The row of states above narrows them, e.g. **Arrived** or **No-show**",
+            "Tap a tile to open the customer who booked"
           ]
         },
         "history": {

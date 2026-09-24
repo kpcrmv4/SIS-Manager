@@ -1588,6 +1588,10 @@ export type Database = {
         }
         Returns: Json
       }
+      customer_booking_board: {
+        Args: { p_branch: string; p_night: string; p_seq?: string }
+        Returns: Json
+      }
       customer_detail: {
         Args: {
           p_bk_offset?: number

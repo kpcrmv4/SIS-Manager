@@ -46,9 +46,9 @@ export const NAV: readonly NavItem[] = [
   { key: 'overview', href: '/overview', label: 'overview', icon: LayoutDashboard, roles: OWNER, section: 'catDaily', slot: 1 },
   { key: 'deposits', href: '/deposits', label: 'deposits', icon: Wine, roles: ALL, section: 'catDaily', slot: 2 },
   { key: 'bookings', href: '/bookings', label: 'bookings', icon: CalendarDays, roles: ALL, section: 'catDaily', slot: 4 },
-  // R-048 — no bottom-bar slot of its own: on a phone it sits first in the เพิ่มเติม sheet
-  { key: 'customers', href: '/customers', label: 'customers', icon: ContactRound, roles: ALL, section: 'catDaily' },
   { key: 'scan', href: '/scan', label: 'scan', icon: ScanLine, roles: ALL, section: 'catDaily', primary: true },
+  // R-048 / R-049 — every role, first under รายงาน (ภาพรวมและรายงาน in the เพิ่มเติม sheet)
+  { key: 'customers', href: '/customers', label: 'customers', icon: ContactRound, roles: ALL, section: 'catReports' },
   { key: 'reports', href: '/reports', label: 'reports', icon: BarChart3, roles: OWNER, section: 'catReports' },
   { key: 'audit', href: '/audit', label: 'audit', icon: History, roles: OWNER, section: 'catReports' },
   { key: 'settingsBooking', href: '/settings/booking', label: 'settingsBooking', icon: CalendarCheck2, roles: OWNER, section: 'catSettings' },

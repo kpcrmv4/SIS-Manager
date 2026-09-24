@@ -118,8 +118,11 @@ function Pager({ base, sp, param, page, total, testId }: { base: string; sp: Rec
   const last = Math.max(1, Math.ceil(total / HISTORY_PAGE))
   return (
     <div className="flex items-center justify-end gap-2 px-1 pt-2" data-testid={testId}>
+      {/* replace, scroll kept: paging a history is not a page to go Back through (R-050) */}
       <Link
         href={hrefWith(base, sp, { [param]: page > 2 ? page - 1 : null })}
+        replace
+        scroll={false}
         aria-disabled={page <= 1}
         className={`btn-ghost btn-sm ${page <= 1 ? 'pointer-events-none opacity-50' : ''}`}
       >
@@ -130,6 +133,8 @@ function Pager({ base, sp, param, page, total, testId }: { base: string; sp: Rec
       </span>
       <Link
         href={hrefWith(base, sp, { [param]: page + 1 })}
+        replace
+        scroll={false}
         aria-disabled={page >= last}
         className={`btn-ghost btn-sm ${page >= last ? 'pointer-events-none opacity-50' : ''}`}
         data-testid={`${testId}-next`}

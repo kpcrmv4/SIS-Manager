@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { replaceQuery, uuidParam } from '@/lib/url-state'
 import { FloorPlan } from './floor-plan'
 import { BookingList } from './booking-list'
 import { ConfirmAssignDialog } from './confirm-assign-dialog'
@@ -31,9 +32,15 @@ export function BookingsBoard({
   emptyZones?: ReactNode
 }) {
   const router = useRouter()
+  const sp = useSearchParams()
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [rejectId, setRejectId] = useState<string | null>(null)
-  const [detailId, setDetailId] = useState<string | null>(null)
+  // the open booking stays in the address (?b=, R-050): Back from its customer page reopens it
+  const [detailId, setDetail] = useState<string | null>(() => uuidParam(sp.get('b')))
+  const setDetailId = (id: string | null) => {
+    setDetail(id)
+    replaceQuery({ b: id })
+  }
 
   const confirmTarget = bookings.find((b) => b.id === confirmId)
   const allTables = zones.flatMap((z) => z.tables)

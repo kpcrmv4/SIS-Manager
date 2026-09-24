@@ -1,6 +1,7 @@
 import 'server-only'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { CUSTOMER_PAGE, HISTORY_PAGE, type CustomerDetail, type CustomerFilter, type CustomerList } from './view'
+import type { Board } from './smart'
 
 /**
  * Reads for the customers pages (R-048). A failed read throws, so the route's error boundary
@@ -18,6 +19,14 @@ export async function listCustomers(branchId: string, filter: CustomerFilter, q:
   })
   if (error) throw new Error(`customer_list: ${error.message}`)
   return data as unknown as CustomerList
+}
+
+/** One night's bookings as tiles (R-049), narrowed by the digits typed after the date. */
+export async function getBookingBoard(branchId: string, night: string, seq: string | null): Promise<Board> {
+  const sb = await getSupabaseServer()
+  const { data, error } = await sb.rpc('customer_booking_board', { p_branch: branchId, p_night: night, p_seq: seq ?? undefined })
+  if (error) throw new Error(`customer_booking_board: ${error.message}`)
+  return data as unknown as Board
 }
 
 export async function getCustomer(branchId: string, key: string, depositPage: number, bookingPage: number): Promise<CustomerDetail | null> {

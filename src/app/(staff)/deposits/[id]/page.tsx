@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { Badge } from '@/components/ui/badge'
+import { BackLink } from '@/components/shell/back-link'
 import { BottlesGrid } from '@/components/deposit/bottles-grid'
 import { HistoryTimeline } from '@/components/deposit/history-timeline'
 import { DetailActions } from '@/components/deposit/detail-actions'
@@ -42,9 +42,7 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Link href="/deposits" className="btn-ghost btn-sm mb-3">
-        ‹ {t('back')}
-      </Link>
+      <BackLink fallbackHref="/deposits" fallbackLabel={t('back')} />
       <header className="mb-4">
         <div className="flex items-start justify-between gap-3">
           <h1 className="min-w-0 wrap-break-word text-2xl font-bold leading-tight text-ink">{detail.itemName}</h1>

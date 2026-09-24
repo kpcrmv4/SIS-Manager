@@ -35,7 +35,7 @@ export function MoreSheet({
   branch: BranchRef | null
 }) {
   const t = useTranslations('nav')
-  // catDaily: the daily pages without a bottom-bar slot (ลูกค้า)
+  // catDaily: any daily page without a bottom-bar slot of its own
   const groups = (['catDaily', 'catReports', 'catSettings', 'catAccount'] as const).map((s) => ({
     section: s,
     items: items.filter((i) => i.section === s),

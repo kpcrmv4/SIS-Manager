@@ -1,18 +1,18 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { ContactRound, Crown, MessageCircle, Wine, type LucideIcon } from 'lucide-react'
+import { ContactRound, Crown, Info, MessageCircle, Wine, type LucideIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
-import { Badge, type BadgeTone } from '@/components/ui/badge'
-import { ListRow } from '@/components/ui/list-row'
-import { SearchBox } from '@/components/ui/filter-bar'
+import type { BadgeTone } from '@/components/ui/badge'
 import { hrefWith } from '@/components/ui/filter-href'
-import { RowLink } from '@/components/deposit/row-link'
 import { EmptyTab } from '@/components/deposit/empty-tab'
-import { VipBadge } from '@/components/customers/vip-badge'
+import { BookingBoard } from '@/components/customers/booking-board'
+import { CustomerRows } from '@/components/customers/customer-rows'
+import { SmartSearch } from '@/components/customers/smart-search'
 import { getActorState } from '@/lib/auth/actor'
-import { listCustomers } from '@/lib/customers/queries'
-import { CUSTOMER_FILTERS, CUSTOMER_PAGE, parseCustomerFilter, type CustomerFilter, type CustomerRow } from '@/lib/customers/view'
-import { formatShortDate, type AppLocale } from '@/lib/date'
+import { getBookingBoard, listCustomers } from '@/lib/customers/queries'
+import { parseBoardFilter, parseSmartQuery, shortcutCodes } from '@/lib/customers/smart'
+import { CUSTOMER_FILTERS, parseCustomerFilter, type CustomerFilter } from '@/lib/customers/view'
+import { businessNight } from '@/lib/date'
 
 /** The four summary cards double as the filter (R-048), in the colours their badges use. */
 const LOOK: Record<CustomerFilter, { icon: LucideIcon; tone: BadgeTone; label: string }> = {
@@ -29,11 +29,11 @@ const EMPTY: Record<CustomerFilter, string> = {
   line: 'emptyLine',
 }
 
-type Translate = Awaited<ReturnType<typeof getTranslations>>
-
 /**
  * ลูกค้า (R-048): every customer of the branch — a LINE account, a phone or a name — with what they
  * keep here, their deposits and bookings and when they last came; each opens its own page.
+ * The search reads what is typed (R-049): a booking code (BK-0925, BK-0925-001) or the จองวันนี้ /
+ * จองพรุ่งนี้ shortcuts bring up that night's bookings as tiles instead of the list.
  */
 export default async function CustomersPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams
@@ -60,10 +60,15 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const filter = parseCustomerFilter(sp.filter)
   const q = (sp.q ?? '').trim().slice(0, 100)
   const page = Math.max(1, Math.trunc(Number(sp.page) || 1))
-  const list = await listCustomers(branch.id, filter, q, page)
-
-  const from = list.total ? (page - 1) * CUSTOMER_PAGE + 1 : 0
-  const to = Math.min(page * CUSTOMER_PAGE, list.total)
+  const tonight = businessNight()
+  const smart = parseSmartQuery(q, tonight)
+  // a booking code searches bookings, not the customer list
+  const textQ = smart.kind === 'text' ? q : ''
+  const [list, board] = await Promise.all([
+    listCustomers(branch.id, filter, textQ, page),
+    smart.kind === 'booking' ? getBookingBoard(branch.id, smart.night, smart.seq) : Promise.resolve(null),
+  ])
+  const codes = shortcutCodes(tonight)
 
   return (
     <>
@@ -75,9 +80,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           return (
             <Link
               key={key}
-              href={hrefWith('/customers', sp, { filter: key, page: null })}
+              // a card lists customers: it keeps a name or phone search, not a booking code
+              href={hrefWith('/customers', sp, { filter: key, page: null, st: null, q: textQ || null })}
               className="fcard"
-              aria-current={filter === key ? 'page' : undefined}
+              aria-current={filter === key && smart.kind === 'text' ? 'page' : undefined}
               data-tone={tone}
               data-count={list.counts[key]}
               data-testid={`customers-filter-${key}`}
@@ -95,108 +101,31 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       </nav>
 
       <div className="mb-4">
-        <SearchBox basePath="/customers" params={sp} q={sp.q ?? ''} placeholder={t('searchPlaceholder')} label={tc('search')} />
+        <SmartSearch
+          q={q}
+          params={sp}
+          placeholder={t('searchPlaceholder')}
+          searchLabel={tc('search')}
+          clearLabel={t('clearSearch')}
+          shortcuts={[
+            { key: 'today', label: t('shortcutToday'), code: codes.today },
+            { key: 'tomorrow', label: t('shortcutTomorrow'), code: codes.tomorrow },
+          ]}
+        />
       </div>
 
-      {list.rows.length === 0 ? (
+      {smart.kind === 'booking' && board ? (
+        <BookingBoard board={board} code={smart.code} seq={smart.seq} filter={parseBoardFilter(sp.st)} tonight={tonight} locale={actor.locale} params={sp} />
+      ) : smart.kind === 'bookingHint' ? (
+        <p className="panel flex items-start gap-2 px-4 py-3 text-sm text-ink-2" data-testid="customers-hint">
+          <Info className="mt-0.5 size-4 flex-none text-status-info" aria-hidden />
+          {t(smart.reason === 'date' ? 'hintDate' : 'hintBadDate', { example: codes.tomorrow })}
+        </p>
+      ) : list.rows.length === 0 ? (
         <EmptyTab title={q ? t('emptySearch', { q }) : t(EMPTY[filter])} body={q ? undefined : t(`${EMPTY[filter]}Body`)} />
       ) : (
-        <>
-          <div className="panel hidden nav:block" data-testid="customers-table-desktop">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>{t('colCustomer')}</th>
-                  <th>{t('colLine')}</th>
-                  <th>{t('colInStore')}</th>
-                  <th>{t('colDeposits')}</th>
-                  <th>{t('colBookings')}</th>
-                  <th>{t('colLast')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.rows.map((c) => (
-                  <RowLink key={c.key} href={`/customers/${c.key}`} testId="customer-row">
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <b className="min-w-0 truncate">{c.name}</b>
-                        {c.is_vip && <VipBadge label={t('vip')} />}
-                      </div>
-                      {c.phone && <div className="num text-xs text-muted-token">{c.phone}</div>}
-                    </td>
-                    <td>{c.line ? <Badge tone="info">{t('lineLinked')}</Badge> : <span className="text-muted-token">—</span>}</td>
-                    <td className="num">{inStoreText(t, c)}</td>
-                    <td className="num">{c.deposits}</td>
-                    <td className="num">{bookingsText(t, c, actor.locale)}</td>
-                    <td className="num">{c.last_at ? formatShortDate(c.last_at, actor.locale) : '—'}</td>
-                  </RowLink>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="panel nav:hidden" data-testid="customers-list-mobile">
-            {list.rows.map((c) => (
-              <ListRow
-                key={c.key}
-                href={`/customers/${c.key}`}
-                title={
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="min-w-0 truncate">{c.name}</span>
-                    {c.is_vip && <VipBadge label={t('vip')} />}
-                  </span>
-                }
-                meta={
-                  <span className="num">
-                    {[c.phone, c.line ? t('lineLinked') : null, t('rowDeposits', { count: c.deposits }), t('rowBookings', { count: c.bookings })]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </span>
-                }
-                aside={
-                  // a phone puts this on its own line: bottles in store and the last visit side by side
-                  <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-1">
-                    {c.deposits_in_store > 0 ? <Badge tone="done">{inStoreText(t, c)}</Badge> : <Badge tone="pending">{t('noBottles')}</Badge>}
-                    <span className="num text-xs text-muted-token">
-                      {c.next_night ? t('nextBooking', { date: formatShortDate(c.next_night, actor.locale) }) : c.last_at ? t('lastSeen', { date: formatShortDate(c.last_at, actor.locale) }) : ''}
-                    </span>
-                  </div>
-                }
-              />
-            ))}
-          </div>
-
-          <div className="mt-2 flex items-center justify-between px-1 py-2.5 text-xs text-muted-token nav:px-4" data-testid="customers-pagination">
-            <span className="tnum">{tc('showing', { from, to, total: list.total })}</span>
-            <span className="flex gap-2">
-              <Link
-                href={hrefWith('/customers', sp, { page: page > 1 ? page - 1 : null })}
-                aria-disabled={page <= 1}
-                className={`btn-ghost btn-sm ${page <= 1 ? 'pointer-events-none opacity-50' : ''}`}
-              >
-                {tc('previous')}
-              </Link>
-              <Link
-                href={hrefWith('/customers', sp, { page: page + 1 })}
-                aria-disabled={to >= list.total}
-                className={`btn-ghost btn-sm ${to >= list.total ? 'pointer-events-none opacity-50' : ''}`}
-                data-testid="customers-next"
-              >
-                {tc('next')}
-              </Link>
-            </span>
-          </div>
-        </>
+        <CustomerRows list={list} page={page} locale={actor.locale} params={sp} />
       )}
     </>
   )
-}
-
-function inStoreText(t: Translate, c: CustomerRow): string {
-  return c.deposits_in_store > 0 ? t('inStoreValue', { bottles: c.bottles_in_store, deposits: c.deposits_in_store }) : '—'
-}
-
-function bookingsText(t: Translate, c: CustomerRow, locale: AppLocale): string {
-  if (!c.bookings) return '0'
-  return c.next_night ? t('bookingsNext', { count: c.bookings, date: formatShortDate(c.next_night, locale) }) : String(c.bookings)
 }

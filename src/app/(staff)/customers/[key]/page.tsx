@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { CalendarDays, MessageCircle, Phone } from 'lucide-react'
+import { BackLink } from '@/components/shell/back-link'
 import { VipBadge } from '@/components/customers/vip-badge'
 import { VipCard } from '@/components/customers/vip-card'
 import { BookingHistory, ContactCard, CustomerSummary, DepositHistory } from '@/components/customers/detail-cards'
@@ -42,9 +42,7 @@ export default async function CustomerPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <Link href="/customers" className="btn-ghost btn-sm mb-3">
-        ‹ {t('back')}
-      </Link>
+      <BackLink fallbackHref="/customers" fallbackLabel={t('back')} />
       <header className="mb-4" data-testid="customer-header" data-key={detail.key}>
         <div className="flex items-start justify-between gap-3">
           <h1 className="min-w-0 wrap-break-word text-2xl font-bold leading-tight text-ink">{detail.name}</h1>

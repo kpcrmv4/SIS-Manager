@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/shell/sidebar'
 import { TopBar } from '@/components/shell/top-bar'
 import { LiveProvider } from '@/components/realtime/live-provider'
 import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
+import { NavTrail } from '@/components/shell/nav-trail'
 
 /**
  * Staff shell. The auth decision lives HERE, not in a page under a loading
@@ -28,6 +29,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
         </div>
         <BottomNav role={actor.role} branches={actor.branches} branch={actor.branch} />
         <BfcacheGuard />
+        <NavTrail />
         <ServiceWorkerRegister />
       </div>
     </LiveProvider>

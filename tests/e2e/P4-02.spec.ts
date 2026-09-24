@@ -110,3 +110,16 @@ test.describe('bar (branch A)', () => {
     await expect(page.getByText(`${RUN} owner-only`)).toHaveCount(0)
   })
 })
+
+test('P4-02-07 a test branch tells only the test accounts — never a real owner (R-051)', async () => {
+  const { data: dep, error } = await createDeposit('staff', { qty: 1 }) // received → bar and owner are told
+  expect(error, error?.message).toBeNull()
+  const admin = adminDb()
+  const { data: told, error: toldErr } = await admin.from('notifications').select('user_id').eq('payload->>deposit_id', dep!.id)
+  expect(toldErr, toldErr?.message).toBeNull()
+  const ids = [...new Set((told ?? []).map((n) => n.user_id))]
+  expect(ids).toEqual(expect.arrayContaining([fixtureIds().users.bar, fixtureIds().users.owner]))
+  const { data: who, error: whoErr } = await admin.from('profiles').select('username').in('id', ids)
+  expect(whoErr, whoErr?.message).toBeNull()
+  expect(who!.map((p) => p.username).filter((u) => !u.startsWith('e2e'))).toEqual([])
+})

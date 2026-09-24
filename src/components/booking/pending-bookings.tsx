@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { replaceQuery, uuidParam } from '@/lib/url-state'
 import { CalendarClock, CircleCheck } from 'lucide-react'
 import { ListRow } from '@/components/ui/list-row'
 import type { NightBooking, ZoneRow } from '@/lib/booking/queries'
@@ -35,7 +36,13 @@ export function PendingBookings({
   const t = useTranslations('bookings')
   const tc = useTranslations('common')
   const router = useRouter()
-  const [detailId, setDetailId] = useState<string | null>(null)
+  const sp = useSearchParams()
+  // the open booking stays in the address (?pb=, R-050): Back from its customer page reopens it
+  const [detailId, setDetail] = useState<string | null>(() => uuidParam(sp.get('pb')))
+  const setDetailId = (id: string | null) => {
+    setDetail(id)
+    replaceQuery({ pb: id })
+  }
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [rejectId, setRejectId] = useState<string | null>(null)
   const onDone = () => router.refresh()

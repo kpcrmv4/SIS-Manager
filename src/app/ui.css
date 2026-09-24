@@ -122,6 +122,33 @@
   .fcard .l { font-size: 0.8125rem; line-height: 1.35; color: var(--ink-2); }
   .fcard[aria-current='page'] .l { color: var(--ink); font-weight: 600; }
 
+  /* booking tiles (/customers, R-049): the table big, who booked, when and how many; a bar across
+     the top in the booking's state colour — the tonight page's tones, not the list badge's */
+  .btile {
+    position: relative; display: flex; min-width: 0; min-height: 138px; flex-direction: column; gap: 0.25rem;
+    overflow: hidden; padding: 0.875rem 0.75rem 0.625rem; border: 1px solid var(--line); border-radius: var(--r-lg);
+    background: var(--card); color: var(--ink); transition: border-color 150ms, box-shadow 150ms;
+  }
+  .btile::before { content: ''; position: absolute; inset: 0 0 auto; height: 4px; background: var(--status-pending); }
+  .btile:hover { border-color: var(--line-strong); box-shadow: var(--shadow-e1); }
+  .btile .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.375rem; }
+  .btile .tbl { min-width: 0; font-size: 1.5rem; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+  .btile .tbl.none { padding-top: 0.25rem; font-size: 0.8125rem; font-weight: 600; color: var(--muted); }
+  .btile .vip { display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 999px; background: var(--gold-bg); color: var(--gold-ink); }
+  .btile .nm {
+    display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    font-size: 0.9375rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere;
+  }
+  .btile .meta { font-size: 0.8125rem; color: var(--ink-2); }
+  .btile .foot { display: flex; align-items: center; justify-content: space-between; gap: 0.375rem; margin-top: auto; font-size: 0.75rem; }
+  .btile .st { display: inline-flex; min-width: 0; align-items: center; gap: 0.3125rem; color: var(--muted); }
+  .btile .st i { width: 7px; height: 7px; flex: none; border-radius: 999px; background: var(--status-pending); }
+  .btile .bt { display: inline-flex; flex: none; align-items: center; gap: 0.1875rem; font-weight: 600; color: var(--status-done); }
+  .btile[data-tone='progress']::before, .btile[data-tone='progress'] .st i { background: var(--status-progress); }
+  .btile[data-tone='info']::before, .btile[data-tone='info'] .st i { background: var(--status-info); }
+  .btile[data-tone='done']::before, .btile[data-tone='done'] .st i { background: var(--status-done); }
+  .btile[data-tone='urgent']::before, .btile[data-tone='urgent'] .st i { background: var(--urgent); }
+
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
 

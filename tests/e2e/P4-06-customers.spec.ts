@@ -7,8 +7,9 @@ import { RUN, cleanupRun, confirmAll, deposit, photo } from './fixtures/deposits
 import { forceExpired } from './fixtures/p2a-flows'
 import { RUN as CRUN, cleanupCustomers, makeCustomer } from './fixtures/p2c-customers'
 import type { FixtureRole } from './fixtures/users'
-import { businessNight } from '../../src/lib/date'
+import { addDays, businessNight } from '../../src/lib/date'
 import type { CustomerDetail, CustomerList } from '../../src/lib/customers/view'
+import { nearestNight, nightCode, parseSmartQuery } from '../../src/lib/customers/smart'
 
 /**
  * P4-06 — ลูกค้า (R-048): one customer per LINE account, else phone digits, else name; the list,
@@ -32,7 +33,9 @@ const P1 = mobile() // a walk-in: three deposits typed three ways, and a booking
 const P2 = mobile() // a LINE customer's phone, also used on a walk-in deposit
 const P3 = mobile() // one phone, two LINE customers
 const P4 = mobile() // a walk-in deposit linked to LINE later
+const P5 = mobile() // R-049: at a table tonight, VIP, two bottles here
 const NAME_ONLY = `${RUN} ชื่ออย่างเดียว`
+const TABLE_LABEL = `T${randomInt(100, 1000)}`
 
 let c1: { id: string }
 let c2: { id: string }
@@ -44,6 +47,12 @@ let depC1: { id: string; code: string }
 let depC2: { id: string; code: string }
 let depB: { id: string; code: string }
 let bkA1: { id: string; code: string }
+let bkT: { id: string; code: string }
+let bkArrived: { id: string; code: string }
+let bkCancelled: { id: string; code: string }
+let bkTomorrow: { id: string; code: string }
+let zoneId = ''
+let tableId = ''
 let depositDays = 30
 
 async function takeDeposit(opts: { name: string; phone?: string; qty?: number; branch?: 'A' | 'B'; role?: FixtureRole }) {
@@ -67,11 +76,12 @@ async function link(depositId: string, customerId: string) {
   expect(error, error?.message).toBeNull()
 }
 
-async function book(name: string, phone?: string) {
+/** A booking taken by staff (confirmed at once), tonight at 21:30 unless told otherwise. */
+async function book(name: string, phone?: string, at: { night?: string; slot?: string } = {}) {
   const { data, error } = await dbAs('staff').rpc('create_booking', {
     p_branch: fixtureIds().branchA,
-    p_night: businessNight(),
-    p_slot: '21:30:00',
+    p_night: at.night ?? businessNight(),
+    p_slot: at.slot ?? '21:30:00',
     p_party: 3,
     p_name: `${RUN} ${name}`,
     p_phone: phone,
@@ -182,6 +192,34 @@ test.beforeAll(async () => {
   await book('ชื่ออย่างเดียว')
 
   depB = await takeDeposit({ name: 'สาขาบี', phone: P1.dashed, branch: 'B', role: 'staffB' })
+
+  // R-049 — tonight: a VIP with two bottles here at our own table, a guest who came, one cancelled;
+  // tomorrow: one more
+  const { branchA } = fixtureIds()
+  const zone = await admin.from('table_zones').insert({ branch_id: branchA, name: `${RUN} โซน`, sort: 99 }).select('id').single()
+  expect(zone.error, zone.error?.message).toBeNull()
+  zoneId = zone.data!.id
+  const table = await admin
+    .from('tables')
+    .insert({ branch_id: branchA, zone_id: zoneId, label: TABLE_LABEL, shape: 'square', seats_min: 2, seats_max: 6, sort: 99 })
+    .select('id')
+    .single()
+  expect(table.error, table.error?.message).toBeNull()
+  tableId = table.data!.id
+  const kept = await takeDeposit({ name: 'คุณไทล์', phone: P5.dashed, qty: 2 })
+  await confirmAll(kept.id, [100, 100])
+  bkT = await book('คุณไทล์', P5.dashed, { slot: '20:00:00' })
+  const seated = await dbAs('bar').rpc('assign_table', { p_booking: bkT.id, p_table: tableId })
+  expect(seated.error, seated.error?.message).toBeNull()
+  const vip = await dbAs('bar').rpc('set_customer_vip', { p_branch: branchA, p_key: `p-${P5.key}`, p_vip: true })
+  expect(vip.error, vip.error?.message).toBeNull()
+  bkArrived = await book('คุณมาแล้ว', undefined, { slot: '19:30:00' })
+  const came = await dbAs('staff').rpc('check_in_booking', { p_branch: branchA, p_ref: bkArrived.code })
+  expect(came.error, came.error?.message).toBeNull()
+  bkCancelled = await book('คุณยกเลิก', undefined, { slot: '22:00:00' })
+  const gone = await dbAs('bar').rpc('cancel_booking', { p_booking: bkCancelled.id, p_reason: 'e2e' })
+  expect(gone.error, gone.error?.message).toBeNull()
+  bkTomorrow = await book('คุณพรุ่งนี้', undefined, { night: addDays(businessNight(), 1), slot: '20:30:00' })
 })
 
 test.afterAll(async () => {
@@ -191,9 +229,11 @@ test.afterAll(async () => {
     .from('customer_vips')
     .delete()
     .in('branch_id', [branchA, branchB])
-    .in('phone_key', [P1.key, P2.key, P3.key, P4.key])
+    .in('phone_key', [P1.key, P2.key, P3.key, P4.key, P5.key])
   await cleanupRun()
   await admin.from('bookings').delete().eq('branch_id', branchA).like('name', `${RUN}%`)
+  if (tableId) await admin.from('tables').delete().eq('id', tableId)
+  if (zoneId) await admin.from('table_zones').delete().eq('id', zoneId)
   await cleanupCustomers() // their VIP rows go with them
 })
 
@@ -227,13 +267,21 @@ test('P4-06-02 one person, many records: LINE, else phone digits, else name — 
   expect(d.stats).toMatchObject({ bottles_in_store: 2, deposits_in_store: 1, deposits: 3, expired: 1, bookings: 1, to_vip: 3, vip_deposits: 0 })
 })
 
-test('P4-06-01 ลูกค้า is in the menu for every role — the sidebar on a computer, the เพิ่มเติม sheet on a phone', async ({ browser }) => {
+test('P4-06-01 ลูกค้า is in the menu for every role — first under รายงาน on a computer, under ภาพรวมและรายงาน in the เพิ่มเติม sheet', async ({ browser }) => {
+  const top = async (loc: import('@playwright/test').Locator) => (await loc.boundingBox())!.y
   for (const role of ['staff', 'bar', 'owner'] as const) {
     const desk = await browser.newContext({ storageState: as(role), viewport: { width: 1280, height: 800 } })
     await desk.addCookies([{ name: 'sis_branch', value: fixtureIds().branchA, url: BASE_URL }])
     const page = await desk.newPage()
     await page.goto(role === 'owner' ? '/overview' : '/tonight')
-    await page.locator('nav[aria-label="เมนูหลัก"]:visible').getByRole('link', { name: 'ลูกค้า', exact: true }).click()
+    const side = page.locator('nav[aria-label="เมนูหลัก"]:visible')
+    const link = side.getByRole('link', { name: 'ลูกค้า', exact: true })
+    // after สแกน QR (the last daily page), under the รายงาน heading, before the owner's รายงาน and บัญชีของฉัน
+    expect(await top(link), role).toBeGreaterThan(await top(side.getByRole('link', { name: 'สแกน QR', exact: true })))
+    expect(await top(link), role).toBeGreaterThan(await top(side.getByText('รายงาน', { exact: true }).first()))
+    expect(await top(link), role).toBeLessThan(await top(side.getByRole('link', { name: 'บัญชีของฉัน', exact: true })))
+    if (role === 'owner') expect(await top(link)).toBeLessThan(await top(side.getByRole('link', { name: 'รายงาน', exact: true })))
+    await link.click()
     await expect(page).toHaveURL(/\/customers$/)
     await expect(page.getByRole('heading', { name: 'ลูกค้า', exact: true })).toBeVisible()
     await desk.close()
@@ -241,15 +289,38 @@ test('P4-06-01 ลูกค้า is in the menu for every role — the sidebar 
   const { ctx, page } = await phonePage(browser, 'staff')
   await page.goto('/tonight')
   await page.getByRole('button', { name: 'เพิ่มเติม', exact: true }).click()
-  await page.getByRole('dialog').getByRole('link', { name: 'ลูกค้า', exact: true }).click()
+  const sheet = page.getByRole('dialog')
+  await expect(sheet.getByText('ภาพรวมและรายงาน', { exact: true })).toBeVisible()
+  await expect(sheet.getByText('งานประจำวัน', { exact: true })).toHaveCount(0)
+  expect(await top(sheet.getByRole('link', { name: 'ลูกค้า', exact: true }))).toBeGreaterThan(await top(sheet.getByText('ภาพรวมและรายงาน', { exact: true })))
+  await sheet.getByRole('link', { name: 'ลูกค้า', exact: true }).click()
   await expect(page).toHaveURL(/\/customers$/)
   await ctx.close()
+})
+
+test('P4-06-14 reading what was typed: a booking code and its night, half a date, no such date', () => {
+  const tonight = '2026-09-24'
+  for (const q of ['BK-0925', 'bk0925', 'BK 0925', ' bk-0925 ']) {
+    expect(parseSmartQuery(q, tonight), q).toEqual({ kind: 'booking', night: '2026-09-25', code: 'BK-0925', seq: null })
+  }
+  expect(parseSmartQuery('BK-0925-001', tonight)).toMatchObject({ night: '2026-09-25', seq: '001' })
+  expect(parseSmartQuery('BK 0925 1', tonight)).toMatchObject({ night: '2026-09-25', seq: '1' })
+  expect(parseSmartQuery('bk09251', tonight)).toMatchObject({ night: '2026-09-25', seq: '1' })
+  for (const q of ['BK', 'BK-', 'BK-09', 'bk092']) expect(parseSmartQuery(q, tonight), q).toEqual({ kind: 'bookingHint', reason: 'date' })
+  for (const q of ['BK-0231', 'BK-1301', 'BK-0000']) expect(parseSmartQuery(q, tonight), q).toEqual({ kind: 'bookingHint', reason: 'badDate' })
+  for (const q of ['สมชาย', '081-234-5678', 'DEP-SRC-AB12C', 'BK-0925-0012', 'book']) expect(parseSmartQuery(q, tonight), q).toEqual({ kind: 'text' })
+  // the year that puts the date nearest tonight — across New Year both ways
+  expect(nearestNight('0102', '2026-12-30')).toBe('2027-01-02')
+  expect(nearestNight('1230', '2027-01-02')).toBe('2026-12-30')
+  expect(nearestNight('0229', '2027-03-01')).toBe('2028-02-29') // 2026 and 2027 have none
+  expect(nearestNight('0229', '2026-09-24')).toBeNull()
+  expect(nightCode('2026-09-05')).toBe('BK-0905')
 })
 
 test.describe('staff', () => {
   test.use({ storageState: as('staff') })
 
-  test('P4-06-03 the four cards count like the list and filter it; search by name, phone in any format, a DEP or BK code', async ({ page }) => {
+  test('P4-06-03 the four cards count like the list and filter it; search by name, phone in any format, a DEP code', async ({ page }) => {
     const everyone = await list('staff')
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto('/customers')
@@ -263,7 +334,8 @@ test.describe('staff', () => {
     await expect(page.getByTestId('customers-filter-line')).toHaveAttribute('aria-current', 'page')
     await expect(page.getByTestId('customers-table-desktop')).toContainText(`${RUN} ลูกค้า LINE`) // the name staff typed, not the LINE one
 
-    for (const q of [P1.dashed, P1.intl, depA2.code, bkA1.code, 'สมชาย ใจดี']) {
+    // a booking code brings up the night's tiles instead (P4-06-12)
+    for (const q of [P1.dashed, P1.intl, depA2.code, 'สมชาย ใจดี']) {
       await page.goto(`/customers?q=${encodeURIComponent(q)}`)
       const rows = page.getByTestId('customer-row')
       await expect(rows, q).toHaveCount(1)
@@ -336,6 +408,88 @@ test.describe('staff', () => {
     await page.getByRole('button', { name: 'ค้นหา', exact: true }).click()
     await page.getByTestId('booking-customer-history').click()
     await expect(page).toHaveURL(new RegExp(`/customers/p-${P1.key}$`))
+  })
+
+  test('P4-06-12 a booking code brings up that night as you type; the whole code leaves one; half a date or no such date says so', async ({ page }) => {
+    const tonight = businessNight()
+    const code = nightCode(tonight)
+    const seq = bkT.code.split('-')[2]
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/customers')
+    await expect(page.getByTestId('customers-table-desktop')).toBeVisible()
+    const box = page.getByTestId('customers-search')
+    const tiles = page.getByTestId('booking-tile')
+
+    await box.pressSequentially(code, { delay: 40 }) // no Enter
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${code}(&|$)`))
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', tonight)
+    await expect(page.getByTestId('customers-table-desktop')).toHaveCount(0)
+    await expect(tiles.and(page.locator(`[data-code="${bkT.code}"]`))).toBeVisible()
+
+    await box.pressSequentially(`-${seq}`, { delay: 40 })
+    await expect(tiles).toHaveCount(1)
+    await expect(tiles.first()).toHaveAttribute('data-code', bkT.code)
+    await box.fill(`${code}-${Number(seq)}`) // the number without its zeros
+    await expect(tiles).toHaveCount(1)
+    await expect(tiles.first()).toHaveAttribute('data-code', bkT.code)
+
+    await box.fill(code.toLowerCase().replace('-', '')) // bk0924 — no dash, lower case
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', tonight)
+    await box.fill('BK-09')
+    await expect(page.getByTestId('customers-hint')).toContainText('พิมพ์วันที่ให้ครบ')
+    await expect(page.getByTestId('booking-board')).toHaveCount(0)
+    await box.fill('BK-0231')
+    await expect(page.getByTestId('customers-hint')).toContainText('ไม่มีวันที่นี้')
+
+    await page.getByTestId('customers-search-clear').click()
+    await expect(page.getByTestId('customers-table-desktop')).toBeVisible()
+    await expect(page).toHaveURL(/\/customers$/)
+
+    await box.fill(bkT.code)
+    await tiles.first().click()
+    await expect(page).toHaveURL(new RegExp(`/customers/p-${P5.key}$`))
+  })
+
+  test('P4-06-13 จองวันนี้ · จองพรุ่งนี้: the night as tiles — table, who, when, state, VIP, bottles; the states narrow them', async ({ page }) => {
+    const tonight = businessNight()
+    await page.setViewportSize(PHONE)
+    await page.goto('/customers')
+    await page.getByTestId('customers-shortcut-today').click()
+    await expect(page.getByTestId('customers-search')).toHaveValue(nightCode(tonight))
+    await expect(page.getByTestId('customers-shortcut-today')).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', tonight)
+
+    const { data: night, error } = await adminDb().from('bookings').select('code, status').eq('branch_id', fixtureIds().branchA).eq('night', tonight).range(0, 999)
+    expect(error, error?.message).toBeNull()
+    const live = night!.filter((b) => b.status !== 'cancelled' && b.status !== 'rejected')
+    const tiles = page.getByTestId('booking-tile')
+    await expect(tiles).toHaveCount(live.length)
+    await expect(page.getByTestId('board-filter-live')).toContainText(String(live.length))
+
+    const mine = tiles.and(page.locator(`[data-code="${bkT.code}"]`))
+    await expect(mine.locator('.tbl')).toHaveText(TABLE_LABEL)
+    await expect(mine).toContainText(`${RUN} คุณไทล์`)
+    await expect(mine).toContainText('20:00 น. · 3 คน')
+    await expect(mine.getByTestId('tile-vip')).toBeVisible()
+    await expect(mine.getByTestId('tile-bottles')).toHaveText('2')
+    await expect(mine).toHaveAttribute('data-status', 'confirmed')
+    await expect(tiles.and(page.locator(`[data-code="${bkCancelled.code}"]`))).toHaveCount(0) // cancelled: under its own state only
+
+    // two a row on a phone, and the page never scrolls sideways
+    const [a, b] = [await tiles.nth(0).boundingBox(), await tiles.nth(1).boundingBox()]
+    expect(Math.abs(a!.y - b!.y)).toBeLessThan(2)
+    expect(b!.x).toBeGreaterThan(a!.x)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(PHONE.width)
+
+    await page.getByTestId('board-filter-arrived').click()
+    await expect(tiles).toHaveCount(night!.filter((x) => x.status === 'arrived').length)
+    await expect(tiles.and(page.locator(`[data-code="${bkArrived.code}"]`))).toHaveAttribute('data-status', 'arrived')
+    await page.getByTestId('board-filter-cancelled').click()
+    await expect(tiles.and(page.locator(`[data-code="${bkCancelled.code}"]`))).toBeVisible()
+
+    await page.getByTestId('customers-shortcut-tomorrow').click()
+    await expect(page.getByTestId('booking-board')).toHaveAttribute('data-night', addDays(tonight, 1))
+    await expect(tiles.and(page.locator(`[data-code="${bkTomorrow.code}"]`))).toContainText('ยังไม่จัดโต๊ะ')
   })
 
   test('P4-06-09 staff: sees VIP and the note, never the button; the RPC answers BAR_ONLY', async ({ page }) => {
