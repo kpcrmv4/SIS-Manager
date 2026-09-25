@@ -11,7 +11,7 @@ import { LIVE_STATUSES, cellState, type CellState } from '@/lib/booking/format'
  * The floor plan: one grid of table cells per zone. Cell state (free / waiting / booked /
  * arrived / late) depends on wall-clock time, so it is computed client-side and re-evaluated
  * on an interval — a page left open past a booking's slot should turn it "late" without a
- * manual refresh. A table closed for the night with no booking on it reads ปิดจอง (R-056).
+ * manual refresh. A table closed for the night with no booking on it reads ปิดจอง, in red (R-056, R-057).
  * A cell with a booking opens it; a free one opens รับจอง for that table and a closed one
  * opens it again, when the caller passes those handlers (R-055).
  */
@@ -55,7 +55,7 @@ export function FloorPlan({
     [t('legendBooked'), { borderColor: 'var(--info)', background: 'var(--info-bg)' }],
     [t('legendArrived'), { borderColor: 'var(--status-done)', background: 'var(--status-done-bg)' }],
     [t('legendLate'), { borderColor: 'var(--status-progress)', background: 'var(--status-progress-bg)' }],
-    [t('legendClosed'), { borderColor: 'var(--line-strong)', borderStyle: 'dashed', background: 'var(--surface-2)' }],
+    [t('legendClosed'), { borderColor: 'var(--urgent)', borderStyle: 'dashed', background: 'var(--urgent-bg)' }],
   ]
 
   return (

@@ -329,6 +329,16 @@ test.describe('plan: tap a table', () => {
     await expect(page.getByText(/ปิดการจองโต๊ะ PA1/)).toBeVisible()
     await expect(a1).toHaveAttribute('data-state', 'closed')
     await expect(a1).toContainText('ปิดจอง')
+    // red at a glance — the border and the table's name (R-057), not only the word
+    const red = await a1.evaluate((el) => {
+      const probe = document.createElement('i')
+      probe.style.color = 'var(--urgent)'
+      document.body.append(probe)
+      const want = getComputedStyle(probe).color
+      probe.remove()
+      return getComputedStyle(el).borderTopColor === want && getComputedStyle(el.querySelector('b')!).color === want
+    })
+    expect(red).toBe(true)
     const blocks = async () => (await admin().from('table_blocks').select('night, created_by').eq('table_id', zt.tableA1)).data
     expect(await blocks()).toEqual([{ night: NIGHT, created_by: fixtureIds().users.bar }])
     type Plan = { zones: { tables: { id: string; state: string }[] }[] }

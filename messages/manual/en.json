@@ -751,7 +751,7 @@
         "**Waiting for confirmation**: bookings waiting for the shop from tonight on, grouped under **Tonight**, **Tomorrow** and dates",
         "Tabs **Floor plan** and **List**",
         "A summary of the night: tables, guests, and how many are booked out of the total",
-        "The floor plan by zone, coloured **Free**, **Waiting** (violet), **Booked**, **Arrived**, **Late** and **Closed** (dashed) — tap a free table to book it, one with a booking to open it",
+        "The floor plan by zone, coloured **Free**, **Waiting** (violet), **Booked**, **Arrived**, **Late** and **Closed** (red, dashed) — tap a free table to book it, one with a booking to open it",
         "A **Closed for bookings tonight** banner when the shop takes no bookings that night"
       ],
       "howtos": {
