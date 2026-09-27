@@ -90,10 +90,16 @@ export async function receiveRequest(input: {
   return res
 }
 
-export async function confirmDeposit(depositId: string, levels: number[], photoPaths: string[]): Promise<ActionResult<{ id: string; status: string }>> {
+export async function confirmDeposit(depositId: string, levels: number[], photoPaths: string[], itemId?: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(depositId) || !levels.length) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) =>
-    sb.rpc('confirm_deposit', { p_deposit: depositId, p_levels: levels.map((l) => Math.round(l)), p_photo_paths: photoPaths.slice(0, 10) }),
+    sb.rpc('confirm_deposit', {
+      p_deposit: depositId,
+      p_levels: levels.map((l) => Math.round(l)),
+      p_photo_paths: photoPaths.slice(0, 10),
+      // R-060: bar confirms against the shop's list
+      p_item_id: isUuid(itemId) ? itemId : undefined,
+    }),
   )
   if (res.ok) {
     touched(depositId)
@@ -197,5 +203,16 @@ export async function disposeDeposits(depositIds: string[], reason?: string): Pr
     touched()
     after(() => dispatchSoon())
   }
+  return res
+}
+
+/** R-060 · bar / owner add a liquor name the list is missing, to their branch — an existing name is reused. */
+export async function addLiquorItem(branchId: string, name: string, category: string): Promise<ActionResult<{ id: string; name: string; category: string; existed: boolean }>> {
+  const clean = cleanText(name, 120)
+  if (!isUuid(branchId) || !clean) return { ok: false, error: 'invalid' }
+  const res = await callRpc<{ id: string; name: string; category: string; existed: boolean }>((sb) =>
+    sb.rpc('add_liquor_item', { p_branch: branchId, p_name: clean, p_category: category }),
+  )
+  if (res.ok) revalidatePath('/settings/items')
   return res
 }

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { CircleAlert, CircleCheck, UserPlus, Wine } from 'lucide-react'
 import { CxLoader } from './cx-states'
+import { getFriendship } from './liff-client'
 import { customerFetch, useCxSession } from './session-context'
 
 type Linked = { already: boolean; returning: boolean; code: string; linked: number; name: string | null; addFriendUrl: string | null }
@@ -23,6 +24,18 @@ export function LinkClient({ token }: { token: string }) {
   const session = useCxSession()
   const sent = useRef(false)
   const [state, setState] = useState<State>(() => (token ? { kind: 'loading' } : { kind: 'failed', error: 'missing' }))
+  // already the OA's friend → no add-friend card; null = LINE could not say, so ask
+  const [friend, setFriend] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let live = true
+    void getFriendship().then((f) => {
+      if (live) setFriend(f)
+    })
+    return () => {
+      live = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!token || sent.current) return
@@ -78,7 +91,7 @@ export function LinkClient({ token }: { token: string }) {
         )}
         <p className="text-xs leading-relaxed text-cx-muted">{t('link.linkedBody')}</p>
       </div>
-      {!r.returning && r.addFriendUrl && (
+      {r.addFriendUrl && friend !== true && (friend === false || !r.returning) && (
         <a href={r.addFriendUrl} className="cx-card flex-row items-center gap-3" data-testid="cx-link-add-friend">
           <UserPlus className="size-6 flex-none text-cx-gold" aria-hidden />
           <span className="min-w-0">

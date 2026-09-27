@@ -47,3 +47,19 @@ export async function initLiff(liffId: string): Promise<LiffResult> {
 export function liffOpenUrl(liffId: string): string {
   return `https://liff.line.me/${liffId}`
 }
+
+/**
+ * Is this LINE user a friend of the branch's OA? Needs the LIFF app's LINE Login channel to be
+ * linked to that OA (LINE Developers → the channel → "Linked LINE Official Account"). null when it
+ * cannot be told — outside LINE, before init, or with no linked OA — and the caller then asks anyway.
+ */
+export async function getFriendship(): Promise<boolean | null> {
+  try {
+    const { default: liff } = await import('@line/liff')
+    if (!liff.isLoggedIn()) return null
+    const { friendFlag } = await liff.getFriendship()
+    return friendFlag
+  } catch {
+    return null
+  }
+}

@@ -33,6 +33,7 @@ export type DepositDetail = {
   code: string
   status: DepositStatus
   isVip: boolean
+  itemId: string | null
   itemName: string
   category: string
   quantity: number
@@ -73,6 +74,7 @@ type DepositDetailRow = {
   code: string
   status: DepositStatus
   is_vip: boolean
+  item_id: string | null
   item_name: string
   category: string
   quantity: number
@@ -121,7 +123,7 @@ export async function getDepositDetail(branchId: string, id: string): Promise<De
   const depositQ = sb
     .from('deposits')
     .select(
-      `id, branch_id, code, status, is_vip, item_name, category, quantity, remaining_qty, remaining_percent,
+      `id, branch_id, code, status, is_vip, item_id, item_name, category, quantity, remaining_qty, remaining_percent,
        customer_id, customer_name, customer_phone, table_label, created_at, received_at, expires_at, collect_deadline_at,
        photo_paths, confirm_photo_paths, notes, cancel_reason, dispose_reason,
        received_by_profile:profiles!deposits_received_by_fkey(display_name, role),
@@ -164,6 +166,7 @@ export async function getDepositDetail(branchId: string, id: string): Promise<De
     code: dep.code,
     status: dep.status,
     isVip: dep.is_vip,
+    itemId: dep.item_id,
     itemName: dep.item_name,
     category: dep.category,
     quantity: dep.quantity,

@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { ArrowUpFromLine, CalendarX, CheckCheck, CircleX, ClipboardCheck, Inbox, Trash2, Wine, type LucideIcon } from 'lucide-react'
 import type { DepositDetail } from '@/lib/deposit/detail'
 import type { DepositStatus } from '@/lib/deposit/format'
+import type { LiquorItem } from '@/lib/deposit/items'
 import { PrintStatusBadge } from '@/components/print/print-status-badge'
 import { ConfirmDialog } from './confirm-dialog'
 import { RejectDialog } from './reject-dialog'
@@ -47,8 +48,11 @@ export function DetailActions({
   depositDays,
   blockedTonight,
   locale,
+  items = [],
 }: {
   deposit: DepositDetail
+  /** bar / owner confirming: the branch's liquor list (R-060) */
+  items?: LiquorItem[]
   role: 'staff' | 'bar' | 'owner'
   branchId: string
   depositDays: number
@@ -157,7 +161,18 @@ export function DetailActions({
       )}
 
       {canReceive && <ReceiveDialog open={dialog === 'receive'} onOpenChange={(v) => setDialog(v ? 'receive' : null)} depositId={deposit.id} branchId={branchId} defaultQuantity={deposit.quantity} />}
-      {canConfirm && <ConfirmDialog open={dialog === 'confirm'} onOpenChange={(v) => setDialog(v ? 'confirm' : null)} depositId={deposit.id} branchId={branchId} quantity={deposit.quantity} />}
+      {canConfirm && (
+        <ConfirmDialog
+          open={dialog === 'confirm'}
+          onOpenChange={(v) => setDialog(v ? 'confirm' : null)}
+          depositId={deposit.id}
+          branchId={branchId}
+          quantity={deposit.quantity}
+          items={items}
+          itemId={deposit.itemId}
+          itemName={deposit.itemName}
+        />
+      )}
       {canReject && <RejectDialog open={dialog === 'reject'} onOpenChange={(v) => setDialog(v ? 'reject' : null)} depositId={deposit.id} />}
       {canWithdraw && (
         <WithdrawDialog

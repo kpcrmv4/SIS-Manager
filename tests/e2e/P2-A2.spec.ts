@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { expect, test } from '@playwright/test'
 import { adminDb, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
-import { RUN, cleanupRun, confirmAll, deposit, mustCreate } from './fixtures/deposits'
+import { RUN, cleanupRun, confirmAll, deposit, mustCreate, photo } from './fixtures/deposits'
 import { bottleIds, createLineRequest, forceExpired, requestWithdrawal } from './fixtures/p2a-flows'
 import { cleanupCustomers, makeCustomer } from './fixtures/p2c-customers'
 import { addDays, bangkokDate, businessNight, weekdayIndex } from '../../src/lib/date'
@@ -191,6 +191,65 @@ test.describe('detail dialogs', () => {
       await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
       expect((await deposit(none.id)).status).toBe('in_store')
       expect(await jobs(none.id)).toEqual([])
+    })
+
+    test('P2-A2-20 bar confirms against the liquor list: not found, search, add a name, and staff typed freely', async ({ page }) => {
+      const { branchA } = fixtureIds()
+      // staff typed a name the list does not have
+      const typed = `${RUN} จอนนี่ ดำ`
+      const { data: made, error } = await dbAs('staff').rpc('create_deposit', {
+        p_branch: branchA,
+        p_customer_name: `${RUN} ลูกค้า`,
+        p_item_name: typed,
+        p_quantity: 1,
+        p_photo_paths: [await photo()],
+      })
+      expect(error, error?.message).toBeNull()
+      const dep = made as { id: string }
+
+      // the database refuses a confirm with no list item
+      expect((await dbAs('bar').rpc('confirm_deposit', { p_deposit: dep.id, p_levels: [100], p_photo_paths: [await photo()] })).error?.message).toBe('ITEM_REQUIRED')
+
+      await page.goto(`/deposits/${dep.id}`)
+      await page.getByTestId('action-confirm').click()
+      await expect(page.getByTestId('confirm-item-not-found')).toHaveText('ไม่เจอชื่อเหล้า')
+      await expect(page.getByTestId('confirm-item')).toContainText(`ที่พิมพ์มา: ${typed}`)
+      await attachPhoto(page, 'confirm-photo-add')
+      await page.getByTestId('confirm-print-receipt').uncheck()
+      await page.getByTestId('confirm-print-label').uncheck()
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByTestId('confirm-item')).toContainText('เลือกชื่อเหล้าจากรายการก่อนยืนยัน')
+      expect((await deposit(dep.id)).status).toBe('pending_confirm')
+
+      // search finds the list's name; change goes back to the search
+      await page.getByTestId('confirm-item-search').fill('johnnie')
+      await page.getByTestId('confirm-item-option').filter({ has: page.getByText('Johnnie Walker Black Label', { exact: true }) }).first().click()
+      await expect(page.getByTestId('confirm-item-name')).toHaveText('Johnnie Walker Black Label')
+      await page.getByTestId('confirm-item-change').click()
+
+      // or add the missing name: it joins the branch's list and is picked
+      const newName = `${RUN} Blue Label`
+      await page.getByTestId('confirm-item-add').click()
+      await page.getByTestId('add-item-name').fill(newName)
+      await page.getByTestId('add-item-category').selectOption('whisky')
+      await page.getByTestId('add-item-save').click()
+      await expect(page.getByTestId('confirm-item-name')).toHaveText(newName)
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
+
+      const row = await deposit(dep.id)
+      const { data: item } = await adminDb().from('liquor_items').select('id, branch_id, category').eq('name', newName).single()
+      expect(item).toMatchObject({ branch_id: branchA, category: 'whisky' })
+      expect(row).toMatchObject({ status: 'in_store', item_id: item!.id, item_name: newName, category: 'whisky' })
+      const { data: ev } = await adminDb().from('deposit_events').select('payload').eq('deposit_id', dep.id).eq('action', 'confirmed').single()
+      expect(ev!.payload).toMatchObject({ item: newName, typed })
+
+      // adding a name the list has reuses it; staff may not add
+      const again = await dbAs('bar').rpc('add_liquor_item', { p_branch: branchA, p_name: `  ${newName.toUpperCase()} `, p_category: 'other' })
+      expect(again.data).toMatchObject({ id: item!.id, existed: true })
+      expect((await dbAs('staff').rpc('add_liquor_item', { p_branch: branchA, p_name: 'x', p_category: 'other' })).error?.message).toBe('BAR_ONLY')
+      await adminDb().from('deposits').delete().eq('id', dep.id)
+      await adminDb().from('liquor_items').delete().eq('id', item!.id)
     })
 
     test('P2-A2-19 the customer card lists what LINE told the customer; no "ส่ง" badge beside the switch', async ({ page }) => {

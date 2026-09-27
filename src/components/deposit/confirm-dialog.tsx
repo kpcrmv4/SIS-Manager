@@ -9,6 +9,8 @@ import { PhotoPicker } from './photo-picker'
 import { confirmDeposit } from '@/lib/deposit/actions'
 import { queuePrint, type PrintJobType } from '@/lib/deposit/print'
 import { getPrintStatus, type PrintStatusView } from '@/lib/print/actions'
+import type { LiquorItem } from '@/lib/deposit/items'
+import { ItemPicker, initialItem } from './item-picker'
 
 /**
  * bar/owner: % remaining per bottle + a confirm photo → the deposit moves to in_store, then the
@@ -20,12 +22,19 @@ export function ConfirmDialog({
   depositId,
   branchId,
   quantity,
+  items,
+  itemId,
+  itemName,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   depositId: string
   branchId: string
   quantity: number
+  /** the shop's active liquor list for this branch — bar confirms against it (R-060) */
+  items: LiquorItem[]
+  itemId: string | null
+  itemName: string
 }) {
   const t = useTranslations('confirmDialog')
   const td = useTranslations('deposit')
@@ -37,6 +46,8 @@ export function ConfirmDialog({
   const [print, setPrint] = useState<Record<PrintJobType, boolean>>({ receipt: true, label: true })
   const [printer, setPrinter] = useState<PrintStatusView['state'] | null>(null)
   const printing = print.receipt || print.label
+  const [item, setItem] = useState<LiquorItem | null>(() => initialItem(items, itemId, itemName))
+  const [itemError, setItemError] = useState<string | undefined>()
 
   // say up front when the printer is not there — the job still queues and prints later
   useEffect(() => {
@@ -58,8 +69,12 @@ export function ConfirmDialog({
   }
 
   function submit() {
+    if (!item) {
+      setItemError(t('itemPick'))
+      return
+    }
     start(async () => {
-      const res = await confirmDeposit(depositId, levels, photos)
+      const res = await confirmDeposit(depositId, levels, photos, item.id)
       if (!res.ok) {
         toast.error(te(res.error))
         return
@@ -91,6 +106,17 @@ export function ConfirmDialog({
       }
     >
       <div className="space-y-3.5">
+        <ItemPicker
+          branchId={branchId}
+          items={items}
+          typed={itemName}
+          value={item}
+          onChange={(v) => {
+            setItem(v)
+            setItemError(undefined)
+          }}
+          error={itemError}
+        />
         {/* type the % or drag the bar — both edit the same number */}
         {levels.map((lvl, i) => (
           <div key={i} className="text-sm">

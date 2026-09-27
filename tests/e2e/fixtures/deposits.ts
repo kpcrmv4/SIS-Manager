@@ -22,6 +22,8 @@ export async function photo(branch: 'A' | 'B' = 'A'): Promise<string> {
 
 export async function createDeposit(role: FixtureRole, opts: { qty?: number; branch?: 'A' | 'B'; photo?: boolean; expiresAt?: string } = {}) {
   const { branchA, branchB } = fixtureIds()
+  // the name below is on the branch's list, so bar's confirm dialog finds it (R-060)
+  await fixtureItem(opts.branch ?? 'A')
   const { data, error } = await dbAs(role).rpc('create_deposit', {
     p_branch: opts.branch === 'B' ? branchB : branchA,
     p_customer_name: `${RUN} ลูกค้า`,
@@ -59,10 +61,32 @@ export async function bottles(id: string) {
   return data ?? []
 }
 
+const itemCache = new Map<string, string>()
+
+/** R-060: bar confirms against the list — one permanent fixture item per fixture branch, found or made. */
+export async function fixtureItem(branch: 'A' | 'B' = 'A'): Promise<string> {
+  const hit = itemCache.get(branch)
+  if (hit) return hit
+  const { branchA, branchB } = fixtureIds()
+  const branchId = branch === 'B' ? branchB : branchA
+  const admin = adminDb()
+  const name = 'Johnnie Walker Black Label'
+  const { data: found } = await admin.from('liquor_items').select('id').eq('branch_id', branchId).eq('name', name).limit(1)
+  let id = found?.[0]?.id
+  if (!id) {
+    const { data, error } = await admin.from('liquor_items').insert({ branch_id: branchId, name, category: 'whisky' }).select('id').single()
+    expect(error, error?.message).toBeNull()
+    id = data!.id
+  }
+  await admin.from('liquor_items').update({ active: true }).eq('id', id)
+  itemCache.set(branch, id)
+  return id
+}
+
 export async function confirmAll(id: string, levels: number[], role: FixtureRole = 'bar') {
   const row = await deposit(id)
   const branch = row.branch_id === fixtureIds().branchB ? 'B' : 'A'
-  const { error } = await dbAs(role).rpc('confirm_deposit', { p_deposit: id, p_levels: levels, p_photo_paths: [await photo(branch)] })
+  const { error } = await dbAs(role).rpc('confirm_deposit', { p_deposit: id, p_levels: levels, p_photo_paths: [await photo(branch)], p_item_id: await fixtureItem(branch) })
   expect(error, error?.message).toBeNull()
 }
 

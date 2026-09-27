@@ -8,6 +8,7 @@ import { DetailActions } from '@/components/deposit/detail-actions'
 import { CustomerCard, DetailSummary, FactsCard, PhotosCard } from '@/components/deposit/detail-cards'
 import { getActorState } from '@/lib/auth/actor'
 import { getDepositDetail } from '@/lib/deposit/detail'
+import { listLiquorItems } from '@/lib/deposit/items'
 import { getBranchSettings, DOW_NAMES } from '@/lib/deposit/branch'
 import { depositBadgeSpec, badgeText } from '@/lib/deposit/format'
 import { businessNight, weekdayIndex } from '@/lib/date'
@@ -33,6 +34,8 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
 
   const t = await getTranslations('deposit')
   const tRoot = await getTranslations()
+  // bar / owner confirm the bottle against the shop's list (R-060)
+  const items = detail.status === 'pending_confirm' && actor.role !== 'staff' ? await listLiquorItems(branch.id) : []
 
   const photoUrls = await signedPhotoUrls([...detail.photoPaths, ...detail.confirmPhotoPaths])
   const spec = depositBadgeSpec(detail)
@@ -58,7 +61,7 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
       <div className="grid items-start gap-4 nav:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
         <div className="flex min-w-0 flex-col gap-4">
           <DetailSummary detail={detail} noticeDays={branchSettings?.expiryNoticeDays ?? 7} locale={actor.locale} />
-          <DetailActions deposit={detail} role={actor.role} branchId={branch.id} depositDays={depositDays} blockedTonight={blockedTonight} locale={actor.locale} />
+          <DetailActions deposit={detail} role={actor.role} branchId={branch.id} depositDays={depositDays} blockedTonight={blockedTonight} locale={actor.locale} items={items} />
           <BottlesGrid bottles={detail.bottles} total={detail.quantity} />
           <CustomerCard detail={detail} canEditReminders={actor.role === 'bar' || actor.role === 'owner'} branchRemindersOff={branchSettings?.expiryRemindersEnabled === false} locale={actor.locale} />
           <FactsCard detail={detail} depositDays={depositDays} locale={actor.locale} />

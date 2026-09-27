@@ -23,8 +23,8 @@ export async function LineHistory({ depositId, linked, locale }: { depositId: st
 
   return (
     <details className="group" data-testid="line-history">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm [&::-webkit-details-marker]:hidden">
-        <span className="text-muted-token">{t('title')}</span>
+      <summary className="btn-ghost btn-sm -mx-1 cursor-pointer list-none justify-between [&::-webkit-details-marker]:hidden">
+        <span>{t('title')}</span>
         <span className="flex items-center gap-1.5 text-ink-2 tnum">
           {t('count', { count: rows.length })}
           <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden />

@@ -1515,6 +1515,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_liquor_item: {
+        Args: { p_branch: string; p_category?: string; p_name: string }
+        Returns: Json
+      }
       assign_table: {
         Args: { p_booking: string; p_table: string }
         Returns: Json
@@ -1605,7 +1609,12 @@ export type Database = {
         Returns: Json
       }
       confirm_deposit: {
-        Args: { p_deposit: string; p_levels: number[]; p_photo_paths: string[] }
+        Args: {
+          p_deposit: string
+          p_item_id?: string
+          p_levels: number[]
+          p_photo_paths: string[]
+        }
         Returns: Json
       }
       create_booking: {
