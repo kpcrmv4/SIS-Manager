@@ -252,7 +252,7 @@ test.describe('owner', () => {
     expect((await go('00000000-0000-0000-0000-000000000000', '/deposits')).status()).toBe(403)
   })
 
-  test('P4-01-17 previous-period figures equal SQL; the delta chip and the stock line agree', async ({ page }) => {
+  test('P4-01-17 previous-period figures equal SQL; the delta chip and last week\'s stock agree', async ({ page }) => {
     const { from, to } = periodRange('month')
     const prev = previousRange(from, to)
     await expect(async () => {
@@ -270,12 +270,16 @@ test.describe('owner', () => {
       expect(trends.weeks[7].in_store_end).toBe(k.in_store_bottles)
 
       await page.goto('/overview')
-      const d = delta(k.new_deposits, trends.prev.new_deposits)
+      // a change shows only against a previous period that had something (owner, 2026-09-27)
+      const d = trends.prev.new_deposits > 0 ? delta(k.new_deposits, trends.prev.new_deposits) : null
       const chip = page.locator('[data-testid="kpi-delta"][data-kpi="new_deposits"]')
       if (d) await expect(chip).toHaveAttribute('data-dir', d.dir, { timeout: 1_000 })
       else await expect(chip).toHaveCount(0, { timeout: 1_000 })
-      const values = await page.locator('[data-testid="kpi-cell"][data-kpi="in_store"] [data-testid="sparkline"]').getAttribute('data-values')
-      expect(values!.split(',').at(-1)).toBe(String(k.in_store_bottles))
+      // the stock is compared with last week's end — shown only when last week had bottles
+      const lastWeek = trends.weeks[6].in_store_end
+      const prevWeek = page.getByTestId('kpi-prev-week')
+      if (lastWeek > 0) await expect(prevWeek).toHaveAttribute('data-value', String(lastWeek), { timeout: 1_000 })
+      else await expect(prevWeek).toHaveCount(0, { timeout: 1_000 })
     }).toPass({ timeout: 45_000 })
   })
 
@@ -335,6 +339,22 @@ test.describe('owner', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0)
     const y = async (p: Page, id: string) => (await p.getByTestId(id).boundingBox())!.y
     expect(await y(page, 'overview-actions')).toBeLessThan(await y(page, 'overview-kpis'))
+    // (owner, 2026-09-27) the jobs are a list, urgent ones first, and the header adds them up
+    const rows = page.getByTestId('action-chip')
+    const tones = await rows.evaluateAll((els) => els.map((e) => e.getAttribute('data-tone')))
+    const firstCalm = tones.findIndex((t) => t !== 'urgent')
+    if (firstCalm >= 0) expect(tones.slice(firstCalm)).not.toContain('urgent')
+    const counts = await rows.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-count'))))
+    if (counts.length) await expect(page.getByTestId('actions-summary')).toContainText(`${counts.reduce((n, c) => n + c, 0)} งาน`)
+    // the stock split adds up to the bottles in store; the show-rate split to came + no-show + the rest
+    const inStore = Number(await page.locator('[data-testid="kpi-value"][data-kpi="in_store"]').textContent())
+    const split = page.getByTestId('stock-split')
+    if (await split.count()) {
+      const parts = await split.locator('[data-value]').evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-value'))))
+      expect(parts.reduce((n, v) => n + v, 0)).toBe(inStore)
+    }
+    // no trend lines left
+    await expect(page.getByTestId('sparkline')).toHaveCount(0)
     // exports live on /reports (R-034)
     await expect(page.getByTestId('overview-export')).toHaveCount(0)
     await expect(page.getByTestId('overview-export-xlsx')).toHaveCount(0)

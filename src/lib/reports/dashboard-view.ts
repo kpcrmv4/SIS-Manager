@@ -123,7 +123,7 @@ export function branchHref(branchId: string, path: string, working: string | nul
 
 export const ACTION_KEYS = ['to_confirm', 'requests', 'withdrawals', 'bookings_pending', 'expiring', 'to_dispose', 'printers_offline', 'line_failed'] as const
 export type ActionKey = (typeof ACTION_KEYS)[number]
-export type ActionItem = { key: ActionKey; count: number; tone: 'progress' | 'info' | 'violet' | 'urgent'; href: string }
+export type ActionItem = { key: ActionKey; count: number; tone: 'progress' | 'info' | 'violet' | 'urgent'; href: string; /** the branch the link opens, when there are several */ branch: string | null }
 
 // a chip that opens a deposit group wears that group's hue (R-047)
 const ACTIONS: Record<ActionKey, { tone: ActionItem['tone']; count: (b: DashBranch) => number; path: (b: DashBranch) => string }> = {
@@ -152,9 +152,10 @@ export function actionItems(branches: DashBranch[], working: string | null): Act
       total += n
       if (n > 0 && (!top || b.id === working || (top.id !== working && n > def.count(top)))) top = b
     }
-    if (total > 0 && top) out.push({ key, count: total, tone: def.tone, href: branchHref(top.id, def.path(top), working) })
+    if (total > 0 && top) out.push({ key, count: total, tone: def.tone, href: branchHref(top.id, def.path(top), working), branch: branches.length > 1 ? top.name : null })
   }
-  return out
+  // the urgent ones first, each group in its usual order (owner: "what is most urgent" at a glance)
+  return [...out.filter((a) => a.tone === 'urgent'), ...out.filter((a) => a.tone !== 'urgent')]
 }
 
 // ── setup checklist ────────────────────────────────────────────────────────

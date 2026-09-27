@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { GlassWater, Martini, PackagePlus, Trash2, UserCheck, Users, Wine } from 'lucide-react'
+import { Martini, Users } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
 import { EmptyState } from '@/components/ui/states'
 import { SegmentedFilter } from '@/components/ui/filter-bar'
@@ -8,7 +8,7 @@ import { ActivityFeed } from '@/components/overview/activity-feed'
 import { BranchOverview } from '@/components/overview/branch-overview'
 import { DisposalList } from '@/components/overview/disposal-list'
 import { ExpiringList } from '@/components/overview/expiring-list'
-import { KpiStrip, type KpiCell } from '@/components/overview/kpi-strip'
+import { FiguresPanel, type FlowFigure } from '@/components/overview/figures-panel'
 import { OverviewLive } from '@/components/overview/overview-live'
 import { TonightPanel } from '@/components/overview/tonight-panel'
 import { TopList } from '@/components/overview/top-list'
@@ -16,7 +16,8 @@ import { WeekdayChart } from '@/components/overview/weekday-chart'
 import { getActorState } from '@/lib/auth/actor'
 import { formatLongDate, formatShortDate, formatTime } from '@/lib/date'
 import { getDashboard, getTrends } from '@/lib/reports/dashboard'
-import { ACTION_KEYS, actionItems, delta, pointsDelta, weeklyShowRate, type Delta, type TrendWeek } from '@/lib/reports/dashboard-view'
+import { ACTION_KEYS, actionItems, delta, pointsDelta, type Delta } from '@/lib/reports/dashboard-view'
+import { SHOP_NAME } from '@/lib/constants'
 import { getOverview, parsePeriod, periodRange, previousRange, showRate } from '@/lib/reports/overview'
 
 type Search = Promise<{ period?: string }>
@@ -53,108 +54,59 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
   const prev = trends.prev
   const weeks = trends.weeks
 
-  // ── figures ──
+  // ── figures ── (redesigned 2026-09-27: what each number is made of, no decorative trend lines)
+  // a change is shown only against a period that had something — "ใหม่" against zero says nothing
+  const change = (cur: number, before: number): Delta => (before > 0 ? delta(cur, before) : null)
   const deltaText = (d: Delta, points = false) =>
     !d ? null : d.pct === null ? t('delta.new') : d.dir === 'same' ? t('delta.same') : points ? t('delta.points', { pts: d.pct }) : t('delta.pct', { pct: d.pct })
   const vsPrev = t('delta.vsPrev', { from: formatShortDate(prev.from, locale), to: formatShortDate(prev.to, locale) })
-  const spark = (values: (number | null)[]) => t('spark', { values: values.map((v) => v ?? '–').join(', ') })
-  const series = (key: keyof Omit<TrendWeek, 'start'>) => weeks.map((w) => w[key])
   const reports = `/reports?from=${from}&to=${to}`
   const rate = showRate(k.arrived, k.no_shows)
   const prevRate = showRate(prev.arrived, prev.no_shows)
   const lastWeekStock = weeks.length >= 2 ? weeks[weeks.length - 2].in_store_end : null
-  const stockDelta = lastWeekStock === null ? null : delta(k.in_store_bottles, lastWeekStock)
-  const newDelta = delta(k.new_deposits, prev.new_deposits)
-  const outDelta = delta(k.bottles_withdrawn, prev.bottles_withdrawn)
-  const disposedDelta = delta(k.disposed, prev.disposed)
-  const rateDelta = pointsDelta(rate, prevRate)
-  const rates = weeklyShowRate(weeks)
+  const stockMove = lastWeekStock ? k.in_store_bottles - lastWeekStock : null
+  const rateDelta = prev.arrived + prev.no_shows > 0 ? pointsDelta(rate, prevRate) : null
 
-  const cells: KpiCell[] = [
-    {
-      key: 'in_store',
-      label: t('kpiInStore'),
-      icon: Wine,
-      value: String(k.in_store_bottles),
-      unit: t('bottlesUnit'),
-      hint: t('kpiInStoreHint', { branches: k.branches, customers: k.in_store_customers }),
-      tone: 'default',
-      delta: stockDelta,
-      good: 'none',
-      deltaText: deltaText(stockDelta),
-      deltaTitle: t('delta.vsLastWeek'),
-      series: series('in_store_end'),
-      seriesLabel: spark(series('in_store_end')),
-      href: '/deposits',
-    },
-    {
-      key: 'new_deposits',
-      label: t('kpiNew'),
-      icon: PackagePlus,
-      value: String(k.new_deposits),
-      hint: t('prevHint', { value: prev.new_deposits }),
-      tone: 'default',
-      delta: newDelta,
-      good: 'up',
-      deltaText: deltaText(newDelta),
-      deltaTitle: vsPrev,
-      series: series('new_deposits'),
-      seriesLabel: spark(series('new_deposits')),
-      href: reports,
-    },
-    {
-      key: 'bottles_withdrawn',
-      label: t('kpiWithdrawn'),
-      icon: GlassWater,
-      value: String(k.bottles_withdrawn),
-      unit: t('bottlesUnit'),
-      hint: t('prevHint', { value: prev.bottles_withdrawn }),
-      tone: 'info',
-      delta: outDelta,
-      good: 'none',
-      deltaText: deltaText(outDelta),
-      deltaTitle: vsPrev,
-      series: series('bottles_withdrawn'),
-      seriesLabel: spark(series('bottles_withdrawn')),
-      href: reports,
-    },
+  // the stock by branch: the brand's own red, fading per branch; past three, the rest together
+  const shade = ['var(--brand)', 'color-mix(in srgb, var(--brand) 55%, var(--card))', 'color-mix(in srgb, var(--brand) 28%, var(--card))']
+  const byStock = [...branches].sort((x, y) => y.in_store_bottles - x.in_store_bottles)
+  const short = (name: string) => name.replace(SHOP_NAME, '').trim() || name
+  const stockParts = byStock.slice(0, 3).map((b, i) => ({ key: b.id, label: `${short(b.name)} ${b.in_store_bottles}`, value: b.in_store_bottles, color: shade[i] }))
+  const rest = byStock.slice(3).reduce((n, b) => n + b.in_store_bottles, 0)
+  if (byStock.length > 3) stockParts.push({ key: 'rest', label: t('otherBranches', { count: rest }), value: rest, color: 'var(--line-strong)' })
+
+  const flowFigures: FlowFigure[] = [
+    { key: 'new_deposits', label: t('kpiNew'), value: k.new_deposits, unit: t('depositsUnit'), tone: 'brand', good: 'up', ...fig(k.new_deposits, prev.new_deposits) },
+    { key: 'bottles_withdrawn', label: t('kpiWithdrawn'), value: k.bottles_withdrawn, unit: t('bottlesUnit'), tone: 'info', good: 'none', ...fig(k.bottles_withdrawn, prev.bottles_withdrawn) },
     {
       key: 'disposed',
       label: t('kpiDisposed'),
-      icon: Trash2,
-      value: String(k.disposed),
-      hint: t('kpiDisposedHint', { count: k.awaiting_disposal }),
+      value: k.disposed,
       tone: 'urgent',
-      delta: disposedDelta,
       good: 'down',
-      deltaText: deltaText(disposedDelta),
-      deltaTitle: vsPrev,
-      series: series('disposed'),
-      seriesLabel: spark(series('disposed')),
-      href: reports,
+      ...fig(k.disposed, prev.disposed),
+      // what is still waiting to go says more here than last period's figure
+      ...(k.awaiting_disposal > 0 ? { sub: t('awaitingMore', { count: k.awaiting_disposal }), subUrgent: true } : {}),
     },
-    {
-      key: 'show_rate',
-      label: t('kpiShowRate'),
-      icon: UserCheck,
-      value: rate === null ? '—' : `${rate}%`,
-      hint: t('kpiShowRateHint', { bookings: k.bookings, noShows: k.no_shows }),
-      tone: 'done',
-      delta: rateDelta,
-      good: 'up',
-      deltaText: deltaText(rateDelta, true),
-      deltaTitle: vsPrev,
-      series: rates,
-      seriesLabel: spark(rates),
-      seriesMax: 100,
-      href: reports,
-    },
+  ]
+  function fig(cur: number, before: number) {
+    const d = change(cur, before)
+    return { delta: d, deltaText: deltaText(d), deltaTitle: vsPrev, sub: t('prevHint', { value: before }), href: reports }
+  }
+  const others = Math.max(0, k.bookings - k.arrived - k.no_shows)
+  const rateParts = [
+    { key: 'arrived', label: t('rateArrived', { count: k.arrived }), value: k.arrived, color: 'var(--status-done)' },
+    { key: 'no_show', label: t('rateNoShow', { count: k.no_shows }), value: k.no_shows, color: 'var(--urgent)' },
+    { key: 'other', label: t('rateOther', { count: others }), value: others, color: 'var(--line-strong)' },
   ]
 
   // ── what needs doing ── (setup lives on /settings/branch, exports on /reports — owner, R-034)
   const actions = actionItems(branches, working)
   const expiringTotal = branches.reduce((n, b) => n + b.expiring, 0)
   const actionLabels = Object.fromEntries(ACTION_KEYS.map((key) => [key, t(`action.${key}`)])) as Record<(typeof ACTION_KEYS)[number], string>
+  const actionHints = Object.fromEntries(ACTION_KEYS.map((key) => [key, t(`actionHint.${key}`)])) as Record<(typeof ACTION_KEYS)[number], string>
+  const jobs = actions.reduce((n, a) => n + a.count, 0)
+  const urgentJobs = actions.filter((a) => a.tone === 'urgent').reduce((n, a) => n + a.count, 0)
 
   return (
     <>
@@ -178,9 +130,45 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
         }
       />
 
-      <ActionStrip title={t('actionsTitle')} none={t('actionsNone')} items={actions} labels={actionLabels} />
+      <ActionStrip
+        title={t('actionsTitle')}
+        none={t('actionsNone')}
+        items={actions}
+        labels={actionLabels}
+        hints={actionHints}
+        summary={{ total: t('actionsTotal', { count: jobs }), urgent: urgentJobs ? t('actionsUrgent', { count: urgentJobs }) : null }}
+      />
 
-      <KpiStrip cells={cells} />
+      <FiguresPanel
+        stock={{
+          label: t('kpiInStore'),
+          value: k.in_store_bottles,
+          unit: t('bottlesUnit'),
+          hint: t('kpiInStoreHint', { branches: k.branches, customers: k.in_store_customers }),
+          prev:
+            stockMove === null ? null : (
+              <span data-testid="kpi-prev-week" data-value={lastWeekStock ?? ''}>
+                {t('stockPrevWeek', { count: lastWeekStock ?? 0 })}
+                {stockMove !== 0 && (
+                  <span className={stockMove > 0 ? 'text-status-done' : 'text-urgent'}> {stockMove > 0 ? `+${stockMove}` : stockMove}</span>
+                )}
+              </span>
+            ),
+          branches: stockParts,
+          href: '/deposits',
+        }}
+        flow={{ label: t('flowTitle'), range: `${formatShortDate(from, locale)} – ${formatShortDate(to, locale)}`, figures: flowFigures }}
+        rate={{
+          label: t('kpiShowRate'),
+          value: rate === null ? '—' : `${rate}%`,
+          booked: t('rateBooked', { count: k.bookings }),
+          delta: rateDelta,
+          deltaText: deltaText(rateDelta, true),
+          deltaTitle: vsPrev,
+          parts: rateParts,
+          href: reports,
+        }}
+      />
 
       {/* left: tonight and the bottles at risk · right: what just happened — two columns of similar height */}
       <div className="grid items-start gap-4 xl:grid-cols-12">

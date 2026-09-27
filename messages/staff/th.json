@@ -288,7 +288,28 @@
     "noBranches": "ยังไม่มีสาขาที่เปิดใช้งาน",
     "setupNext": "ขั้นตอนถัดไป",
     "setupAll": "ดูทุกขั้นตอน ({count})",
-    "setupDone": "ตั้งค่าครบแล้ว"
+    "setupDone": "ตั้งค่าครบแล้ว",
+    "actionsTotal": "{count} งาน",
+    "actionsUrgent": "เร่งด่วน {count}",
+    "actionHint": {
+      "to_confirm": "bar ยืนยัน % แล้วเก็บเข้าชั้น",
+      "requests": "ลูกค้าขอฝากผ่าน LINE รอรับเหล้า",
+      "withdrawals": "ลูกค้ารอเหล้าอยู่",
+      "bookings_pending": "ยืนยันหรือปฏิเสธการจอง",
+      "expiring": "หมดอายุภายในช่วงแจ้งเตือน",
+      "to_dispose": "หมดอายุแล้ว นำออกจากชั้น",
+      "printers_offline": "เปิดคอมเครื่องพิมพ์ที่ร้าน",
+      "line_failed": "ตรวจการตั้งค่า LINE"
+    },
+    "stockPrevWeek": "สัปดาห์ก่อน {count} ขวด",
+    "flowTitle": "เข้า–ออก",
+    "depositsUnit": "รายการ",
+    "awaitingMore": "รอจำหน่ายอีก {count}",
+    "rateBooked": "จอง {count} โต๊ะ",
+    "rateArrived": "มาแล้ว {count}",
+    "rateNoShow": "ไม่มา {count}",
+    "rateOther": "รอ/ยกเลิก {count}",
+    "otherBranches": "สาขาอื่น {count}"
   },
   "deposits": {
     "title": "ฝากเหล้า",

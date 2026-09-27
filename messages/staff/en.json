@@ -288,7 +288,28 @@
     "noBranches": "No active branches yet",
     "setupNext": "Next step",
     "setupAll": "All steps ({count})",
-    "setupDone": "Setup complete"
+    "setupDone": "Setup complete",
+    "actionsTotal": "{count} jobs",
+    "actionsUrgent": "{count} urgent",
+    "actionHint": {
+      "to_confirm": "bar confirms the % and shelves them",
+      "requests": "LINE requests waiting for the bottle",
+      "withdrawals": "customers waiting for their bottle",
+      "bookings_pending": "confirm or reject the booking",
+      "expiring": "expire within the notice window",
+      "to_dispose": "expired — take them off the shelf",
+      "printers_offline": "turn on the shop print PC",
+      "line_failed": "check the LINE settings"
+    },
+    "stockPrevWeek": "Last week {count} bottles",
+    "flowTitle": "In and out",
+    "depositsUnit": "deposits",
+    "awaitingMore": "{count} more to dispose",
+    "rateBooked": "{count} booked",
+    "rateArrived": "Came {count}",
+    "rateNoShow": "No-show {count}",
+    "rateOther": "Waiting/cancelled {count}",
+    "otherBranches": "Other branches {count}"
   },
   "deposits": {
     "title": "Deposits",
