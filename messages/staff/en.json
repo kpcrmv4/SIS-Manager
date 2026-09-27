@@ -1248,7 +1248,15 @@
     "warnNotSetUp": "This branch's printer is not set up — the job waits in the queue until the print server is set up and running",
     "warnUnknown": "Couldn't check the printer — you can still queue the job",
     "confirmPrint": "Print",
-    "confirmQueueAnyway": "Queue it anyway"
+    "confirmQueueAnyway": "Queue it anyway",
+    "installTitle": "How to install the shop's printer",
+    "installSteps": [
+      "Open this page on the Windows PC connected to the shop's receipt printer",
+      "Press Printer setup, then Confirm — a zip file downloads",
+      "Unzip it, right-click INSTALL.bat and choose Run as administrator",
+      "When it finishes, the status above turns green: Online"
+    ],
+    "installManual": "Read it in the manual"
   },
   "errors": {
     "UNAUTHENTICATED": "Session expired — log in again",

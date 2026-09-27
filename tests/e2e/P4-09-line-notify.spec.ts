@@ -77,5 +77,17 @@ test.describe('P4-09-02 the settings card', () => {
     })
     expect(gaps.length).toBeGreaterThan(2)
     for (const g of gaps) expect(g).toBe(16)
+
+    // (owner, 2026-09-27) the printer's state sits right of its title; how to install it unfolds here and in the manual
+    const panel = page.getByTestId('print-status-panel')
+    const title = await panel.locator('.sec-head').first().boundingBox()
+    const badge = await panel.getByTestId('print-status-badge').boundingBox()
+    expect(badge!.x).toBeGreaterThan(title!.x + title!.width)
+    expect(Math.abs(badge!.y + badge!.height / 2 - (title!.y + title!.height / 2))).toBeLessThan(6)
+    await page.getByTestId('print-install-help').locator('summary').click()
+    await expect(page.getByTestId('print-install-help').locator('li')).toHaveCount(4)
+    await page.getByTestId('print-install-manual').click()
+    await page.waitForURL(/\/manual#branchSettings-install$/)
+    await expect(page.locator('#branchSettings-install')).toContainText('วิธีติดตั้งเครื่องพิมพ์ที่ร้าน')
   })
 })

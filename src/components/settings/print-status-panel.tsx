@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import * as Dialog from '@radix-ui/react-dialog'
-import { Loader2, RotateCw, Settings2 } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronRight, Loader2, RotateCw, Settings2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { ListRow } from '@/components/ui/list-row'
@@ -85,12 +86,13 @@ export function PrintStatusPanel({ branchId, branchCode, initialJobs }: { branch
 
   return (
     <div className="card-surface flex flex-col gap-4 p-4" data-testid="print-status-panel">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="sec-head mb-0!">{t('statusTitle')}</span>
-          <PrintStatusBadge branchId={branchId} refreshKey={refreshKey} />
-        </div>
-        <div className="flex items-center gap-2">
+      {/* the title on the left, where it stands on the right (owner, 2026-09-27) */}
+      <div className="flex items-center justify-between gap-3">
+        <span className="sec-head m-0!">{t('statusTitle')}</span>
+        <PrintStatusBadge branchId={branchId} refreshKey={refreshKey} />
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button type="button" className="btn-ghost btn-sm" onClick={refresh} data-testid="print-status-refresh">
             <RotateCw className="size-4" aria-hidden />
             {tc('retry')}
@@ -100,6 +102,27 @@ export function PrintStatusPanel({ branchId, branchCode, initialJobs }: { branch
             {t('setupButton')}
           </button>
         </div>
+        {/* how to install the print server on the shop's PC — the manual's own steps, here where it is needed */}
+        <details className="group rounded-md border border-line-soft" data-testid="print-install-help">
+          <summary className="btn-ghost btn-sm w-full cursor-pointer list-none justify-between [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-1.5">
+              <BookOpen className="size-4" aria-hidden />
+              {t('installTitle')}
+            </span>
+            <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden />
+          </summary>
+          <div className="px-3 pb-3 pt-1">
+            <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-sm text-ink-2">
+              {(t.raw('installSteps') as string[]).map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ol>
+            <Link href="/manual#branchSettings-install" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline" data-testid="print-install-manual">
+              {t('installManual')}
+              <ChevronRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        </details>
       </div>
 
       {jobs.length === 0 ? (

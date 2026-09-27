@@ -99,7 +99,7 @@ function SectionCard({ id, s, howtos, m, customer }: { id: string; s: ManualSect
       )}
 
       {howtos.map(([hid, h]) => (
-        <div key={hid} data-testid="manual-howto" data-roles={h.roles.join(' ')}>
+        <div key={hid} id={`${id}-${hid}`} className="scroll-mt-4" data-testid="manual-howto" data-roles={h.roles.join(' ')}>
           <h4 className="man-h4">{h.title}</h4>
           {h.roles.length < s.roles.length && <RoleChips roles={h.roles} m={m} />}
           <ol className="man-steps">
