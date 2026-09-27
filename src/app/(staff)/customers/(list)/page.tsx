@@ -72,7 +72,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <PageHeader title={t('title')} subtitle={t('subtitle', { branch: branch.name, count: list.counts.all })} />
+      <PageHeader title={t('title')} />
 
       <nav aria-label={t('title')} className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="customers-filters">
         {CUSTOMER_FILTERS.map((key) => {

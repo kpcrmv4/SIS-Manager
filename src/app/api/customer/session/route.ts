@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { customerAuthStatus, requireCustomer } from '@/lib/customer/auth'
+import { customerContact } from '@/lib/customer/contact'
 import { readJsonBody } from '../_lib/body'
 
 export const runtime = 'nodejs'
@@ -25,5 +26,7 @@ export async function POST(req: NextRequest) {
     token: s.token,
     customer: { id: s.customer.id, display_name: s.customer.display_name, locale: s.customer.locale },
     branch: { code: s.branch.code, name: s.branch.name },
+    // R-065: what the LIFF forms fill in — the name and phone this customer last gave
+    contact: await customerContact(s.customer.id, s.customer.display_name),
   })
 }

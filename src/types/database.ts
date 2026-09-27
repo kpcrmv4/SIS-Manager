@@ -485,6 +485,7 @@ export type Database = {
       }
       customers: {
         Row: {
+          contact_name: string | null
           created_at: string
           display_name: string | null
           expiry_notices_enabled: boolean
@@ -496,6 +497,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          contact_name?: string | null
           created_at?: string
           display_name?: string | null
           expiry_notices_enabled?: boolean
@@ -507,6 +509,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          contact_name?: string | null
           created_at?: string
           display_name?: string | null
           expiry_notices_enabled?: boolean

@@ -41,8 +41,9 @@ export function BookClient() {
   const [slot, setSlot] = useState<string | null>(null)
   const [party, setParty] = useState(2)
   const [zoneId, setZoneId] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+  // R-065: filled with what this customer last gave; theirs to change
+  const [name, setName] = useState(session.contact?.name ?? '')
+  const [phone, setPhone] = useState(session.contact?.phone ?? '')
   const [note, setNote] = useState('')
   const [pending, setPending] = useState(false)
   const [plan, setPlan] = useState<PlanZone[] | null>(null)
@@ -274,7 +275,7 @@ export function BookClient() {
           </label>
           <label className="block">
             <span className="cx-label">{t('book.phone')}</span>
-            <input className="cx-input" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} inputMode="tel" />
+            <input className="cx-input" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} inputMode="tel" data-testid="cx-book-phone" />
           </label>
           <label className="block">
             <span className="cx-label">{t('book.note')}</span>

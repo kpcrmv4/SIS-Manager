@@ -8,6 +8,8 @@ export type CxSession = {
   token: string
   customer: { id: string; display_name: string | null; locale: CustomerLocale }
   branch: { code: string; name: string }
+  /** R-065: the name and phone this customer last gave, filled into the forms (editable) */
+  contact?: { name: string; phone: string }
 }
 
 const SessionContext = createContext<CxSession | null>(null)

@@ -1,6 +1,7 @@
 import { NextResponse, after, type NextRequest } from 'next/server'
 import { dispatchSoon } from '@/lib/line/dispatch'
 import { customerAuthStatus, requireCustomer } from '@/lib/customer/auth'
+import { rememberContact } from '@/lib/customer/contact'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { TERMS_VERSION } from '@/components/liff/constants'
 import { readJsonBody } from '../_lib/body'
@@ -48,5 +49,7 @@ export async function POST(req: NextRequest) {
   })
   if (error) return rpcError(error)
   after(() => dispatchSoon())
+  // R-065: what they just gave is what the next form fills in
+  after(() => rememberContact(s.customer.id, cleanName, typeof phone === 'string' ? phone : undefined))
   return NextResponse.json({ ok: true, ...(data as object) }, { status: 201 })
 }
