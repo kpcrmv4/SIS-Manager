@@ -173,7 +173,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
       {/* left: tonight and the bottles at risk · right: what just happened — two columns of similar height */}
       <div className="grid items-start gap-4 xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-4 xl:col-span-7">
-          <TonightPanel tonight={dash.tonight} t={t} nightLabel={formatShortDate(dash.night, locale)} planHref="/bookings" />
+          <TonightPanel tonight={dash.tonight} t={t} nightLabel={formatShortDate(dash.night, locale)} planHref="/bookings?view=plan" />
           <ExpiringList items={dash.expiring} total={expiringTotal} t={t} locale={locale} working={working} showBranch={multi} now={new Date(dash.generated_at)} />
           <DisposalList items={data.recent_disposals} t={t} disposedLabel={ts('deposit.disposed')} locale={locale} working={working} showBranch={multi} />
         </div>

@@ -66,7 +66,7 @@ export default async function TonightPage() {
         <div>
           <h2 className="sec-head">
             <span>{t('bookingsTonight')}</span>
-            <Link href="/bookings" className="more">
+            <Link href="/bookings?view=plan" className="more">
               {t('viewPlan')}
             </Link>
           </h2>

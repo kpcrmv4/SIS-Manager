@@ -14,12 +14,13 @@ export function ViewTabs({
   listLabel: string
 }) {
   return (
+    // the list first — it is the default view (owner, 2026-09-27)
     <div className="tabs shrink-0" role="tablist" aria-label={planLabel}>
-      <Link href={hrefWith('/bookings', params, { view: 'plan' })} className="tab px-3!" aria-selected={view === 'plan'} role="tab">
-        {planLabel}
-      </Link>
       <Link href={hrefWith('/bookings', params, { view: 'list' })} className="tab px-3!" aria-selected={view === 'list'} role="tab">
         {listLabel}
+      </Link>
+      <Link href={hrefWith('/bookings', params, { view: 'plan' })} className="tab px-3!" aria-selected={view === 'plan'} role="tab">
+        {planLabel}
       </Link>
     </div>
   )

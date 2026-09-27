@@ -55,7 +55,8 @@ export default async function BookingsPage({
 
   const nightParam = typeof sp.night === 'string' ? sp.night : undefined
   const night = nightParam && isNightParam(nightParam) ? nightParam : businessNight()
-  const view = sp.view === 'list' ? 'list' : 'plan'
+  // the list first: what is actually happening tonight (owner, 2026-09-27); the plan is one tap away
+  const view = sp.view === 'plan' ? 'plan' : 'list'
   const params = { night: nightParam, view: typeof sp.view === 'string' ? sp.view : undefined }
 
   const tonight = businessNight()
