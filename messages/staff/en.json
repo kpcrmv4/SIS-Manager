@@ -1253,12 +1253,15 @@
     "confirmQueueAnyway": "Queue it anyway",
     "installTitle": "How to install the shop's printer",
     "installSteps": [
-      "Open this page on the Windows PC connected to the shop's receipt printer",
-      "Press Printer setup, then Confirm — a zip file downloads",
+      "On the Windows PC connected to the receipt printer, open Settings > Bluetooth & devices > Printers & scanners (or Control Panel > Devices and Printers) and note the receipt printer's name, e.g. POS80 or XP-80C",
+      "Type that name in Printer name above exactly (letter case and spaces included) and press Save",
+      "Open this page on that PC, press Printer setup, then Confirm — a zip file downloads",
       "Unzip it, right-click INSTALL.bat and choose Run as administrator",
-      "When it finishes, the status above turns green: Online"
+      "When it finishes the status above turns green, Online — try Print receipt on any deposit",
+      "Changing printers later? Just change the name and save; the PC uses the new name within about a minute, no reinstall"
     ],
-    "installManual": "Read it in the manual"
+    "installManual": "Read it in the manual",
+    "printerNameHelp": "Must match the printer name on the Windows PC exactly — see How to install the shop's printer below. Save it before pressing Printer setup"
   },
   "errors": {
     "UNAUTHENTICATED": "Session expired — log in again",

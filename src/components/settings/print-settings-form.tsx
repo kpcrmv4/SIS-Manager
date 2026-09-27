@@ -117,7 +117,11 @@ export function PrintSettingsForm({ branchId, initial }: { branchId: string; ini
         <label className="label-base" htmlFor="ps-printer">
           {t('printerName')}
         </label>
-        <input id="ps-printer" className="input-base" value={printerName} onChange={(e) => setPrinterName(e.target.value)} maxLength={60} placeholder="POS80" />
+        <input id="ps-printer" className="input-base" value={printerName} onChange={(e) => setPrinterName(e.target.value)} maxLength={60} placeholder="POS80" aria-describedby="ps-printer-help" />
+        {/* the setup zip carries the saved name — name first, then setup */}
+        <p id="ps-printer-help" className="help-text">
+          {t('printerNameHelp')}
+        </p>
       </div>
 
       <button type="button" className="btn-primary self-start" disabled={pending} onClick={save} data-testid="print-settings-save">
