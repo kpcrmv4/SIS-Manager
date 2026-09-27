@@ -10,8 +10,8 @@ import { isActive, navFor } from './nav'
 import { MoreSheet } from './more-sheet'
 
 /**
- * Phones: 5 slots — home · ฝากเหล้า · [scan, raised, icon only] · จองโต๊ะ · เพิ่มเติม. Dark, in the
- * sidebar's colour like the top bar (owner, 2026-09-27); the active item in gold.
+ * Phones: 5 slots — home · ฝากเหล้า · [scan, raised, icon only] · จองโต๊ะ · เพิ่มเติม. The card's
+ * colour with a hairline, like the top bar.
  * Everything else lives in the เพิ่มเติม bottom sheet.
  */
 export function BottomNav({ role, branches, branch }: { role: Role; branches: BranchRef[]; branch: BranchRef | null }) {
@@ -34,7 +34,7 @@ export function BottomNav({ role, branches, branch }: { role: Role; branches: Br
       <Link
         href={item.href}
         aria-current={active ? 'page' : undefined}
-        className={`flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${active ? 'font-semibold text-accent' : 'text-sidebar-fg-dim'}`}
+        className={`flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${active ? 'font-semibold text-brand' : 'text-muted-token'}`}
       >
         <Icon className="size-5" aria-hidden />
         <span>{label}</span>
@@ -46,7 +46,7 @@ export function BottomNav({ role, branches, branch }: { role: Role; branches: Br
     <>
       <nav
         aria-label={t('mainMenu')}
-        className="fixed inset-x-0 bottom-0 z-20 grid h-[calc(64px+env(safe-area-inset-bottom,0px))] grid-cols-5 border-t border-sidebar-line bg-sidebar pb-[env(safe-area-inset-bottom,0px)] nav:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 grid h-[calc(64px+env(safe-area-inset-bottom,0px))] grid-cols-5 border-t border-line bg-card pb-[env(safe-area-inset-bottom,0px)] nav:hidden"
       >
         {slot(1)}
         {slot(2)}
@@ -56,7 +56,7 @@ export function BottomNav({ role, branches, branch }: { role: Role; branches: Br
               href={primary.href}
               aria-label={t(primary.label)}
               aria-current={isActive(primary, pathname) ? 'page' : undefined}
-              className="absolute left-1/2 top-[-20px] flex size-[58px] -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-accent bg-sidebar text-accent shadow-[0_8px_20px_rgba(0,0,0,.35)]"
+              className="absolute left-1/2 top-[-20px] flex size-[58px] -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-canvas bg-sidebar text-accent shadow-[0_8px_20px_rgba(0,0,0,.28)] dark:border-accent/50"
             >
               <primary.icon className="size-[26px]" aria-hidden />
             </Link>
@@ -69,7 +69,7 @@ export function BottomNav({ role, branches, branch }: { role: Role; branches: Br
           type="button"
           onClick={() => setOpen(true)}
           aria-haspopup="dialog"
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${overflowActive ? 'font-semibold text-accent' : 'text-sidebar-fg-dim'}`}
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10.5px] ${overflowActive ? 'font-semibold text-brand' : 'text-muted-token'}`}
         >
           <MoreHorizontal className="size-5" aria-hidden />
           <span>{t('more')}</span>

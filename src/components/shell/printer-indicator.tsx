@@ -49,7 +49,7 @@ export function PrinterIndicator({ branchId, className, owner }: { branchId: str
   const body = (
     <>
       <Printer className="size-5" aria-hidden />
-      {state && <span className={`absolute right-2 top-2 size-2.5 rounded-full ring-2 ring-sidebar nav:ring-canvas ${DOT[state]}`} aria-hidden />}
+      {state && <span className={`absolute right-2 top-2 size-2.5 rounded-full ring-2 ring-card nav:ring-canvas ${DOT[state]}`} aria-hidden />}
     </>
   )
   const common = { className: `relative ${className}`, 'aria-label': label, title: label, 'data-testid': 'printer-indicator', 'data-state': state ?? 'loading' }

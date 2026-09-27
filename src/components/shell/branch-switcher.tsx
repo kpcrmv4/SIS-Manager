@@ -85,8 +85,8 @@ export function BranchSwitcher({
   const top = variant === 'top'
   if (top && branches.length <= 1) {
     return (
-      <span className="flex min-w-0 items-center gap-1.5 px-1 text-sm font-semibold text-sidebar-title" data-testid="branch-switcher-current">
-        <Store className="size-4 flex-none text-sidebar-fg-dim" aria-hidden />
+      <span className="flex min-w-0 items-center gap-1.5 px-1 text-sm font-semibold text-ink" data-testid="branch-switcher-current">
+        <Store className="size-4 flex-none text-muted-token" aria-hidden />
         <span className="truncate">{branch?.name}</span>
       </span>
     )
@@ -104,18 +104,18 @@ export function BranchSwitcher({
         aria-label={`${t('switchBranch')}: ${branch?.name ?? ''}`}
         className={`flex items-center gap-2 rounded-[10px] px-2.5 py-2 text-left text-sm transition-colors ${
           top
-            ? 'max-w-full bg-sidebar-hover font-semibold text-sidebar-title hover:bg-sidebar-active-bg'
+            ? 'max-w-full bg-surface-2 font-semibold text-ink hover:bg-line-soft'
             : dark
               ? 'w-full bg-sidebar-hover text-sidebar-title hover:brightness-110'
               : 'w-full border border-line bg-card text-ink'
         }`}
       >
-        <Store className={`size-4 flex-none ${dark || top ? 'text-sidebar-fg-dim' : 'text-muted-token'}`} aria-hidden />
+        <Store className={`size-4 flex-none ${dark ? 'text-sidebar-fg-dim' : 'text-muted-token'}`} aria-hidden />
         <span className="min-w-0 flex-1 truncate" data-testid="branch-switcher-current">{branch?.name}</span>
         {pending ? (
           <Loader2 className="size-4 flex-none animate-spin" aria-hidden />
         ) : (
-          <ChevronDown className={`size-4 flex-none transition-transform ${open ? 'rotate-180' : ''} ${dark || top ? 'text-sidebar-fg-dim' : 'text-muted-token'}`} aria-hidden />
+          <ChevronDown className={`size-4 flex-none transition-transform ${open ? 'rotate-180' : ''} ${dark ? 'text-sidebar-fg-dim' : 'text-muted-token'}`} aria-hidden />
         )}
       </button>
       {open && (
