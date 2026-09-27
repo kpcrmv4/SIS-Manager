@@ -1710,6 +1710,19 @@ export type Database = {
         }
         Returns: Json
       }
+      deposit_history: {
+        Args: {
+          p_actor?: string
+          p_branch: string
+          p_from: string
+          p_group?: string
+          p_limit?: number
+          p_offset?: number
+          p_q?: string
+          p_to: string
+        }
+        Returns: Json
+      }
       deposit_line_history: { Args: { p_deposit: string }; Returns: Json }
       dispose_deposits: {
         Args: { p_deposit_ids: string[]; p_reason?: string }

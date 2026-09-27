@@ -78,7 +78,8 @@
     "notifications": "การแจ้งเตือน",
     "manual": "คู่มือการใช้งาน",
     "audit": "บันทึกการใช้งาน",
-    "customers": "ลูกค้า"
+    "customers": "ลูกค้า",
+    "depositHistory": "ประวัติฝาก/เบิก"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -1519,6 +1520,51 @@
     "settings": "ตั้งค่า",
     "me": "บัญชีของฉัน",
     "manual": "คู่มือการใช้งาน",
-    "previous": "ย้อนกลับ"
+    "previous": "ย้อนกลับ",
+    "depositHistory": "ประวัติฝาก/เบิก"
+  },
+  "depositHistory": {
+    "title": "ประวัติฝาก/เบิก",
+    "subtitle": "{branch} · คืน {from} – {to}",
+    "subtitleOne": "{branch} · คืน {from}",
+    "open": "ประวัติ",
+    "rangeLabel": "ช่วงเวลา",
+    "tonight": "คืนนี้",
+    "yesterday": "เมื่อวาน",
+    "last7": "7 คืน",
+    "from": "ตั้งแต่คืน",
+    "to": "ถึงคืน",
+    "actor": "คนทำ",
+    "anyone": "ทุกคน",
+    "customer": "ลูกค้า (LINE)",
+    "system": "ระบบอัตโนมัติ",
+    "search": "ค้นหา",
+    "searchPlaceholder": "รหัสฝาก ชื่อลูกค้า เบอร์ หรือชื่อเหล้า",
+    "apply": "ดู",
+    "groupsLabel": "ประเภท",
+    "groups": {
+      "all": "ทั้งหมด",
+      "deposit": "ฝาก",
+      "withdraw": "เบิก",
+      "expiry": "หมดอายุ-จำหน่าย",
+      "other": "อื่น ๆ"
+    },
+    "sumReceived": "รับฝาก",
+    "sumWithdrawn": "เบิก",
+    "sumDisposed": "จำหน่ายออก",
+    "unitDeposits": "รายการ",
+    "unitBottles": "ขวด",
+    "colTime": "เวลา",
+    "colWhat": "ทำอะไร",
+    "colDeposit": "รายการ",
+    "colWho": "ใครทำ",
+    "empty": "ไม่มีความเคลื่อนไหวในช่วงนี้",
+    "emptyBody": "ลองเปลี่ยนช่วงเวลา ประเภท หรือคนทำ",
+    "showing": "แสดง {from}–{to} จาก {total} รายการ",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "badRange": "คืนเริ่มต้องไม่เกินคืนสุดท้าย",
+    "rangeTooLong": "เลือกช่วงได้ไม่เกิน 1 ปี",
+    "unknownActor": "ไม่ทราบชื่อ"
   }
 }

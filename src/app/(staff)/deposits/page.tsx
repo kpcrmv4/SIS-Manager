@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { Archive, ArrowUpFromLine, CalendarX, ClipboardCheck, MessageCircle, Plus, Wine, type LucideIcon } from 'lucide-react'
+import { Archive, ArrowUpFromLine, CalendarX, ClipboardCheck, ClipboardList, MessageCircle, Plus, Wine, type LucideIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shell/page-header'
 import { EmptyState } from '@/components/ui/states'
 import { Badge, type BadgeTone } from '@/components/ui/badge'
@@ -84,6 +84,7 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
 
   const tRoot = await getTranslations()
   const tc = await getTranslations('common')
+  const th = await getTranslations('depositHistory')
 
   const [counts, { rows, total }] = await Promise.all([depositTabCounts(branch.id), listDeposits(branch.id, tab, q, page)])
 
@@ -98,10 +99,17 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
         title={t('title')}
         subtitle={t('subtitle', { branch: branch.name, count: counts.inStore })}
         action={
-          <Link href="/deposits/new" className="btn-primary" data-testid="deposits-new">
-            <Plus className="size-4" aria-hidden />
-            {t('new')}
-          </Link>
+          <>
+            <Link href="/deposits/new" className="btn-primary" data-testid="deposits-new">
+              <Plus className="size-4" aria-hidden />
+              {t('new')}
+            </Link>
+            {/* R-061: what happened, by night */}
+            <Link href="/deposits/history" className="btn-secondary" data-testid="deposits-history">
+              <ClipboardList className="size-4" aria-hidden />
+              {th('open')}
+            </Link>
+          </>
         }
       />
 

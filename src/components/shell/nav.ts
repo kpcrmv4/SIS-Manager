@@ -3,6 +3,7 @@ import {
   BookOpen,
   CalendarCheck2,
   CalendarDays,
+  ClipboardList,
   ContactRound,
   History,
   LayoutDashboard,
@@ -35,6 +36,8 @@ export type NavItem = {
   slot?: 1 | 2 | 4
   /** routes that should light this item too */
   match?: readonly string[]
+  /** routes under this item's href that belong to another item */
+  except?: readonly string[]
 }
 
 const ALL: readonly Role[] = ['staff', 'bar', 'owner']
@@ -44,11 +47,13 @@ const OWNER: readonly Role[] = ['owner']
 export const NAV: readonly NavItem[] = [
   { key: 'tonight', href: '/tonight', label: 'tonight', icon: Moon, roles: FLOOR, section: 'catDaily', slot: 1 },
   { key: 'overview', href: '/overview', label: 'overview', icon: LayoutDashboard, roles: OWNER, section: 'catDaily', slot: 1 },
-  { key: 'deposits', href: '/deposits', label: 'deposits', icon: Wine, roles: ALL, section: 'catDaily', slot: 2 },
+  { key: 'deposits', href: '/deposits', label: 'deposits', icon: Wine, roles: ALL, section: 'catDaily', slot: 2, except: ['/deposits/history'] },
   { key: 'bookings', href: '/bookings', label: 'bookings', icon: CalendarDays, roles: ALL, section: 'catDaily', slot: 4 },
   { key: 'scan', href: '/scan', label: 'scan', icon: ScanLine, roles: ALL, section: 'catDaily', primary: true },
   // R-048 / R-049 — every role, first under รายงาน (ภาพรวมและรายงาน in the เพิ่มเติม sheet)
   { key: 'customers', href: '/customers', label: 'customers', icon: ContactRound, roles: ALL, section: 'catReports' },
+  // R-061 — every role, their branch's deposit and withdrawal events
+  { key: 'depositHistory', href: '/deposits/history', label: 'depositHistory', icon: ClipboardList, roles: ALL, section: 'catReports' },
   { key: 'reports', href: '/reports', label: 'reports', icon: BarChart3, roles: OWNER, section: 'catReports' },
   { key: 'audit', href: '/audit', label: 'audit', icon: History, roles: OWNER, section: 'catReports' },
   { key: 'settingsBooking', href: '/settings/booking', label: 'settingsBooking', icon: CalendarCheck2, roles: OWNER, section: 'catSettings' },
@@ -66,6 +71,7 @@ export function navFor(role: Role) {
 }
 
 export function isActive(item: NavItem, pathname: string) {
+  if ((item.except ?? []).some((m) => pathname === m || pathname.startsWith(`${m}/`))) return false
   if (pathname === item.href || pathname.startsWith(`${item.href}/`)) return true
   return (item.match ?? []).some((m) => pathname === m || pathname.startsWith(`${m}/`))
 }

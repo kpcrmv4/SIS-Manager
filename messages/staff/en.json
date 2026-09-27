@@ -78,7 +78,8 @@
     "notifications": "Notifications",
     "manual": "User manual",
     "audit": "Audit log",
-    "customers": "Customers"
+    "customers": "Customers",
+    "depositHistory": "Deposit history"
   },
   "login": {
     "title": "Log in",
@@ -1519,6 +1520,51 @@
     "settings": "Settings",
     "me": "My account",
     "manual": "User manual",
-    "previous": "Back"
+    "previous": "Back",
+    "depositHistory": "Deposit history"
+  },
+  "depositHistory": {
+    "title": "Deposit history",
+    "subtitle": "{branch} · nights {from} – {to}",
+    "subtitleOne": "{branch} · night of {from}",
+    "open": "History",
+    "rangeLabel": "Period",
+    "tonight": "Tonight",
+    "yesterday": "Last night",
+    "last7": "7 nights",
+    "from": "From night",
+    "to": "To night",
+    "actor": "Who",
+    "anyone": "Anyone",
+    "customer": "Customer (LINE)",
+    "system": "System",
+    "search": "Search",
+    "searchPlaceholder": "Code, customer, phone or liquor",
+    "apply": "Show",
+    "groupsLabel": "Kind",
+    "groups": {
+      "all": "All",
+      "deposit": "Deposits",
+      "withdraw": "Withdrawals",
+      "expiry": "Expiry & disposal",
+      "other": "Other"
+    },
+    "sumReceived": "Received",
+    "sumWithdrawn": "Withdrawn",
+    "sumDisposed": "Disposed",
+    "unitDeposits": "deposits",
+    "unitBottles": "bottles",
+    "colTime": "Time",
+    "colWhat": "What",
+    "colDeposit": "Deposit",
+    "colWho": "Who",
+    "empty": "Nothing happened in this period",
+    "emptyBody": "Try another period, kind or person",
+    "showing": "Showing {from}–{to} of {total}",
+    "prev": "Previous",
+    "next": "Next",
+    "badRange": "The first night must not be after the last",
+    "rangeTooLong": "Pick at most one year",
+    "unknownActor": "Unknown"
   }
 }

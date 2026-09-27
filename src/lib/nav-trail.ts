@@ -108,6 +108,7 @@ export function backKey(path: string): string {
   if (path === '/overview') return 'overview'
   if (path === '/deposits') return 'deposits'
   if (path === '/deposits/new') return 'depositNew'
+  if (path === '/deposits/history') return 'depositHistory'
   if (path.startsWith('/deposits/')) return 'deposit'
   if (path === '/bookings') return 'bookings'
   if (path === '/scan') return 'scan'
