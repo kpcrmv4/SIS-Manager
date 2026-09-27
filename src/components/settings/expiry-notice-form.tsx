@@ -21,6 +21,7 @@ import { saveExpiryNotices } from '@/lib/settings/expiry-actions'
 
 export type ExpiryNoticeValue = {
   enabled: boolean
+  expiredEnabled: boolean
   days: number[]
   time: string
   templates: Partial<Record<ExpiryLocale, string>>
@@ -47,6 +48,7 @@ export function ExpiryNoticeForm({ branchId, branchName, branchCode, today, init
   const t = useTranslations('settingsBranch.expiry')
   const tc = useTranslations('common')
   const [enabled, setEnabled] = useState(initial.enabled)
+  const [expiredEnabled, setExpiredEnabled] = useState(initial.expiredEnabled)
   const [time, setTime] = useState(initial.time.slice(0, 5))
   const [days, setDays] = useState<string[]>(initial.days.map(String))
   const [lang, setLang] = useState<ExpiryLocale>('th')
@@ -105,7 +107,7 @@ export function ExpiryNoticeForm({ branchId, branchName, branchCode, today, init
       }
     }
     start(async () => {
-      const res = await saveExpiryNotices(branchId, { enabled, days: reminderDays, time, templates: texts })
+      const res = await saveExpiryNotices(branchId, { enabled, expiredEnabled, days: reminderDays, time, templates: texts })
       if (!res.ok) {
         toast.error(res.error === 'days' ? t('errDays') : res.error === 'time' ? t('errTime') : tc('errorGeneric'))
         return
@@ -122,22 +124,24 @@ export function ExpiryNoticeForm({ branchId, branchName, branchCode, today, init
         <p className="text-sm text-muted-token">{t('hint')}</p>
       </div>
 
-      <div>
+      {/* one time for both messages */}
+      <div className={enabled || expiredEnabled ? '' : 'opacity-60'}>
+        <label className="label-base" htmlFor="ex-time">
+          {t('time')}
+        </label>
+        <input id="ex-time" type="time" step={300} className="input-base tnum w-36" value={time} onChange={(e) => setTime(e.target.value)} data-testid="expiry-time" />
+        <p className="help-text">{t('timeHelp')}</p>
+      </div>
+
+      {/* R-064: the reminders before and the message after switch apart — some shops want only the reminders */}
+      <div className="rounded-md border border-line-soft p-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium text-ink">{t('enabled')}</span>
+          <span className="text-sm font-semibold text-ink">{t('enabled')}</span>
           <button type="button" role="switch" aria-checked={enabled} aria-label={t('enabled')} className="tg" onClick={() => setEnabled((v) => !v)} data-testid="expiry-enabled" />
         </div>
         <p className="help-text">{t('enabledHelp')}</p>
-      </div>
 
-      <div className={`flex flex-col gap-4 ${enabled ? '' : 'opacity-60'}`}>
-        <div>
-          <label className="label-base" htmlFor="ex-time">
-            {t('time')}
-          </label>
-          <input id="ex-time" type="time" step={300} className="input-base tnum w-36" value={time} onChange={(e) => setTime(e.target.value)} data-testid="expiry-time" />
-          <p className="help-text">{t('timeHelp')}</p>
-        </div>
+      <div className={`mt-4 flex flex-col gap-4 ${enabled ? '' : 'opacity-60'}`}>
 
         <div>
           <div className="label-base">{t('days')}</div>
@@ -223,6 +227,23 @@ export function ExpiryNoticeForm({ branchId, branchName, branchCode, today, init
             </p>
           </div>
         </div>
+      </div>
+      </div>
+
+      <div className="rounded-md border border-line-soft p-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-semibold text-ink">{t('expiredEnabled')}</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={expiredEnabled}
+            aria-label={t('expiredEnabled')}
+            className="tg"
+            onClick={() => setExpiredEnabled((v) => !v)}
+            data-testid="expiry-expired-enabled"
+          />
+        </div>
+        <p className="help-text">{t('expiredEnabledHelp')}</p>
       </div>
 
       <button type="button" className="btn-primary self-start" disabled={pending} onClick={save} data-testid="expiry-save">

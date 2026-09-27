@@ -902,10 +902,10 @@
     "expiry": {
       "title": "Expiry reminders on LINE",
       "hint": "Messages to customers who linked LINE: before a bottle expires, and once it has",
-      "enabled": "Send expiry reminders to customers",
-      "enabledHelp": "Off: no customer of this branch gets the reminders or the expired message. To turn one customer off, use that customer’s deposit page",
+      "enabled": "Remind before expiry",
+      "enabledHelp": "Sent on the days set below. Off: no customer of this branch gets a reminder. To stop them for one customer, do it on that customer's deposit page",
       "time": "Send at",
-      "timeHelp": "Once a day, within minutes of this time (Bangkok); the expired message goes out then too",
+      "timeHelp": "Once a day, within minutes after this time (Bangkok); used by both the reminders and the expired message",
       "days": "Send before expiry",
       "daysHelp": "Up to 3 reminders, 1–90 days before the expiry date each, e.g. 15 · 7 · 3",
       "dayLabel": "Reminder {n} (days before)",
@@ -936,7 +936,9 @@
       "errTime": "Invalid time",
       "errUnknown": "Unknown variable {names}",
       "errTooLong": "Longer than {max} characters",
-      "errEmpty": "The wording is empty — write one or press Use the default"
+      "errEmpty": "The wording is empty — write one or press Use the default",
+      "expiredEnabled": "Tell them once it has expired",
+      "expiredEnabledHelp": "Sent once when the collection deadline has passed; switch it apart from the reminders"
     },
     "notify": {
       "title": "Automatic LINE messages",

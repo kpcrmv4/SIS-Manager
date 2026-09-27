@@ -24,7 +24,7 @@ test.describe.configure({ mode: 'serial' })
 const as = (role: string) => join(AUTH_DIR, `${role}.json`)
 const TODAY = bangkokDate()
 const STARTED = new Date().toISOString()
-const SETTINGS = 'expiry_reminders_enabled, expiry_reminder_days, expiry_reminder_time, expiry_reminder_templates, withdrawal_blocked_days'
+const SETTINGS = 'expiry_reminders_enabled, expired_notice_enabled, expiry_reminder_days, expiry_reminder_time, expiry_reminder_templates, withdrawal_blocked_days'
 type BranchPatch = Database['public']['Tables']['branches']['Update']
 let saved: BranchPatch | null = null
 
@@ -129,12 +129,18 @@ test.describe('owner', () => {
     const audit = (await adminDb().from('audit_log').select('details').eq('action', 'branch.updated').eq('target_id', branchA).order('id', { ascending: false }).limit(1)).data?.[0]
     expect(Object.keys(audit?.details ?? {})).toEqual(expect.arrayContaining(['expiry_reminder_days', 'expiry_reminder_time', 'expiry_reminder_templates.th']))
 
-    // the branch switch
+    // the branch switches — the reminders and the expired message apart (R-064)
     await form.getByTestId('expiry-enabled').click()
     await form.getByTestId('expiry-save').click()
     await expect
-      .poll(async () => (await adminDb().from('branches').select('expiry_reminders_enabled').eq('id', branchA).single()).data?.expiry_reminders_enabled)
-      .toBe(false)
+      .poll(async () => (await adminDb().from('branches').select('expiry_reminders_enabled, expired_notice_enabled').eq('id', branchA).single()).data)
+      .toEqual({ expiry_reminders_enabled: false, expired_notice_enabled: true })
+    await form.getByTestId('expiry-enabled').click()
+    await form.getByTestId('expiry-expired-enabled').click()
+    await form.getByTestId('expiry-save').click()
+    await expect
+      .poll(async () => (await adminDb().from('branches').select('expiry_reminders_enabled, expired_notice_enabled').eq('id', branchA).single()).data)
+      .toEqual({ expiry_reminders_enabled: true, expired_notice_enabled: false })
   })
 })
 
@@ -184,7 +190,7 @@ test('P3-A4-03 switched off for the branch or one customer: nothing sent and the
   await run()
   expect(await outbox(off.id)).toEqual([])
   expect((await deposit(off.id)).expiry_reminders_sent).toEqual([7]) // dropped, not saved up
-  await settings({ expiry_reminders_enabled: true })
+  await settings({ expiry_reminders_enabled: true, expired_notice_enabled: true })
   await run()
   expect(await outbox(off.id)).toEqual([])
 
@@ -213,6 +219,35 @@ test('P3-A4-03 switched off for the branch or one customer: nothing sent and the
   expect((await deposit(fresh.id)).expired_notice_sent_at).not.toBeNull()
   expect(await outbox(stale.id, 'expired')).toEqual([])
   expect(await outbox(quietExpired.id, 'expired')).toEqual([])
+})
+
+test('P3-A4-07 the reminders and the expired message switch apart (R-064)', async () => {
+  const c = await makeCustomer()
+  const bkkHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', hourCycle: 'h23' }).format(new Date()))
+  const lastNight = addDays(TODAY, bkkHour >= 4 ? -1 : -2)
+  const expired = async () => {
+    const d = await linkedDeposit(c.id, 20)
+    await adminDb().from('deposits').update({ expires_at: `${lastNight}T12:00:00+07:00` }).eq('id', d.id)
+    expect((await adminDb().rpc('expire_due_deposits')).error).toBeNull()
+    return d
+  }
+
+  // reminders on, expired off: the reminder goes, the expired message does not
+  await settings({ expiry_reminders_enabled: true, expired_notice_enabled: false, expiry_reminder_days: [7], expiry_reminder_templates: {}, withdrawal_blocked_days: [] })
+  const soon1 = await linkedDeposit(c.id, 7)
+  const gone1 = await expired()
+  await run()
+  expect(await outbox(soon1.id)).toHaveLength(1)
+  expect(await outbox(gone1.id, 'expired')).toEqual([])
+
+  // reminders off, expired on: the other way round
+  await settings({ expiry_reminders_enabled: false, expired_notice_enabled: true })
+  const soon2 = await linkedDeposit(c.id, 7)
+  const gone2 = await expired()
+  await run()
+  expect(await outbox(soon2.id)).toEqual([])
+  expect(await outbox(gone2.id, 'expired')).toHaveLength(1)
+  await settings({ expiry_reminders_enabled: true, expired_notice_enabled: true })
 })
 
 test('P3-A4-04 each branch runs once a day, at or after its own time', async () => {

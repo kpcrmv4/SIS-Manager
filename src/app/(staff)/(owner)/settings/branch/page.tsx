@@ -36,7 +36,7 @@ export default async function SettingsBranchPage() {
   const { data, error } = await sb
     .from('branches')
     .select(
-      'name, active, opens_at, closes_at, deposit_days, expiry_notice_days, withdrawal_blocked_days, receipt_settings, expiry_reminders_enabled, expiry_reminder_days, expiry_reminder_time, expiry_reminder_templates, line_notify_off',
+      'name, active, opens_at, closes_at, deposit_days, expiry_notice_days, withdrawal_blocked_days, receipt_settings, expiry_reminders_enabled, expired_notice_enabled, expiry_reminder_days, expiry_reminder_time, expiry_reminder_templates, line_notify_off',
     )
     .eq('id', branch.id)
     .maybeSingle()
@@ -101,6 +101,7 @@ export default async function SettingsBranchPage() {
           today={bangkokDate()}
           initial={{
             enabled: data.expiry_reminders_enabled,
+            expiredEnabled: data.expired_notice_enabled,
             days: data.expiry_reminder_days,
             time: data.expiry_reminder_time,
             templates: (data.expiry_reminder_templates ?? {}) as Partial<Record<ExpiryLocale, string>>,

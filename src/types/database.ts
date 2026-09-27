@@ -354,6 +354,7 @@ export type Database = {
           code: string
           created_at: string
           deposit_days: number
+          expired_notice_enabled: boolean
           expiry_notice_days: number
           expiry_reminder_days: number[]
           expiry_reminder_templates: Json
@@ -381,6 +382,7 @@ export type Database = {
           code: string
           created_at?: string
           deposit_days?: number
+          expired_notice_enabled?: boolean
           expiry_notice_days?: number
           expiry_reminder_days?: number[]
           expiry_reminder_templates?: Json
@@ -408,6 +410,7 @@ export type Database = {
           code?: string
           created_at?: string
           deposit_days?: number
+          expired_notice_enabled?: boolean
           expiry_notice_days?: number
           expiry_reminder_days?: number[]
           expiry_reminder_templates?: Json

@@ -7,7 +7,10 @@ import { EXPIRY_LOCALES, TEMPLATE_MAX, cleanReminderDays, unknownVariables, type
 import { expiryReminderDefaults } from '@/lib/line/catalog'
 
 export type ExpiryNoticeInput = {
+  /** the reminders before the expiry date */
   enabled: boolean
+  /** the message once the collection deadline has passed (R-064) */
+  expiredEnabled: boolean
   /** days before the expiry date — 1 to 3 of them, 1–90 each */
   days: number[]
   /** HH:MM, Bangkok wall clock */
@@ -25,7 +28,7 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/
  * write a branch. A wording equal to the default is not stored, so the default can improve later.
  */
 export async function saveExpiryNotices(branchId: string, input: ExpiryNoticeInput): Promise<ExpiryNoticeResult> {
-  if (!isUuid(branchId) || typeof input?.enabled !== 'boolean') return { ok: false, error: 'invalid' }
+  if (!isUuid(branchId) || typeof input?.enabled !== 'boolean' || typeof input.expiredEnabled !== 'boolean') return { ok: false, error: 'invalid' }
   const days = cleanReminderDays(input.days)
   if (!days) return { ok: false, error: 'days' }
   if (typeof input.time !== 'string' || !TIME_RE.test(input.time)) return { ok: false, error: 'time' }
@@ -42,7 +45,7 @@ export async function saveExpiryNotices(branchId: string, input: ExpiryNoticeInp
   const sb = await getSupabaseServer()
   const { data, error } = await sb
     .from('branches')
-    .update({ expiry_reminders_enabled: input.enabled, expiry_reminder_days: days, expiry_reminder_time: input.time, expiry_reminder_templates: templates })
+    .update({ expiry_reminders_enabled: input.enabled, expired_notice_enabled: input.expiredEnabled, expiry_reminder_days: days, expiry_reminder_time: input.time, expiry_reminder_templates: templates })
     .eq('id', branchId)
     .select('id')
     .maybeSingle()
