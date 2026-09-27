@@ -249,7 +249,9 @@
       "lineReady": "LINE ready",
       "lineMissing": "LINE incomplete",
       "groupBound": "Staff group bound",
-      "groupMissing": "No staff group"
+      "groupMissing": "No staff group",
+      "printerShort": "Printer",
+      "groupShort": "Staff group"
     },
     "colBranch": "Branch",
     "colHealth": "System",
@@ -309,7 +311,9 @@
     "rateArrived": "Came {count}",
     "rateNoShow": "No-show {count}",
     "rateOther": "Waiting/cancelled {count}",
-    "otherBranches": "Other branches {count}"
+    "otherBranches": "Other branches {count}",
+    "groupLiquor": "Deposits",
+    "tileBooked": "Booked"
   },
   "deposits": {
     "title": "Deposits",

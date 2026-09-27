@@ -49,7 +49,7 @@ export function ActionStrip({
   summary: { total: string; urgent: string | null }
 }) {
   return (
-    <section aria-label={title} className="mb-5 rounded-lg border border-line bg-card px-4 pb-1 pt-3.5 shadow-e1" data-testid="overview-actions">
+    <section aria-label={title} className="mb-4 rounded-lg border border-line bg-card px-4 pb-1 pt-3.5 shadow-e1" data-testid="overview-actions">
       <div className="flex items-baseline justify-between gap-2 pb-1.5">
         <h2 className="text-base font-bold text-ink">{title}</h2>
         {items.length > 0 && (

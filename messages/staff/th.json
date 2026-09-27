@@ -249,7 +249,9 @@
       "lineReady": "LINE พร้อม",
       "lineMissing": "LINE ยังไม่ครบ",
       "groupBound": "ผูกกลุ่มพนักงานแล้ว",
-      "groupMissing": "ยังไม่ผูกกลุ่มพนักงาน"
+      "groupMissing": "ยังไม่ผูกกลุ่มพนักงาน",
+      "printerShort": "เครื่องพิมพ์",
+      "groupShort": "กลุ่มพนักงาน"
     },
     "colBranch": "สาขา",
     "colHealth": "สถานะระบบ",
@@ -309,7 +311,9 @@
     "rateArrived": "มาแล้ว {count}",
     "rateNoShow": "ไม่มา {count}",
     "rateOther": "รอ/ยกเลิก {count}",
-    "otherBranches": "สาขาอื่น {count}"
+    "otherBranches": "สาขาอื่น {count}",
+    "groupLiquor": "เหล้าฝาก",
+    "tileBooked": "จอง"
   },
   "deposits": {
     "title": "ฝากเหล้า",

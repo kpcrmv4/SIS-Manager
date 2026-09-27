@@ -187,7 +187,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
         <BranchOverview branches={branches} t={t} tc={tc} weekdays={weekdays} locale={locale} working={working} />
       )}
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <WeekdayChart days={trends.weekdays} weekdays={weekdays} t={t} className="md:col-span-2 xl:col-span-1" />
         <TopList title={t('topCustomersTitle')} rows={trends.top_customers} t={t} icon={Users} testId="overview-top-customers" />
         <TopList title={t('topItemsTitle')} rows={trends.top_items} t={t} icon={Martini} testId="overview-top-items" />

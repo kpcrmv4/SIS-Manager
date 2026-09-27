@@ -70,7 +70,7 @@ export function FiguresPanel({
   rate: { label: string; value: string; booked: string; delta: Delta; deltaText: string | null; deltaTitle: string; parts: Segment[]; href: string }
 }) {
   return (
-    <section className="mb-5 overflow-hidden rounded-lg border border-line bg-card shadow-e1 lg:grid lg:grid-cols-[1fr_1.4fr_1fr]" data-testid="overview-kpis">
+    <section className="mb-4 overflow-hidden rounded-lg border border-line bg-card shadow-e1 lg:grid lg:grid-cols-[1fr_1.4fr_1fr]" data-testid="overview-kpis">
       <Link href={stock.href} className="flex flex-col gap-2.5 px-4 pb-4 pt-3.5 transition-colors duration-100 hover:bg-surface-2" data-testid="kpi-cell" data-kpi="in_store">
         <Head label={stock.label} aside={stock.prev} />
         <div className="flex flex-wrap items-baseline gap-x-1.5">
