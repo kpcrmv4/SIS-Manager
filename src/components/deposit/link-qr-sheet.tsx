@@ -8,7 +8,8 @@ import { toast } from 'sonner'
 import { issueLinkQr, linkPhoneOwner, linkQrStatus, revokeLinkQr, type LinkQr, type LinkQrStatus } from '@/lib/deposit/link-qr'
 import { ActionDialog } from './action-dialog'
 
-const POLL_MS = 2500
+// the deposit's own broadcast refreshes the page (R-066): this poll is only the fallback
+const POLL_MS = 15_000
 
 type View = { kind: 'loading' } | { kind: 'qr'; qr: LinkQr; image: string } | { kind: 'expired' } | { kind: 'linked'; status: LinkQrStatus }
 
@@ -101,6 +102,17 @@ export function LinkQrSheet({ depositId, linked, hasPhone }: { depositId: string
       clearInterval(poll)
     }
   }, [open, view, depositId])
+
+  // the customer scanned: the deposit's broadcast refreshed the page and `linked` turned true — say who, at once
+  useEffect(() => {
+    if (!open || !linked || view.kind === 'linked') return
+    void linkQrStatus(depositId).then((res) => {
+      if (res.ok && res.data.linked) {
+        live.current = false
+        setView({ kind: 'linked', status: res.data })
+      }
+    })
+  }, [open, linked, view.kind, depositId])
 
   // leaving the page with the sheet open kills the QR too
   useEffect(() => {

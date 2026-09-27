@@ -114,7 +114,8 @@ test.describe('scan + sheet', () => {
     await page.getByTestId('scan-input').fill(b.code)
     await page.getByRole('button', { name: 'ค้นหา' }).click()
     const checkInBtn = page.getByTestId('check-in-button')
-    await expect(checkInBtn).toHaveText('ลูกค้ามาแล้ว')
+    // run after 20:30 Bangkok the same button reads "ลูกค้ามาแล้ว (มาสาย)" — the clock, not the flow
+    await expect(checkInBtn).toHaveText(/^ลูกค้ามาแล้ว/)
     await checkInBtn.click()
     await expect(checkInBtn).toHaveText('เช็กอินแล้ว')
     await expect(checkInBtn).toBeDisabled()

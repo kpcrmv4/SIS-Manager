@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -10,6 +10,7 @@ import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { ListRow } from '@/components/ui/list-row'
 import { EmptyState } from '@/components/ui/states'
 import { PrintStatusBadge } from '@/components/print/print-status-badge'
+import { useLive } from '@/components/realtime/live-provider'
 import { getPrintStatus, requeuePrintJob, type PrintJobRow } from '@/lib/print/actions'
 import { formatShortDate, formatTime, type AppLocale } from '@/lib/date'
 
@@ -23,6 +24,13 @@ export function PrintStatusPanel({ branchId, branchCode, initialJobs }: { branch
   const locale = useLocale() as AppLocale
   const [jobs, setJobs] = useState(initialJobs)
   const [refreshKey, setRefreshKey] = useState(0)
+  // R-066: a job queued, printed or failed anywhere in the branch reloads the list at once
+  const { printTick } = useLive()
+  useEffect(() => {
+    if (printTick === 0) return
+    void refresh()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [printTick])
   const [retryingId, setRetryingId] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [settingUp, setSettingUp] = useState(false)

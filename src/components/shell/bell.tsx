@@ -12,7 +12,7 @@ import { appEnv, noSubscribe } from '@/components/pwa/platform'
 import { usePush } from '@/components/pwa/use-push'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { formatShortDate, formatTime } from '@/lib/date'
-import { textKind } from '@/lib/push/kinds'
+import { alertSoundOn, chime, notificationText, setAlertSound } from './notification-text'
 
 // each kind wears its work's icon and hue — the same as the LINE switches and the /deposits filter cards (R-047)
 const LOOK: Record<string, { icon: LucideIcon; tone: string }> = {
@@ -123,8 +123,9 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
   if (!rows) return <ListSkeleton rows={4} />
 
   const unread = rows.some((r) => !r.read_at)
-  const toolbar = (offerPush || pushBlocked || unread) && (
+  const toolbar = (
     <div className="mb-2 flex flex-col gap-2">
+      <SoundToggle label={t('sound')} />
       {pushBlocked && (
         <p className="text-xs text-urgent" data-testid="bell-push-blocked">
           {t('pushBlocked')}
@@ -156,11 +157,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
       </>
     )
 
-  const text = (r: Row) => {
-    const p = r.payload ?? {}
-    const v = (k: string) => (p[k] == null ? '' : String(p[k]))
-    return t(`kinds.${textKind(r.kind)}` as never, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') } as never)
-  }
+  const text = (r: Row) => notificationText(t as never, r.kind, r.payload)
 
   return (
     <div data-testid="bell-list">
@@ -195,6 +192,35 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
           </li>
         ))}
       </ul>
+    </div>
+  )
+}
+
+/** R-066: a chime with the toast for a new job — this device's choice, off until turned on. */
+function SoundToggle({ label }: { label: string }) {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    // this device's setting, read once the page is in the browser
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOn(alertSoundOn())
+  }, [])
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-line-soft px-3 py-2" data-testid="bell-sound">
+      <span className="text-sm text-ink">{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={label}
+        className="tg"
+        onClick={() => {
+          const next = !on
+          setOn(next)
+          setAlertSound(next)
+          if (next) chime()
+        }}
+        data-testid="bell-sound-switch"
+      />
     </div>
   )
 }

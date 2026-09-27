@@ -20,7 +20,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   const { actor } = state
 
   return (
-    <LiveProvider userId={actor.id} branchId={actor.branch?.id ?? null}>
+    <LiveProvider userId={actor.id} displayName={actor.displayName} branchId={actor.branch?.id ?? null}>
       <div className="flex min-h-dvh">
         <Sidebar role={actor.role} branches={actor.branches} branch={actor.branch} />
         <div className="flex min-w-0 flex-1 flex-col">

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Printer } from 'lucide-react'
 import { getPrintState } from '@/lib/print/actions'
+import { useLive } from '@/components/realtime/live-provider'
 import type { PrintStatusView } from '@/lib/print/actions'
 
 type State = PrintStatusView['state'] | 'error' | null
@@ -25,6 +26,7 @@ const DOT: Record<Exclude<State, null>, string> = {
 export function PrinterIndicator({ branchId, className, owner }: { branchId: string; className: string; owner: boolean }) {
   const t = useTranslations('print')
   const [state, setState] = useState<State>(null)
+  const { printTick } = useLive()
 
   useEffect(() => {
     let alive = true
@@ -41,7 +43,7 @@ export function PrinterIndicator({ branchId, className, owner }: { branchId: str
       window.clearInterval(id)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [branchId])
+  }, [branchId, printTick])
 
   const text =
     state === null ? t('checking') : state === 'error' ? t('statusError') : state === 'online' ? t('online') : state === 'offline' ? t('offline') : t('notSetUp')

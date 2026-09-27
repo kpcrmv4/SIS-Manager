@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { Badge } from '@/components/ui/badge'
 import { BackLink } from '@/components/shell/back-link'
 import { BottlesGrid } from '@/components/deposit/bottles-grid'
+import { ViewersNote } from '@/components/deposit/viewers-note'
 import { HistoryTimeline } from '@/components/deposit/history-timeline'
 import { DetailActions } from '@/components/deposit/detail-actions'
 import { CustomerCard, DetailSummary, FactsCard, PhotosCard } from '@/components/deposit/detail-cards'
@@ -58,6 +59,7 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
         </div>
       </header>
 
+      <ViewersNote path={`/deposits/${detail.id}`} />
       <div className="grid items-start gap-4 nav:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
         <div className="flex min-w-0 flex-col gap-4">
           <DetailSummary detail={detail} noticeDays={branchSettings?.expiryNoticeDays ?? 7} locale={actor.locale} />

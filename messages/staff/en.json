@@ -504,7 +504,8 @@
         "failed": "Failed · will retry",
         "skipped": "Not sent"
       }
-    }
+    },
+    "viewers": "{names} also has this open"
   },
   "depositForm": {
     "title": "New deposit",
@@ -1216,7 +1217,9 @@
       "booking_cancelled": "Booking cancelled by the customer · {name} · {party} people · {time}",
       "test": "Test notification · this device receives notifications",
       "other": "Something new needs you"
-    }
+    },
+    "open": "Open",
+    "sound": "Chime for new jobs (this device)"
   },
   "print": {
     "statusError": "Couldn't check the printer",
@@ -1269,7 +1272,8 @@
       "Changing printers later? Just change the name and save; the PC uses the new name within about a minute, no reinstall"
     ],
     "installManual": "Read it in the manual",
-    "printerNameHelp": "Must match the printer name on the Windows PC exactly — see How to install the shop's printer below. Save it before pressing Printer setup"
+    "printerNameHelp": "Must match the printer name on the Windows PC exactly — see How to install the shop's printer below. Save it before pressing Printer setup",
+    "jobFailedToast": "Didn't print · {code}"
   },
   "errors": {
     "UNAUTHENTICATED": "Session expired — log in again",

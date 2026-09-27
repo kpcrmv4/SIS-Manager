@@ -137,6 +137,18 @@ test.describe('plan + list', () => {
     await staffCtx.close()
   })
 
+  test('P2-B1-12 /bookings opens on the list, its tab first; ดูผังโต๊ะ on tonight still opens the plan', async ({ page }) => {
+    await page.goto('/bookings')
+    const tabs = page.getByRole('tablist').first().getByRole('tab')
+    await expect(tabs.first()).toHaveText('รายการ')
+    await expect(tabs.first()).toHaveAttribute('aria-selected', 'true')
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'false')
+    await page.goto('/tonight')
+    await page.locator('a[href="/bookings?view=plan"]').first().click()
+    await expect(page).toHaveURL(/view=plan/)
+    await expect(page.getByRole('tablist').first().getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true')
+  })
+
   test('P2-B1-03 night picker changes the data and the subtitle counts', async ({ page }) => {
     await clearBookings(admin(), [branchA])
     await insertBooking({ night: NIGHT, slotTime: '19:00', status: 'confirmed', tableId: zt.tableA1, party: 5 })
