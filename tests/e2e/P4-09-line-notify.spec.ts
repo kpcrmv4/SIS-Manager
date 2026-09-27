@@ -70,5 +70,12 @@ test.describe('P4-09-02 the settings card', () => {
     await expect(page.locator('[data-testid="notify-row"][data-kind="booking_confirmed"]')).toHaveAttribute('data-on', 'true')
     await expect.poll(async () => (await adminDb().from('branches').select('line_notify_off').eq('id', fixtureIds().branchA).single()).data?.line_notify_off).toEqual([])
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+    // (owner, 2026-09-27) the cards on this page sit 16px apart, none touching
+    const gaps = await page.getByTestId('branch-settings').evaluate((el) => {
+      const cards = [...el.querySelectorAll(':scope > *, :scope > #print > *')].filter((c) => c.id !== 'print').map((c) => c.getBoundingClientRect()).filter((r) => r.height > 0)
+      return cards.slice(1).map((r, i) => Math.round(r.top - cards[i].bottom))
+    })
+    expect(gaps.length).toBeGreaterThan(2)
+    for (const g of gaps) expect(g).toBe(16)
   })
 })

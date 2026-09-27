@@ -33,7 +33,7 @@ export function SetupCard({
   const pct = items.length ? Math.round((done / items.length) * 100) : 0
 
   return (
-    <section aria-label={title} className="card-surface mb-5 p-4" data-testid="setup-card" data-done={done} data-total={items.length}>
+    <section aria-label={title} className="card-surface p-4" data-testid="setup-card" data-done={done} data-total={items.length}>
       <div className="flex items-center justify-between gap-3">
         <h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold text-ink">
           <Rocket className="size-4 shrink-0 text-accent" aria-hidden />

@@ -76,36 +76,39 @@ export default async function SettingsBranchPage() {
   return (
     <>
       <PageHeader title={t('title')} subtitle={branch.name} />
-      {setup && (
-        <SetupCard
-          items={setup}
-          title={to('setupTitle')}
-          progress={to('setupProgress', { done: setup.filter((s) => s.done).length, total: setup.length })}
-          nextLabel={to('setupNext')}
-          allLabel={to('setupAll', { count: setup.length })}
-          doneLabel={to('setupDone')}
-          go={to('setupGo')}
-          labels={Object.fromEntries(SETUP_KEYS.map((k) => [k, to(`setup.${k}`)])) as Record<SetupKey, string>}
-          hints={Object.fromEntries(SETUP_KEYS.map((k) => [k, to(`setupHint.${k}`)])) as Record<SetupKey, string>}
+      {/* one gap between every card, as on every other page */}
+      <div className="flex flex-col gap-4" data-testid="branch-settings">
+        {setup && (
+          <SetupCard
+            items={setup}
+            title={to('setupTitle')}
+            progress={to('setupProgress', { done: setup.filter((s) => s.done).length, total: setup.length })}
+            nextLabel={to('setupNext')}
+            allLabel={to('setupAll', { count: setup.length })}
+            doneLabel={to('setupDone')}
+            go={to('setupGo')}
+            labels={Object.fromEntries(SETUP_KEYS.map((k) => [k, to(`setup.${k}`)])) as Record<SetupKey, string>}
+            hints={Object.fromEntries(SETUP_KEYS.map((k) => [k, to(`setupHint.${k}`)])) as Record<SetupKey, string>}
+          />
+        )}
+        <BranchForm branchId={branch.id} initial={initial} />
+        {/* R-063: which automatic LINE messages go out, and what they cost */}
+        <LineNotifyCard branchId={branch.id} initialOff={data.line_notify_off} kinds={LINE_NOTIFY_KINDS} quota={await lineQuota(branch.id)} />
+        <ExpiryNoticeForm
+          branchId={branch.id}
+          branchName={data.name}
+          branchCode={branch.code}
+          today={bangkokDate()}
+          initial={{
+            enabled: data.expiry_reminders_enabled,
+            days: data.expiry_reminder_days,
+            time: data.expiry_reminder_time,
+            templates: (data.expiry_reminder_templates ?? {}) as Partial<Record<ExpiryLocale, string>>,
+          }}
+          defaults={expiryReminderDefaults()}
         />
-      )}
-      <BranchForm branchId={branch.id} initial={initial} />
-      {/* R-063: which automatic LINE messages go out, and what they cost */}
-      <LineNotifyCard branchId={branch.id} initialOff={data.line_notify_off} kinds={LINE_NOTIFY_KINDS} quota={await lineQuota(branch.id)} />
-      <ExpiryNoticeForm
-        branchId={branch.id}
-        branchName={data.name}
-        branchCode={branch.code}
-        today={bangkokDate()}
-        initial={{
-          enabled: data.expiry_reminders_enabled,
-          days: data.expiry_reminder_days,
-          time: data.expiry_reminder_time,
-          templates: (data.expiry_reminder_templates ?? {}) as Partial<Record<ExpiryLocale, string>>,
-        }}
-        defaults={expiryReminderDefaults()}
-      />
-      <PrintSettingsSection branchId={branch.id} branchCode={branch.code} />
+        <PrintSettingsSection branchId={branch.id} branchCode={branch.code} />
+      </div>
     </>
   )
 }
