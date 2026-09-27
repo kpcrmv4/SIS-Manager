@@ -391,7 +391,9 @@
       "vip_on_auto": "VIP by itself — a VIP customer",
       "vip_on_customer": "Customer made VIP",
       "vip_off_customer": "Customer's VIP cancelled",
-      "line_linked_qr": "Customer linked LINE by QR"
+      "line_linked_qr": "Customer linked LINE by QR",
+      "line_linked_phone": "Staff linked LINE to the phone owner",
+      "phone_shared": "Shared phone · not linked to LINE"
     },
     "eventMeta": "{date} · {time} · {actor}",
     "lineSent": "Customer told on LINE",
@@ -448,7 +450,10 @@
       "linkedNew": "New customer · {name}",
       "linkedCount": "Linked {count} deposits in all",
       "done": "Done",
-      "closeHint": "Closing this stops the QR at once"
+      "closeHint": "Closing this stops the QR at once",
+      "linkOwner": "Link to {name} now",
+      "linkOwnerHint": "If the person here is not the phone owner, have them scan the QR below",
+      "linkedOwner": "Linked to {name} on LINE"
     }
   },
   "depositForm": {
@@ -473,7 +478,21 @@
     "created": "Deposit saved · {code}",
     "nameRequired": "Enter the customer's name",
     "itemRequired": "Pick or type a liquor",
-    "quantityInvalid": "Bottles must be 1–50"
+    "quantityInvalid": "Bottles must be 1–50",
+    "ownerTitle": "Returning customer · LINE linked",
+    "ownerLine": "{name}",
+    "ownerOpen": "{count} open deposits",
+    "ownerAsk": "Is this the customer?",
+    "ownerYes": "Yes, this one",
+    "ownerNo": "No",
+    "ownerChosen": "Links to {name} on LINE right away",
+    "ownerChange": "Change",
+    "ownerDenied": "This phone is another LINE customer's · check the number",
+    "ownerShared": "Shared phone · deposit without LINE",
+    "ownerSharedChosen": "Shared phone · this deposit will not link to LINE",
+    "ownerPick": "Say whether this is the customer",
+    "ownerFix": "Fix the phone, or choose shared phone",
+    "checking": "Checking the phone"
   },
   "confirmDialog": {
     "title": "Confirm bottles",
@@ -1171,7 +1190,8 @@
     "NO_CUSTOMER_KEY": "This customer has no phone or LINE — make single bottles VIP instead",
     "NOT_LATE": "It isn't the booking's time yet — if the guest won't come, cancel the booking instead",
     "ALREADY_LINKED": "This deposit is already linked to LINE",
-    "NO_LIFF": "This branch has no LIFF yet · the owner sets it in LINE settings"
+    "NO_LIFF": "This branch has no LIFF yet · the owner sets it in LINE settings",
+    "NOT_PHONE_OWNER": "This phone no longer belongs to that customer · check again"
   },
   "audit": {
     "title": "Audit log",

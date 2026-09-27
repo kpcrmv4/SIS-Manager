@@ -695,6 +695,7 @@ export type Database = {
           link_code: string
           link_token: string
           notes: string | null
+          phone_shared: boolean
           photo_paths: string[]
           quantity: number
           received_at: string | null
@@ -738,6 +739,7 @@ export type Database = {
           link_code?: string
           link_token?: string
           notes?: string | null
+          phone_shared?: boolean
           photo_paths?: string[]
           quantity: number
           received_at?: string | null
@@ -781,6 +783,7 @@ export type Database = {
           link_code?: string
           link_token?: string
           notes?: string | null
+          phone_shared?: boolean
           photo_paths?: string[]
           quantity?: number
           received_at?: string | null
@@ -1637,6 +1640,24 @@ export type Database = {
         }
         Returns: Json
       }
+      create_deposit_with_phone: {
+        Args: {
+          p_branch: string
+          p_category?: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_expires_at?: string
+          p_item_id?: string
+          p_item_name: string
+          p_notes?: string
+          p_phone_choice?: string
+          p_phone_customer?: string
+          p_photo_paths: string[]
+          p_quantity: number
+          p_table?: string
+        }
+        Returns: Json
+      }
       customer_booking_board: {
         Args: { p_branch: string; p_night: string; p_seq?: string }
         Returns: Json
@@ -1706,6 +1727,10 @@ export type Database = {
         Args: { p_branch: string; p_customer_id: string; p_token: string }
         Returns: Json
       }
+      link_phone_owner: {
+        Args: { p_customer: string; p_deposit: string }
+        Returns: Json
+      }
       link_qr_status: { Args: { p_deposit: string }; Returns: Json }
       login_record: {
         Args: { p_identifier: string; p_ip: string; p_ok: boolean }
@@ -1735,6 +1760,10 @@ export type Database = {
           p_prev_to: string
           p_to: string
         }
+        Returns: Json
+      }
+      phone_customer: {
+        Args: { p_branch: string; p_phone: string }
         Returns: Json
       }
       queue_print: {

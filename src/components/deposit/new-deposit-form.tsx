@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useSyncExternalStore, useTransition } from 'react'
+import { useMemo, useRef, useState, useSyncExternalStore, useTransition } from 'react'
 
 const noopSubscribe = () => () => {}
 import { useRouter } from 'next/navigation'
@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PhotoPicker } from './photo-picker'
+import { PhoneOwnerCard, usePhoneOwner, type PhoneChoice } from './phone-owner-check'
 import { createDeposit } from '@/lib/deposit/actions'
 import { addDays, bangkokDate, formatShortDate } from '@/lib/date'
 import type { LiquorItem } from '@/lib/deposit/items'
@@ -44,6 +45,17 @@ export function NewDepositForm({
   // typing before hydration is overwritten by React's first render — tests wait for this flag
   const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false)
   const [pending, start] = useTransition()
+  // R-059: a phone that is a LINE customer's asks "ใช่คนนี้ไหม" before the deposit can be saved
+  const phoneRef = useRef<HTMLInputElement>(null)
+  const [phoneChoice, setPhoneChoice] = useState<PhoneChoice>(null)
+  const { owner, checking, ensure } = usePhoneOwner(branchId, phone)
+
+  function choosePhone(c: PhoneChoice) {
+    setPhoneChoice(c)
+    setErrors((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== 'phone')))
+    if (c === 'owner' && !name.trim() && owner?.lastName) setName(owner.lastName)
+    if (c === 'denied') phoneRef.current?.focus()
+  }
 
   const matchedItem = useMemo(() => items.find((i) => i.name === itemName), [items, itemName])
 
@@ -53,10 +65,17 @@ export function NewDepositForm({
     if (!itemName.trim()) nextErrors.item = t('itemRequired')
     if (!Number.isFinite(quantity) || quantity < 1 || quantity > 50) nextErrors.quantity = t('quantityInvalid')
     if (!barOrOwner && photos.length === 0) nextErrors.photo = t('photoRequired')
+    if (owner && phoneChoice === null) nextErrors.phone = t('ownerPick')
+    if (owner && phoneChoice === 'denied') nextErrors.phone = t('ownerFix')
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
 
     start(async () => {
+      const o = await ensure()
+      if (o && (phoneChoice === null || phoneChoice === 'denied')) {
+        setErrors({ phone: phoneChoice === null ? t('ownerPick') : t('ownerFix') })
+        return
+      }
       const res = await createDeposit({
         branchId,
         customerName: name,
@@ -69,6 +88,7 @@ export function NewDepositForm({
         photoPaths: photos,
         notes: notes || undefined,
         expiresAt: barOrOwner ? `${expiresDate}T23:59:59+07:00` : undefined,
+        phoneChoice: !o ? undefined : phoneChoice === 'owner' ? { kind: 'owner', customerId: o.customerId } : { kind: 'shared' },
       })
       if (!res.ok) {
         toast.error(te(res.error))
@@ -94,7 +114,19 @@ export function NewDepositForm({
             <label className="label-base" htmlFor="f-phone">
               {t('phone')}
             </label>
-            <input id="f-phone" className="input-base tnum" value={phone} onChange={(e) => setPhone(e.target.value)} data-testid="deposit-phone" />
+            <input
+              id="f-phone"
+              ref={phoneRef}
+              className="input-base tnum"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value)
+                setPhoneChoice(null)
+              }}
+              data-testid="deposit-phone"
+            />
+            <PhoneOwnerCard owner={owner} checking={checking} choice={phoneChoice} onChoose={choosePhone} error={errors.phone} />
           </div>
         </div>
 

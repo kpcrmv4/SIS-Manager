@@ -1,4 +1,6 @@
 import { createHash, randomBytes, randomInt } from 'node:crypto'
+import { writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 import { adminDb, anonDb, dbAs, fixtureIds } from './fixtures/db'
@@ -348,4 +350,157 @@ test('P4-07-09 who may: service role only for the scan, no direct read of the QR
   expect(await ownerOf(dep.id)).toBeNull()
   await adminDb().from('line_link_failures').delete().eq('line_user_id', c.line_user_id)
   expect((await scan(c.id, qr.token)).ok).toBe(true)
+})
+
+// ── R-059 · the phone decides at the counter ─────────────────────────────
+
+/** A phone that one LINE customer owns here: their deposit with it, linked. */
+async function ownedPhone(name: string) {
+  const p = mobile()
+  const c = await customer(name)
+  const d = await createDep({ phone: p.dashed })
+  await linkDirect(d.id, c.id)
+  return { p, c }
+}
+
+async function createWithPhone(phone: string, choice: 'owner' | 'shared' | null, customerId?: string) {
+  const { branchA } = fixtureIds()
+  return dbAs('staff').rpc('create_deposit_with_phone', {
+    p_branch: branchA,
+    p_customer_name: `${RUN} ลูกค้าเบอร์`,
+    p_item_name: 'Chivas Regal 12',
+    p_quantity: 1,
+    p_photo_paths: [await photo('A')],
+    p_customer_phone: phone,
+    p_phone_choice: choice ?? undefined,
+    p_phone_customer: customerId,
+  })
+}
+
+test('P4-07-11 whose phone: the owner in any format; nothing for a new phone, a shared one, or another branch', async () => {
+  const { branchA, branchB } = fixtureIds()
+  const { p, c } = await ownedPhone(`${RUN} เจ้าของเบอร์ 11`)
+  for (const typed of [p.dashed, p.intl, p.key]) {
+    const { data, error } = await dbAs('staff').rpc('phone_customer', { p_branch: branchA, p_phone: typed })
+    expect(error, error?.message).toBeNull()
+    expect(data).toMatchObject({ customer_id: c.id, name: `${RUN} เจ้าของเบอร์ 11`, last_name: `${RUN} ลูกค้า QR`, open: 1 })
+  }
+  expect((await dbAs('staff').rpc('phone_customer', { p_branch: branchA, p_phone: mobile().dashed })).data).toBeNull()
+  // two LINE customers on one phone → nobody owns it
+  const second = await customer()
+  const d2 = await createDep({ phone: p.key })
+  await linkDirect(d2.id, second.id)
+  expect((await dbAs('staff').rpc('phone_customer', { p_branch: branchA, p_phone: p.dashed })).data).toBeNull()
+  expect((await dbAs('staff').rpc('phone_customer', { p_branch: branchB, p_phone: p.dashed })).error?.message).toBe('FORBIDDEN')
+})
+
+test('P4-07-12 receive with the phone settled: linked from birth, the wrong customer refused whole, a shared phone never links along', async () => {
+  const { p, c } = await ownedPhone(`${RUN} เจ้าของเบอร์ 12`)
+  const { data, error } = await createWithPhone(p.intl, 'owner', c.id)
+  expect(error, error?.message).toBeNull()
+  const linked = data as { id: string }
+  expect(await ownerOf(linked.id)).toBe(c.id)
+  const { data: ev } = await adminDb().from('deposit_events').select('payload, actor_kind').eq('deposit_id', linked.id).eq('action', 'line_linked').single()
+  expect(ev).toMatchObject({ actor_kind: 'staff', payload: { via: 'phone' } })
+
+  // naming someone who does not own the phone creates nothing
+  const stranger = await customer()
+  const { count: before } = await adminDb().from('deposits').select('id', { count: 'exact', head: true }).like('customer_name', `${RUN}%`)
+  expect((await createWithPhone(p.dashed, 'owner', stranger.id)).error?.message).toBe('NOT_PHONE_OWNER')
+  const { count: after } = await adminDb().from('deposits').select('id', { count: 'exact', head: true }).like('customer_name', `${RUN}%`)
+  expect(after).toBe(before)
+
+  // a shared phone: unlinked, marked, and left alone when the owner scans another deposit of that phone
+  const shared = (await createWithPhone(p.dashed, 'shared')).data as { id: string }
+  expect(await ownerOf(shared.id)).toBeNull()
+  expect((await deposit(shared.id)).phone_shared).toBe(true)
+  const other = await createDep({ phone: p.key })
+  expect(await scan(c.id, (await mustIssue(other.id)).token)).toMatchObject({ ok: true, linked: 1 })
+  expect(await ownerOf(shared.id)).toBeNull()
+  // its own QR still links it
+  const sharer = await customer()
+  expect(await scan(sharer.id, (await mustIssue(shared.id)).token)).toMatchObject({ ok: true, linked: 1 })
+  expect(await ownerOf(shared.id)).toBe(sharer.id)
+})
+
+test.describe('P4-07-13 the receive form and the sheet', () => {
+  test.use({ storageState: as('staff'), viewport: PHONE_VIEW })
+  const PHOTO = join(tmpdir(), `p407-${Date.now()}.jpg`)
+
+  async function fillForm(page: Page, phone: string, name = '') {
+    writeFileSync(PHOTO, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0xff, 0xd9]))
+    await page.goto('/deposits/new')
+    await expect(page.getByTestId('new-deposit-form')).toHaveAttribute('data-hydrated', 'true')
+    if (name) await page.getByTestId('deposit-name').fill(name)
+    await page.getByTestId('deposit-item').fill('Chivas Regal 12')
+    const chooser = page.waitForEvent('filechooser')
+    await page.getByTestId('deposit-photo-add').click()
+    await (await chooser).setFiles(PHOTO)
+    await expect(page.getByTestId('photo-chip').first()).toBeVisible()
+    await page.getByTestId('deposit-phone').fill(phone)
+  }
+
+  test('P4-07-13 a known phone asks; yes links at once, no sends back to the phone, shared saves unlinked', async ({ page }) => {
+    const { p, c } = await ownedPhone(`${RUN} เจ้าของเบอร์ 13`)
+
+    // yes: the name fills from their last deposit, the deposit is born linked
+    await fillForm(page, p.intl)
+    await expect(page.getByTestId('phone-owner-name')).toHaveText(`${RUN} เจ้าของเบอร์ 13`)
+    // the question must be answered
+    await page.getByTestId('deposit-submit').click()
+    await expect(page.getByTestId('phone-owner-card')).toContainText('เลือกว่าใช่ลูกค้าคนนี้ไหม')
+    await page.getByTestId('phone-owner-yes').click()
+    await expect(page.getByTestId('deposit-name')).toHaveValue(`${RUN} ลูกค้า QR`)
+    await expect(page.getByTestId('phone-owner-chosen')).toHaveAttribute('data-choice', 'owner')
+    await page.getByTestId('deposit-submit').click()
+    await page.waitForURL(/\/deposits\/[0-9a-f-]{36}$/)
+    const yesId = page.url().split('/').pop()!
+    expect(await ownerOf(yesId)).toBe(c.id)
+    await expect(page.getByTestId('deposit-customer')).toContainText('เชื่อม LINE แล้ว')
+
+    // no: back to the phone, cannot save until fixed or shared
+    await fillForm(page, p.dashed, `${RUN} คนอื่น`)
+    await page.getByTestId('phone-owner-no').click()
+    await expect(page.getByTestId('phone-owner-denied')).toContainText('ตรวจเบอร์อีกครั้ง')
+    await expect(page.getByTestId('deposit-phone')).toBeFocused()
+    await page.getByTestId('deposit-submit').click()
+    await expect(page.getByTestId('phone-owner-denied')).toContainText('แก้เบอร์ หรือเลือกใช้เบอร์ร่วมกัน')
+    await expect(page).toHaveURL(/\/deposits\/new$/)
+    // shared: saved without LINE, marked shared
+    await page.getByTestId('phone-owner-shared').click()
+    await expect(page.getByTestId('phone-owner-chosen')).toHaveAttribute('data-choice', 'shared')
+    await page.getByTestId('deposit-submit').click()
+    await page.waitForURL(/\/deposits\/[0-9a-f-]{36}$/)
+    const sharedId = page.url().split('/').pop()!
+    expect(await ownerOf(sharedId)).toBeNull()
+    expect((await deposit(sharedId)).phone_shared).toBe(true)
+
+    // a new phone: no question at all
+    await fillForm(page, mobile().dashed, `${RUN} ลูกค้าใหม่`)
+    await page.waitForTimeout(900)
+    await expect(page.getByTestId('phone-owner-card')).toHaveCount(0)
+    await page.getByTestId('deposit-submit').click()
+    await page.waitForURL(/\/deposits\/[0-9a-f-]{36}$/)
+    expect(await ownerOf(page.url().split('/').pop()!)).toBeNull()
+  })
+
+  test('P4-07-14 an older deposit of a known phone links to its owner from the QR sheet, no scan', async ({ page }) => {
+    const { p, c } = await ownedPhone(`${RUN} เจ้าของเบอร์ 14`)
+    const old = await createDep({ phone: p.key })
+    await page.goto(`/deposits/${old.id}`)
+    await page.getByTestId('link-qr-open').click()
+    await expect(page.getByTestId('link-qr-history')).toHaveAttribute('data-known', 'true')
+    await page.getByTestId('link-qr-owner').click()
+    await expect(page.getByTestId('link-qr-linked')).toContainText(`ลูกค้าเดิม · ${RUN} เจ้าของเบอร์ 14`)
+    expect(await ownerOf(old.id)).toBe(c.id)
+    expect((await adminDb().from('deposit_link_qr').select('deposit_id').eq('deposit_id', old.id)).data).toHaveLength(0)
+    await page.getByTestId('link-qr-close').click()
+    await expect(page.getByTestId('deposit-customer')).toContainText('เชื่อม LINE แล้ว')
+    // the owner no longer owning it (a second LINE customer on the phone) → refused
+    const later = await createDep({ phone: p.key })
+    const second = await customer()
+    const d2 = await createDep({ phone: p.dashed })
+    await linkDirect(d2.id, second.id)
+    expect((await dbAs('staff').rpc('link_phone_owner', { p_deposit: later.id, p_customer: c.id })).error?.message).toBe('NOT_PHONE_OWNER')
+  })
 })

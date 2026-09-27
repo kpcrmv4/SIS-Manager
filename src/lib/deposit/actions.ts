@@ -31,12 +31,14 @@ export type CreateDepositInput = {
   notes?: string
   /** bar/owner only — the RPC refuses it for staff */
   expiresAt?: string
+  /** R-059: what the staff said about a phone that is a LINE customer's — link to that owner, or a shared phone */
+  phoneChoice?: { kind: 'owner'; customerId: string } | { kind: 'shared' }
 }
 
 export async function createDeposit(input: CreateDepositInput): Promise<ActionResult<{ id: string; code: string }>> {
   if (!isUuid(input.branchId) || !cleanText(input.customerName, 120) || !cleanText(input.itemName, 120)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; code: string }>((sb) =>
-    sb.rpc('create_deposit', {
+    sb.rpc('create_deposit_with_phone', {
       p_branch: input.branchId,
       p_customer_name: cleanText(input.customerName, 120)!,
       p_item_name: cleanText(input.itemName, 120)!,
@@ -48,7 +50,9 @@ export async function createDeposit(input: CreateDepositInput): Promise<ActionRe
       p_category: cleanText(input.category, 20),
       p_notes: cleanText(input.notes, 500),
       p_expires_at: input.expiresAt,
-      // a customer is attached only by the verified LINE link flow (RULINGS R-017)
+      // staff never name a customer: 'owner' links the one the database finds for this phone (R-059)
+      p_phone_choice: input.phoneChoice?.kind,
+      p_phone_customer: input.phoneChoice?.kind === 'owner' && isUuid(input.phoneChoice.customerId) ? input.phoneChoice.customerId : undefined,
     }),
   )
   if (res.ok) {

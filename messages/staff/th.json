@@ -391,7 +391,9 @@
       "vip_on_auto": "เป็น VIP อัตโนมัติ (ลูกค้า VIP)",
       "vip_on_customer": "ตั้งลูกค้าเป็น VIP",
       "vip_off_customer": "ยกเลิก VIP ของลูกค้า",
-      "line_linked_qr": "ลูกค้าสแกน QR เชื่อม LINE"
+      "line_linked_qr": "ลูกค้าสแกน QR เชื่อม LINE",
+      "line_linked_phone": "พนักงานผูก LINE กับเจ้าของเบอร์",
+      "phone_shared": "ใช้เบอร์ร่วมกัน · ไม่ผูก LINE"
     },
     "eventMeta": "{date} · {time} น. · {actor}",
     "lineSent": "แจ้ง LINE ลูกค้าแล้ว",
@@ -448,7 +450,10 @@
       "linkedNew": "ลูกค้าใหม่ · {name}",
       "linkedCount": "ผูกรายการฝากทั้งหมด {count} รายการ",
       "done": "เสร็จแล้ว",
-      "closeHint": "ปิดหน้านี้แล้ว QR จะใช้ไม่ได้ทันที"
+      "closeHint": "ปิดหน้านี้แล้ว QR จะใช้ไม่ได้ทันที",
+      "linkOwner": "ผูกกับ {name} เลย",
+      "linkOwnerHint": "ถ้าคนตรงหน้าไม่ใช่เจ้าของเบอร์ ให้สแกน QR ด้านล่างแทน",
+      "linkedOwner": "ผูก LINE กับ {name} แล้ว"
     }
   },
   "depositForm": {
@@ -473,7 +478,21 @@
     "created": "รับฝากแล้ว · {code}",
     "nameRequired": "กรอกชื่อลูกค้า",
     "itemRequired": "เลือกหรือพิมพ์ชื่อเหล้า",
-    "quantityInvalid": "จำนวนขวดต้องเป็น 1–50"
+    "quantityInvalid": "จำนวนขวดต้องเป็น 1–50",
+    "ownerTitle": "ลูกค้าเดิม · ผูก LINE แล้ว",
+    "ownerLine": "{name}",
+    "ownerOpen": "ฝากอยู่ {count} รายการ",
+    "ownerAsk": "ใช่ลูกค้าคนนี้ไหม",
+    "ownerYes": "ใช่ คนนี้",
+    "ownerNo": "ไม่ใช่",
+    "ownerChosen": "จะผูก LINE กับ {name} ทันที",
+    "ownerChange": "เปลี่ยน",
+    "ownerDenied": "เบอร์นี้เป็นของลูกค้า LINE คนอื่น · ตรวจเบอร์อีกครั้ง",
+    "ownerShared": "ใช้เบอร์ร่วมกัน · ฝากโดยไม่ผูก LINE",
+    "ownerSharedChosen": "ใช้เบอร์ร่วมกัน · รายการนี้จะไม่ผูก LINE",
+    "ownerPick": "เลือกว่าใช่ลูกค้าคนนี้ไหม",
+    "ownerFix": "แก้เบอร์ หรือเลือกใช้เบอร์ร่วมกัน",
+    "checking": "กำลังตรวจเบอร์"
   },
   "confirmDialog": {
     "title": "ยืนยันเหล้า",
@@ -1171,7 +1190,8 @@
     "NO_CUSTOMER_KEY": "ลูกค้าคนนี้ไม่มีเบอร์โทรหรือ LINE — ตั้ง VIP ทีละขวดแทน",
     "NOT_LATE": "ยังไม่ถึงเวลาจอง — ถ้าลูกค้าไม่มาแน่ ให้กดยกเลิกการจองแทน",
     "ALREADY_LINKED": "รายการนี้ผูก LINE แล้ว",
-    "NO_LIFF": "สาขานี้ยังไม่ได้ตั้งค่า LIFF · ให้ owner ตั้งค่าที่ ตั้งค่า LINE"
+    "NO_LIFF": "สาขานี้ยังไม่ได้ตั้งค่า LIFF · ให้ owner ตั้งค่าที่ ตั้งค่า LINE",
+    "NOT_PHONE_OWNER": "เบอร์นี้ไม่ใช่ของลูกค้าคนนี้แล้ว · ตรวจอีกครั้ง"
   },
   "audit": {
     "title": "บันทึกการใช้งาน",

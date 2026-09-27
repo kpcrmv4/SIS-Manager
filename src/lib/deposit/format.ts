@@ -102,7 +102,9 @@ export function eventText(t: Translator, e: { action: string; payload: Record<st
     case 'printed':
       return t('deposit.event.printed')
     case 'line_linked':
-      return t(p.via === 'qr' ? 'deposit.event.line_linked_qr' : 'deposit.event.line_linked')
+      return t(p.via === 'qr' ? 'deposit.event.line_linked_qr' : p.via === 'phone' ? 'deposit.event.line_linked_phone' : 'deposit.event.line_linked')
+    case 'phone_shared':
+      return t('deposit.event.phone_shared')
     case 'cancelled':
       return t('deposit.event.cancelled')
     default:

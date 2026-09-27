@@ -43,6 +43,7 @@ export const DB_ERROR_CODES = [
   'NOT_LATE',
   'ALREADY_LINKED',
   'NO_LIFF',
+  'NOT_PHONE_OWNER',
   'line_disabled',
   'past',
   'closed_weekday',

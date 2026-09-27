@@ -1,11 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { CheckCircle2, Loader2, QrCode, RotateCw, UserCheck, UserPlus } from 'lucide-react'
+import { CheckCircle2, Link2, Loader2, QrCode, RotateCw, UserCheck, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { issueLinkQr, linkQrStatus, revokeLinkQr, type LinkQr, type LinkQrStatus } from '@/lib/deposit/link-qr'
+import { issueLinkQr, linkPhoneOwner, linkQrStatus, revokeLinkQr, type LinkQr, type LinkQrStatus } from '@/lib/deposit/link-qr'
 import { ActionDialog } from './action-dialog'
 
 const POLL_MS = 2500
@@ -33,6 +33,21 @@ export function LinkQrSheet({ depositId, linked, hasPhone }: { depositId: string
   const [view, setView] = useState<View>({ kind: 'loading' })
   const [now, setNow] = useState(() => Date.now())
   const live = useRef(false)
+  const [linking, startLinking] = useTransition()
+
+  // R-059: the phone already has a LINE customer here — staff link to them without a scan
+  function linkOwner(qr: LinkQr) {
+    if (!qr.knownId) return
+    startLinking(async () => {
+      const res = await linkPhoneOwner(depositId, qr.knownId!)
+      if (!res.ok) {
+        toast.error(te(res.error))
+        return
+      }
+      live.current = false
+      setView({ kind: 'linked', status: { linked: true, live: false, name: qr.knownName, viaQr: false, returning: true, count: 1 } })
+    })
+  }
 
   const issue = useCallback(async () => {
     setView({ kind: 'loading' })
@@ -131,6 +146,15 @@ export function LinkQrSheet({ depositId, linked, hasPhone }: { depositId: string
           {view.kind === 'qr' && !shownExpired && (
             <div className="flex flex-col items-center gap-3">
               <HistoryLine qr={view.qr} hasPhone={hasPhone} />
+              {view.qr.known && view.qr.knownId && (
+                <div className="flex w-full flex-col gap-1.5">
+                  <button type="button" className="btn-primary w-full" onClick={() => linkOwner(view.qr)} disabled={linking} data-testid="link-qr-owner">
+                    {linking ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
+                    {t('linkOwner', { name: view.qr.knownName ?? 'LINE' })}
+                  </button>
+                  <p className="text-center text-xs text-muted-token">{t('linkOwnerHint')}</p>
+                </div>
+              )}
               {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL made on this device */}
               <img src={view.image} alt="" width={280} height={280} className="size-[min(280px,70vw)] rounded-[12px] border border-line bg-white p-1" data-testid="link-qr-image" data-url={view.qr.url} />
               <p className="text-center text-sm text-ink-2">{t('body')}</p>
