@@ -217,7 +217,7 @@ test('P1-BK-17 customer cancels inside the window; too late once the window has 
   expect((await admin().rpc('cancel_booking', { p_booking: other.id, p_customer_id: '00000000-0000-0000-0000-000000000000', p_branch: fixtureIds().branchA } as never)).error?.message).toContain('NOT_YOURS')
 })
 
-test('P1-BK-18 no-show job: past confirmed/pending → no_show, arrived untouched', async () => {
+test('P1-BK-18 no-show job: past confirmed → no_show, past waiting → cancelled without LINE (R-062), arrived untouched', async () => {
   const c = ok(await staffBook('staff', { p_slot: '19:00', p_night: addDays(TODAY, 1) }))
   const p = ok(await lineBook({ p_slot: '19:00', p_night: addDays(TODAY, 1) }))
   const yesterday = addDays(TODAY, -1)
@@ -225,11 +225,14 @@ test('P1-BK-18 no-show job: past confirmed/pending → no_show, arrived untouche
   await admin().from('bookings').update({ night: yesterday }).eq('id', arrivedId)
   const { error } = await admin().rpc('mark_no_shows')
   expect(error, error?.message).toBeNull()
-  const { data } = await admin().from('bookings').select('id, status').in('id', [c.id, p.id, arrivedId])
-  const st = Object.fromEntries((data ?? []).map((r) => [r.id, r.status]))
-  expect(st[c.id]).toBe('no_show')
-  expect(st[p.id]).toBe('no_show')
-  expect(st[arrivedId]).toBe('arrived')
+  const { data } = await admin().from('bookings').select('id, status, cancel_reason, cancelled_by_customer, table_id').in('id', [c.id, p.id, arrivedId])
+  const st = Object.fromEntries((data ?? []).map((r) => [r.id, r]))
+  expect(st[c.id].status).toBe('no_show')
+  // the shop never took it: cancelled, not counted as a no-show, the table free, nothing sent
+  expect(st[p.id]).toMatchObject({ status: 'cancelled', cancel_reason: 'หมดเวลา · ร้านไม่ได้ยืนยัน', cancelled_by_customer: false, table_id: null })
+  const { count } = await admin().from('line_outbox').select('id', { count: 'exact', head: true }).eq('kind', 'booking_cancelled').eq('payload->>booking_id', p.id)
+  expect(count).toBe(0)
+  expect(st[arrivedId].status).toBe('arrived')
 })
 
 test('P1-BK-19 availability: 7 nights, closed weekday and blackout flagged, slots listed', async () => {
