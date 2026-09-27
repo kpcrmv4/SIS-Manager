@@ -6,6 +6,8 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import { RefreshRetry } from '@/components/booking/refresh-retry'
 import { BranchForm, type BranchFormValue } from '@/components/settings/branch-form'
 import { ExpiryNoticeForm } from '@/components/settings/expiry-notice-form'
+import { LineNotifyCard } from '@/components/settings/line-notify-card'
+import { LINE_NOTIFY_KINDS, lineQuota } from '@/lib/settings/line-notify'
 import { PrintSettingsSection } from '@/components/settings/print-settings-section'
 import { SetupCard } from '@/components/settings/setup-card'
 import { getDashboard } from '@/lib/reports/dashboard'
@@ -34,7 +36,7 @@ export default async function SettingsBranchPage() {
   const { data, error } = await sb
     .from('branches')
     .select(
-      'name, active, opens_at, closes_at, deposit_days, expiry_notice_days, withdrawal_blocked_days, receipt_settings, expiry_reminders_enabled, expiry_reminder_days, expiry_reminder_time, expiry_reminder_templates',
+      'name, active, opens_at, closes_at, deposit_days, expiry_notice_days, withdrawal_blocked_days, receipt_settings, expiry_reminders_enabled, expiry_reminder_days, expiry_reminder_time, expiry_reminder_templates, line_notify_off',
     )
     .eq('id', branch.id)
     .maybeSingle()
@@ -88,6 +90,8 @@ export default async function SettingsBranchPage() {
         />
       )}
       <BranchForm branchId={branch.id} initial={initial} />
+      {/* R-063: which automatic LINE messages go out, and what they cost */}
+      <LineNotifyCard branchId={branch.id} initialOff={data.line_notify_off} kinds={LINE_NOTIFY_KINDS} quota={await lineQuota(branch.id)} />
       <ExpiryNoticeForm
         branchId={branch.id}
         branchName={data.name}

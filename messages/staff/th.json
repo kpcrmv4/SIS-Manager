@@ -937,6 +937,52 @@
       "errUnknown": "ไม่รู้จักตัวแปร {names}",
       "errTooLong": "ข้อความยาวเกิน {max} ตัวอักษร",
       "errEmpty": "ข้อความว่างอยู่ ใส่ข้อความหรือกด ใช้ข้อความเริ่มต้น"
+    },
+    "notify": {
+      "title": "แจ้งเตือนอัตโนมัติทาง LINE",
+      "hint": "เลือกว่าระบบจะส่งข้อความ LINE เรื่องไหนให้อัตโนมัติ ปิดแล้วจะไม่ส่งและไม่กินโควต้า",
+      "quotaTitle": "โควต้าข้อความเดือนนี้",
+      "quotaUsed": "ใช้ไป {used} / {limit}",
+      "quotaUnlimited": "ใช้ไป {used} · ไม่จำกัด",
+      "quotaLeft": "เหลือ {left} ข้อความ",
+      "quotaNoToken": "ยังไม่ได้ตั้งค่า Channel access token ของสาขานี้ (ตั้งค่า LINE)",
+      "quotaError": "ดึงข้อมูลโควต้าจาก LINE ไม่สำเร็จ ลองใหม่ภายหลัง",
+      "quotaHelp": "นับเฉพาะข้อความที่ระบบส่งเอง ข้อความตอบกลับเมื่อลูกค้าพิมพ์ในแชทไม่นับ",
+      "toCustomer": "ถึงลูกค้า",
+      "toGroup": "ถึงกลุ่มพนักงาน",
+      "expiryNote": "แจ้งเตือนก่อนหมดอายุและหมดอายุแล้ว ตั้งค่าที่การ์ด \"แจ้งเตือนหมดอายุทาง LINE\" ด้านล่าง",
+      "savedOn": "เปิดส่ง \"{name}\" แล้ว",
+      "savedOff": "ปิดส่ง \"{name}\" แล้ว",
+      "kind": {
+        "deposit_confirmed": "ยืนยันรับฝากเหล้า",
+        "deposit_rejected": "ปฏิเสธการฝาก",
+        "withdraw_completed": "เบิกเหล้าแล้ว",
+        "withdraw_rejected": "ปฏิเสธการเบิก",
+        "disposed": "แจ้งจำหน่ายออก",
+        "booking_pending": "ได้รับคำขอจองโต๊ะ",
+        "booking_confirmed": "ยืนยันการจองโต๊ะ",
+        "booking_rejected": "ปฏิเสธการจอง",
+        "booking_cancelled": "ยกเลิกการจอง",
+        "booking_reminder": "เตือนก่อนถึงคืนที่จอง",
+        "deposit_requested": "ลูกค้าขอฝากผ่าน LINE",
+        "withdrawal_requested": "ลูกค้าขอเบิกเหล้า",
+        "booking_new": "มีการจองใหม่"
+      },
+      "when": {
+        "deposit_confirmed": "เมื่อ bar ยืนยันเหล้าเก็บเข้าชั้น",
+        "deposit_rejected": "เมื่อ bar ปฏิเสธรายการฝาก",
+        "withdraw_completed": "เมื่อนำเหล้ามาให้ลูกค้าแล้ว",
+        "withdraw_rejected": "เมื่อ bar ปฏิเสธคำขอเบิก",
+        "disposed": "เมื่อเหล้าที่หมดอายุถูกจำหน่ายออก",
+        "booking_pending": "เมื่อลูกค้าจองผ่าน LINE และรอร้านยืนยัน",
+        "booking_confirmed": "เมื่อร้านยืนยันการจอง",
+        "booking_rejected": "เมื่อร้านปฏิเสธการจอง",
+        "booking_cancelled": "เมื่อการจองถูกยกเลิก",
+        "booking_reminder": "วันที่จอง เวลา 16:00",
+        "deposit_requested": "เมื่อลูกค้าส่งคำขอฝากเหล้า",
+        "withdrawal_requested": "เมื่อลูกค้าส่งคำขอเบิกเหล้า",
+        "booking_new": "เมื่อมีการจองโต๊ะใหม่"
+      }
     }
   },
   "settingsLine": {

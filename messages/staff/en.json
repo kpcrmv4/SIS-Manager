@@ -937,6 +937,52 @@
       "errUnknown": "Unknown variable {names}",
       "errTooLong": "Longer than {max} characters",
       "errEmpty": "The wording is empty — write one or press Use the default"
+    },
+    "notify": {
+      "title": "Automatic LINE messages",
+      "hint": "Choose which LINE messages the system sends by itself. Off means not sent and no quota used",
+      "quotaTitle": "This month's message quota",
+      "quotaUsed": "{used} / {limit} used",
+      "quotaUnlimited": "{used} used · unlimited",
+      "quotaLeft": "{left} messages left",
+      "quotaNoToken": "This branch's channel access token is not set (LINE settings)",
+      "quotaError": "Could not read the quota from LINE, try again later",
+      "quotaHelp": "Only messages the system sends count; replies to a customer's own chat message do not",
+      "toCustomer": "To customers",
+      "toGroup": "To the staff group",
+      "expiryNote": "Expiry reminders are set in the \"Expiry reminders on LINE\" card below",
+      "savedOn": "\"{name}\" turned on",
+      "savedOff": "\"{name}\" turned off",
+      "kind": {
+        "deposit_confirmed": "Deposit confirmed",
+        "deposit_rejected": "Deposit rejected",
+        "withdraw_completed": "Bottles withdrawn",
+        "withdraw_rejected": "Withdrawal rejected",
+        "disposed": "Disposed",
+        "booking_pending": "Booking request received",
+        "booking_confirmed": "Booking confirmed",
+        "booking_rejected": "Booking rejected",
+        "booking_cancelled": "Booking cancelled",
+        "booking_reminder": "Booking reminder",
+        "deposit_requested": "Customer asks to deposit",
+        "withdrawal_requested": "Customer asks to withdraw",
+        "booking_new": "New booking"
+      },
+      "when": {
+        "deposit_confirmed": "when bar confirms and shelves the bottles",
+        "deposit_rejected": "when bar rejects a deposit",
+        "withdraw_completed": "when the bottles reach the customer",
+        "withdraw_rejected": "when bar rejects a withdrawal",
+        "disposed": "when expired bottles are disposed",
+        "booking_pending": "when a LINE booking waits for the shop",
+        "booking_confirmed": "when the shop confirms a booking",
+        "booking_rejected": "when the shop rejects a booking",
+        "booking_cancelled": "when a booking is cancelled",
+        "booking_reminder": "on the booked day at 16:00",
+        "deposit_requested": "when a customer sends a deposit request",
+        "withdrawal_requested": "when a customer sends a withdrawal request",
+        "booking_new": "when a table is booked"
+      }
     }
   },
   "settingsLine": {

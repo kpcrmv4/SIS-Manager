@@ -363,6 +363,7 @@ export type Database = {
           liff_id: string | null
           line_bot_user_id: string | null
           line_channel_id: string | null
+          line_notify_off: string[]
           name: string
           opens_at: string
           phone: string | null
@@ -389,6 +390,7 @@ export type Database = {
           liff_id?: string | null
           line_bot_user_id?: string | null
           line_channel_id?: string | null
+          line_notify_off?: string[]
           name: string
           opens_at?: string
           phone?: string | null
@@ -415,6 +417,7 @@ export type Database = {
           liff_id?: string | null
           line_bot_user_id?: string | null
           line_channel_id?: string | null
+          line_notify_off?: string[]
           name?: string
           opens_at?: string
           phone?: string | null

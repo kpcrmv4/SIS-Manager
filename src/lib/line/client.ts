@@ -61,3 +61,16 @@ export async function getBotProfile(token: string, userId: string): Promise<Line
   const str = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null)
   return { displayName: str(p.displayName, 120), pictureUrl: str(p.pictureUrl, 500), language: str(p.language, 20) }
 }
+
+/** The OA's push allowance this month and what it has used (R-063). limit null = no cap on the plan. */
+export async function getMessageQuota(token: string): Promise<{ limit: number | null; used: number } | null> {
+  const [q, c] = await Promise.all([
+    lineFetch('/v2/bot/message/quota', token, { method: 'GET' }),
+    lineFetch('/v2/bot/message/quota/consumption', token, { method: 'GET' }),
+  ])
+  if (!q.ok || !c.ok) return null
+  const quota = q.body as { type?: string; value?: number }
+  const used = (c.body as { totalUsage?: number }).totalUsage
+  if (typeof used !== 'number') return null
+  return { limit: quota.type === 'limited' && typeof quota.value === 'number' ? quota.value : null, used }
+}
