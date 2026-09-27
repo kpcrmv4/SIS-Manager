@@ -83,6 +83,9 @@ test.describe('bar (branch A)', () => {
     await page.getByTestId('bell-button').first().click()
     const first = page.getByTestId('bell-item').first()
     await expect(first).toHaveAttribute('data-unread', 'true')
+    // (owner, 2026-09-27) a deposit waiting for bar wears its work's icon box in the "to confirm" hue
+    await expect(first).toHaveAttribute('data-kind', 'deposit_received')
+    await expect(first.locator('.bg-status-progress-bg svg')).toHaveCount(1)
     const barId = fixtureIds().users.bar
     const { data: newest } = await adminDb().from('notifications').select('id, link').eq('user_id', barId).order('created_at', { ascending: false }).limit(1).single()
     await first.click()

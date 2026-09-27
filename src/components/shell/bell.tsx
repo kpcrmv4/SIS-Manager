@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Bell, BellRing, Loader2 } from 'lucide-react'
+import { Bell, BellRing, CalendarCheck, CalendarClock, CalendarMinus, ClipboardCheck, GlassWater, Loader2, MessageSquarePlus, type LucideIcon } from 'lucide-react'
 import { ResponsiveDialog } from '@/components/booking/responsive-dialog'
 import { ErrorRetry } from '@/components/ui/error-retry'
 import { EmptyState, ListSkeleton } from '@/components/ui/states'
@@ -13,6 +13,17 @@ import { usePush } from '@/components/pwa/use-push'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { formatShortDate, formatTime } from '@/lib/date'
 import { textKind } from '@/lib/push/kinds'
+
+// each kind wears its work's icon and hue — the same as the LINE switches and the /deposits filter cards (R-047)
+const LOOK: Record<string, { icon: LucideIcon; tone: string }> = {
+  deposit_received: { icon: ClipboardCheck, tone: 'bg-status-progress-bg text-status-progress' },
+  deposit_withdrawal_requested: { icon: GlassWater, tone: 'bg-status-violet-bg text-status-violet' },
+  deposit_requested: { icon: MessageSquarePlus, tone: 'bg-status-info-bg text-status-info' },
+  booking_pending: { icon: CalendarClock, tone: 'bg-status-progress-bg text-status-progress' },
+  booking_new: { icon: CalendarCheck, tone: 'bg-status-done-bg text-status-done' },
+  booking_cancelled: { icon: CalendarMinus, tone: 'bg-urgent-bg text-urgent' },
+}
+const PLAIN = { icon: Bell, tone: 'bg-surface-2 text-ink-2' }
 
 type Row = { id: string; kind: string; payload: Record<string, unknown>; link: string | null; read_at: string | null; created_at: string }
 
@@ -160,11 +171,20 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
             <button
               type="button"
               onClick={() => void openRow(r)}
-              className="flex w-full items-start gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-2"
+              className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-2"
               data-testid="bell-item"
               data-unread={r.read_at ? 'false' : 'true'}
+              data-kind={r.kind}
             >
-              <span className={`mt-2 size-2 flex-none rounded-full ${r.read_at ? 'bg-transparent' : 'bg-brand'}`} aria-hidden />
+              {(() => {
+                const look = LOOK[r.kind] ?? PLAIN
+                return (
+                  <span className={`relative flex size-9 flex-none items-center justify-center rounded-[10px] ${look.tone} ${r.read_at ? 'opacity-55' : ''}`} aria-hidden>
+                    <look.icon className="size-4.5" />
+                    {!r.read_at && <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-urgent ring-2 ring-card" />}
+                  </span>
+                )
+              })()}
               <span className="min-w-0 flex-1">
                 <span className={`block truncate text-sm leading-5 ${r.read_at ? 'text-ink-2' : 'font-semibold text-ink'}`}>{text(r)}</span>
                 <span className="block text-xs text-muted-token tnum">
