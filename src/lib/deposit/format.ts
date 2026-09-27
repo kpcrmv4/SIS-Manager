@@ -44,9 +44,8 @@ export function badgeText(t: Translator, spec: BadgeSpec): string {
   return spec.count !== undefined ? t(spec.key, { count: spec.count }) : t(spec.key)
 }
 
-/** "{count} ขวด · {percent}%" vs "{count} ขวด · ยังไม่เปิด" when every remaining bottle is still sealed (100%). */
+/** "{count} ขวด · {percent}%" — a sealed deposit reads 100%, like every other level (owner, 2026-09-27). */
 export function remainingText(t: Translator, remainingQty: number, remainingPercent: number): string {
-  if (remainingQty > 0 && remainingPercent >= 100) return t('deposits.remainingSealed', { count: remainingQty })
   return t('deposits.remaining', { count: remainingQty, percent: Math.round(remainingPercent) })
 }
 

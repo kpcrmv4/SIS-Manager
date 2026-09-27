@@ -308,7 +308,6 @@
     "colExpires": "หมดอายุ",
     "colStatus": "สถานะ",
     "remaining": "{count} ขวด · {percent}%",
-    "remainingSealed": "{count} ขวด · ยังไม่เปิด",
     "expiresOn": "หมดอายุ {date}",
     "noExpiry": "ไม่หมดอายุ",
     "expiredHelp": "เหล้าที่เลยกำหนดรับคืนแล้ว เลือกเหล้าที่นำออกจากชั้นจริงแล้วกด \"จำหน่ายออก\" ระบบจะแจ้ง LINE ลูกค้าให้ทันที",

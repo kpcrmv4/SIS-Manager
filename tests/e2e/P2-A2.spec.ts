@@ -152,6 +152,42 @@ test.describe('detail dialogs', () => {
       expect(bottles!.map((b) => b.status)).toEqual(['sealed', 'opened', 'consumed'])
     })
 
+    test('P2-A2-17 confirm dialog: type the % or drag the bar — one number; the list reads 100% with a level bar', async ({ page }) => {
+      const dep = await mustCreate('staff', { qty: 2 })
+      await page.goto(`/deposits/${dep.id}`)
+      await page.getByTestId('action-confirm').click()
+      const num2 = page.getByTestId('confirm-level-2')
+      const bar2 = page.getByTestId('confirm-level-range-2')
+      await expect(bar2).toHaveValue('100')
+      await num2.fill('60')
+      await expect(bar2).toHaveValue('60')
+      // the bar moves in steps of 5 and the number follows it
+      await bar2.focus()
+      await page.keyboard.press('ArrowLeft')
+      await expect(num2).toHaveValue('55')
+      await bar2.fill('30')
+      await expect(num2).toHaveValue('30')
+      // typing past the ends stays inside 0–100
+      await num2.fill('150')
+      await expect(num2).toHaveValue('100')
+      await num2.fill('45')
+      await attachPhoto(page, 'confirm-photo-add')
+      await page.getByRole('button', { name: 'ยืนยันเก็บเข้าชั้น', exact: true }).click()
+      await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
+      const { data: bottles } = await adminDb().from('deposit_bottles').select('remaining_percent').eq('deposit_id', dep.id).order('bottle_no')
+      expect(bottles!.map((b) => Number(b.remaining_percent))).toEqual([100, 45])
+
+      // a sealed deposit reads 100%, never "ยังไม่เปิด", with its bar on a phone
+      const sealed = await mustCreate('staff', { qty: 2 })
+      await confirmAll(sealed.id, [100, 100])
+      await page.setViewportSize({ width: 390, height: 844 })
+      await page.goto(`/deposits?q=${sealed.code}`)
+      const level = page.getByTestId('deposits-list-mobile').getByTestId('deposit-row-level')
+      await expect(level).toHaveText('2 ขวด · 100%')
+      await expect(level.locator('.level-bar > i')).toHaveAttribute('style', /width: ?100%/)
+      await expect(page.getByText('ยังไม่เปิด')).toHaveCount(0)
+    })
+
     test('P2-A2-06 reject a deposit with a reason → cancelled, reason in history', async ({ page }) => {
       const dep = await mustCreate('staff', { qty: 1 })
       await page.goto(`/deposits/${dep.id}`)

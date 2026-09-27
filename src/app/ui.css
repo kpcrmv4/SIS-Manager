@@ -181,6 +181,29 @@
   /* level bar (remaining %) */
   .level-bar { height: 6px; width: 64px; flex: none; overflow: hidden; border-radius: 3px; background: var(--line); }
   .level-bar > i { display: block; height: 100%; background: var(--brand); }
+  .level { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
+
+  /* a bottle's % as a slider (confirm dialog): the filled part of the track is the level */
+  .level-range {
+    width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer;
+    -webkit-appearance: none; appearance: none; touch-action: pan-y;
+  }
+  .level-range:focus-visible { outline: none; }
+  .level-range::-webkit-slider-runnable-track {
+    height: 10px; border-radius: 5px;
+    background: linear-gradient(to right, var(--brand) var(--lvl), var(--line) var(--lvl));
+  }
+  .level-range::-moz-range-track { height: 10px; border-radius: 5px; background: var(--line); }
+  .level-range::-moz-range-progress { height: 10px; border-radius: 5px; background: var(--brand); }
+  .level-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 26px; height: 26px; margin-top: -8px;
+    border-radius: 50%; background: var(--card); border: 3px solid var(--brand); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  }
+  .level-range::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--card); border: 3px solid var(--brand);
+  }
+  .level-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--ring); }
+  .level-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--ring); }
 
   /* ── bottles (deposit detail) ────────────────────────────────────────── */
   .bottles { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 0.625rem; }

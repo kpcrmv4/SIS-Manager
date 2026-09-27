@@ -199,7 +199,12 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
                     // a phone puts this on its own line: badge and amount side by side, flush left
                     <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-1">
                       <Badge tone={spec.tone}>{badgeText(tRoot, spec)}</Badge>
-                      <span className="num text-xs text-muted-token">{remainingText(tRoot, r.remainingQty, r.remainingPercent)}</span>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-token num" data-testid="deposit-row-level">
+                        <span className="level-bar w-12!" aria-hidden>
+                          <i style={{ width: `${Math.round(r.remainingPercent)}%` }} />
+                        </span>
+                        {remainingText(tRoot, r.remainingQty, r.remainingPercent)}
+                      </span>
                     </div>
                   }
                 />

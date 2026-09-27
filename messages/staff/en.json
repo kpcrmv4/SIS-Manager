@@ -308,7 +308,6 @@
     "colExpires": "Expires",
     "colStatus": "Status",
     "remaining": "{count} btl · {percent}%",
-    "remainingSealed": "{count} btl · sealed",
     "expiresOn": "Expires {date}",
     "noExpiry": "Never expires",
     "expiredHelp": "These are past their collection deadline. Tick the bottles you have actually taken off the shelf and press \"Dispose\" — the customer is told on LINE right away",
