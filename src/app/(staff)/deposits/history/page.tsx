@@ -10,6 +10,7 @@ import { getActorState } from '@/lib/auth/actor'
 import { eventText } from '@/lib/deposit/format'
 import { HISTORY_GROUPS, HISTORY_PAGE, getDepositHistory, isHistoryGroup, type HistoryFeed } from '@/lib/deposit/history'
 import { addDays, businessNight, formatShortDate } from '@/lib/date'
+import { FilterDisclosure } from '@/components/ui/filter-disclosure'
 
 type Search = Promise<{ from?: string; to?: string; g?: string; actor?: string; q?: string; page?: string }>
 
@@ -23,7 +24,7 @@ const MAX_SPAN_DAYS = 366
  */
 export default async function DepositHistoryPage({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams
-  const [t, tRoot, state] = await Promise.all([getTranslations('depositHistory'), getTranslations(), getActorState()])
+  const [t, tRoot, tc, state] = await Promise.all([getTranslations('depositHistory'), getTranslations(), getTranslations('common'), getActorState()])
   const actor = state.status === 'ok' ? state.actor : null
   const branch = actor?.branch ?? null
   if (!actor || !branch) {
@@ -93,6 +94,17 @@ export default async function DepositHistoryPage({ searchParams }: { searchParam
           </Link>
         ))}
       </div>
+      <FilterDisclosure
+        label={tc('filter')}
+        summary={[
+          from === to ? fmt(from) : `${fmt(from)} – ${fmt(to)}`,
+          who === 'customer' ? t('customer') : who === 'system' ? t('system') : (feed?.actors.find((x) => x.id === who)?.name ?? t('anyone')),
+          q,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+        testId="history-filter-fold"
+      >
       <form method="get" action="/deposits/history" className="card-surface p-4" data-testid="history-filter">
         <div role="group" aria-label={t('rangeLabel')} className="tabs mb-3 flex-wrap" data-testid="history-ranges">
           {ranges.map((r) => (
@@ -141,6 +153,7 @@ export default async function DepositHistoryPage({ searchParams }: { searchParam
           </button>
         </div>
       </form>
+      </FilterDisclosure>
     </div>
   )
 

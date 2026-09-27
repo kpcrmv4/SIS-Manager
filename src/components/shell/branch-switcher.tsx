@@ -19,7 +19,8 @@ export function BranchSwitcher({
 }: {
   branches: BranchRef[]
   branch: BranchRef | null
-  variant: 'sidebar' | 'sheet'
+  /** top = the phone's top bar: the name alone, a picker only when there is more than one */
+  variant: 'sidebar' | 'sheet' | 'top'
 }) {
   const t = useTranslations('nav')
   const tc = useTranslations('common')
@@ -81,6 +82,15 @@ export function BranchSwitcher({
   }
 
   const dark = variant === 'sidebar'
+  const top = variant === 'top'
+  if (top && branches.length <= 1) {
+    return (
+      <span className="flex min-w-0 items-center gap-1.5 px-1 text-sm font-semibold text-ink" data-testid="branch-switcher-current">
+        <Store className="size-4 flex-none text-muted-token" aria-hidden />
+        <span className="truncate">{branch?.name}</span>
+      </span>
+    )
+  }
   return (
     <div ref={root} className="relative" data-testid="branch-switcher">
       <button
@@ -92,8 +102,12 @@ export function BranchSwitcher({
         aria-expanded={open}
         aria-controls={listId}
         aria-label={`${t('switchBranch')}: ${branch?.name ?? ''}`}
-        className={`flex w-full items-center gap-2 rounded-[10px] px-2.5 py-2 text-left text-sm transition-colors ${
-          dark ? 'bg-sidebar-hover text-sidebar-title hover:brightness-110' : 'border border-line bg-card text-ink'
+        className={`flex items-center gap-2 rounded-[10px] px-2.5 py-2 text-left text-sm transition-colors ${
+          top
+            ? 'max-w-full border border-line bg-card font-semibold text-ink hover:bg-surface-2'
+            : dark
+              ? 'w-full bg-sidebar-hover text-sidebar-title hover:brightness-110'
+              : 'w-full border border-line bg-card text-ink'
         }`}
       >
         <Store className={`size-4 flex-none ${dark ? 'text-sidebar-fg-dim' : 'text-muted-token'}`} aria-hidden />
@@ -109,7 +123,9 @@ export function BranchSwitcher({
           id={listId}
           role="listbox"
           aria-label={t('switchBranch')}
-          className="absolute inset-x-0 top-[calc(100%+6px)] z-40 max-h-72 overflow-auto rounded-xl border border-line bg-card p-1 text-ink shadow-[0_12px_32px_rgba(0,0,0,.28)]"
+          className={`absolute top-[calc(100%+6px)] z-40 max-h-72 overflow-auto rounded-xl border border-line bg-card p-1 text-ink shadow-[0_12px_32px_rgba(0,0,0,.28)] ${
+            top ? 'left-0 w-[min(18rem,calc(100vw-1.5rem))]' : 'inset-x-0'
+          }`}
         >
           {branches.map((b, i) => {
             const selected = b.id === branch?.id

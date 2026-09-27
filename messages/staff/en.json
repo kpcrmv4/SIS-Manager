@@ -38,7 +38,8 @@
     "errorBody": "Check the connection and try again",
     "errorGeneric": "Something went wrong. Try again",
     "forbidden": "This account can't do that",
-    "notFound": "Not found"
+    "notFound": "Not found",
+    "filter": "Filters"
   },
   "roles": {
     "staff": "staff",
@@ -132,7 +133,7 @@
     "lateBy": "{count} min late"
   },
   "tonight": {
-    "title": "Tonight · {branch}",
+    "title": "Tonight",
     "subtitle": "{date} · open {open}–{close}",
     "kpiBookings": "Bookings tonight",
     "kpiBookingsHint": "{people} people · {arrived} arrived",
@@ -317,7 +318,7 @@
   },
   "deposits": {
     "title": "Deposits",
-    "subtitle": "{branch} · {count} bottles in store",
+    "subtitle": "{count} bottles in store",
     "new": "New deposit",
     "tabInStore": "In store",
     "tabToConfirm": "To confirm",
@@ -618,7 +619,7 @@
   },
   "bookings": {
     "title": "Bookings",
-    "subtitle": "{date} · {tables} tables, {people} people · {booked} of {capacity} booked",
+    "subtitle": "{tables} bookings, {people} people · {booked}/{capacity} tables taken",
     "new": "New booking",
     "viewPlan": "Floor plan",
     "viewList": "List",
@@ -641,7 +642,7 @@
     "emptyBody": "Bookings from LINE and staff show up here",
     "emptyZones": "No floor plan yet",
     "emptyZonesBody": "The owner adds zones and tables under Settings → Floor plan",
-    "closedNight": "Closed for bookings tonight · {reason}",
+    "closedNight": "Closed to bookings · {reason}",
     "pendingTitle": "Waiting for confirmation",
     "pendingCount": "{count} bookings",
     "pendingNone": "No bookings waiting for confirmation",
@@ -736,7 +737,7 @@
   },
   "settingsBooking": {
     "title": "Booking rules",
-    "subtitle": "{branch} · applies to new bookings only",
+    "subtitle": "Applies to new bookings only",
     "lineEnabled": "Take bookings on LINE",
     "lineEnabledHelp": "Off: customers can't book themselves; staff still can",
     "autoConfirm": "Confirm bookings automatically",
@@ -783,7 +784,7 @@
   },
   "settingsTables": {
     "title": "Floor plan",
-    "subtitle": "{branch} · {zones} zones, {tables} tables",
+    "subtitle": "{zones} zones, {tables} tables",
     "addZone": "Add zone",
     "addTable": "Add table",
     "colTable": "Table",
@@ -1480,7 +1481,7 @@
   },
   "customers": {
     "title": "Customers",
-    "subtitle": "{branch} · {count, plural, one {# customer} other {# customers}}",
+    "subtitle": "{count, plural, one {# customer} other {# customers}}",
     "back": "Customers",
     "filterAll": "All customers",
     "filterInStore": "With bottles here",
@@ -1609,8 +1610,8 @@
   },
   "depositHistory": {
     "title": "Deposit history",
-    "subtitle": "{branch} · nights {from} – {to}",
-    "subtitleOne": "{branch} · night of {from}",
+    "subtitle": "Nights {from} – {to}",
+    "subtitleOne": "Night of {from}",
     "open": "History",
     "rangeLabel": "Period",
     "tonight": "Tonight",

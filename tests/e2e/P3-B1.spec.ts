@@ -142,7 +142,7 @@ test.describe('P3-B1-04/05 print status + settings', () => {
     await admin().from('profiles').update({ active: true }).eq('id', ownerId)
     await context.addCookies([{ name: 'sis_branch', value: branchA, url: BASE_URL }])
     await page.goto('/tonight')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(BRANCH_A_NAME)
+    await expect(page.locator('[data-testid="branch-switcher-current"]:visible').first()).toContainText(BRANCH_A_NAME)
   })
 
   test('P3-B1-04a not set up / online / offline', async ({ page }) => {

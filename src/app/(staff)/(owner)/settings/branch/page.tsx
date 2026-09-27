@@ -75,7 +75,7 @@ export default async function SettingsBranchPage() {
 
   return (
     <>
-      <PageHeader title={t('title')} subtitle={branch.name} />
+      <PageHeader title={t('title')} />
       {/* one gap between every card, as on every other page */}
       <div className="flex flex-col gap-4" data-testid="branch-settings">
         {setup && (

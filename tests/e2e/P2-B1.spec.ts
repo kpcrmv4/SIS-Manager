@@ -224,7 +224,7 @@ test.describe('empty zones (owner)', () => {
     // would otherwise default to the alphabetically-first branch, which is another fixture's)
     await context.addCookies([{ name: 'sis_branch', value: ownerBranchB, url: BASE_URL }])
     await page.goto('/tonight')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(BRANCH_B_NAME)
+    await expect(page.locator('[data-testid="branch-switcher-current"]:visible').first()).toContainText(BRANCH_B_NAME)
     await page.goto(`/bookings?night=${NIGHT}&view=plan`)
     await expect(page.getByText('ยังไม่มีผังโต๊ะ')).toBeVisible()
     await expect(page.getByRole('link', { name: 'ยังไม่มีผังโต๊ะ' })).toBeVisible()

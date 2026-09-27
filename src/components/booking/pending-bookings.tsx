@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { replaceQuery, uuidParam } from '@/lib/url-state'
-import { CalendarClock, CircleCheck } from 'lucide-react'
+import { CalendarClock } from 'lucide-react'
 import { ListRow } from '@/components/ui/list-row'
 import type { NightBooking, ZoneRow } from '@/lib/booking/queries'
 import { addDays, formatLongDate, formatTime, type AppLocale } from '@/lib/date'
@@ -47,14 +47,8 @@ export function PendingBookings({
   const [rejectId, setRejectId] = useState<string | null>(null)
   const onDone = () => router.refresh()
 
-  if (bookings.length === 0) {
-    return (
-      <p className="mb-4 flex items-center gap-1.5 text-sm text-muted-token" data-testid="pending-bookings-none">
-        <CircleCheck className="size-4 text-status-done" aria-hidden />
-        {t('pendingNone')}
-      </p>
-    )
-  }
+  // nothing waiting: nothing to show — the section appears only when there is something to confirm
+  if (bookings.length === 0) return null
 
   // the query orders by night then slot — keep that order, one group per night
   const groups: [string, NightBooking[]][] = []

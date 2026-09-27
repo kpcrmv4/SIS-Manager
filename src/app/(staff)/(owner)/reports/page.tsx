@@ -18,6 +18,7 @@ import { delta, pointsDelta, type Delta } from '@/lib/reports/dashboard-view'
 import { getReport, getReportDetail, isYmd, periodRange, previousRange, reportTotals, showRate } from '@/lib/reports/overview'
 import type { ReportTotalKey } from '@/lib/reports/period'
 import { bucketDays, weekdayTotals } from '@/lib/reports/report-view'
+import { FilterDisclosure } from '@/components/ui/filter-disclosure'
 
 type Search = Promise<{ from?: string; to?: string; branch?: string }>
 
@@ -36,8 +37,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
   const branchId = sp.branch && sp.branch !== 'all' ? sp.branch : null
 
   const sb = await getSupabaseServer()
-  const [t, tOv, tRoles, tb, state, branchesRes] = await Promise.all([
+  const [t, tc, tOv, tRoles, tb, state, branchesRes] = await Promise.all([
     getTranslations('reports'),
+    getTranslations('common'),
     getTranslations('overview'),
     getTranslations('roles'),
     getTranslations('settingsBooking'),
@@ -82,7 +84,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
   )
 
   const filter = (
-    <form method="get" className="card-surface mb-5 p-4" data-testid="reports-filter">
+    <div className="mb-4">
+    <FilterDisclosure label={tc('filter')} summary={t('rangeBranch', { from: fmt(from), to: fmt(to), branch: branchName })} testId="reports-filter-fold">
+    <form method="get" className="card-surface p-4" data-testid="reports-filter">
       <div role="group" aria-label={t('rangeLabel')} className="tabs mb-3 flex-wrap" data-testid="reports-ranges">
         {ranges.map((r) => {
           const active = r.from === from && r.to === to
@@ -124,6 +128,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         </button>
       </div>
     </form>
+    </FilterDisclosure>
+    </div>
   )
 
   if (badRange) {
@@ -145,7 +151,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
   const dText = (d: Delta, points = false) =>
     !d ? null : d.pct === null ? tOv('delta.new') : d.dir === 'same' ? tOv('delta.same') : points ? tOv('delta.points', { pts: d.pct }) : tOv('delta.pct', { pct: d.pct })
   const fig = (key: ReportTotalKey, label: string, good: ReportFigure['good'], tone?: ReportFigure['tone']): ReportFigure => {
-    const d = delta(totals[key], before[key])
+    // a change only against a previous period that had something — "ใหม่" against zero says nothing (as on /overview)
+    const d = before[key] > 0 ? delta(totals[key], before[key]) : null
     return { key, label, value: String(totals[key]), delta: d, good, deltaText: dText(d), hint: t('prevHint', { value: before[key] }), tone }
   }
   const rate = showRate(totals.arrived, totals.no_shows)

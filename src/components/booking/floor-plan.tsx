@@ -60,14 +60,6 @@ export function FloorPlan({
 
   return (
     <div>
-      <div className="legend mb-3">
-        {legend.map(([label, style]) => (
-          <span key={label}>
-            <i style={style} />
-            {label}
-          </span>
-        ))}
-      </div>
       <div className="card-surface flex flex-col gap-5 p-4">
         {zones.map((zone) => (
           <div key={zone.id}>
@@ -111,6 +103,15 @@ export function FloorPlan({
               </div>
             )}
           </div>
+        ))}
+      </div>
+      {/* what the colours mean — under the plan, quieter than the tables themselves */}
+      <div className="legend mt-3" data-testid="plan-legend">
+        {legend.map(([label, style]) => (
+          <span key={label}>
+            <i style={style} />
+            {label}
+          </span>
         ))}
       </div>
     </div>

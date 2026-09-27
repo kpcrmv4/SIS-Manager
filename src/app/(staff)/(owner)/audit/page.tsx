@@ -10,6 +10,7 @@ import { eventText } from '@/lib/deposit/format'
 import { addDays, bangkokDate, formatShortDate } from '@/lib/date'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { AUDIT_KINDS, AUDIT_PAGE, formatValue, isAuditKind, isDepositEvent, latest, type AuditFeed, type AuditRow, type ValueFormat } from '@/lib/audit/view'
+import { FilterDisclosure } from '@/components/ui/filter-disclosure'
 
 type Search = Promise<{ from?: string; to?: string; kind?: string; branch?: string; actor?: string; q?: string; page?: string }>
 
@@ -38,8 +39,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Search
   const badRange = to < from ? 'badRange' : spanDays > MAX_SPAN_DAYS ? 'rangeTooLong' : null
 
   const sb = await getSupabaseServer()
-  const [t, tRoot, state, branchesRes, peopleRes] = await Promise.all([
+  const [t, tc, tRoot, state, branchesRes, peopleRes] = await Promise.all([
     getTranslations('audit'),
+    getTranslations('common'),
     getTranslations(),
     getActorState(),
     sb.from('branches').select('id, name').order('name').range(0, 199),
@@ -101,6 +103,18 @@ export default async function AuditPage({ searchParams }: { searchParams: Search
           </Link>
         ))}
       </div>
+      <FilterDisclosure
+        label={tc('filter')}
+        summary={[
+          `${fmt(from)} – ${fmt(to)}`,
+          branches.find((b) => b.id === branchId)?.name ?? t('allBranches'),
+          actor === 'customer' ? t('customer') : actor === 'system' ? t('system') : (people.find((x) => x.id === actor)?.display_name ?? t('anyone')),
+          q,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+        testId="audit-filter-fold"
+      >
       <form method="get" className="card-surface p-4" data-testid="audit-filter">
         <div role="group" aria-label={t('rangeLabel')} className="tabs mb-3 flex-wrap" data-testid="audit-ranges">
           {ranges.map((r) => (
@@ -162,6 +176,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Search
           </button>
         </div>
       </form>
+      </FilterDisclosure>
     </div>
   )
 

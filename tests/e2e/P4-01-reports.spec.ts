@@ -97,7 +97,7 @@ test.describe('owner', () => {
       await page.goto(`/reports?from=${from}&to=${to}&branch=${branchA}`)
       for (const k of Object.keys(GOOD) as Key[]) {
         await expect(page.locator(`[data-testid="report-figure"][data-key="${k}"]`), k).toHaveAttribute('data-value', String(now[k]), { timeout: 1_000 })
-        const d = delta(now[k], before[k])
+        const d = before[k] > 0 ? delta(now[k], before[k]) : null
         const chip = page.locator(`[data-testid="kpi-delta"][data-kpi="${k}"]`)
         if (!d) {
           await expect(chip, k).toHaveCount(0, { timeout: 1_000 })

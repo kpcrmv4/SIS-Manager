@@ -67,25 +67,25 @@ export async function BookingsContent({
 
   return (
     <>
-      <p className="mb-3 text-sm text-muted-token tnum" data-testid="bookings-subtitle">
-        {t('subtitle', {
-          date: formatLongDate(`${night}T00:00:00Z`, locale),
-          tables: stats.reservations,
-          people: stats.people,
-          booked: stats.booked,
-          capacity: stats.capacity,
-        })}
-      </p>
-      {nightInfo?.closed && (
-        <div className="warnbox mb-4" role="status" data-testid="closed-night-banner">
-          <AlertTriangle className="size-4 shrink-0" aria-hidden />
-          <span>
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className="text-muted-token tnum" data-testid="bookings-subtitle" title={formatLongDate(`${night}T00:00:00Z`, locale)}>
+          {t('subtitle', {
+            date: formatLongDate(`${night}T00:00:00Z`, locale),
+            tables: stats.reservations,
+            people: stats.people,
+            booked: stats.booked,
+            capacity: stats.capacity,
+          })}
+        </span>
+        {nightInfo?.closed && (
+          <span className="inline-flex items-center gap-1 text-status-progress" role="status" data-testid="closed-night-banner">
+            <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
             {t('closedNight', {
               reason: nightInfo.reason === 'blackout' && nightInfo.blackout_reason ? nightInfo.blackout_reason : tErr(nightInfo.reason ?? 'past'),
             })}
           </span>
-        </div>
-      )}
+        )}
+      </div>
       <BookingsBoard
         branchId={branchId}
         view={view}

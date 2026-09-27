@@ -34,7 +34,7 @@ export default async function SettingsLinePage() {
   if (error || secretError || !data) {
     return (
       <>
-        <PageHeader title={t('title')} subtitle={branch.name} />
+        <PageHeader title={t('title')} />
         <RefreshRetry />
       </>
     )
@@ -47,7 +47,7 @@ export default async function SettingsLinePage() {
 
   return (
     <>
-      <PageHeader title={t('title')} subtitle={branch.name} />
+      <PageHeader title={t('title')} />
       <LineSettings
         key={branch.id}
         branchId={branch.id}

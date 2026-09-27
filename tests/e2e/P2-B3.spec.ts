@@ -50,7 +50,7 @@ test.describe('owner settings', () => {
     await admin().from('profiles').update({ active: true }).eq('id', ownerId)
     await context.addCookies([{ name: 'sis_branch', value: branchA, url: BASE_URL }])
     await page.goto('/tonight')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(BRANCH_A_NAME)
+    await expect(page.locator('[data-testid="branch-switcher-current"]:visible').first()).toContainText(BRANCH_A_NAME)
   })
 
   test('P2-B3-01 P2-B3-02 save every booking rule field incl. weekday toggles', async ({ page }) => {

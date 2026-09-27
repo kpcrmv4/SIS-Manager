@@ -14,8 +14,8 @@ export function NightPicker({ night, params }: { night: string; params: Record<s
   const go = (n: string) => router.push(hrefWith('/bookings', params, { night: n }))
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-[10px] border border-line bg-card px-1 py-1">
-      <button type="button" className="btn-ghost btn-sm" aria-label={t('previous')} onClick={() => go(addDays(night, -1))}>
+    <div className="inline-flex min-w-0 items-center gap-0.5 rounded-[10px] border border-line bg-card p-0.5">
+      <button type="button" className="btn-ghost btn-sm px-2" aria-label={t('previous')} onClick={() => go(addDays(night, -1))}>
         <ChevronLeft className="size-4" aria-hidden />
       </button>
       <input
@@ -23,9 +23,9 @@ export function NightPicker({ night, params }: { night: string; params: Record<s
         value={night}
         aria-label={tf('night')}
         onChange={(e) => e.target.value && go(e.target.value)}
-        className="w-[130px] rounded-sm bg-transparent px-1 py-1 text-sm tnum outline-none"
+        className="w-[122px] min-w-0 rounded-sm bg-transparent px-0.5 py-1 text-sm tnum outline-none"
       />
-      <button type="button" className="btn-ghost btn-sm" aria-label={t('next')} onClick={() => go(addDays(night, 1))}>
+      <button type="button" className="btn-ghost btn-sm px-2" aria-label={t('next')} onClick={() => go(addDays(night, 1))}>
         <ChevronRight className="size-4" aria-hidden />
       </button>
     </div>

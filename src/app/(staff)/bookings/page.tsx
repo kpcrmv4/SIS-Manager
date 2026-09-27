@@ -79,13 +79,13 @@ export default async function BookingsPage({
     <>
       <PageHeader
         title={t('title')}
-        action={
-          <>
-            <NightPicker night={night} params={params} />
-            <NewBookingButton branchId={branch.id} night={night} zones={zones} settings={settings} canCloseTable={isBarOrOwner(actor.role)} />
-          </>
-        }
+        action={<NewBookingButton branchId={branch.id} night={night} zones={zones} settings={settings} canCloseTable={isBarOrOwner(actor.role)} />}
       />
+      {/* one row: which night, and plan or list (owner, 2026-09-27 — the header had grown six layers) */}
+      <div className="mb-3 flex items-center justify-between gap-2" data-testid="bookings-toolbar">
+        <NightPicker night={night} params={params} />
+        <ViewTabs view={view} params={params} planLabel={t('viewPlan')} listLabel={t('viewList')} />
+      </div>
       {pending.error ? (
         <RefreshRetry />
       ) : (
@@ -98,7 +98,6 @@ export default async function BookingsPage({
           isBarOrOwner={isBarOrOwner(actor.role)}
         />
       )}
-      <ViewTabs view={view} params={params} planLabel={t('viewPlan')} listLabel={t('viewList')} />
       <Suspense key={`${branch.id}:${night}:${view}`} fallback={view === 'plan' ? <PlanSkeleton /> : <div className="panel h-64 animate-pulse" />}>
         <BookingsContent
           branchId={branch.id}

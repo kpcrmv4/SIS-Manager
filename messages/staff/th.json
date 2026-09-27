@@ -38,7 +38,8 @@
     "errorBody": "ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง",
     "errorGeneric": "เกิดข้อผิดพลาด ลองอีกครั้ง",
     "forbidden": "บัญชีนี้ไม่มีสิทธิ์ทำรายการนี้",
-    "notFound": "ไม่พบข้อมูล"
+    "notFound": "ไม่พบข้อมูล",
+    "filter": "ตัวกรอง"
   },
   "roles": {
     "staff": "staff",
@@ -132,7 +133,7 @@
     "lateBy": "เลยเวลา {count} นาที"
   },
   "tonight": {
-    "title": "คืนนี้ · สาขา{branch}",
+    "title": "คืนนี้",
     "subtitle": "{date} · ร้านเปิด {open}–{close} น.",
     "kpiBookings": "จองคืนนี้",
     "kpiBookingsHint": "{people} คน · มาแล้ว {arrived} โต๊ะ",
@@ -317,7 +318,7 @@
   },
   "deposits": {
     "title": "ฝากเหล้า",
-    "subtitle": "สาขา{branch} · เหล้าในร้าน {count} ขวด",
+    "subtitle": "เหล้าในร้าน {count} ขวด",
     "new": "รับฝากเหล้า",
     "tabInStore": "ในร้าน",
     "tabToConfirm": "รอยืนยันเหล้า",
@@ -618,7 +619,7 @@
   },
   "bookings": {
     "title": "จองโต๊ะ",
-    "subtitle": "คืน{date} · {tables} โต๊ะ {people} คน · เต็มแล้ว {booked} จาก {capacity} โต๊ะ",
+    "subtitle": "{tables} โต๊ะ {people} คน · เต็ม {booked}/{capacity} โต๊ะ",
     "new": "รับจอง",
     "viewPlan": "ผังโต๊ะ",
     "viewList": "รายการ",
@@ -641,7 +642,7 @@
     "emptyBody": "การจองจาก LINE และที่พนักงานรับจะขึ้นที่นี่",
     "emptyZones": "ยังไม่มีผังโต๊ะ",
     "emptyZonesBody": "เจ้าของร้านเพิ่มโซนและโต๊ะได้ที่ ตั้งค่า → ผังโต๊ะ",
-    "closedNight": "ปิดรับจองคืนนี้ · {reason}",
+    "closedNight": "ปิดรับจอง · {reason}",
     "pendingTitle": "รอยืนยัน",
     "pendingCount": "{count} รายการ",
     "pendingNone": "ไม่มีการจองรอยืนยัน",
@@ -736,7 +737,7 @@
   },
   "settingsBooking": {
     "title": "ตั้งค่าการจอง",
-    "subtitle": "สาขา{branch} · มีผลกับการจองใหม่เท่านั้น",
+    "subtitle": "มีผลกับการจองใหม่เท่านั้น",
     "lineEnabled": "เปิดรับจองผ่าน LINE",
     "lineEnabledHelp": "ปิดแล้วลูกค้าจองเองไม่ได้ พนักงานยังรับจองได้",
     "autoConfirm": "ยืนยันการจองอัตโนมัติ",
@@ -783,7 +784,7 @@
   },
   "settingsTables": {
     "title": "ผังโต๊ะ",
-    "subtitle": "สาขา{branch} · {zones} โซน {tables} โต๊ะ",
+    "subtitle": "{zones} โซน {tables} โต๊ะ",
     "addZone": "เพิ่มโซน",
     "addTable": "เพิ่มโต๊ะ",
     "colTable": "โต๊ะ",
@@ -1480,7 +1481,7 @@
   },
   "customers": {
     "title": "ลูกค้า",
-    "subtitle": "สาขา{branch} · ลูกค้า {count} คน",
+    "subtitle": "ลูกค้า {count} คน",
     "back": "ลูกค้า",
     "filterAll": "ลูกค้าทั้งหมด",
     "filterInStore": "มีเหล้าฝากอยู่",
@@ -1609,8 +1610,8 @@
   },
   "depositHistory": {
     "title": "ประวัติฝาก/เบิก",
-    "subtitle": "{branch} · คืน {from} – {to}",
-    "subtitleOne": "{branch} · คืน {from}",
+    "subtitle": "คืน {from} – {to}",
+    "subtitleOne": "คืน {from}",
     "open": "ประวัติ",
     "rangeLabel": "ช่วงเวลา",
     "tonight": "คืนนี้",
