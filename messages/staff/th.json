@@ -654,7 +654,14 @@
     "closedTitle": "โต๊ะ {table} · ปิดจอง",
     "closedBody": "ปิดรับจองคืนวันที่ {date} — ลูกค้าที่เลือกโต๊ะเองใน LINE จะเห็นว่าจองแล้ว เปิดอีกครั้งเพื่อรับจองโต๊ะนี้ได้ตามปกติ",
     "reopen": "เปิดให้จองอีกครั้ง",
-    "reopened": "เปิดให้จองโต๊ะ {table} แล้ว"
+    "reopened": "เปิดให้จองโต๊ะ {table} แล้ว",
+    "statBooked": "จองแล้ว",
+    "statPeople": "คน",
+    "statArrived": "มาแล้ว",
+    "statFree": "ว่าง",
+    "statTables": "โต๊ะ",
+    "zoneBooked": "จอง {count}",
+    "zoneFree": "ว่าง {count}"
   },
   "booking": {
     "time": "เวลาจอง",

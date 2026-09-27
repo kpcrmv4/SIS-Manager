@@ -145,6 +145,18 @@ test.describe('plan + list', () => {
 
     await page.goto(`/bookings?night=${NIGHT}&view=plan`)
     await expect(page.getByTestId('bookings-subtitle')).toContainText('5')
+    // (owner, 2026-09-27) the night in four figures, and each zone's booked | free
+    const stat = (k: string) => page.locator(`[data-testid="bookings-stat"][data-key="${k}"]`)
+    await expect(stat('booked')).toHaveAttribute('data-value', '1')
+    await expect(stat('people')).toHaveAttribute('data-value', '5')
+    await expect(stat('arrived')).toHaveAttribute('data-value', '0')
+    const zones = page.getByTestId('zone-summary')
+    const booked = await zones.evaluateAll((els) => els.reduce((n, e) => n + Number(e.getAttribute('data-booked')), 0))
+    const free = await zones.evaluateAll((els) => els.reduce((n, e) => n + Number(e.getAttribute('data-free')), 0))
+    const cells = await page.getByTestId('table-cell').count()
+    expect(booked).toBe(1)
+    await expect(stat('free')).toHaveAttribute('data-value', String(cells - 1))
+    expect(free).toBeLessThanOrEqual(cells - 1)
     // the prev/next buttons are plain <button>s — more reliable in CI than fill()
     // on a native <input type="date"> (OS-locale-dependent under Chromium/Windows)
     await page.getByRole('button', { name: 'ถัดไป' }).click()

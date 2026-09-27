@@ -44,6 +44,8 @@ export function FloorPlan({
     if (b.tableId && LIVE_STATUSES.includes(b.status)) byTable.set(b.tableId, b)
   }
   const closed = new Set(closedTableIds)
+  const zoneBooked = (zone: ZoneRow) => zone.tables.filter((tb) => byTable.has(tb.id)).length
+  const zoneFree = (zone: ZoneRow) => zone.tables.filter((tb) => !byTable.has(tb.id) && !closed.has(tb.id)).length
 
   if (!zones.length) {
     return emptyZones ? <>{emptyZones}</> : <EmptyState message={t('emptyZones')} />
@@ -66,6 +68,12 @@ export function FloorPlan({
             <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-ink">
               {zone.name}
               <Badge tone="pending">{t('zoneTables', { count: zone.tables.length })}</Badge>
+              {/* (owner, 2026-09-27) the zone at a glance: booked | free */}
+              <span className="ml-auto text-xs font-medium text-muted-token tnum" data-testid="zone-summary" data-booked={zoneBooked(zone)} data-free={zoneFree(zone)}>
+                {t('zoneBooked', { count: zoneBooked(zone) })}
+                <span className="mx-1.5 text-line-strong" aria-hidden>|</span>
+                {t('zoneFree', { count: zoneFree(zone) })}
+              </span>
             </h3>
             {zone.tables.length === 0 ? (
               <p className="text-sm text-muted-token">—</p>

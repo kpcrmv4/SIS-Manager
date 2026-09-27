@@ -654,7 +654,14 @@
     "closedTitle": "Table {table} · closed",
     "closedBody": "Closed to bookings on the night of {date} — guests who pick their own table in LINE see it as booked. Open it to take bookings for it again.",
     "reopen": "Open for booking",
-    "reopened": "Table {table} is open for booking"
+    "reopened": "Table {table} is open for booking",
+    "statBooked": "Booked",
+    "statPeople": "People",
+    "statArrived": "Arrived",
+    "statFree": "Free",
+    "statTables": "tables",
+    "zoneBooked": "{count} booked",
+    "zoneFree": "{count} free"
   },
   "booking": {
     "time": "Time",

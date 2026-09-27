@@ -176,6 +176,7 @@ export function nightStats(bookings: NightBooking[], totalTables: number) {
   return {
     reservations: live.length,
     people: live.reduce((sum, b) => sum + b.party, 0),
+    arrived: live.filter((b) => b.status === 'arrived').length,
     booked: occupied.size,
     capacity: totalTables,
   }

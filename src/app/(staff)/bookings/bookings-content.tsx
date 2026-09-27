@@ -67,16 +67,24 @@ export async function BookingsContent({
 
   return (
     <>
-      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span className="text-muted-token tnum" data-testid="bookings-subtitle" title={formatLongDate(`${night}T00:00:00Z`, locale)}>
-          {t('subtitle', {
-            date: formatLongDate(`${night}T00:00:00Z`, locale),
-            tables: stats.reservations,
-            people: stats.people,
-            booked: stats.booked,
-            capacity: stats.capacity,
-          })}
-        </span>
+      {/* the night in four small figures (owner, 2026-09-27) — one row, quieter than the plan below */}
+      <div className="mb-3 grid grid-cols-4 gap-2" data-testid="bookings-subtitle" title={formatLongDate(`${night}T00:00:00Z`, locale)}>
+        {[
+          { key: 'booked', label: t('statBooked'), value: stats.reservations, unit: t('statTables'), tone: 'text-status-info' },
+          { key: 'people', label: t('statPeople'), value: stats.people, unit: null, tone: 'text-ink' },
+          { key: 'arrived', label: t('statArrived'), value: stats.arrived, unit: null, tone: 'text-status-done' },
+          { key: 'free', label: t('statFree'), value: Math.max(0, stats.capacity - stats.booked), unit: t('statTables'), tone: 'text-ink' },
+        ].map((f) => (
+          <div key={f.key} className="card-surface flex min-w-0 flex-col items-center px-1.5 py-2" data-testid="bookings-stat" data-key={f.key} data-value={f.value}>
+            <span className="truncate text-[11px] text-muted-token">{f.label}</span>
+            <span className={`text-xl font-bold leading-tight tnum ${f.value > 0 ? f.tone : 'text-muted-token'}`}>
+              {f.value}
+              {f.unit && <span className="ml-0.5 text-[11px] font-medium text-muted-token">{f.unit}</span>}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm empty:hidden">
         {nightInfo?.closed && (
           <span className="inline-flex items-center gap-1 text-status-progress" role="status" data-testid="closed-night-banner">
             <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
