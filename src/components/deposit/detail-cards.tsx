@@ -7,6 +7,7 @@ import { daysUntil, formatShortDate, formatTime, type AppLocale } from '@/lib/da
 import type { DepositDetail } from '@/lib/deposit/detail'
 import { customerHrefForDeposit } from '@/lib/customers/view'
 import { CustomerReminders } from './customer-reminders'
+import { LinkQrSheet } from './link-qr-sheet'
 
 /** The deposit page's cards (R-045): a glanceable summary, then who, then the facts, then the photos. */
 
@@ -76,6 +77,8 @@ export async function CustomerCard({ detail, canEditReminders, branchRemindersOf
           <span className="text-sm text-muted-token">{t('line')}</span>
           <Badge tone={detail.customerId ? 'done' : 'pending'}>{detail.customerId ? t('lineLinked') : t('lineNotLinked')}</Badge>
         </div>
+        {/* R-058: the customer scans a one-time QR to link LINE — kept mounted once linked so the sheet can say who */}
+        {!CLOSED.has(detail.status) && <LinkQrSheet depositId={detail.id} linked={!!detail.customerId} hasPhone={!!detail.customerPhone} />}
         {detail.customerReminders !== null && (
           <CustomerReminders depositId={detail.id} enabled={detail.customerReminders} canEdit={canEditReminders} branchOff={branchRemindersOff} />
         )}

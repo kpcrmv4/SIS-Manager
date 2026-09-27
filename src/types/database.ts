@@ -616,6 +616,55 @@ export type Database = {
           },
         ]
       }
+      deposit_link_qr: {
+        Row: {
+          branch_id: string
+          created_at: string
+          deposit_id: string
+          expires_at: string
+          issued_by: string | null
+          token_hash: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          deposit_id: string
+          expires_at: string
+          issued_by?: string | null
+          token_hash: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          deposit_id?: string
+          expires_at?: string
+          issued_by?: string | null
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_link_qr_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_link_qr_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: true
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_link_qr_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposits: {
         Row: {
           branch_id: string
@@ -1602,6 +1651,10 @@ export type Database = {
         }
         Returns: Json
       }
+      customer_link_by_qr: {
+        Args: { p_branch: string; p_customer: string; p_token: string }
+        Returns: Json
+      }
       customer_list: {
         Args: {
           p_branch: string
@@ -1644,6 +1697,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      issue_link_qr: { Args: { p_deposit: string }; Returns: Json }
       line_link_attempt: {
         Args: { p_branch: string; p_customer_id: string; p_ref: string }
         Returns: Json
@@ -1652,6 +1706,7 @@ export type Database = {
         Args: { p_branch: string; p_customer_id: string; p_token: string }
         Returns: Json
       }
+      link_qr_status: { Args: { p_deposit: string }; Returns: Json }
       login_record: {
         Args: { p_identifier: string; p_ip: string; p_ok: boolean }
         Returns: undefined
@@ -1710,6 +1765,7 @@ export type Database = {
         }
         Returns: Json
       }
+      revoke_link_qr: { Args: { p_deposit: string }; Returns: undefined }
       run_expiry_notices: {
         Args: { p_branch?: string; p_force?: boolean }
         Returns: number

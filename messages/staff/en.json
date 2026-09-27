@@ -391,7 +391,8 @@
       "cancelled": "Cancelled",
       "vip_on_auto": "VIP by itself — a VIP customer",
       "vip_on_customer": "Customer made VIP",
-      "vip_off_customer": "Customer's VIP cancelled"
+      "vip_off_customer": "Customer's VIP cancelled",
+      "line_linked_qr": "Customer linked LINE by QR"
     },
     "eventMeta": "{date} · {time} · {actor}",
     "lineSent": "Customer told on LINE",
@@ -429,7 +430,27 @@
       "reason": "Reason: {reason}"
     },
     "depositTerm": "{days, plural, one {# day} other {# days}} term",
-    "customerHistory": "Customer history"
+    "customerHistory": "Customer history",
+    "linkQr": {
+      "open": "Link LINE by QR",
+      "title": "Customer scans to link LINE",
+      "body": "Ask the customer to scan this QR with their phone camera. LINE opens, confirms who they are, and links this deposit to their LINE.",
+      "known": "This phone already has LINE · {name}",
+      "knownNoName": "This phone already has LINE",
+      "isNew": "New customer · this phone has never linked LINE",
+      "noPhone": "No phone on this deposit · links this deposit only",
+      "also": "Also links {count} more open deposits of this phone",
+      "expiresIn": "Single use · expires in {time}",
+      "expired": "The QR has expired",
+      "renew": "New QR",
+      "loading": "Making the QR",
+      "linkedTitle": "LINE linked",
+      "linkedReturning": "Returning customer · {name}",
+      "linkedNew": "New customer · {name}",
+      "linkedCount": "Linked {count} deposits in all",
+      "done": "Done",
+      "closeHint": "Closing this stops the QR at once"
+    }
   },
   "depositForm": {
     "title": "New deposit",
@@ -1149,7 +1170,9 @@
     "table_seats": "The party does not fit this table",
     "TABLE_OTHER_BRANCH": "This table belongs to another branch",
     "NO_CUSTOMER_KEY": "This customer has no phone or LINE — make single bottles VIP instead",
-    "NOT_LATE": "It isn't the booking's time yet — if the guest won't come, cancel the booking instead"
+    "NOT_LATE": "It isn't the booking's time yet — if the guest won't come, cancel the booking instead",
+    "ALREADY_LINKED": "This deposit is already linked to LINE",
+    "NO_LIFF": "This branch has no LIFF yet · the owner sets it in LINE settings"
   },
   "audit": {
     "title": "Audit log",

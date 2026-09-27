@@ -267,5 +267,22 @@
     "btnBook": "Book a table",
     "btnTickets": "View my bookings",
     "hint": "Type deposit · withdraw · book · menu any time"
+  },
+  "link": {
+    "header": "Link LINE",
+    "loading": "Linking your bottles to LINE",
+    "welcomeBack": "Welcome back, {name}",
+    "welcomeNew": "LINE linked",
+    "already": "{code} is already on this LINE",
+    "linked": "Linked {count} deposits",
+    "linkedBody": "From now on see your bottles, ask for them and get reminders before they expire, right here in LINE",
+    "addFriend": "Add the bar as a LINE friend",
+    "addFriendBody": "Add the bar to get a reminder before your bottles expire",
+    "myBottles": "My bottles",
+    "missing": "No QR found · scan the staff's QR again",
+    "EXPIRED": "This QR has expired or was already used · ask the staff for a new one",
+    "NOT_YOURS": "This deposit is linked to another LINE account · please ask the staff",
+    "BAD_STATE": "This deposit is closed and cannot be linked",
+    "THROTTLED": "Too many tries · wait 15 minutes and try again"
   }
 }

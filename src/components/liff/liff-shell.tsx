@@ -31,6 +31,7 @@ function headerFor(pathname: string, home: string): { title: string; back?: stri
   if (rest.startsWith('/book')) return { title: 'book.title' }
   if (rest.startsWith('/ticket/')) return { title: 'ticket.title', back: `${home}/tickets` }
   if (rest.startsWith('/tickets')) return { title: 'ticket.list' }
+  if (rest.startsWith('/link')) return { title: 'link.header', back: home }
   return { title: 'bottles.title' }
 }
 
@@ -61,7 +62,10 @@ async function establishSession(
     return { status: 'login_failed' }
   }
 
-  const stored = readStoredToken(branch.code)
+  // a LIFF deep link (liff.line.me/<id>/link?t=…) first lands on the endpoint with liff.state —
+  // only liff.init() carries it on to the page it names, so a stored token must not skip it
+  const deepLink = new URLSearchParams(window.location.search).has('liff.state')
+  const stored = deepLink ? null : readStoredToken(branch.code)
   if (stored) {
     const hit = await viaToken(stored)
     if (hit) return hit

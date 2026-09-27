@@ -267,5 +267,22 @@
     "btnBook": "订位",
     "btnTickets": "查看我的预约",
     "hint": "随时输入 寄存 · 取酒 · 订位 · 菜单"
+  },
+  "link": {
+    "header": "绑定 LINE",
+    "loading": "正在将您的酒绑定到 LINE",
+    "welcomeBack": "欢迎回来，{name}",
+    "welcomeNew": "LINE 绑定成功",
+    "already": "{code} 已绑定此 LINE",
+    "linked": "已绑定 {count} 笔寄存",
+    "linkedBody": "今后可在此 LINE 查看您的酒、申请取酒，并在到期前收到提醒",
+    "addFriend": "将本店加为 LINE 好友",
+    "addFriendBody": "加为好友以在酒到期前收到提醒",
+    "myBottles": "我的酒",
+    "missing": "未找到二维码 · 请重新扫描店员的二维码",
+    "EXPIRED": "此二维码已过期或已使用 · 请让店员重新生成",
+    "NOT_YOURS": "此寄存已绑定其他 LINE 账号 · 请联系店员",
+    "BAD_STATE": "此寄存已结束，无法绑定",
+    "THROTTLED": "尝试次数过多 · 请 15 分钟后再试"
   }
 }

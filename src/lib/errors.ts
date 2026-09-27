@@ -41,6 +41,8 @@ export const DB_ERROR_CODES = [
   'NO_GROUP',
   'NO_CUSTOMER_KEY',
   'NOT_LATE',
+  'ALREADY_LINKED',
+  'NO_LIFF',
   'line_disabled',
   'past',
   'closed_weekday',
