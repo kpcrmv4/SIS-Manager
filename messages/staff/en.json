@@ -356,7 +356,9 @@
     "emptyExpired": "Nothing to dispose",
     "emptyExpiredBody": "Bottles past their collection deadline show up here",
     "emptyClosed": "Nothing closed yet",
-    "emptySearch": "Nothing matches \"{q}\""
+    "emptySearch": "Nothing matches \"{q}\"",
+    "inStoreTotal": "In store",
+    "bottleUnit": "bottles"
   },
   "deposit": {
     "back": "Deposits",

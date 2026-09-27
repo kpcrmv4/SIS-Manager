@@ -214,6 +214,13 @@ test.describe('phone (390px)', () => {
 
   test('P2-A1-02 phone: cards visible, table hidden, card shows code/item/remaining/badge', async ({ page }) => {
     await page.goto('/deposits')
+    // (owner, 2026-09-27) the bottles in store sit on the title's line, at the right
+    const h1 = (await page.getByRole('heading', { level: 1 }).boundingBox())!
+    const stat = (await page.getByTestId('deposits-in-store').boundingBox())!
+    expect(stat.x).toBeGreaterThan(h1.x + h1.width)
+    expect(stat.y).toBeLessThan(h1.y + h1.height)
+    expect(stat.y + stat.height).toBeGreaterThan(h1.y)
+    await expect(page.getByTestId('deposits-in-store')).toContainText('ฝากในร้านทั้งหมด')
     await expect(page.getByTestId('deposits-table-desktop')).toBeHidden()
     const mobile = page.getByTestId('deposits-list-mobile')
     await expect(mobile).toBeVisible()

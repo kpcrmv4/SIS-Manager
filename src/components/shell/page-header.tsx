@@ -15,10 +15,13 @@ import type { ReactNode } from 'react'
 export function PageHeader({
   title,
   subtitle,
+  stat,
   action,
 }: {
   title: string
   subtitle?: ReactNode
+  /** one figure the page is about, on the title's line at the right (owner, 2026-09-27) */
+  stat?: ReactNode
   action?: ReactNode
 }) {
   return (
@@ -27,6 +30,7 @@ export function PageHeader({
         <h1 className="truncate text-2xl font-bold text-ink">{title}</h1>
         {subtitle && <div className="mt-0.5 text-sm text-muted-token">{subtitle}</div>}
       </div>
+      {stat && <div className="ml-auto shrink-0 self-center">{stat}</div>}
       {/*
         `shrink-0` keeps a Thai button label from being squeezed until it breaks
         mid-syllable — but `shrink-0` ALONE overflows the page when a header

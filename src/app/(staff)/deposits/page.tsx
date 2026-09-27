@@ -97,7 +97,15 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
     <>
       <PageHeader
         title={t('title')}
-        subtitle={t('subtitle', { branch: branch.name, count: counts.inStore })}
+        stat={
+          <div className="rounded-lg bg-brand-soft px-3 py-1.5 text-right" data-testid="deposits-in-store" data-count={counts.inStore}>
+            <div className="text-[11px] font-medium leading-tight text-brand">{t('inStoreTotal')}</div>
+            <div className="text-xl font-bold leading-tight text-brand tnum">
+              {counts.inStore}
+              <span className="ml-1 text-xs font-semibold">{t('bottleUnit')}</span>
+            </div>
+          </div>
+        }
         action={
           <>
             <Link href="/deposits/new" className="btn-primary" data-testid="deposits-new">
