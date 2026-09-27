@@ -500,7 +500,16 @@
     "percent": "Bottle {n} remaining (%)",
     "photo": "Confirmation photo",
     "submit": "Confirm and shelve",
-    "done": "Bottles confirmed"
+    "done": "Bottles confirmed",
+    "printTitle": "Print after confirming",
+    "printReceipt": "Receipt",
+    "printLabel": "Bottle label",
+    "printHelp": "Untick both to skip printing",
+    "printOffline": "The printer is offline · the job prints once the shop PC is on",
+    "printNotSetUp": "This branch has no printer yet · the job waits in the queue",
+    "submitPrint": "Confirm and print",
+    "donePrinted": "Bottles confirmed · sent to print",
+    "printFailed": "Bottles confirmed, but printing could not be queued · print again from Tools"
   },
   "rejectDialog": {
     "title": "Reject deposit",

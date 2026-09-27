@@ -144,12 +144,52 @@ test.describe('detail dialogs', () => {
       await page.getByTestId('confirm-level-2').fill('60')
       await page.getByTestId('confirm-level-3').fill('0')
       await attachPhoto(page, 'confirm-photo-add')
-      await page.getByRole('button', { name: 'ยืนยันเก็บเข้าชั้น', exact: true }).click()
-      await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
       const row = await deposit(dep.id)
       expect(row.status).toBe('in_store')
       const { data: bottles } = await adminDb().from('deposit_bottles').select('status').eq('deposit_id', dep.id).order('bottle_no')
       expect(bottles!.map((b) => b.status)).toEqual(['sealed', 'opened', 'consumed'])
+    })
+
+    test('P2-A2-18 confirm dialog prints the receipt and the label by default; unticked prints nothing', async ({ page }) => {
+      const jobs = async (id: string) =>
+        ((await adminDb().from('print_jobs').select('job_type').eq('deposit_id', id)).data ?? []).map((j) => j.job_type).sort()
+
+      const dep = await mustCreate('staff', { qty: 1 })
+      await page.goto(`/deposits/${dep.id}`)
+      await page.getByTestId('action-confirm').click()
+      await expect(page.getByTestId('confirm-print-receipt')).toBeChecked()
+      await expect(page.getByTestId('confirm-print-label')).toBeChecked()
+      await expect(page.getByTestId('confirm-submit')).toHaveText('ยืนยันเก็บเข้าชั้นและพิมพ์')
+      await attachPhoto(page, 'confirm-photo-add')
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByText('ยืนยันเหล้าแล้ว · ส่งพิมพ์แล้ว', { exact: true })).toBeVisible()
+      expect((await deposit(dep.id)).status).toBe('in_store')
+      expect(await jobs(dep.id)).toEqual(['label', 'receipt'])
+
+      // only the label
+      const one = await mustCreate('staff', { qty: 1 })
+      await page.goto(`/deposits/${one.id}`)
+      await page.getByTestId('action-confirm').click()
+      await page.getByTestId('confirm-print-receipt').uncheck()
+      await attachPhoto(page, 'confirm-photo-add')
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByText('ยืนยันเหล้าแล้ว · ส่งพิมพ์แล้ว', { exact: true })).toBeVisible()
+      expect(await jobs(one.id)).toEqual(['label'])
+
+      // neither: confirmed, nothing printed
+      const none = await mustCreate('staff', { qty: 1 })
+      await page.goto(`/deposits/${none.id}`)
+      await page.getByTestId('action-confirm').click()
+      await page.getByTestId('confirm-print-receipt').uncheck()
+      await page.getByTestId('confirm-print-label').uncheck()
+      await expect(page.getByTestId('confirm-submit')).toHaveText('ยืนยันเก็บเข้าชั้น')
+      await attachPhoto(page, 'confirm-photo-add')
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
+      expect((await deposit(none.id)).status).toBe('in_store')
+      expect(await jobs(none.id)).toEqual([])
     })
 
     test('P2-A2-17 confirm dialog: type the % or drag the bar — one number; the list reads 100% with a level bar', async ({ page }) => {
@@ -172,8 +212,8 @@ test.describe('detail dialogs', () => {
       await expect(num2).toHaveValue('100')
       await num2.fill('45')
       await attachPhoto(page, 'confirm-photo-add')
-      await page.getByRole('button', { name: 'ยืนยันเก็บเข้าชั้น', exact: true }).click()
-      await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
+      await page.getByTestId('confirm-submit').click()
+      await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
       const { data: bottles } = await adminDb().from('deposit_bottles').select('remaining_percent').eq('deposit_id', dep.id).order('bottle_no')
       expect(bottles!.map((b) => Number(b.remaining_percent))).toEqual([100, 45])
 

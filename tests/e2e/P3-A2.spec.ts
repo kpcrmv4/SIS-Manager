@@ -153,8 +153,8 @@ test.describe('bar', () => {
     await page.getByTestId('confirm-photo-add').click()
     await (await chooser).setFiles(PHOTO_PATH)
     await expect(page.getByTestId('photo-chip').first()).toBeVisible()
-    await page.getByRole('button', { name: 'ยืนยันเก็บเข้าชั้น', exact: true }).click()
-    await expect(page.getByText('ยืนยันเหล้าแล้ว', { exact: true })).toBeVisible()
+    await page.getByTestId('confirm-submit').click()
+    await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
     expect((await deposit(dep.id)).status).toBe('in_store')
     await expect.poll(() => mock.pushesTo(line).length, { timeout: 30_000 }).toBe(1)
     // the mock records the push before the dispatcher hears back and marks the row — wait for that

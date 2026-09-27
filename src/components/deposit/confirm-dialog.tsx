@@ -1,14 +1,19 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Printer } from 'lucide-react'
 import { toast } from 'sonner'
 import { ActionDialog } from './action-dialog'
 import { PhotoPicker } from './photo-picker'
 import { confirmDeposit } from '@/lib/deposit/actions'
+import { queuePrint, type PrintJobType } from '@/lib/deposit/print'
+import { getPrintStatus, type PrintStatusView } from '@/lib/print/actions'
 
-/** bar/owner: % remaining per bottle + a confirm photo → the deposit moves to in_store. */
+/**
+ * bar/owner: % remaining per bottle + a confirm photo → the deposit moves to in_store, then the
+ * receipt and the bottle label go to the printer — both ticked by default, untick to skip (owner).
+ */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -29,6 +34,23 @@ export function ConfirmDialog({
   const [levels, setLevels] = useState<number[]>(() => Array.from({ length: quantity }, () => 100))
   const [photos, setPhotos] = useState<string[]>([])
   const [pending, start] = useTransition()
+  const [print, setPrint] = useState<Record<PrintJobType, boolean>>({ receipt: true, label: true })
+  const [printer, setPrinter] = useState<PrintStatusView['state'] | null>(null)
+  const printing = print.receipt || print.label
+
+  // say up front when the printer is not there — the job still queues and prints later
+  useEffect(() => {
+    if (!open) return
+    let live = true
+    void getPrintStatus(branchId)
+      .then((res) => {
+        if (live && res.ok) setPrinter(res.data.state)
+      })
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [open, branchId])
 
   const setLevel = (i: number, raw: string) => {
     const n = Math.min(100, Math.max(0, Math.round(Number(raw) || 0)))
@@ -42,7 +64,10 @@ export function ConfirmDialog({
         toast.error(te(res.error))
         return
       }
-      toast.success(t('done'))
+      const types = (['receipt', 'label'] as const).filter((k) => print[k])
+      const queued = await Promise.all(types.map((k) => queuePrint(depositId, k).catch(() => ({ ok: false as const }))))
+      if (queued.some((r) => !r.ok)) toast.error(t('printFailed'))
+      else toast.success(types.length ? t('donePrinted') : t('done'))
       onOpenChange(false)
     })
   }
@@ -58,9 +83,9 @@ export function ConfirmDialog({
           <button type="button" className="btn-ghost" onClick={() => onOpenChange(false)} disabled={pending}>
             {tc('cancel')}
           </button>
-          <button type="button" className="btn-primary" onClick={submit} disabled={pending || !photos.length}>
-            {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-            {t('submit')}
+          <button type="button" className="btn-primary" onClick={submit} disabled={pending || !photos.length} data-testid="confirm-submit">
+            {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : printing && <Printer className="size-4" aria-hidden />}
+            {printing ? t('submitPrint') : t('submit')}
           </button>
         </>
       }
@@ -107,6 +132,24 @@ export function ConfirmDialog({
           <label className="label-base">{t('photo')}</label>
           <PhotoPicker branchId={branchId} paths={photos} onChange={setPhotos} addLabel={td('actionConfirm')} testId="confirm-photo-add" />
         </div>
+        <fieldset className="border-t border-line-soft pt-3" data-testid="confirm-print">
+          <legend className="label-base float-left mb-2 w-full">{t('printTitle')}</legend>
+          <div className="clear-both flex flex-wrap gap-2">
+            {(['receipt', 'label'] as const).map((k) => (
+              <label key={k} className="chip cursor-pointer gap-2 has-checked:border-brand has-checked:text-ink">
+                <input
+                  type="checkbox"
+                  checked={print[k]}
+                  onChange={(e) => setPrint((p) => ({ ...p, [k]: e.target.checked }))}
+                  className="size-4 accent-(--brand)"
+                  data-testid={`confirm-print-${k}`}
+                />
+                {k === 'receipt' ? t('printReceipt') : t('printLabel')}
+              </label>
+            ))}
+          </div>
+          <p className="help-text">{printing && printer === 'offline' ? t('printOffline') : printing && printer === 'not_set_up' ? t('printNotSetUp') : t('printHelp')}</p>
+        </fieldset>
       </div>
     </ActionDialog>
   )
