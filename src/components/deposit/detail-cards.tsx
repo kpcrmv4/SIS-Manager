@@ -8,6 +8,7 @@ import type { DepositDetail } from '@/lib/deposit/detail'
 import { customerHrefForDeposit } from '@/lib/customers/view'
 import { CustomerReminders } from './customer-reminders'
 import { LinkQrSheet } from './link-qr-sheet'
+import { LineHistory } from './line-history'
 
 /** The deposit page's cards (R-045): a glanceable summary, then who, then the facts, then the photos. */
 
@@ -54,7 +55,17 @@ export async function DetailSummary({ detail, noticeDays, locale }: { detail: De
 }
 
 /** Who: the name, a phone to call from the counter, LINE, and their expiry reminders (R-044). */
-export async function CustomerCard({ detail, canEditReminders, branchRemindersOff }: { detail: DepositDetail; canEditReminders: boolean; branchRemindersOff: boolean }) {
+export async function CustomerCard({
+  detail,
+  canEditReminders,
+  branchRemindersOff,
+  locale,
+}: {
+  detail: DepositDetail
+  canEditReminders: boolean
+  branchRemindersOff: boolean
+  locale: AppLocale
+}) {
   const t = await getTranslations('deposit')
   const tel = detail.customerPhone?.replace(/[^\d+]/g, '') ?? ''
   return (
@@ -82,6 +93,7 @@ export async function CustomerCard({ detail, canEditReminders, branchRemindersOf
         {detail.customerReminders !== null && (
           <CustomerReminders depositId={detail.id} enabled={detail.customerReminders} canEdit={canEditReminders} branchOff={branchRemindersOff} />
         )}
+        <LineHistory depositId={detail.id} linked={!!detail.customerId} locale={locale} />
         {/* every deposit and booking of this customer, and their VIP (R-048) */}
         <Link href={customerHrefForDeposit(detail.id)} className="btn-ghost btn-sm -mx-1 justify-between" data-testid="deposit-customer-history">
           {t('customerHistory')}

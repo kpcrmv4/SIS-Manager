@@ -1701,6 +1701,7 @@ export type Database = {
         }
         Returns: Json
       }
+      deposit_line_history: { Args: { p_deposit: string }; Returns: Json }
       dispose_deposits: {
         Args: { p_deposit_ids: string[]; p_reason?: string }
         Returns: Json

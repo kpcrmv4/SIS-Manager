@@ -342,8 +342,8 @@
     "lineLinked": "เชื่อม LINE แล้ว",
     "lineNotLinked": "ยังไม่เชื่อม LINE",
     "reminders": "แจ้งเตือนหมดอายุ",
-    "remindersOn": "ส่ง",
-    "remindersOff": "ไม่ส่ง",
+    "remindersOn": "เปิดอยู่",
+    "remindersOff": "ปิดอยู่",
     "remindersHelp": "ใช้กับเหล้าทุกรายการของลูกค้าคนนี้",
     "remindersBranchOff": "สาขานี้ปิดแจ้งเตือนหมดอายุทั้งหมดอยู่",
     "remindersOnDone": "เปิดแจ้งเตือนหมดอายุของลูกค้าคนนี้แล้ว",
@@ -454,6 +454,29 @@
       "linkOwner": "ผูกกับ {name} เลย",
       "linkOwnerHint": "ถ้าคนตรงหน้าไม่ใช่เจ้าของเบอร์ ให้สแกน QR ด้านล่างแทน",
       "linkedOwner": "ผูก LINE กับ {name} แล้ว"
+    },
+    "lineHistory": {
+      "title": "ประวัติแจ้งเตือน LINE",
+      "count": "{count} ครั้ง",
+      "empty": "ยังไม่เคยส่งข้อความ LINE ถึงลูกค้าเรื่องรายการนี้",
+      "notLinked": "ลูกค้ายังไม่ผูก LINE · ส่งแจ้งเตือนไม่ได้",
+      "kind": {
+        "deposit_confirmed": "ยืนยันรับฝาก",
+        "deposit_rejected": "ปฏิเสธการฝาก",
+        "withdraw_completed": "เบิกเหล้าแล้ว",
+        "withdraw_rejected": "ปฏิเสธการเบิก",
+        "expiry_soon": "เตือนใกล้หมดอายุ",
+        "expired": "แจ้งหมดอายุ",
+        "disposed": "แจ้งจำหน่ายออก",
+        "other": "ข้อความ LINE"
+      },
+      "status": {
+        "queued": "รอส่ง",
+        "sending": "กำลังส่ง",
+        "sent": "ส่งแล้ว",
+        "failed": "ส่งไม่สำเร็จ · จะลองใหม่",
+        "skipped": "ไม่ได้ส่ง"
+      }
     }
   },
   "depositForm": {

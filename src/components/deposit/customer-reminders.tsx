@@ -37,7 +37,8 @@ export function CustomerReminders({ depositId, enabled, canEdit, branchOff }: { 
           {canEdit && (
             <button type="button" role="switch" aria-checked={on} aria-label={t('reminders')} className="tg" onClick={toggle} disabled={pending} data-testid="customer-reminders-switch" />
           )}
-          <Badge tone={on ? 'done' : 'pending'}>{on ? t('remindersOn') : t('remindersOff')}</Badge>
+          {/* the switch already says it; staff, who have no switch, read the state instead */}
+          {!canEdit && <Badge tone={on ? 'done' : 'pending'}>{on ? t('remindersOn') : t('remindersOff')}</Badge>}
         </div>
       </div>
       <p className="mt-1 text-xs text-muted-token">{branchOff ? t('remindersBranchOff') : t('remindersHelp')}</p>

@@ -454,6 +454,29 @@
       "linkOwner": "Link to {name} now",
       "linkOwnerHint": "If the person here is not the phone owner, have them scan the QR below",
       "linkedOwner": "Linked to {name} on LINE"
+    },
+    "lineHistory": {
+      "title": "LINE messages sent",
+      "count": "{count}",
+      "empty": "No LINE message about this deposit has been sent yet",
+      "notLinked": "The customer has no LINE linked · no message can be sent",
+      "kind": {
+        "deposit_confirmed": "Deposit confirmed",
+        "deposit_rejected": "Deposit rejected",
+        "withdraw_completed": "Bottles withdrawn",
+        "withdraw_rejected": "Withdrawal rejected",
+        "expiry_soon": "Expiry reminder",
+        "expired": "Expired",
+        "disposed": "Disposed",
+        "other": "LINE message"
+      },
+      "status": {
+        "queued": "Queued",
+        "sending": "Sending",
+        "sent": "Sent",
+        "failed": "Failed · will retry",
+        "skipped": "Not sent"
+      }
     }
   },
   "depositForm": {

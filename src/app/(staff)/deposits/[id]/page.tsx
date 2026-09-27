@@ -60,7 +60,7 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
           <DetailSummary detail={detail} noticeDays={branchSettings?.expiryNoticeDays ?? 7} locale={actor.locale} />
           <DetailActions deposit={detail} role={actor.role} branchId={branch.id} depositDays={depositDays} blockedTonight={blockedTonight} locale={actor.locale} />
           <BottlesGrid bottles={detail.bottles} total={detail.quantity} />
-          <CustomerCard detail={detail} canEditReminders={actor.role === 'bar' || actor.role === 'owner'} branchRemindersOff={branchSettings?.expiryRemindersEnabled === false} />
+          <CustomerCard detail={detail} canEditReminders={actor.role === 'bar' || actor.role === 'owner'} branchRemindersOff={branchSettings?.expiryRemindersEnabled === false} locale={actor.locale} />
           <FactsCard detail={detail} depositDays={depositDays} locale={actor.locale} />
           <PhotosCard urls={Object.values(photoUrls)} />
         </div>

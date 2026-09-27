@@ -6,6 +6,7 @@ import { adminDb, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
 import { RUN, cleanupRun, confirmAll, deposit, mustCreate } from './fixtures/deposits'
 import { bottleIds, createLineRequest, forceExpired, requestWithdrawal } from './fixtures/p2a-flows'
+import { cleanupCustomers, makeCustomer } from './fixtures/p2c-customers'
 import { addDays, bangkokDate, businessNight, weekdayIndex } from '../../src/lib/date'
 
 const as = (role: string) => join(AUTH_DIR, `${role}.json`)
@@ -190,6 +191,28 @@ test.describe('detail dialogs', () => {
       await expect(page.getByText(/^ยืนยันเหล้าแล้ว/)).toBeVisible()
       expect((await deposit(none.id)).status).toBe('in_store')
       expect(await jobs(none.id)).toEqual([])
+    })
+
+    test('P2-A2-19 the customer card lists what LINE told the customer; no "ส่ง" badge beside the switch', async ({ page }) => {
+      const me = await makeCustomer()
+      const dep = await mustCreate('staff', { qty: 1, customerId: me.id })
+      await confirmAll(dep.id, [100])
+      await page.goto(`/deposits/${dep.id}`)
+      const reminders = page.getByTestId('customer-reminders')
+      await expect(reminders.getByRole('switch')).toBeVisible()
+      await expect(reminders.getByText('ส่ง', { exact: true })).toHaveCount(0)
+      const history = page.getByTestId('line-history')
+      await expect(history).toContainText('ประวัติแจ้งเตือน LINE')
+      await history.locator('summary').click()
+      const row = history.getByTestId('line-history-row').filter({ hasText: 'ยืนยันรับฝาก' })
+      await expect(row).toHaveCount(1)
+      await expect(row).toHaveAttribute('data-kind', 'deposit_confirmed')
+      // read only inside the reader's branches
+      const { error } = await dbAs('staffB').rpc('deposit_line_history', { p_deposit: dep.id })
+      expect(error?.message).toBe('FORBIDDEN')
+      const { data } = await dbAs('staff').rpc('deposit_line_history', { p_deposit: dep.id })
+      expect((data as { kind: string }[]).map((r) => r.kind)).toContain('deposit_confirmed')
+      await cleanupCustomers()
     })
 
     test('P2-A2-17 confirm dialog: type the % or drag the bar — one number; the list reads 100% with a level bar', async ({ page }) => {
