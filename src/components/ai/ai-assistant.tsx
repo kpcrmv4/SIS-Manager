@@ -6,8 +6,21 @@ import { useTranslations } from 'next-intl'
 import * as Dialog from '@radix-ui/react-dialog'
 import { ArrowUp, Loader2, RotateCcw, Sparkles, X } from 'lucide-react'
 import { AiMarkdown } from './ai-markdown'
+import { AiProposalCard, type CardOutcome } from './ai-proposal-card'
+import type { Proposal } from '@/lib/ai/proposal-types'
 
-type Turn = { role: 'user' | 'assistant'; text: string; error?: string }
+type Card = { proposal: Proposal; outcome: CardOutcome }
+type Turn = { role: 'user' | 'assistant'; text: string; error?: string; cards?: Card[] }
+
+/** What the model is told about an earlier answer: its words, and what the person did with each card. */
+function wire(t: Turn): { role: 'user' | 'assistant'; text: string } {
+  const notes = (t.cards ?? []).map((c) => {
+    const code = c.proposal.fields.find((f) => f.key === 'code')?.value ?? ''
+    return `[card ${c.proposal.kind}${code ? ` ${code}` : ''}: ${c.outcome.state}${c.outcome.note ? ` ${c.outcome.note}` : ''}${c.outcome.error ? ` ${c.outcome.error}` : ''}]`
+  })
+  return { role: t.role, text: [t.text, ...notes].filter(Boolean).join('\n') || '…' }
+}
+
 type Chip = { key: string; values?: Record<string, string | number> }
 
 const STORE = 'sis_ai_chat'
@@ -72,10 +85,11 @@ export function AiAssistant({ className, branchName }: { className: string; bran
       if (!q || busy) return
       const history: Turn[] = [...turns.filter((x) => !x.error), { role: 'user', text: q }]
       let answer = ''
+      const cards: Card[] = []
       let failed = false
       const show = (patch: Partial<Turn>) =>
         setTurns(() => {
-          const next = [...history, { role: 'assistant' as const, text: answer, ...patch }]
+          const next = [...history, { role: 'assistant' as const, text: answer, cards: [...cards], ...patch }]
           keep(next)
           return next
         })
@@ -88,7 +102,7 @@ export function AiAssistant({ className, branchName }: { className: string; bran
         const res = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history.map(({ role, text }) => ({ role, text })), path, pageTitle: document.querySelector('main h1')?.textContent ?? null }),
+          body: JSON.stringify({ messages: history.map(wire), path, pageTitle: document.querySelector('main h1')?.textContent ?? null }),
           signal: ac.signal,
         })
         if (!res.ok || !res.body) {
@@ -108,19 +122,23 @@ export function AiAssistant({ className, branchName }: { className: string; bran
             const chunk = buf.slice(0, cut)
             buf = buf.slice(cut + 2)
             if (!chunk.startsWith('data: ')) continue
-            const ev = JSON.parse(chunk.slice(6)) as { type: string; text?: string; error?: string }
+            const ev = JSON.parse(chunk.slice(6)) as { type: string; text?: string; error?: string; proposal?: Proposal }
             if (ev.type === 'text' && ev.text) {
               answer += ev.text
               setBusy('thinking')
               show({})
             } else if (ev.type === 'tool') setBusy('looking')
+            else if (ev.type === 'proposal' && ev.proposal) {
+              cards.push({ proposal: ev.proposal, outcome: { state: 'pending' } })
+              show({})
+            }
             else if (ev.type === 'error') {
               failed = true
               show({ error: ev.error ?? 'ai_unreachable' })
             }
           }
         }
-        if (!failed && !answer.trim()) show({ error: 'ai_unreachable' })
+        if (!failed && !answer.trim() && !cards.length) show({ error: 'ai_unreachable' })
       } catch (err) {
         if ((err as Error).name !== 'AbortError') show({ error: 'ai_unreachable' })
       } finally {
@@ -130,6 +148,14 @@ export function AiAssistant({ className, branchName }: { className: string; bran
     },
     [busy, turns, path],
   )
+
+  function setOutcome(turn: number, card: number, outcome: CardOutcome) {
+    setTurns((prev) => {
+      const next = prev.map((t, i) => (i === turn && t.cards ? { ...t, cards: t.cards.map((c, j) => (j === card ? { ...c, outcome } : c)) } : t))
+      keep(next)
+      return next
+    })
+  }
 
   function reset() {
     abortRef.current?.abort()
@@ -188,6 +214,11 @@ export function AiAssistant({ className, branchName }: { className: string; bran
                 ) : (
                   <div key={i} className="mr-4 rounded-2xl rounded-bl-md bg-surface-2 px-3 py-2" data-testid="ai-answer">
                     {m.text && <AiMarkdown text={m.text} onNavigate={() => setOpen(false)} />}
+                    {m.cards?.map((c, j) => (
+                      <div key={c.proposal.id} className="mt-2">
+                        <AiProposalCard proposal={c.proposal} outcome={c.outcome} onOutcome={(o) => setOutcome(i, j, o)} onNavigate={() => setOpen(false)} />
+                      </div>
+                    ))}
                     {m.error && (
                       <p className="text-sm text-urgent" data-testid="ai-error" data-error={m.error}>
                         {t.has(`errors.${m.error}`) ? t(`errors.${m.error}`) : t('errors.ai_unreachable')}

@@ -50,12 +50,12 @@ export async function chipsFor(branchId: string, role: Role, path: string): Prom
 
   const d = await depositOnPage(branchId, path)
   if (d) {
-    if (d.status === 'pending_withdrawal') add({ key: 'nextWithdrawal', values: { code: d.code } })
+    if (d.status === 'pending_withdrawal') add({ key: barOwner ? 'doCompleteWithdrawal' : 'nextWithdrawal', values: { code: d.code } })
     if (d.status === 'pending_confirm') add({ key: barOwner ? 'nextConfirm' : 'nextConfirmStaff', values: { code: d.code } })
     if (d.status === 'requested') add({ key: 'nextRequested', values: { code: d.code } })
     if (d.status === 'expired') add({ key: barOwner ? 'howDispose' : 'expiredStaff' })
     add({ key: 'summarizeDeposit', values: { code: d.code } })
-    if (d.status === 'in_store') add({ key: 'howWithdraw' })
+    if (d.status === 'in_store') add({ key: 'doWithdraw', values: { code: d.code } })
     if (barOwner && (d.status === 'in_store' || d.status === 'pending_withdrawal')) add({ key: 'howExtend' })
     add({ key: 'withdrawFlow' })
     return out
@@ -70,7 +70,7 @@ export async function chipsFor(branchId: string, role: Role, path: string): Prom
       add({ key: 'tonightBookings', values: { count: live } })
       if (pendingBookings) add({ key: 'bookingsPending', values: { count: pendingBookings } })
       add({ key: 'freeTables' })
-      add({ key: 'howBook' })
+      add({ key: 'doBook' })
       add({ key: 'howCheckin' })
       return out
     }

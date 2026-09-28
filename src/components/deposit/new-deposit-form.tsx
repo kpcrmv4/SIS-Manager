@@ -15,15 +15,19 @@ import { addDays, bangkokDate, formatShortDate } from '@/lib/date'
 import type { LiquorItem } from '@/lib/deposit/items'
 
 type Row = { key: number; name: string; qty: number }
+export type DepositPrefill = { name: string; phone: string; table: string; items: { name: string; qty: number }[] }
 const MAX_ITEMS = 10
 
 export function NewDepositForm({
+  prefill = null,
   branchId,
   items,
   depositDays,
   role,
   locale,
 }: {
+  /** R-071: filled in by the assistant; the person checks it, adds the photo and saves */
+  prefill?: DepositPrefill | null
   branchId: string
   items: LiquorItem[]
   depositDays: number
@@ -37,13 +41,13 @@ export function NewDepositForm({
   const barOrOwner = role !== 'staff'
   const defaultExpiry = addDays(bangkokDate(), depositDays)
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+  const [name, setName] = useState(prefill?.name ?? '')
+  const [phone, setPhone] = useState(prefill?.phone ?? '')
   // R-068: several liquors in one form — each row becomes its own deposit and DEP code
-  const [rows, setRows] = useState<Row[]>([{ key: 0, name: '', qty: 1 }])
+  const [rows, setRows] = useState<Row[]>(() => (prefill?.items.length ? prefill.items.map((it, i) => ({ key: i, name: it.name, qty: it.qty })) : [{ key: 0, name: '', qty: 1 }]))
   const [saved, setSaved] = useState<CreatedDeposit[] | null>(null)
-  const nextKey = useRef(1)
-  const [table, setTable] = useState('')
+  const nextKey = useRef(Math.max(1, prefill?.items.length ?? 0))
+  const [table, setTable] = useState(prefill?.table ?? '')
   const [expiresDate, setExpiresDate] = useState(defaultExpiry)
   const [notes, setNotes] = useState('')
   const [photos, setPhotos] = useState<string[]>([])

@@ -9,6 +9,14 @@ export type AiConfig = { enabledRoles: Role[]; model: string; hasKey: boolean; k
 export const DEFAULT_MODEL = 'claude-opus-5'
 export const MODEL_RE = /^[a-z0-9][a-z0-9.:@_-]{2,79}$/
 
+/**
+ * The one place a client is made. AI_API_BASE points the E2E dev server at a local mock of the
+ * Messages API (tests/e2e/fixtures/ai-mock.ts) — unset everywhere else (L-009, as LINE_API_BASE).
+ */
+export function anthropicWith(apiKey: string, opts: { maxRetries?: number; timeout?: number } = {}): Anthropic {
+  return new Anthropic({ apiKey, baseURL: process.env.AI_API_BASE || undefined, maxRetries: opts.maxRetries ?? 1, timeout: opts.timeout })
+}
+
 function hint(key: string): string {
   return `${key.slice(0, 7)}…${key.slice(-4)}`
 }
@@ -35,7 +43,7 @@ export async function aiClient(): Promise<{ client: Anthropic; model: string } |
     admin.from('ai_secrets').select('api_key').eq('id', true).maybeSingle(),
   ])
   if (!k?.api_key) return null
-  return { client: new Anthropic({ apiKey: k.api_key, maxRetries: 1 }), model: s?.model ?? DEFAULT_MODEL }
+  return { client: anthropicWith(k.api_key), model: s?.model ?? DEFAULT_MODEL }
 }
 
 /**

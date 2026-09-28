@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getActorState } from '@/lib/auth/actor'
 import { aiClient, aiErrorCode, getAiConfig } from '@/lib/ai/config'
 import { AI_TOOLS, runTool, type ToolCtx } from '@/lib/ai/tools'
+import { buildProposal, isProposalTool, proposalToolsFor } from '@/lib/ai/proposals'
 import { contextBlock, systemPrompt } from '@/lib/ai/prompt'
 import { cleanPath, pageExtra } from '@/lib/ai/page'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
       : { role: t.role, content: t.text },
   )
   const ctx: ToolCtx = { branchId: me.branch.id, role: me.role, locale: me.locale }
+  const tools = [...AI_TOOLS, ...proposalToolsFor(me.role)]
   const system: Anthropic.Beta.BetaTextBlockParam[] = [{ type: 'text', text: systemPrompt(me.role, me.locale), cache_control: { type: 'ephemeral' } }]
   const enc = new TextEncoder()
 
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
             model: ai.model,
             max_tokens: 16000,
             system,
-            tools: round < MAX_TOOL_ROUNDS ? AI_TOOLS : undefined,
+            tools: round < MAX_TOOL_ROUNDS ? tools : undefined,
             messages,
             ...(withFallback(ai.model) ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
           })
@@ -110,6 +112,17 @@ export async function POST(req: NextRequest) {
           const results = await Promise.all(
             calls.map(async (c): Promise<Anthropic.Beta.BetaToolResultBlockParam> => {
               try {
+                // R-071: an action is only prepared — a card the person confirms in the panel
+                if (isProposalTool(c.name)) {
+                  const built = await buildProposal(c.name, c.input, ctx)
+                  if (!built.ok) return { type: 'tool_result', tool_use_id: c.id, content: `not prepared: ${built.reason}` }
+                  send({ type: 'proposal', proposal: built.proposal })
+                  return {
+                    type: 'tool_result',
+                    tool_use_id: c.id,
+                    content: 'A confirmation card with these details is now shown under your message. Nothing has happened yet: say in one short sentence what the card will do and that they press ยืนยัน on the card (or ยกเลิก). Never say it is done.',
+                  }
+                }
                 const r = await runTool(c.name, c.input, ctx)
                 return { type: 'tool_result', tool_use_id: c.id, content: r.content, is_error: r.isError }
               } catch {

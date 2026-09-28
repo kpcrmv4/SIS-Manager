@@ -1,11 +1,10 @@
 'use server'
 
-import Anthropic from '@anthropic-ai/sdk'
 import { revalidatePath } from 'next/cache'
 import { getActorState, type Role } from '@/lib/auth/actor'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { MODEL_RE, aiErrorCode, getAiConfig, type AiConfig } from './config'
+import { MODEL_RE, aiErrorCode, anthropicWith, getAiConfig, type AiConfig } from './config'
 
 type Result<T = undefined> = { ok: true; data: T } | { ok: false; error: string }
 const ROLES: Role[] = ['staff', 'bar', 'owner']
@@ -67,7 +66,7 @@ export async function testAi(): Promise<Result<{ model: string; name: string }>>
   if (!k?.api_key) return { ok: false, error: 'ai_not_configured' }
   const model = s?.model ?? ''
   try {
-    const m = await new Anthropic({ apiKey: k.api_key, maxRetries: 0, timeout: 15_000 }).models.retrieve(model)
+    const m = await anthropicWith(k.api_key, { maxRetries: 0, timeout: 15_000 }).models.retrieve(model)
     return { ok: true, data: { model: m.id, name: m.display_name } }
   } catch (err) {
     return { ok: false, error: aiErrorCode(err) }

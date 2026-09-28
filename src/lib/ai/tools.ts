@@ -52,6 +52,11 @@ export const AI_TOOLS: Anthropic.Beta.BetaTool[] = [
     input_schema: { type: 'object', properties: { night: { type: 'string', description: 'YYYY-MM-DD' } } },
   },
   {
+    name: 'find_bookings',
+    description: 'Find bookings of the current branch by name, phone or BK code, from yesterday up to 60 nights ahead.',
+    input_schema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
+  },
+  {
     name: 'tonight_summary',
     description: 'Counts for the current branch right now: deposits per list tab, and tonight’s bookings per status.',
     input_schema: { type: 'object', properties: {} },
@@ -163,6 +168,38 @@ export async function runTool(name: string, input: unknown, ctx: ToolCtx): Promi
             path: `/bookings?night=${night}&b=${b.id}`,
           })),
         }),
+      }
+    }
+    case 'find_bookings': {
+      const q = str(inp.query, 60).replace(/[,()%*"\\]/g, ' ').trim()
+      if (!q) return { content: 'query required', isError: true }
+      const today = businessNight()
+      const sb = await getSupabaseServer()
+      const { data, error } = await sb
+        .from('bookings')
+        .select('id, code, status, night, slot_time, party_size, name, phone, table:tables(label)')
+        .eq('branch_id', ctx.branchId)
+        .gte('night', addDays(today, -1))
+        .lte('night', addDays(today, 60))
+        .or(`name.ilike.%${q}%,phone.ilike.%${q}%,code.ilike.%${q}%`)
+        .order('night')
+        .order('slot_time')
+        .range(0, 19)
+      if (error) return { content: 'could not search bookings', isError: true }
+      return {
+        content: JSON.stringify(
+          (data ?? []).map((b) => ({
+            code: b.code,
+            night: b.night,
+            time: b.slot_time.slice(0, 5),
+            name: b.name,
+            phone: b.phone,
+            party: b.party_size,
+            table: (b.table as { label: string } | null)?.label ?? null,
+            status: b.status,
+            path: `/bookings?night=${b.night}&b=${b.id}`,
+          })),
+        ),
       }
     }
     case 'tonight_summary': {

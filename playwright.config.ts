@@ -35,6 +35,7 @@ export default defineConfig({
     stderr: 'pipe',
     // L-009: every LINE call of the test server goes to the local mock (tests/e2e/fixtures/p3a-line.ts,
     // PORT + 1000) — never to api.line.me with a fixture token. Merged over process.env by Playwright.
-    env: { LINE_API_BASE: process.env.LINE_API_BASE ?? `http://127.0.0.1:${PORT + 1000}` },
+    // R-071: the assistant talks to a local mock of the Messages API (tests/e2e/fixtures/ai-mock.ts, PORT + 1001)
+    env: { LINE_API_BASE: process.env.LINE_API_BASE ?? `http://127.0.0.1:${PORT + 1000}`, AI_API_BASE: process.env.AI_API_BASE ?? `http://127.0.0.1:${PORT + 1001}` },
   },
 })
