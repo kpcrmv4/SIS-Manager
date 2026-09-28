@@ -85,9 +85,9 @@ export function DetailActions({
       ? t('nextHint.reason', { reason: deposit.disposeReason })
       : status === 'cancelled' && deposit.cancelReason
         ? t('nextHint.reason', { reason: deposit.cancelReason })
-        : status === 'requested' || status === 'in_store' || status === 'withdrawn'
+        : status === 'in_store' || status === 'withdrawn'
           ? t(`nextHint.${status}`)
-          : status === 'pending_confirm' || status === 'pending_withdrawal' || status === 'expired'
+          : status === 'requested' || status === 'pending_confirm' || status === 'pending_withdrawal' || status === 'expired'
             ? t(barOrOwner ? `nextHint.${status}` : `nextHint.${status}_staff`)
             : null
   const withdrawMore = canWithdraw && waiting.length > 0

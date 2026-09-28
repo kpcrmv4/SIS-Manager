@@ -494,6 +494,8 @@ test.describe('detail dialogs', () => {
       const { branchA } = fixtureIds()
       const req = await createLineRequest(branchA, { qty: 2 })
       await page.goto(`/deposits/${req.id}`)
+      // (owner, 2026-09-28) staff are told to hand the bottles to bar after the photo
+      await expect(page.getByTestId('deposit-next')).toContainText('กดปุ่ม รับเหล้า และถ่ายรูป จากนั้นนำส่งให้ bar')
       await page.getByTestId('action-receive').click()
       await page.locator('#receive-qty').fill('2')
       await attachPhoto(page, 'receive-photo-add')

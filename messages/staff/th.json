@@ -457,7 +457,8 @@
       "expired": "จำหน่ายออกได้ที่แท็บ หมดอายุ รอจำหน่ายออก",
       "expired_staff": "รอ bar หรือ owner จำหน่ายออก",
       "withdrawn": "เบิกครบทุกขวดแล้ว",
-      "reason": "เหตุผล: {reason}"
+      "reason": "เหตุผล: {reason}",
+      "requested_staff": "กดปุ่ม รับเหล้า และถ่ายรูป จากนั้นนำส่งให้ bar"
     },
     "depositTerm": "อายุฝาก {days} วัน",
     "customerHistory": "ดูประวัติลูกค้า",

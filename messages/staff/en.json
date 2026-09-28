@@ -457,7 +457,8 @@
       "expired": "Dispose of it from the Expired tab",
       "expired_staff": "Waiting for the bar or the owner to dispose of it",
       "withdrawn": "Every bottle has been withdrawn",
-      "reason": "Reason: {reason}"
+      "reason": "Reason: {reason}",
+      "requested_staff": "Tap Receive and take a photo, then hand the bottles to bar"
     },
     "depositTerm": "{days, plural, one {# day} other {# days}} term",
     "customerHistory": "Customer history",
