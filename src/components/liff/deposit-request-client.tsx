@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import type { CustomerLocale } from '@/lib/i18n/config'
-import { Minus, Plus } from 'lucide-react'
+import { Minus, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { errorText } from './error-text'
 import { TERMS_VERSION } from './constants'
@@ -13,6 +13,8 @@ import { CxErrorRetry, CxLoader } from './cx-states'
 import { blockedDaysText } from './weekday-names'
 
 type Policy = { depositDays: number; blockedDays: string[] }
+type Row = { key: number; item: string; quantity: number }
+const MAX_ITEMS = 10
 
 /** "ฝากเหล้า" (P2-C2): form + the 6-item terms, then customer_request_deposit. */
 export function DepositRequestClient() {
@@ -49,8 +51,10 @@ export function DepositRequestClient() {
   // R-065: filled with what this customer last gave; theirs to change
   const [name, setName] = useState(session.contact?.name ?? '')
   const [phone, setPhone] = useState(session.contact?.phone ?? '')
-  const [item, setItem] = useState('')
-  const [quantity, setQuantity] = useState(1)
+  // R-068: several liquors in one request — each becomes its own deposit
+  const [rows, setRows] = useState<Row[]>([{ key: 0, item: '', quantity: 1 }])
+  const [nextKey, setNextKey] = useState(1)
+  const setRow = (key: number, patch: Partial<Row>) => setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)))
   const [table, setTable] = useState('')
   const [notes, setNotes] = useState('')
   const [accepted, setAccepted] = useState(false)
@@ -65,7 +69,8 @@ export function DepositRequestClient() {
     const cleanName = name.trim()
     setNameError(!cleanName)
     setTermsError(!accepted)
-    if (!cleanName || !item.trim() || !accepted) return
+    const filled = rows.filter((r) => r.item.trim())
+    if (!cleanName || filled.length === 0 || !accepted) return
 
     setPending(true)
     try {
@@ -74,8 +79,7 @@ export function DepositRequestClient() {
         body: JSON.stringify({
           name: cleanName,
           phone: phone.trim() || undefined,
-          item_name: item.trim(),
-          quantity,
+          items: filled.map((r) => ({ item_name: r.item.trim(), quantity: r.quantity })),
           table: table.trim() || undefined,
           notes: notes.trim() || undefined,
           accepted,
@@ -90,7 +94,7 @@ export function DepositRequestClient() {
         else toast.error(errorText(t, body.error))
         return
       }
-      toast.success(t('depositRequest.sent'))
+      toast.success(filled.length > 1 ? t('depositRequest.sentMany', { count: filled.length }) : t('depositRequest.sent'))
       router.push(`/liff/${session.branch.code.toLowerCase()}`)
     } catch {
       toast.error(t('shell.errorGeneric'))
@@ -116,22 +120,63 @@ export function DepositRequestClient() {
         <input className="cx-input" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} inputMode="tel" data-testid="cx-deposit-phone" />
       </label>
 
-      <label className="block">
-        <span className="cx-label">{t('depositRequest.item')}</span>
-        <input className="cx-input" value={item} onChange={(e) => setItem(e.target.value)} placeholder={t('depositRequest.itemPlaceholder')} maxLength={120} data-testid="cx-deposit-item" />
-      </label>
-
-      <div>
-        <span className="cx-label">{t('depositRequest.quantity')}</span>
-        <div className="cx-stepper">
-          <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="-">
-            <Minus className="size-4" aria-hidden />
-          </button>
-          <b className="num">{quantity}</b>
-          <button type="button" onClick={() => setQuantity((q) => Math.min(50, q + 1))} aria-label="+">
+      <div className="flex flex-col gap-2" data-testid="cx-deposit-items">
+        {rows.map((r, i) => (
+          <div key={r.key} className={rows.length > 1 ? 'cx-card gap-2' : 'flex flex-col gap-3'} data-testid="cx-deposit-item-row">
+            {rows.length > 1 && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-cx-muted">{t('depositRequest.itemN', { n: i + 1 })}</span>
+                <button
+                  type="button"
+                  className="grid size-8 place-items-center rounded-full text-cx-muted"
+                  onClick={() => setRows((prev) => prev.filter((x) => x.key !== r.key))}
+                  aria-label={t('depositRequest.removeItem', { n: i + 1 })}
+                  data-testid={`cx-deposit-remove-${i}`}
+                >
+                  <X className="size-4" aria-hidden />
+                </button>
+              </div>
+            )}
+            <label className="block">
+              <span className="cx-label">{t('depositRequest.item')}</span>
+              <input
+                className="cx-input"
+                value={r.item}
+                onChange={(e) => setRow(r.key, { item: e.target.value })}
+                placeholder={t('depositRequest.itemPlaceholder')}
+                maxLength={120}
+                data-testid={i === 0 ? 'cx-deposit-item' : `cx-deposit-item-${i}`}
+              />
+            </label>
+            <div>
+              <span className="cx-label">{t('depositRequest.quantity')}</span>
+              <div className="cx-stepper" data-testid={i === 0 ? 'cx-deposit-qty' : `cx-deposit-qty-${i}`}>
+                <button type="button" onClick={() => setRow(r.key, { quantity: Math.max(1, r.quantity - 1) })} aria-label="-">
+                  <Minus className="size-4" aria-hidden />
+                </button>
+                <b className="num">{r.quantity}</b>
+                <button type="button" onClick={() => setRow(r.key, { quantity: Math.min(50, r.quantity + 1) })} aria-label="+">
+                  <Plus className="size-4" aria-hidden />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {rows.length < MAX_ITEMS && (
+          <button
+            type="button"
+            className="cx-btn add"
+            onClick={() => {
+              setRows((prev) => [...prev, { key: nextKey, item: '', quantity: 1 }])
+              setNextKey((k) => k + 1)
+            }}
+            data-testid="cx-deposit-add-item"
+          >
             <Plus className="size-4" aria-hidden />
+            {t('depositRequest.addItem')}
           </button>
-        </div>
+        )}
+        {rows.length > 1 && <p className="text-xs text-cx-muted">{t('depositRequest.itemsHelp')}</p>}
       </div>
 
       <label className="block">

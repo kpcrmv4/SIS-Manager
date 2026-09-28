@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ArrowUpFromLine, CalendarX, CheckCheck, CircleX, ClipboardCheck, Inbox, Trash2, Wine, type LucideIcon } from 'lucide-react'
+import { ArrowUpFromLine, CalendarX, CheckCheck, CircleX, ClipboardCheck, Inbox, Plus, Trash2, Wine, type LucideIcon } from 'lucide-react'
 import type { DepositDetail } from '@/lib/deposit/detail'
 import type { DepositStatus } from '@/lib/deposit/format'
 import type { LiquorItem } from '@/lib/deposit/items'
@@ -63,7 +63,12 @@ export function DetailActions({
   const barOrOwner = role !== 'staff'
   const { status, isVip } = deposit
 
-  const canWithdraw = status === 'in_store' || status === 'pending_withdrawal'
+  // a request already waiting: its panel leads, and asking for another bottle becomes a
+  // secondary "เบิกขวดอื่นเพิ่ม" — gone when every bottle left is already asked for
+  const waiting = deposit.pendingWithdrawals
+  const pendingBottleIds = new Set(waiting.map((w) => w.bottleId).filter((id): id is string => !!id))
+  const freeBottles = deposit.bottles.filter((b) => b.status !== 'consumed' && !pendingBottleIds.has(b.id)).length
+  const canWithdraw = (status === 'in_store' || status === 'pending_withdrawal') && freeBottles > 0
   const searchParams = useSearchParams()
   // the scan result card's "withdraw" button deep-links here with ?open=withdraw
   const [dialog, setDialog] = useState<DialogKind>(() => (canWithdraw && searchParams.get('open') === 'withdraw' ? 'withdraw' : null))
@@ -85,7 +90,8 @@ export function DetailActions({
           : status === 'pending_confirm' || status === 'pending_withdrawal' || status === 'expired'
             ? t(barOrOwner ? `nextHint.${status}` : `nextHint.${status}_staff`)
             : null
-  const primary = [canReceive, canConfirm, canReject, canWithdraw, toExpiredTab].filter(Boolean).length
+  const withdrawMore = canWithdraw && waiting.length > 0
+  const primary = [canReceive, canConfirm, canReject, canWithdraw && !withdrawMore, toExpiredTab].filter(Boolean).length
   const { icon: Icon, tone } = STATE[status]
 
   return (
@@ -117,7 +123,7 @@ export function DetailActions({
               {t('actionReject')}
             </button>
           )}
-          {canWithdraw && (
+          {canWithdraw && !withdrawMore && (
             <button type="button" className="btn-primary" onClick={() => setDialog('withdraw')} data-testid="action-withdraw">
               {t('actionWithdraw')}
             </button>
@@ -130,7 +136,20 @@ export function DetailActions({
         </div>
       )}
 
-      {barOrOwner && <WithdrawalPanel depositId={deposit.id} pending={deposit.pendingWithdrawals} />}
+      <WithdrawalPanel depositId={deposit.id} pending={waiting} canDecide={barOrOwner} />
+      {/* a new request is its own section under the waiting one — never mistaken for it (owner, 2026-09-28) */}
+      {withdrawMore && (
+        <div className="rounded-lg border border-dashed border-line-strong p-3" data-testid="withdraw-new-section">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <span className="text-sm font-semibold text-ink">{t('withdrawNewTitle')}</span>
+            <span className="text-xs text-muted-token tnum">{t('withdrawNewLeft', { count: freeBottles })}</span>
+          </div>
+          <button type="button" className="btn-secondary w-full" onClick={() => setDialog('withdraw')} data-testid="action-withdraw" data-more="true">
+            <Plus className="size-4" aria-hidden />
+            {t('actionWithdrawMore')}
+          </button>
+        </div>
+      )}
 
       {(canPrint || canExtend || canVip) && (
         <div className="border-t border-line-soft pt-3">
@@ -180,7 +199,8 @@ export function DetailActions({
           onOpenChange={(v) => setDialog(v ? 'withdraw' : null)}
           depositId={deposit.id}
           bottles={deposit.bottles}
-          pendingBottleIds={new Set(deposit.pendingWithdrawals.map((w) => w.bottleId).filter((id): id is string => !!id))}
+          pendingBottleIds={pendingBottleIds}
+          pendingBottleNos={waiting.map((w) => w.bottleNo).filter((n): n is number => n !== null)}
           defaultTable={deposit.tableLabel ?? ''}
           blockedTonight={blockedTonight}
         />

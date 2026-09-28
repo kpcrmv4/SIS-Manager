@@ -74,7 +74,12 @@
     "table": "桌号",
     "notes": "备注",
     "submit": "提交存酒申请",
-    "sent": "已提交，请将酒交给店员"
+    "sent": "已提交，请将酒交给店员",
+    "addItem": "再添加一种酒",
+    "itemN": "第 {n} 项",
+    "removeItem": "删除第 {n} 项",
+    "itemsHelp": "每一项都有自己的寄存编号",
+    "sentMany": "已发送 {count} 项寄存申请"
   },
   "terms": {
     "title": "存酒与取酒条款",

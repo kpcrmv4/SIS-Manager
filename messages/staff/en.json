@@ -451,7 +451,7 @@
       "pending_confirm": "Enter the % left in every bottle with a photo, then press Confirm",
       "pending_confirm_staff": "Waiting for the bar or the owner to confirm",
       "in_store": "The customer can ask on LINE, or press Withdraw",
-      "pending_withdrawal": "Bring the bottle to the customer, then press Confirm withdrawal",
+      "pending_withdrawal": "Tap Confirm withdrawal, then take the bottle to the customer",
       "pending_withdrawal_staff": "Waiting for the bar or the owner to confirm",
       "expired": "Dispose of it from the Expired tab",
       "expired_staff": "Waiting for the bar or the owner to dispose of it",
@@ -506,7 +506,15 @@
         "skipped": "Not sent"
       }
     },
-    "viewers": "{names} also has this open"
+    "viewers": "{names} also has this open",
+    "pendingWithdrawTitle": "{count, plural, one {# bottle} other {# bottles}} requested · awaiting confirmation",
+    "requestedBy": "Asked by {name}",
+    "requestedByCustomer": "Customer asked in LINE",
+    "pendingWithdrawWait": "Waiting for bar or owner · if the customer is chasing the same request, don't ask again",
+    "actionWithdrawMore": "Withdraw another bottle",
+    "bottlePendingWithdraw": "Requested",
+    "withdrawNewTitle": "New withdrawal",
+    "withdrawNewLeft": "{count, plural, one {# bottle} other {# bottles}} still free"
   },
   "depositForm": {
     "title": "New deposit",
@@ -544,7 +552,24 @@
     "ownerSharedChosen": "Shared phone · this deposit will not link to LINE",
     "ownerPick": "Say whether this is the customer",
     "ownerFix": "Fix the phone, or choose shared phone",
-    "checking": "Checking the phone"
+    "checking": "Checking the phone",
+    "itemN": "Item {n}",
+    "itemsCount": "{count} items",
+    "removeItem": "Remove item {n}",
+    "addItem": "Add another liquor",
+    "itemsHelp": "Each item gets its own deposit code · several bottles of one liquor go in its bottle count",
+    "submitMany": "Save {count} deposits",
+    "createdMany": "{count} deposits saved",
+    "savedTitle": "{count} deposits saved",
+    "savedBody": "Each has its own deposit code · bar confirms each one",
+    "printAllTitle": "Print all",
+    "printReceipts": "Receipts",
+    "printLabels": "Labels",
+    "printAll": "Print all {count}",
+    "printAgain": "Print again",
+    "printQueued": "{count, plural, one {# job} other {# jobs}} sent to the printer",
+    "newAnother": "New deposit",
+    "toList": "To be confirmed"
   },
   "confirmDialog": {
     "title": "Confirm bottles",
@@ -595,7 +620,8 @@
     "complete": "Withdraw now",
     "done": "Withdrawal requested",
     "completed": "Withdrawn",
-    "rejected": "Withdrawal rejected"
+    "rejected": "Withdrawal rejected",
+    "alreadyPending": "{bottles} already requested · pick only bottles the customer wants in addition"
   },
   "extendDialog": {
     "title": "Extend",
@@ -1052,7 +1078,9 @@
       "testTitle": "Test message",
       "testBody": "The branch LINE can post to this group · {date} {time}",
       "groupBound": "This group is now linked to branch {branch} · deposit, withdrawal and new booking alerts will arrive here",
-      "groupBoundTitle": "Staff group connected"
+      "groupBoundTitle": "Staff group connected",
+      "depositRequestedManyTitle": "New deposit request · {count} items",
+      "requestItemLine": "{item} × {count} · {code}"
     },
     "liffEndpoint": "LIFF endpoint URL",
     "liffEndpointHelp": "Paste into LINE Developers → LINE Login → LIFF → Endpoint URL · if it points at the site's home page, customers land on the staff login instead of their own pages"

@@ -62,6 +62,46 @@ export async function createDeposit(input: CreateDepositInput): Promise<ActionRe
   return res
 }
 
+export type DepositItemInput = { itemId?: string; itemName: string; category?: string; quantity: number }
+export type CreatedDeposit = { id: string; code: string; item: string; quantity: number }
+
+/**
+ * R-068: one form, 1-10 liquors — each its own deposit and DEP code, written in one transaction
+ * (an error in any item saves none); the bell and push go out once for the batch.
+ */
+export async function createDeposits(
+  input: Omit<CreateDepositInput, 'itemId' | 'itemName' | 'category' | 'quantity'> & { items: DepositItemInput[] },
+): Promise<ActionResult<{ deposits: CreatedDeposit[] }>> {
+  const items = input.items.map((i) => ({
+    item_name: cleanText(i.itemName, 120),
+    quantity: Math.trunc(i.quantity),
+    item_id: isUuid(i.itemId) ? i.itemId : undefined,
+    category: cleanText(i.category, 20),
+  }))
+  if (!isUuid(input.branchId) || !cleanText(input.customerName, 120) || !items.length || items.length > 10 || items.some((i) => !i.item_name || !Number.isFinite(i.quantity))) {
+    return { ok: false, error: 'invalid' }
+  }
+  const res = await callRpc<{ deposits: CreatedDeposit[] }>((sb) =>
+    sb.rpc('create_deposits', {
+      p_branch: input.branchId,
+      p_customer_name: cleanText(input.customerName, 120)!,
+      p_items: items,
+      p_photo_paths: input.photoPaths.slice(0, 10),
+      p_customer_phone: cleanText(input.customerPhone, 20),
+      p_table: cleanText(input.table, 20),
+      p_notes: cleanText(input.notes, 500),
+      p_expires_at: input.expiresAt,
+      p_phone_choice: input.phoneChoice?.kind,
+      p_phone_customer: input.phoneChoice?.kind === 'owner' && isUuid(input.phoneChoice.customerId) ? input.phoneChoice.customerId : undefined,
+    }),
+  )
+  if (res.ok) {
+    touched()
+    after(() => dispatchSoon())
+  }
+  return res
+}
+
 export async function receiveRequest(input: {
   depositId: string
   quantity: number

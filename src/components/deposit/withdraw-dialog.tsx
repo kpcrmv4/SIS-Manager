@@ -15,6 +15,7 @@ export function WithdrawDialog({
   depositId,
   bottles,
   pendingBottleIds,
+  pendingBottleNos = [],
   defaultTable,
   blockedTonight,
 }: {
@@ -23,6 +24,8 @@ export function WithdrawDialog({
   depositId: string
   bottles: DepositBottle[]
   pendingBottleIds: Set<string>
+  /** bottles already asked for — the dialog says so first */
+  pendingBottleNos?: number[]
   defaultTable: string
   blockedTonight: boolean
 }) {
@@ -72,6 +75,12 @@ export function WithdrawDialog({
       }
     >
       <div className="space-y-3.5">
+        {pendingBottleNos.length > 0 && (
+          <div className="warnbox" data-testid="withdraw-already-pending">
+            <TriangleAlert className="size-4 shrink-0" aria-hidden />
+            <span>{t('alreadyPending', { bottles: pendingBottleNos.map((n) => td('bottleN', { n })).join(', ') })}</span>
+          </div>
+        )}
         <div>
           <label className="label-base">{t('pickBottles')}</label>
           <div className="space-y-1.5" role="group" aria-label={t('pickBottles')}>

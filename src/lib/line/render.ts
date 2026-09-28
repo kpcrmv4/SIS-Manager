@@ -170,7 +170,15 @@ function renderStaff(kind: (typeof STAFF_KINDS)[number], p: Payload, ctx: Render
   const lines: { text: string; muted?: boolean; strong?: boolean }[] = []
   let path: string | null = null
 
-  if (kind === 'deposit_requested' || kind === 'withdrawal_requested') {
+  const batch = kind === 'deposit_requested' && Array.isArray(p.items) && p.items.length > 1 ? (p.items as Payload[]).slice(0, 10) : null
+  if (batch) {
+    // R-068: one message for a request with several items — each line its own DEP code
+    title = interpolate(s.depositRequestedManyTitle, { count: batch.length })
+    lines.push({ text: clip(p.customer, 60), strong: true })
+    for (const it of batch) lines.push({ text: interpolate(s.requestItemLine, { item: item(it), count: int(it.count), code: code(it) }) })
+    if (table) lines.push({ text: interpolate(s.tableLine, { table }), muted: true })
+    path = '/deposits?tab=requests'
+  } else if (kind === 'deposit_requested' || kind === 'withdrawal_requested') {
     title = interpolate(kind === 'deposit_requested' ? s.depositRequestedTitle : s.withdrawalRequestedTitle, { code: code(p) })
     lines.push({ text: interpolate(s.requestBody, { customer: clip(p.customer, 60), item: item(p), count: int(p.count) }), strong: true })
     if (kind === 'withdrawal_requested' && (p.type === 'in_store' || p.type === 'take_home')) {

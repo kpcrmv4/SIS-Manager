@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import type { DepositBottle } from '@/lib/deposit/detail'
 
 /** Server-rendered — the bottles panel never needs client interactivity. */
-export async function BottlesGrid({ bottles, total }: { bottles: DepositBottle[]; total: number }) {
+export async function BottlesGrid({ bottles, total, pendingBottleIds = [] }: { bottles: DepositBottle[]; total: number; pendingBottleIds?: string[] }) {
   const t = await getTranslations('deposit')
   const ts = await getTranslations('status')
   const remaining = bottles.filter((b) => b.status !== 'consumed').length
@@ -21,6 +21,11 @@ export async function BottlesGrid({ bottles, total }: { bottles: DepositBottle[]
               <i style={{ height: `${b.status === 'consumed' ? 0 : Math.round(b.remainingPercent)}%` }} />
             </div>
             <b>{t('bottleN', { n: b.bottleNo })}</b>
+            {pendingBottleIds.includes(b.id) && (
+              <span className="my-0.5 flex justify-center" data-testid={`bottle-${b.bottleNo}-pending`}>
+                <Badge tone="violet">{t('bottlePendingWithdraw')}</Badge>
+              </span>
+            )}
             <div className="num">
               {b.status === 'consumed' ? ts('bottle.consumed') : t('bottleLevel', { percent: Math.round(b.remainingPercent), state: ts(`bottle.${b.status}`) })}
             </div>

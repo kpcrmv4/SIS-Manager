@@ -1679,6 +1679,21 @@ export type Database = {
         }
         Returns: Json
       }
+      create_deposits: {
+        Args: {
+          p_branch: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_expires_at?: string
+          p_items: Json
+          p_notes?: string
+          p_phone_choice?: string
+          p_phone_customer?: string
+          p_photo_paths: string[]
+          p_table?: string
+        }
+        Returns: Json
+      }
       customer_booking_board: {
         Args: { p_branch: string; p_night: string; p_seq?: string }
         Returns: Json
@@ -1716,6 +1731,20 @@ export type Database = {
           p_item_name: string
           p_notes?: string
           p_quantity: number
+          p_table?: string
+          p_terms_locale: Database["public"]["Enums"]["app_locale"]
+          p_terms_version: string
+        }
+        Returns: Json
+      }
+      customer_request_deposits: {
+        Args: {
+          p_branch: string
+          p_customer_id: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_items: Json
+          p_notes?: string
           p_table?: string
           p_terms_locale: Database["public"]["Enums"]["app_locale"]
           p_terms_version: string

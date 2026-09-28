@@ -1,17 +1,21 @@
 'use client'
 
-import { useMemo, useRef, useState, useSyncExternalStore, useTransition } from 'react'
+import { useRef, useState, useSyncExternalStore, useTransition } from 'react'
 
 const noopSubscribe = () => () => {}
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { PhotoPicker } from './photo-picker'
 import { PhoneOwnerCard, usePhoneOwner, type PhoneChoice } from './phone-owner-check'
-import { createDeposit } from '@/lib/deposit/actions'
+import { createDeposits, type CreatedDeposit } from '@/lib/deposit/actions'
+import { NewDepositSaved } from './new-deposit-saved'
 import { addDays, bangkokDate, formatShortDate } from '@/lib/date'
 import type { LiquorItem } from '@/lib/deposit/items'
+
+type Row = { key: number; name: string; qty: number }
+const MAX_ITEMS = 10
 
 export function NewDepositForm({
   branchId,
@@ -35,8 +39,10 @@ export function NewDepositForm({
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [itemName, setItemName] = useState('')
-  const [quantity, setQuantity] = useState(1)
+  // R-068: several liquors in one form — each row becomes its own deposit and DEP code
+  const [rows, setRows] = useState<Row[]>([{ key: 0, name: '', qty: 1 }])
+  const [saved, setSaved] = useState<CreatedDeposit[] | null>(null)
+  const nextKey = useRef(1)
   const [table, setTable] = useState('')
   const [expiresDate, setExpiresDate] = useState(defaultExpiry)
   const [notes, setNotes] = useState('')
@@ -57,13 +63,31 @@ export function NewDepositForm({
     if (c === 'denied') phoneRef.current?.focus()
   }
 
-  const matchedItem = useMemo(() => items.find((i) => i.name === itemName), [items, itemName])
+  const setRow = (key: number, patch: Partial<Row>) => setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)))
+  const addRow = () => {
+    setRows((prev) => (prev.length >= MAX_ITEMS ? prev : [...prev, { key: nextKey.current++, name: '', qty: 1 }]))
+  }
+  const removeRow = (key: number) => setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
+
+  function startAnother() {
+    setSaved(null)
+    setRows([{ key: nextKey.current++, name: '', qty: 1 }])
+    setName('')
+    setPhone('')
+    setPhoneChoice(null)
+    setTable('')
+    setNotes('')
+    setPhotos([])
+    setErrors({})
+  }
 
   function submit() {
     const nextErrors: Record<string, string> = {}
     if (!name.trim()) nextErrors.name = t('nameRequired')
-    if (!itemName.trim()) nextErrors.item = t('itemRequired')
-    if (!Number.isFinite(quantity) || quantity < 1 || quantity > 50) nextErrors.quantity = t('quantityInvalid')
+    rows.forEach((r) => {
+      if (!r.name.trim()) nextErrors[`item_${r.key}`] = t('itemRequired')
+      if (!Number.isFinite(r.qty) || r.qty < 1 || r.qty > 50) nextErrors[`qty_${r.key}`] = t('quantityInvalid')
+    })
     if (!barOrOwner && photos.length === 0) nextErrors.photo = t('photoRequired')
     if (owner && phoneChoice === null) nextErrors.phone = t('ownerPick')
     if (owner && phoneChoice === 'denied') nextErrors.phone = t('ownerFix')
@@ -76,15 +100,15 @@ export function NewDepositForm({
         setErrors({ phone: phoneChoice === null ? t('ownerPick') : t('ownerFix') })
         return
       }
-      const res = await createDeposit({
+      const res = await createDeposits({
         branchId,
         customerName: name,
         customerPhone: phone || undefined,
         table: table || undefined,
-        itemId: matchedItem?.id,
-        itemName,
-        category: matchedItem?.category,
-        quantity,
+        items: rows.map((r) => {
+          const matched = items.find((i) => i.name === r.name.trim())
+          return { itemId: matched?.id, itemName: r.name.trim(), category: matched?.category, quantity: r.qty }
+        }),
         photoPaths: photos,
         notes: notes || undefined,
         expiresAt: barOrOwner ? `${expiresDate}T23:59:59+07:00` : undefined,
@@ -94,10 +118,19 @@ export function NewDepositForm({
         toast.error(te(res.error))
         return
       }
-      toast.success(t('created', { code: res.data?.code ?? '' }))
-      router.push(`/deposits/${res.data?.id}`)
+      const made = res.data.deposits
+      if (made.length === 1) {
+        toast.success(t('created', { code: made[0].code }))
+        router.push(`/deposits/${made[0].id}`)
+        return
+      }
+      toast.success(t('createdMany', { count: made.length }))
+      setSaved(made)
+      window.scrollTo({ top: 0 })
     })
   }
+
+  if (saved) return <NewDepositSaved branchId={branchId} deposits={saved} onAnother={startAnother} />
 
   return (
     <div className="card-surface max-w-160 p-4" data-testid="new-deposit-form" data-hydrated={hydrated}>
@@ -130,44 +163,68 @@ export function NewDepositForm({
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label-base" htmlFor="f-item">
-              {t('item')}
-            </label>
-            <input
-              id="f-item"
-              className="input-base"
-              list="deposit-items"
-              placeholder={t('itemPlaceholder')}
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              data-testid="deposit-item"
-            />
-            <datalist id="deposit-items">
-              {items.map((i) => (
-                <option key={i.id} value={i.name} />
-              ))}
-            </datalist>
-            <p className="help-text">{t('itemHelp')}</p>
-            {errors.item && <p className="help-text text-urgent">{errors.item}</p>}
+        <div data-testid="deposit-items">
+          <div className="mb-1.5 flex items-baseline justify-between gap-2">
+            <span className="label-base mb-0">{t('item')}</span>
+            {rows.length > 1 && <span className="text-xs text-muted-token">{t('itemsCount', { count: rows.length })}</span>}
           </div>
-          <div>
-            <label className="label-base" htmlFor="f-qty">
-              {t('quantity')}
-            </label>
-            <input
-              id="f-qty"
-              type="number"
-              min={1}
-              max={50}
-              inputMode="numeric"
-              className="input-base tnum"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              data-testid="deposit-quantity"
-            />
-            {errors.quantity && <p className="help-text text-urgent">{errors.quantity}</p>}
+          <datalist id="deposit-items">
+            {items.map((i) => (
+              <option key={i.id} value={i.name} />
+            ))}
+          </datalist>
+          <div className="flex flex-col gap-2">
+            {rows.map((r, i) => (
+              <div key={r.key} className={rows.length > 1 ? 'rounded-lg border border-line-soft p-2.5' : ''} data-testid="deposit-item-row">
+                {rows.length > 1 && (
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-token">{t('itemN', { n: i + 1 })}</span>
+                    <button type="button" className="btn-ghost btn-sm -my-1" onClick={() => removeRow(r.key)} aria-label={t('removeItem', { n: i + 1 })} data-testid={`deposit-remove-item-${i}`}>
+                      <X className="size-4" aria-hidden />
+                    </button>
+                  </div>
+                )}
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <input
+                      id={i === 0 ? 'f-item' : undefined}
+                      className="input-base"
+                      list="deposit-items"
+                      placeholder={t('itemPlaceholder')}
+                      aria-label={rows.length > 1 ? t('itemN', { n: i + 1 }) : t('item')}
+                      value={r.name}
+                      onChange={(e) => setRow(r.key, { name: e.target.value })}
+                      data-testid={i === 0 ? 'deposit-item' : `deposit-item-${i}`}
+                    />
+                    {errors[`item_${r.key}`] && <p className="help-text text-urgent">{errors[`item_${r.key}`]}</p>}
+                  </div>
+                  <div className="w-24 flex-none">
+                    <input
+                      id={i === 0 ? 'f-qty' : undefined}
+                      type="number"
+                      min={1}
+                      max={50}
+                      inputMode="numeric"
+                      className="input-base tnum"
+                      aria-label={t('quantity')}
+                      value={r.qty}
+                      onChange={(e) => setRow(r.key, { qty: Number(e.target.value) })}
+                      data-testid={i === 0 ? 'deposit-quantity' : `deposit-quantity-${i}`}
+                    />
+                    {errors[`qty_${r.key}`] && <p className="help-text text-urgent">{errors[`qty_${r.key}`]}</p>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+            <p className="help-text m-0">{rows.length > 1 ? t('itemsHelp') : t('itemHelp')}</p>
+            {rows.length < MAX_ITEMS && (
+              <button type="button" className="btn-ghost btn-sm" onClick={addRow} data-testid="deposit-add-item">
+                <Plus className="size-4" aria-hidden />
+                {t('addItem')}
+              </button>
+            )}
           </div>
         </div>
 
@@ -227,7 +284,7 @@ export function NewDepositForm({
           </button>
           <button type="button" className="btn-primary" onClick={submit} disabled={pending} data-testid="deposit-submit">
             {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-            {t('submit')}
+            {rows.length > 1 ? t('submitMany', { count: rows.length }) : t('submit')}
           </button>
         </div>
       </div>

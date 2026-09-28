@@ -74,7 +74,12 @@
     "table": "Table",
     "notes": "Notes",
     "submit": "Send deposit request",
-    "sent": "Request sent — hand the bottle to staff"
+    "sent": "Request sent — hand the bottle to staff",
+    "addItem": "Add another bottle type",
+    "itemN": "Item {n}",
+    "removeItem": "Remove item {n}",
+    "itemsHelp": "Each item gets its own deposit number",
+    "sentMany": "Sent {count} deposit requests"
   },
   "terms": {
     "title": "Bottle Storage and Collection Terms",

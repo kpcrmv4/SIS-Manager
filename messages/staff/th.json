@@ -451,7 +451,7 @@
       "pending_confirm": "ใส่ % ที่เหลือของทุกขวดพร้อมรูป แล้วกด ยืนยันเหล้า",
       "pending_confirm_staff": "รอ bar หรือ owner ยืนยัน",
       "in_store": "ลูกค้าขอเบิกเองใน LINE ได้ หรือกด เบิกเหล้า",
-      "pending_withdrawal": "นำเหล้าไปให้ลูกค้าแล้วกด ยืนยันการเบิก",
+      "pending_withdrawal": "กด ยืนยันการเบิก แล้วนำเหล้าไปให้ลูกค้า",
       "pending_withdrawal_staff": "รอ bar หรือ owner ยืนยันการเบิก",
       "expired": "จำหน่ายออกได้ที่แท็บ หมดอายุ รอจำหน่ายออก",
       "expired_staff": "รอ bar หรือ owner จำหน่ายออก",
@@ -506,7 +506,15 @@
         "skipped": "ไม่ได้ส่ง"
       }
     },
-    "viewers": "{names} กำลังเปิดรายการนี้อยู่"
+    "viewers": "{names} กำลังเปิดรายการนี้อยู่",
+    "pendingWithdrawTitle": "คำขอเบิก {count} ขวด · รอยืนยัน",
+    "requestedBy": "ขอโดย {name}",
+    "requestedByCustomer": "ลูกค้าขอผ่าน LINE",
+    "pendingWithdrawWait": "รอ bar หรือ owner ยืนยัน · ถ้าลูกค้าตามเรื่องเดิม ไม่ต้องขอเบิกซ้ำ",
+    "actionWithdrawMore": "เบิกขวดอื่นเพิ่ม",
+    "bottlePendingWithdraw": "รอเบิก",
+    "withdrawNewTitle": "เบิกใหม่",
+    "withdrawNewLeft": "ยังเบิกได้อีก {count} ขวด"
   },
   "depositForm": {
     "title": "รับฝากเหล้า",
@@ -544,7 +552,24 @@
     "ownerSharedChosen": "ใช้เบอร์ร่วมกัน · รายการนี้จะไม่ผูก LINE",
     "ownerPick": "เลือกว่าใช่ลูกค้าคนนี้ไหม",
     "ownerFix": "แก้เบอร์ หรือเลือกใช้เบอร์ร่วมกัน",
-    "checking": "กำลังตรวจเบอร์"
+    "checking": "กำลังตรวจเบอร์",
+    "itemN": "รายการที่ {n}",
+    "itemsCount": "{count} รายการ",
+    "removeItem": "ลบรายการที่ {n}",
+    "addItem": "เพิ่มเหล้าอีกรายการ",
+    "itemsHelp": "แต่ละรายการได้หมายเลขฝากของตัวเอง · ชนิดเดียวกันหลายขวดใส่เป็นจำนวนขวด",
+    "submitMany": "บันทึกรับฝาก {count} รายการ",
+    "createdMany": "รับฝากแล้ว {count} รายการ",
+    "savedTitle": "รับฝากแล้ว {count} รายการ",
+    "savedBody": "แต่ละรายการมีหมายเลขฝากของตัวเอง · รอ bar ยืนยันทีละรายการ",
+    "printAllTitle": "พิมพ์ทุกรายการ",
+    "printReceipts": "ใบรับฝาก",
+    "printLabels": "ป้ายเหล้า",
+    "printAll": "พิมพ์ทั้ง {count} รายการ",
+    "printAgain": "พิมพ์อีกครั้ง",
+    "printQueued": "ส่งพิมพ์แล้ว {count} งาน",
+    "newAnother": "รับฝากรายการใหม่",
+    "toList": "ไปหน้ารอยืนยัน"
   },
   "confirmDialog": {
     "title": "ยืนยันเหล้า",
@@ -595,7 +620,8 @@
     "complete": "เบิกเลย",
     "done": "สร้างคำขอเบิกแล้ว",
     "completed": "เบิกเหล้าแล้ว",
-    "rejected": "ปฏิเสธการเบิกแล้ว"
+    "rejected": "ปฏิเสธการเบิกแล้ว",
+    "alreadyPending": "{bottles} มีคำขอเบิกรอยืนยันอยู่แล้ว · เลือกเฉพาะขวดที่ลูกค้าขอเพิ่มจริง"
   },
   "extendDialog": {
     "title": "ต่ออายุ",
@@ -1052,7 +1078,9 @@
       "testTitle": "ข้อความทดสอบ",
       "testBody": "LINE ของสาขาส่งข้อความเข้ากลุ่มนี้ได้แล้ว · {date} {time} น.",
       "groupBound": "ผูกกลุ่มนี้กับสาขา {branch} แล้ว · แจ้งเตือนคำขอฝาก คำขอเบิก และการจองใหม่จะส่งมาที่กลุ่มนี้",
-      "groupBoundTitle": "เชื่อมกลุ่มพนักงานแล้ว"
+      "groupBoundTitle": "เชื่อมกลุ่มพนักงานแล้ว",
+      "depositRequestedManyTitle": "คำขอฝากใหม่ · {count} รายการ",
+      "requestItemLine": "{item} × {count} · {code}"
     },
     "liffEndpoint": "Endpoint URL ของ LIFF",
     "liffEndpointHelp": "วางใน LINE Developers → LINE Login → LIFF → Endpoint URL · ถ้าใส่เป็นหน้าแรกของเว็บ ลูกค้าจะเจอหน้าล็อกอินพนักงานแทนหน้าของลูกค้า"

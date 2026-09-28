@@ -1,20 +1,23 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useTranslations } from 'next-intl'
-import { Loader2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+import { Hourglass, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ActionDialog } from './action-dialog'
 import { completeWithdrawals, rejectWithdrawal } from '@/lib/deposit/actions'
 import type { PendingWithdrawal } from '@/lib/deposit/detail'
+import { formatTime, type AppLocale } from '@/lib/date'
 
 /**
- * bar/owner: the pending withdrawal request(s) on this deposit (one row per bottle —
- * request_withdrawal inserts that way) shown as one request to complete or reject.
+ * The pending withdrawal request(s) on this deposit (one row per bottle — request_withdrawal
+ * inserts that way): every role sees which bottles, who asked and when, so nobody asks again
+ * for a customer who is only chasing it (owner, 2026-09-28); bar / owner complete or reject.
  */
-export function WithdrawalPanel({ depositId, pending: rows }: { depositId: string; pending: PendingWithdrawal[] }) {
+export function WithdrawalPanel({ depositId, pending: rows, canDecide }: { depositId: string; pending: PendingWithdrawal[]; canDecide: boolean }) {
   const t = useTranslations('deposit')
   const tw = useTranslations('withdrawDialog')
+  const locale = useLocale() as AppLocale
   const [completeOpen, setCompleteOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
 
@@ -23,17 +26,31 @@ export function WithdrawalPanel({ depositId, pending: rows }: { depositId: strin
   const table = rows[0]?.tableLabel
 
   return (
-    <div className="rounded-lg border border-status-pending-ring bg-status-pending-bg p-3" data-testid="withdrawal-panel">
-      <h2 className="sec-head mt-0">{t('actionCompleteWithdraw')}</h2>
-      <ul className="mb-3 space-y-1 text-sm text-ink-2">
+    <div className="rounded-lg border border-status-violet-ring bg-status-violet-bg p-3" data-testid="withdrawal-panel" data-can-decide={canDecide}>
+      <h2 className="m-0 flex items-center gap-1.5 text-sm font-semibold text-status-violet">
+        <Hourglass className="size-4 shrink-0" aria-hidden />
+        {t('pendingWithdrawTitle', { count: rows.length })}
+      </h2>
+      <ul className="mt-2 space-y-1.5">
         {rows.map((r) => (
-          <li key={r.id}>
-            {r.bottleNo !== null ? t('bottleN', { n: r.bottleNo }) : r.id} · {tw(r.type === 'in_store' ? 'typeInStore' : 'typeTakeHome')}
-            {r.tableLabel ? ` · ${r.tableLabel}` : ''}
+          <li key={r.id} className="flex flex-col" data-testid="withdrawal-pending-row">
+            <span className="text-sm font-semibold text-ink">
+              {r.bottleNo !== null ? t('bottleN', { n: r.bottleNo }) : r.id} · {tw(r.type === 'in_store' ? 'typeInStore' : 'typeTakeHome')}
+              {r.tableLabel ? ` · ${r.tableLabel}` : ''}
+            </span>
+            <span className="text-xs text-muted-token">
+              {r.byCustomer ? t('requestedByCustomer') : t('requestedBy', { name: r.requestedBy ?? '—' })} · {formatTime(r.createdAt, locale)}
+            </span>
           </li>
         ))}
       </ul>
-      <div className="flex flex-wrap gap-2">
+      {!canDecide && (
+        <p className="mt-2 text-xs text-ink-2" data-testid="withdrawal-wait-note">
+          {t('pendingWithdrawWait')}
+        </p>
+      )}
+      {canDecide && (
+      <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" className="btn-ok btn-sm" onClick={() => setCompleteOpen(true)} data-testid="withdrawal-complete-open">
           {t('actionCompleteWithdraw')}
         </button>
@@ -41,6 +58,7 @@ export function WithdrawalPanel({ depositId, pending: rows }: { depositId: strin
           {t('actionRejectWithdraw')}
         </button>
       </div>
+      )}
 
       <CompleteDialog open={completeOpen} onOpenChange={setCompleteOpen} depositId={depositId} withdrawalIds={ids} table={table} />
       <RejectDialog open={rejectOpen} onOpenChange={setRejectOpen} depositId={depositId} withdrawalIds={ids} />

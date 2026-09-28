@@ -25,6 +25,9 @@ export type PendingWithdrawal = {
   type: WithdrawalType
   tableLabel: string | null
   createdAt: string
+  /** the customer asked in LINE — else the staff member who asked */
+  byCustomer: boolean
+  requestedBy: string | null
 }
 
 export type DepositDetail = {
@@ -113,7 +116,9 @@ type PendingWithdrawalRow = {
   type: WithdrawalType
   table_label: string | null
   created_at: string
+  by_customer: boolean
   bottle: { bottle_no: number } | null
+  requester: { display_name: string } | null
 }
 
 /** Full deposit + bottles + history + open withdrawal requests, scoped to the branch the caller is working in. */
@@ -145,7 +150,7 @@ export async function getDepositDetail(branchId: string, id: string): Promise<De
 
   const pendingQ = sb
     .from('withdrawals')
-    .select('id, bottle_id, type, table_label, created_at, bottle:deposit_bottles(bottle_no)')
+    .select('id, bottle_id, type, table_label, created_at, by_customer, bottle:deposit_bottles(bottle_no), requester:profiles!withdrawals_requested_by_fkey(display_name)')
     .eq('deposit_id', id)
     .eq('status', 'pending')
     .order('created_at')
@@ -205,6 +210,8 @@ export async function getDepositDetail(branchId: string, id: string): Promise<De
       type: w.type,
       tableLabel: w.table_label,
       createdAt: w.created_at,
+      byCustomer: w.by_customer,
+      requestedBy: w.requester?.display_name ?? null,
     })),
   }
 }
