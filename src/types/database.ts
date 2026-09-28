@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_secrets: {
+        Row: {
+          api_key: string
+          id: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          api_key: string
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          api_key?: string
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_settings: {
+        Row: {
+          enabled_roles: Database["public"]["Enums"]["user_role"][]
+          id: boolean
+          model: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled_roles?: Database["public"]["Enums"]["user_role"][]
+          id?: boolean
+          model?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled_roles?: Database["public"]["Enums"]["user_role"][]
+          id?: boolean
+          model?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_usage: {
+        Row: {
+          branch_id: string | null
+          cache_read_tokens: number
+          cache_write_tokens: number
+          created_at: string
+          id: number
+          input_tokens: number
+          model: string
+          output_tokens: number
+          tool_calls: number
+          user_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          cache_read_tokens?: number
+          cache_write_tokens?: number
+          created_at?: string
+          id?: never
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          tool_calls?: number
+          user_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          cache_read_tokens?: number
+          cache_write_tokens?: number
+          created_at?: string
+          id?: never
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          tool_calls?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -1531,6 +1623,7 @@ export type Database = {
         Args: { p_branch: string; p_category?: string; p_name: string }
         Returns: Json
       }
+      ai_usage_month: { Args: never; Returns: Json }
       assign_table: {
         Args: { p_booking: string; p_table: string }
         Returns: Json

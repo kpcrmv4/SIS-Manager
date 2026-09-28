@@ -1,6 +1,8 @@
 'use client'
 
+import { Suspense } from 'react'
 import type { BranchRef } from '@/lib/auth/actor'
+import { AiAssistant } from '@/components/ai/ai-assistant'
 import { BellButton } from './bell'
 import { BranchSwitcher } from './branch-switcher'
 import { PrinterIndicator } from './printer-indicator'
@@ -16,7 +18,7 @@ const ICON_BTN =
  * status · notifications · theme on the right. On a phone it is a sticky bar in the card's colour with
  * a hairline, matching the bottom nav (owner, 2026-09-27 — a dark pair was too harsh on a light page).
  */
-export function TopBar({ userId, branches, branch, owner }: { userId: string; branches: BranchRef[]; branch: BranchRef | null; owner: boolean }) {
+export function TopBar({ userId, branches, branch, owner, ai = false }: { userId: string; branches: BranchRef[]; branch: BranchRef | null; owner: boolean; ai?: boolean }) {
   return (
     <div
       className="sticky top-0 z-20 flex h-14 items-center justify-between gap-2 border-b border-line bg-card px-3 pt-[env(safe-area-inset-top,0px)] nav:static nav:h-auto nav:justify-end nav:border-0 nav:bg-transparent nav:px-5 nav:pt-3"
@@ -24,6 +26,12 @@ export function TopBar({ userId, branches, branch, owner }: { userId: string; br
     >
       <div className="min-w-0 flex-1 nav:hidden">{branch && <BranchSwitcher branches={branches} branch={branch} variant="top" />}</div>
       <div className="flex flex-none items-center gap-1">
+        {/* R-070: the assistant, where the owner turned it on for this role */}
+        {ai && branch && (
+          <Suspense fallback={null}>
+            <AiAssistant className={ICON_BTN} branchName={branch.name} />
+          </Suspense>
+        )}
         {branch && <PrinterIndicator key={branch.id} branchId={branch.id} className={ICON_BTN} owner={owner} />}
         <BellButton userId={userId} className={ICON_BTN} showLabel={false} />
         <ThemeToggle className={ICON_BTN} showLabel={false} />

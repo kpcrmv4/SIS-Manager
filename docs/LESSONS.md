@@ -154,3 +154,9 @@
 - หลักฐาน: error-context — booking-board ยังอยู่ 1 ชิ้นหลัง `box.fill(DEP…)` · รันเดี่ยวผ่าน · แก้ด้วยตัวนับคำขอ (boardReq) แล้วทิ้งคำตอบที่ไม่ใช่ล่าสุด
 - กฎ: การค้นหาแบบพิมพ์แล้วยิงเอง (debounce + server action) ต้องทิ้งคำตอบของคำขอที่เก่ากว่าเสมอ — ทั้งตอนคำขอใหม่ออกไปและตอนล้างผลเอง
 - status: new
+
+## L-018 · 2026-09-28 · claude-api · sdk-error-instanceof
+- อาการ: แชทผู้ช่วยขึ้น "ติดต่อผู้ช่วยไม่ได้" ทั้งที่ Anthropic ตอบ 401 (key ผิด) — ใน node ตรง ๆ `err instanceof Anthropic.AuthenticationError` เป็น true แต่ใน route ของ Next ได้ผลไม่ตรง และฝั่ง client ยังเขียนทับ error ด้วย "ไม่มีคำตอบ" หลังสตรีมจบ
+- สาเหตุ: (1) แยกชนิด error ด้วย class ของ SDK ไม่ปลอดภัยเมื่อ bundle แยก chunk (2) หลัง event error แล้ว โค้ดเช็ก "คำตอบว่าง" ซ้ำอีกรอบ
+- กฎ: แปลง error ของ SDK ด้วย `err.status` (401/403 key, 404 model, 429/529 busy) และเมื่อสตรีมส่ง error มาแล้ว ห้ามมี fallback ที่ทับ error นั้น
+- status: new

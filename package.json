@@ -16,6 +16,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@line/liff": "^2.31.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@react-pdf/renderer": "^4.9.0",

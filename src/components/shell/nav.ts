@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Moon,
   ScanLine,
+  Sparkles,
   Store,
   UserRound,
   UsersRound,
@@ -62,6 +63,8 @@ export const NAV: readonly NavItem[] = [
   { key: 'settingsUsers', href: '/settings/users', label: 'settingsUsers', icon: UsersRound, roles: OWNER, section: 'catSettings' },
   { key: 'settingsBranch', href: '/settings/branch', label: 'settingsBranch', icon: Store, roles: OWNER, section: 'catSettings' },
   { key: 'settingsLine', href: '/settings/line', label: 'settingsLine', icon: MessageCircle, roles: OWNER, section: 'catSettings' },
+  // R-070 — who may use the assistant, its API key and model
+  { key: 'settingsAi', href: '/settings/ai', label: 'settingsAi', icon: Sparkles, roles: OWNER, section: 'catSettings' },
   { key: 'me', href: '/me', label: 'me', icon: UserRound, roles: ALL, section: 'catAccount' },
   { key: 'manual', href: '/manual', label: 'manual', icon: BookOpen, roles: ALL, section: 'catAccount' },
 ]

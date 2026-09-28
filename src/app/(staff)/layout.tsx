@@ -8,6 +8,7 @@ import { TopBar } from '@/components/shell/top-bar'
 import { LiveProvider } from '@/components/realtime/live-provider'
 import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
 import { NavTrail } from '@/components/shell/nav-trail'
+import { aiAvailableFor } from '@/lib/ai/config'
 
 /**
  * Staff shell. The auth decision lives HERE, not in a page under a loading
@@ -18,13 +19,14 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   if (state.status === 'anonymous') redirect('/api/auth/logout?reason=stale')
   if (state.status === 'inactive') redirect('/api/auth/logout?reason=inactive')
   const { actor } = state
+  const ai = await aiAvailableFor(actor.role).catch(() => false)
 
   return (
     <LiveProvider userId={actor.id} displayName={actor.displayName} branchId={actor.branch?.id ?? null}>
       <div className="flex min-h-dvh">
         <Sidebar role={actor.role} branches={actor.branches} branch={actor.branch} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar userId={actor.id} branches={actor.branches} branch={actor.branch} owner={actor.role === 'owner'} />
+          <TopBar userId={actor.id} branches={actor.branches} branch={actor.branch} owner={actor.role === 'owner'} ai={ai} />
           <main className="min-w-0 flex-1 px-4 pb-[104px] pt-4 nav:px-7 nav:pb-10 nav:pt-0">{children}</main>
         </div>
         <BottomNav role={actor.role} branches={actor.branches} branch={actor.branch} />
