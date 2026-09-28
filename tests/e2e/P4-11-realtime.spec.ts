@@ -46,15 +46,44 @@ test.describe('owner', () => {
 test.describe('bar', () => {
   test.use({ storageState: as('bar') })
 
-  test('P4-11-02 a new notification pops a toast that opens it; the chime is this device\'s switch', async ({ page }) => {
+  test('P4-11-02 new work waits in a stack shown only when the person is free; it stays until opened or closed and leaves when done elsewhere (R-078)', async ({ page }) => {
     await page.goto('/tonight')
     await waitLive(page)
+    // busy: the bell sheet is open — the work queues
+    await page.getByTestId('bell-button').first().click()
     const { data, error } = await createDeposit('staff', { qty: 1 })
     expect(error, error?.message).toBeNull()
-    const toast = page.locator('[data-sonner-toast]').filter({ hasText: 'เหล้ารอยืนยัน' })
-    await expect(toast).toBeVisible({ timeout: 15_000 })
-    await toast.getByRole('button', { name: 'เปิด' }).click()
+    await expect(page.locator('[data-testid="bell-item"][data-kind="deposit_received"]').first()).toBeVisible({ timeout: 15_000 })
+    await page.waitForTimeout(4000)
+    await expect(page.getByTestId('work-stack')).toHaveCount(0)
+    // free: the sheet closed and nothing touched for 3 s — it shows, and stays
+    await page.keyboard.press('Escape')
+    const stack = page.getByTestId('work-stack')
+    await expect(stack).toBeVisible({ timeout: 15_000 })
+    await expect(stack.getByTestId('work-stack-top')).toHaveAttribute('data-kind', 'deposit_received')
+    await expect(stack.getByTestId('work-stack-top')).toContainText('เหล้ารอยืนยัน')
+    await expect(stack.getByTestId('work-stack-top')).toContainText(/โต๊ะ A3/)
+    await page.waitForTimeout(7000)
+    await expect(stack).toBeVisible()
+
+    // a second one: the newest on top, "+1" opens the rest
+    const second = await createDeposit('staff', { qty: 1 })
+    expect(second.error, second.error?.message).toBeNull()
+    await expect(stack).toHaveAttribute('data-count', '2', { timeout: 15_000 })
+    await stack.getByTestId('work-stack-more').click()
+    await expect(stack.getByTestId('work-stack-row')).toHaveCount(1)
+
+    // done elsewhere → it leaves by itself
+    const { data: bottles } = await adminDb().from('deposit_bottles').select('id').eq('deposit_id', second.data!.id)
+    const { data: pic } = await adminDb().from('deposits').select('photo_paths').eq('id', second.data!.id).single()
+    const { error: cErr } = await dbAs('owner').rpc('confirm_deposit', { p_deposit: second.data!.id, p_levels: (bottles ?? []).map(() => 100), p_photo_paths: pic!.photo_paths })
+    expect(cErr, cErr?.message).toBeNull()
+    await expect(stack).toHaveAttribute('data-count', '1', { timeout: 15_000 })
+
+    // เปิด opens it and takes it off the stack (read)
+    await stack.getByTestId('work-stack-open').click()
     await page.waitForURL(new RegExp(`/deposits/${data!.id}`))
+    await expect(page.getByTestId('work-stack')).toHaveCount(0)
 
     // the chime: off until turned on, and it stays on for this device
     await page.getByTestId('bell-button').first().click()

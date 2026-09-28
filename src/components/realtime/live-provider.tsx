@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { toast } from 'sonner'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
-import { alertSoundOn, chime, clearSystemNotifications, notificationText } from '@/components/shell/notification-text'
+import { clearSystemNotifications } from '@/components/shell/notification-text'
+import { WorkStack, keepStack, loadStack, pushStack, type StackItem } from './work-stack'
 
 /**
  * P4-02 — one realtime connection per staff tab.
@@ -16,8 +17,8 @@ import { alertSoundOn, chime, clearSystemNotifications, notificationText } from 
  *    R-066: 'print_job' / 'printer' on the same topic bump `printTick` instead (the printer icon
  *    and the jobs panel reload; a job that didn't print says so in a toast), and the topic carries
  *    presence — who is on which page — so a page can say someone else has it open.
- *  - `user:<id>` (private): a notification row for me → bump the bell, and (R-066) a toast that
- *    opens it, a short vibration, and a chime where this device turned it on.
+ *  - `user:<id>` (private): a notification row for me → bump the bell, and (R-078) put it on the
+ *    work stack, which shows it — with the chime and buzz — once the person is free.
  * The realtime.messages policy decides who may join each topic (P1 migrations, R-066).
  */
 export type Viewer = { id: string; name: string }
@@ -53,7 +54,6 @@ type PresenceMeta = { id: string; name: string; path: string }
 export function LiveProvider({ userId, displayName, branchId, children }: { userId: string; displayName: string; branchId: string | null; children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const tb = useTranslations('bell')
   const tp = useTranslations('print')
   // null until the first count arrives — the icon is left alone until then
   const [unread, setUnread] = useState<number | null>(null)
@@ -61,17 +61,24 @@ export function LiveProvider({ userId, displayName, branchId, children }: { user
   const [printTick, setPrintTick] = useState(0)
   const [joined, setJoined] = useState(false)
   const [presence, setPresence] = useState<PresenceMeta[]>([])
+  // R-078: new work waiting to be seen; kept for this tab across pages
+  const [stack, setStackState] = useState<StackItem[]>(() => (typeof window === 'undefined' ? [] : loadStack()))
+  const setStack = useCallback((fn: (prev: StackItem[]) => StackItem[]) => {
+    setStackState((prev) => {
+      const next = fn(prev)
+      keepStack(next)
+      return next
+    })
+  }, [])
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const pending = useRef(false)
   const branchChannel = useRef<RealtimeChannel | null>(null)
   const pathRef = useRef(pathname)
   // the handlers below live as long as the socket; they read these through refs
-  const tbRef = useRef(tb)
   const tpRef = useRef(tp)
   useEffect(() => {
-    tbRef.current = tb
     tpRef.current = tp
-  }, [tb, tp])
+  }, [tp])
 
   const refreshUnread = useCallback(() => {
     void getSupabaseBrowser()
@@ -93,30 +100,22 @@ export function LiveProvider({ userId, displayName, branchId, children }: { user
     timer.current = setTimeout(() => router.refresh(), REFRESH_DEBOUNCE_MS)
   }, [router])
 
-  /** A new notification: the bell, and a toast that opens it (R-066). */
+  /** A new notification: the bell, and the work stack (R-078) — it shows once the person is free. */
   const announce = useCallback(
     (id: string) => {
       refreshUnread()
       setNotificationTick((n) => n + 1)
-      if (document.visibilityState !== 'visible') return
       void getSupabaseBrowser()
         .from('notifications')
-        .select('kind, payload, link')
+        .select('id, kind, payload, link, created_at')
         .eq('id', id)
         .maybeSingle()
         .then(({ data, error }) => {
           if (error || !data) return
-          const text = notificationText(tbRef.current as never, data.kind, data.payload as Record<string, unknown> | null)
-          toast(text, {
-            id: `n-${id}`,
-            duration: TOAST_MS,
-            action: data.link ? { label: tbRef.current('open'), onClick: () => router.push(data.link!) } : undefined,
-          })
-          if (alertSoundOn()) chime()
-          navigator.vibrate?.(120)
+          setStack((prev) => pushStack(prev, { ...data, payload: data.payload as Record<string, unknown> | null }))
         })
     },
-    [refreshUnread, router],
+    [refreshUnread, setStack],
   )
 
   useEffect(() => {
@@ -224,6 +223,7 @@ export function LiveProvider({ userId, displayName, branchId, children }: { user
       <div data-live={joined ? 'joined' : 'connecting'} className="contents">
         {children}
       </div>
+      <WorkStack items={stack} setItems={setStack} tick={notificationTick} />
     </Ctx.Provider>
   )
 }

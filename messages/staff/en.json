@@ -1949,5 +1949,10 @@
     "photos": "Photos",
     "notFound": "No such disposal in this branch",
     "total": "{bottles, plural, one {# bottle} other {# bottles}} disposed of · {deposits} deposits"
+  },
+  "workStack": {
+    "dismiss": "Dismiss",
+    "more": "+{count} more",
+    "clearAll": "Dismiss all"
   }
 }

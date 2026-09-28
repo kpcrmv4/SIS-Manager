@@ -1949,5 +1949,10 @@
     "photos": "รูป",
     "notFound": "ไม่พบใบจำหน่ายออกนี้ในสาขานี้",
     "total": "จำหน่ายออกทั้งหมด {bottles} ขวด · {deposits} รายการ"
+  },
+  "workStack": {
+    "dismiss": "ปิด",
+    "more": "+{count} งานใหม่",
+    "clearAll": "ปิดทั้งหมด"
   }
 }
