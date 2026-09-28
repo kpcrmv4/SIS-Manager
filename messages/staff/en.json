@@ -157,7 +157,9 @@
     "expiringMeta": "Expires {date} · {left} left",
     "noBookings": "No bookings tonight yet",
     "noWork": "Nothing waiting",
-    "noExpiring": "Nothing expiring soon"
+    "noExpiring": "Nothing expiring soon",
+    "kpiRequests": "LINE deposit requests",
+    "kpiRequestsHint": "Waiting to receive the bottles"
   },
   "overview": {
     "title": "All branches",

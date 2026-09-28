@@ -157,7 +157,9 @@
     "expiringMeta": "หมดอายุ {date} · เหลือ {left}",
     "noBookings": "คืนนี้ยังไม่มีการจอง",
     "noWork": "ไม่มีงานที่รออยู่",
-    "noExpiring": "ไม่มีเหล้าใกล้หมดอายุ"
+    "noExpiring": "ไม่มีเหล้าใกล้หมดอายุ",
+    "kpiRequests": "คำขอฝากจาก LINE",
+    "kpiRequestsHint": "รอรับเหล้าจากลูกค้า"
   },
   "overview": {
     "title": "ภาพรวมทุกสาขา",

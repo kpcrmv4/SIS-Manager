@@ -37,6 +37,8 @@ export type TonightData = {
   bookingPeople: number
   bookingArrived: number
   toConfirmCount: number
+  /** LINE deposit requests nobody has received yet — staff's own job (owner, 2026-09-28) */
+  requestCount: number
   withdrawCount: number
   pendingWork: PendingTask[]
   expiring: ExpiringDeposit[]
@@ -66,7 +68,7 @@ export async function getTonightData(branchId: string, expiryNoticeDays: number)
     .order('received_at')
     .range(0, 49)
 
-  const requestsQ = sb.from('deposits').select('id, customer_name, table_label').eq('branch_id', branchId).eq('status', 'requested').order('created_at').range(0, 49)
+  const requestsQ = sb.from('deposits').select('id, customer_name, table_label', { count: 'exact' }).eq('branch_id', branchId).eq('status', 'requested').order('created_at').range(0, 49)
 
   const withdrawalsQ = sb
     .from('withdrawals')
@@ -91,7 +93,7 @@ export async function getTonightData(branchId: string, expiryNoticeDays: number)
   const failed = results.find((r) => r.error)
   // a failed leg must surface as an error state, not as an empty board
   if (failed?.error) throw new Error(`tonight: ${failed.error.code ?? failed.error.message}`)
-  const [{ data: bookingsRaw }, { data: toConfirmRaw, count: toConfirmCount }, { data: requestsRaw }, { data: withdrawalsRaw }, { data: expiringRaw }] = results
+  const [{ data: bookingsRaw }, { data: toConfirmRaw, count: toConfirmCount }, { data: requestsRaw, count: requestCount }, { data: withdrawalsRaw }, { data: expiringRaw }] = results
 
   const bookings: TonightBooking[] = (bookingsRaw ?? []).map((b) => ({
     id: b.id,
@@ -137,6 +139,7 @@ export async function getTonightData(branchId: string, expiryNoticeDays: number)
     bookingPeople: bookings.reduce((sum, b) => sum + b.partySize, 0),
     bookingArrived: bookings.filter((b) => b.status === 'arrived').length,
     toConfirmCount: toConfirmCount ?? 0,
+    requestCount: requestCount ?? 0,
     withdrawCount: withdrawByDeposit.size,
     pendingWork,
     expiring,

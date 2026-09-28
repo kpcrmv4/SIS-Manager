@@ -145,10 +145,15 @@ test.describe('bar', () => {
 test.describe('staff', () => {
   test.use({ storageState: as('staff') })
 
-  test('P2-A3-02 staff: the รอ bar ยืนยันเหล้า KPI is hidden', async ({ page }) => {
+  test('P2-A3-02 staff: the รอ bar ยืนยันเหล้า KPI is hidden; staff get คำขอฝากจาก LINE instead, linked to its tab', async ({ page }) => {
     await page.goto('/tonight')
     await expect(page.getByText('รอ bar ยืนยันเหล้า', { exact: true })).toHaveCount(0)
     await expect(page.getByText('คำขอเบิก', { exact: true })).toBeVisible()
+    const { branchA } = fixtureIds()
+    const { count } = await adminDb().from('deposits').select('id', { count: 'exact', head: true }).eq('branch_id', branchA).eq('status', 'requested')
+    const card = page.locator('a[href="/deposits?tab=requests"]').filter({ hasText: 'คำขอฝากจาก LINE' })
+    await expect(card).toContainText('รอรับเหล้าจากลูกค้า')
+    await expect(card).toContainText(String(count ?? 0))
   })
 
   test('P2-A3-03 tonight bookings list: time, unassigned table, name/party, code, มาแล้ว check-in', async ({ page }) => {

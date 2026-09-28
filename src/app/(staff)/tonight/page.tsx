@@ -51,6 +51,8 @@ export default async function TonightPage() {
       <MetricBar>
         <Metric label={t('kpiBookings')} value={data.bookings.length} hint={t('kpiBookingsHint', { people: data.bookingPeople, arrived: data.bookingArrived })} href="/bookings" />
         {barOrOwner && <Metric label={t('kpiToConfirm')} value={data.toConfirmCount} hint={t('kpiToConfirmHint')} tone="progress" href="/deposits?tab=toConfirm" />}
+        {/* staff's fourth card: LINE requests waiting for someone to receive the bottles (owner, 2026-09-28) */}
+        {!barOrOwner && <Metric label={t('kpiRequests')} value={data.requestCount} hint={t('kpiRequestsHint')} tone="info" href="/deposits?tab=requests" />}
         <Metric label={t('kpiWithdrawals')} value={data.withdrawCount} hint={t('kpiWithdrawalsHint')} tone="violet" href="/deposits?tab=withdraw" />
         <Metric
           label={t('kpiExpiring', { days: expiryNoticeDays })}
