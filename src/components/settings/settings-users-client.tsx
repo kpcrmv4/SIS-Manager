@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Store, UsersRound } from 'lucide-react'
 import { UsersTab, type UserRow } from './users-tab'
 import { BranchesTab, type BranchListRow } from './branches-tab'
 
@@ -11,14 +12,34 @@ export function SettingsUsersClient({ meId, users, branches, loginUrl }: { meId:
 
   return (
     <>
-      <div className="tabs mb-4" role="tablist">
-        <button type="button" className="tab" aria-selected={tab === 'users'} role="tab" onClick={() => setTab('users')}>
-          {t('tabUsers')}
-        </button>
-        <button type="button" className="tab" aria-selected={tab === 'branches'} role="tab" onClick={() => setTab('branches')}>
-          {t('tabBranches')}
-        </button>
-      </div>
+      {/* the same filter cards as ฝากเหล้า — an icon, the count, the name (owner, 2026-09-28) */}
+      <nav aria-label={t('title')} className="mb-4 grid grid-cols-2 gap-2 sm:max-w-md" data-testid="users-tabs">
+        {(
+          [
+            ['users', UsersRound, 'info', users.length, t('tabUsers')],
+            ['branches', Store, 'violet', branches.length, t('tabBranches')],
+          ] as const
+        ).map(([key, Icon, tone, count, label]) => (
+          <button
+            key={key}
+            type="button"
+            className="fcard text-left"
+            aria-current={tab === key ? 'page' : undefined}
+            data-tone={tone}
+            data-count={count}
+            onClick={() => setTab(key)}
+            data-testid={`users-tab-${key}`}
+          >
+            <span className="top">
+              <span className="ic" aria-hidden>
+                <Icon className="size-4.5" />
+              </span>
+              <span className="c">{count}</span>
+            </span>
+            <span className="l">{label}</span>
+          </button>
+        ))}
+      </nav>
       {tab === 'users' ? (
         <UsersTab meId={meId} users={users} branches={branches.map((b) => ({ id: b.id, name: b.name }))} loginUrl={loginUrl} />
       ) : (

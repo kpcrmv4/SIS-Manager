@@ -253,7 +253,7 @@ test.describe('owner settings', () => {
     const code = `Z${RUN.slice(-2).toUpperCase().replace(/[^A-Z]/g, 'X')}`
     cleanupBranchCodes.push(code)
     await page.goto('/settings/users')
-    await page.getByRole('tab', { name: 'สาขา' }).click()
+    await page.getByTestId('users-tab-branches').click()
     await page.getByTestId('add-branch-button').click()
     await page.getByLabel('รหัสสาขา').fill(code)
     await page.getByLabel('ชื่อสาขา').fill(`${RUN} สาขาทดสอบ`)

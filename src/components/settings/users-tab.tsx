@@ -19,6 +19,13 @@ export function UsersTab({ meId, users, branches, loginUrl }: { meId: string; us
   const router = useRouter()
   const [dialog, setDialog] = useState<{ value: UserDialogValue; isSelf: boolean } | null>(null)
   const [resetId, setResetId] = useState<string | null>(null)
+  // R-082: narrow the list by role and by branch
+  const [role, setRole] = useState<'all' | UserRow['role']>('all')
+  const [branch, setBranch] = useState<string>('all')
+  const shown = users.filter(
+    (u) => (role === 'all' || u.role === role) && (branch === 'all' || (branch === 'none' ? u.branchIds.length === 0 : u.branchIds.includes(branch))),
+  )
+  const roleCount = (r: 'all' | UserRow['role']) => (r === 'all' ? users.length : users.filter((u) => u.role === r).length)
   const refresh = () => router.refresh()
 
   const openEdit = (u: UserRow) =>
@@ -29,20 +36,37 @@ export function UsersTab({ meId, users, branches, loginUrl }: { meId: string; us
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center" data-testid="users-filters">
+        <div className="tabs self-start" role="tablist" aria-label={t('role')}>
+          {(['all', 'staff', 'bar', 'owner'] as const).map((r) => (
+            <button key={r} type="button" role="tab" className="tab px-3!" aria-selected={role === r} onClick={() => setRole(r)} data-testid={`users-role-${r}`}>
+              {r === 'all' ? t('filterAll') : tr(r)} <span className="tnum opacity-70">{roleCount(r)}</span>
+            </button>
+          ))}
+        </div>
+        <select className="input-base sm:w-56" value={branch} onChange={(e) => setBranch(e.target.value)} aria-label={t('branches')} data-testid="users-branch">
+          <option value="all">{t('filterAllBranches')}</option>
+          {branches.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+          <option value="none">{t('filterNoBranch')}</option>
+        </select>
         <button
           type="button"
           className="btn-primary"
           onClick={() => setDialog({ value: { username: '', displayName: '', role: 'staff', branchIds: [], active: true }, isSelf: false })}
           data-testid="add-user-button"
+          style={{ marginInlineStart: 'auto' }}
         >
           <Plus className="size-4" aria-hidden />
           {t('addUser')}
         </button>
       </div>
 
-      {users.length === 0 ? (
-        <EmptyState message={t('empty')} />
+      {shown.length === 0 ? (
+        <EmptyState message={users.length === 0 ? t('empty') : t('filterEmpty')} />
       ) : (
         <>
           <div className="panel hidden overflow-x-auto nav:block" data-testid="users-table-desktop">
@@ -58,7 +82,7 @@ export function UsersTab({ meId, users, branches, loginUrl }: { meId: string; us
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {shown.map((u) => (
                   <tr key={u.id} data-testid="user-row">
                     <td className="code">{u.username}</td>
                     <td>{u.displayName}</td>
@@ -84,7 +108,7 @@ export function UsersTab({ meId, users, branches, loginUrl }: { meId: string; us
           </div>
 
           <div className="panel nav:hidden" data-testid="users-list-mobile">
-            {users.map((u) => (
+            {shown.map((u) => (
               <ListRow
                 key={u.id}
                 title={u.displayName}

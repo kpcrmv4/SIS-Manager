@@ -937,7 +937,11 @@
     "summaryBody": "Copy this and send it to the new person — the password is not shown again once this closes.",
     "summaryText": "SIS Manager account for {name}\nUsername: {username}\nPassword: {password}\nSign in: {url}\nChange the password under My account after signing in",
     "summaryCopy": "Copy text",
-    "summaryCopied": "Copied — send it to them"
+    "summaryCopied": "Copied — send it to them",
+    "filterAll": "All",
+    "filterAllBranches": "All branches",
+    "filterNoBranch": "No branch yet",
+    "filterEmpty": "No users match these filters"
   },
   "settingsBranch": {
     "title": "Branch details",

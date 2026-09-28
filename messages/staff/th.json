@@ -937,7 +937,11 @@
     "summaryBody": "คัดลอกข้อความนี้ส่งให้พนักงาน รหัสผ่านจะไม่แสดงอีกหลังปิดหน้าต่างนี้",
     "summaryText": "บัญชี SIS Manager ของ {name}\nชื่อผู้ใช้: {username}\nรหัสผ่าน: {password}\nเข้าสู่ระบบ: {url}\nเข้าแล้วเปลี่ยนรหัสผ่านได้ที่ บัญชีของฉัน",
     "summaryCopy": "คัดลอกข้อความ",
-    "summaryCopied": "คัดลอกแล้ว ส่งให้พนักงานได้เลย"
+    "summaryCopied": "คัดลอกแล้ว ส่งให้พนักงานได้เลย",
+    "filterAll": "ทั้งหมด",
+    "filterAllBranches": "ทุกสาขา",
+    "filterNoBranch": "ยังไม่กำหนดสาขา",
+    "filterEmpty": "ไม่มีผู้ใช้ที่ตรงกับตัวกรอง"
   },
   "settingsBranch": {
     "title": "ข้อมูลสาขา",

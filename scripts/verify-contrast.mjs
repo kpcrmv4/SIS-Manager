@@ -78,7 +78,7 @@ const STAFF = [
   ['placeholder', 'card'],
   ['brand', 'card'], ['brand', 'canvas'], ['brand-on-tint', 'brand-tint'],
   ['on-brand', 'brand-solid'], ['on-brand', 'brand-solid-hover'], ['on-brand', 'brand-solid-active'],
-  ['on-line-green', 'line-green'],
+  ['line-green-ink', 'line-green-bg'],
   ['on-done', 'status-done'], ['WHITE', 'urgent-solid'],
   ['canvas', 'ink'], // selected tab: canvas text on ink
   ['sidebar-title', 'sidebar'], ['sidebar-fg', 'sidebar'], ['sidebar-fg-dim', 'sidebar'],

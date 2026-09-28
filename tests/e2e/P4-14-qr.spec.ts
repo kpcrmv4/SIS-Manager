@@ -70,10 +70,41 @@ test.describe('phone menu', () => {
     await page.getByText('เพิ่มเติม', { exact: true }).last().click()
     const tile = page.getByTestId('more-lineQr')
     await expect(tile).toBeVisible()
-    await expect(tile).toHaveClass(/bg-line-green/)
+    await expect(tile).toHaveClass(/bg-line-green-bg/)
     const section = tile.locator('xpath=ancestor::div[contains(@class,"pb-2")][1]')
     await expect(section).toContainText('ภาพรวมและรายงาน')
     await tile.click()
     await page.waitForURL(/\/line-qr$/)
+  })
+})
+
+test.describe('owner users page', () => {
+  test.use({ storageState: as('owner') })
+
+  test('P4-14-06 ผู้ใช้ / สาขา are filter cards with counts; users filter by role and by branch (R-082)', async ({ page }) => {
+    const { branchA } = fixtureIds()
+    await page.goto('/settings/users')
+    const usersCard = page.getByTestId('users-tab-users')
+    await expect(usersCard).toHaveAttribute('aria-current', 'page')
+    const total = Number(await usersCard.getAttribute('data-count'))
+    await expect(page.getByTestId('user-row')).toHaveCount(total)
+
+    await page.getByTestId('users-role-bar').click()
+    const bars = page.getByTestId('user-row')
+    const n = await bars.count()
+    expect(n).toBeGreaterThan(0)
+    expect(n).toBeLessThan(total)
+    for (let i = 0; i < n; i++) await expect(bars.nth(i).locator('td').nth(2)).toContainText('bar')
+
+    await page.getByTestId('users-role-all').click()
+    await page.getByTestId('users-branch').selectOption(branchA)
+    const inA = await page.getByTestId('user-row').count()
+    const { count } = await adminDb().from('user_branches').select('user_id', { count: 'exact', head: true }).eq('branch_id', branchA)
+    expect(inA).toBeLessThanOrEqual(count ?? 0)
+    expect(inA).toBeGreaterThan(0)
+
+    await page.getByTestId('users-tab-branches').click()
+    await expect(page.getByTestId('users-tab-branches')).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByTestId('users-filters')).toHaveCount(0)
   })
 })

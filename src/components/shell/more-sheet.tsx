@@ -68,11 +68,11 @@ export function MoreSheet({
                     <Link
                       key={item.key}
                       href={item.href}
-                      className={item.tone === 'line' ? `${TILE} border-transparent! bg-line-green! font-semibold text-on-line-green! active:opacity-90` : TILE}
+                      className={item.tone === 'line' ? `${TILE} border-line-green-line! bg-line-green-bg! font-semibold text-line-green-ink! active:opacity-80` : TILE}
                       onClick={() => onOpenChange(false)}
                       data-testid={`more-${item.key}`}
                     >
-                      <item.icon className={`size-6 ${item.tone === 'line' ? 'text-on-line-green' : 'text-muted-token'}`} aria-hidden />
+                      <item.icon className={`size-6 ${item.tone === 'line' ? 'text-line-green-ink' : 'text-muted-token'}`} aria-hidden />
                       <span>{t(item.label)}</span>
                     </Link>
                   ))}
