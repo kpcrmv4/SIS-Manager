@@ -395,3 +395,35 @@ test.describe('answers', () => {
   })
 })
 
+
+test.describe('rules', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P4-13-15 branch_rules reads the closed weekdays and the blackouts ahead (with their kind); split numbered lists keep counting', async ({ page }) => {
+    await setAi({ roles: ['staff', 'bar', 'owner'], key: GOOD_KEY })
+    const { branchA } = fixtureIds()
+    const night = addDays(businessNight(), 6)
+    const db = adminDb()
+    const { data: before } = await db.from('booking_settings').select('closed_weekdays').eq('branch_id', branchA).single()
+    await db.from('booking_settings').update({ closed_weekdays: [0] }).eq('branch_id', branchA)
+    await db.from('booking_blackouts').upsert({ branch_id: branchA, night, reason: 'E2E-AI งานส่วนตัว', line_only: true }, { onConflict: 'branch_id,night' })
+    try {
+      await page.goto('/bookings')
+      await page.getByTestId('ai-open').click()
+      await page.getByTestId('ai-input').fill('TOOL branch_rules {}')
+      await page.getByTestId('ai-send').click()
+      await expect(page.getByTestId('ai-answer')).toContainText('MOCK:')
+      const out = JSON.parse(mock.toolResults().at(-1) ?? '{}') as { booking: { weekly_closed_days: string[] }; blackout_nights: { night: string; reason: string; kind: string }[] }
+      expect(out.booking.weekly_closed_days).toEqual(['Monday'])
+      expect(out.blackout_nights).toContainEqual({ night, reason: 'E2E-AI งานส่วนตัว', kind: 'LINE bookings stopped; staff can still book' })
+
+      await page.getByTestId('ai-input').fill('ECHO 1. วันปิดประจำสัปดาห์\n\n2. วันงดรับจอง')
+      await page.getByTestId('ai-send').click()
+      await expect(page.getByTestId('ai-answer').nth(1).locator('ol')).toHaveCount(2)
+      await expect(page.getByTestId('ai-answer').nth(1).locator('ol').nth(1)).toHaveAttribute('start', '2')
+    } finally {
+      await db.from('booking_settings').update({ closed_weekdays: before?.closed_weekdays ?? [] }).eq('branch_id', branchA)
+      await db.from('booking_blackouts').delete().eq('branch_id', branchA).eq('night', night)
+    }
+  })
+})

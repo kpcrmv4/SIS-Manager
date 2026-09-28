@@ -57,6 +57,12 @@ export const AI_TOOLS: Anthropic.Beta.BetaTool[] = [
     input_schema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
   },
   {
+    name: 'branch_rules',
+    description:
+      "The current branch's own rules: weekly closed days and the blackout nights ahead (whether each closes the shop or only stops LINE bookings), booking hours, cut-off, how far ahead, party size, auto-confirm; deposit length, withdrawal-blocked days and expiry reminders. Use it for any question about when the shop takes bookings or how deposits work here.",
+    input_schema: { type: 'object', properties: { days_ahead: { type: 'integer', minimum: 1, maximum: 120, description: 'blackouts from today up to this many nights (default 60)' } } },
+  },
+  {
     name: 'tonight_summary',
     description: 'Counts for the current branch right now: deposits per list tab, and tonight’s bookings per status.',
     input_schema: { type: 'object', properties: {} },
@@ -200,6 +206,46 @@ export async function runTool(name: string, input: unknown, ctx: ToolCtx): Promi
             path: `/bookings?night=${b.night}&b=${b.id}`,
           })),
         ),
+      }
+    }
+    case 'branch_rules': {
+      const ahead = Math.min(120, Math.max(1, Number.isInteger(inp.days_ahead) ? (inp.days_ahead as number) : 60))
+      const today = businessNight()
+      const sb = await getSupabaseServer()
+      const [{ data: s }, { data: blackouts }, { data: b }] = await Promise.all([
+        sb.from('booking_settings').select('*').eq('branch_id', ctx.branchId).maybeSingle(),
+        sb.from('booking_blackouts').select('night, reason, line_only').eq('branch_id', ctx.branchId).gte('night', today).lte('night', addDays(today, ahead)).order('night').range(0, 199),
+        sb.from('branches').select('name, deposit_days, withdrawal_blocked_days, expiry_notice_days, expiry_reminders_enabled, expiry_reminder_days').eq('id', ctx.branchId).maybeSingle(),
+      ])
+      const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+      return {
+        content: JSON.stringify({
+          branch: b?.name,
+          today,
+          booking: s
+            ? {
+                weekly_closed_days: (s.closed_weekdays ?? []).map((d: number) => WEEK[d]).filter(Boolean),
+                line_bookings_on: s.line_enabled,
+                auto_confirm_line_bookings: s.auto_confirm,
+                slots: `${String(s.slot_start).slice(0, 5)}-${String(s.slot_end).slice(0, 5)} every ${s.slot_minutes} min`,
+                same_night_cutoff_for_line: String(s.cutoff_time).slice(0, 5),
+                line_can_book_days_ahead: s.advance_days,
+                party_size: `${s.party_min}-${s.party_max}`,
+                max_bookings_per_night: s.max_bookings_per_night,
+                customer_can_cancel_until_hours_before: s.customer_cancel_hours,
+                no_show_after_minutes: s.no_show_minutes,
+              }
+            : null,
+          blackout_nights: (blackouts ?? []).map((x) => ({ night: x.night, reason: x.reason, kind: x.line_only ? 'LINE bookings stopped; staff can still book' : 'shop closed; nobody can book' })),
+          deposit: b
+            ? {
+                deposit_days: b.deposit_days,
+                in_store_withdrawal_blocked_on: b.withdrawal_blocked_days,
+                expiry_reminders_on: b.expiry_reminders_enabled,
+                reminder_days_before_expiry: b.expiry_reminder_days,
+              }
+            : null,
+        }),
       }
     }
     case 'tonight_summary': {

@@ -100,7 +100,7 @@ function Table({ rows, onNavigate, k }: { rows: string[]; onNavigate: () => void
 export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () => void }) {
   const lines = text.replace(/\r/g, '').split('\n')
   const blocks: ReactNode[] = []
-  let list: { ordered: boolean; items: string[] } | null = null
+  let list: { ordered: boolean; start: number; items: string[] } | null = null
   let para: string[] = []
   let table: string[] | null = null
 
@@ -114,7 +114,7 @@ export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () 
     const items = list.items.map((it, i) => <li key={i}>{inline(it, onNavigate, `${k}-${i}`)}</li>)
     blocks.push(
       list.ordered ? (
-        <ol key={k} className="list-decimal space-y-1 pl-5">
+        <ol key={k} start={list.start} className="list-decimal space-y-1 pl-5">
           {items}
         </ol>
       ) : (
@@ -151,7 +151,7 @@ export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () 
       continue
     }
     const bullet = /^\s*[-*•]\s+(.*)$/.exec(line)
-    const num = /^\s*\d+[.)]\s+(.*)$/.exec(line)
+    const num = /^\s*(\d+)[.)]\s+(.*)$/.exec(line)
     const head = /^#{1,4}\s+(.*)$/.exec(line)
     if (!line.trim()) {
       flushPara()
@@ -169,9 +169,9 @@ export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () 
       const ordered = Boolean(num)
       if (!list || list.ordered !== ordered) {
         flushList()
-        list = { ordered, items: [] }
+        list = { ordered, start: num ? Number(num[1]) || 1 : 1, items: [] }
       }
-      list.items.push((bullet ?? num)![1])
+      list.items.push(num ? num[2] : bullet![1])
     } else {
       flushList()
       para.push(line.trim())
