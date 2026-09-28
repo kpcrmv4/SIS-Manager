@@ -1285,7 +1285,19 @@
       "table": "โต๊ะ {table}",
       "party": "{party} คน",
       "test": "เครื่องนี้รับแจ้งเตือนได้แล้ว"
-    }
+    },
+    "handled": {
+      "received": "รับเหล้าแล้ว",
+      "confirmed": "ยืนยันแล้ว",
+      "rejected": "ปฏิเสธแล้ว",
+      "completed": "เบิกให้แล้ว",
+      "cancelled": "ยกเลิกแล้ว",
+      "no_show": "ไม่มา",
+      "arrived": "มาแล้ว",
+      "done": "จัดการแล้ว"
+    },
+    "handledBy": "โดย {name} ({role})",
+    "handledByNone": "โดยลูกค้าหรือระบบ"
   },
   "print": {
     "statusError": "ตรวจสถานะเครื่องพิมพ์ไม่สำเร็จ",

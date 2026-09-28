@@ -1174,6 +1174,11 @@ export type Database = {
         Row: {
           branch_id: string | null
           created_at: string
+          handled_action: string | null
+          handled_at: string | null
+          handled_by: string | null
+          handled_by_name: string | null
+          handled_by_role: Database["public"]["Enums"]["user_role"] | null
           id: string
           kind: string
           link: string | null
@@ -1185,6 +1190,11 @@ export type Database = {
         Insert: {
           branch_id?: string | null
           created_at?: string
+          handled_action?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          handled_by_name?: string | null
+          handled_by_role?: Database["public"]["Enums"]["user_role"] | null
           id?: string
           kind: string
           link?: string | null
@@ -1196,6 +1206,11 @@ export type Database = {
         Update: {
           branch_id?: string | null
           created_at?: string
+          handled_action?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          handled_by_name?: string | null
+          handled_by_role?: Database["public"]["Enums"]["user_role"] | null
           id?: string
           kind?: string
           link?: string | null

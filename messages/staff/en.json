@@ -1285,7 +1285,19 @@
       "table": "Table {table}",
       "party": "{party} people",
       "test": "This device can receive notifications"
-    }
+    },
+    "handled": {
+      "received": "Received",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "completed": "Handed over",
+      "cancelled": "Cancelled",
+      "no_show": "No-show",
+      "arrived": "Arrived",
+      "done": "Done"
+    },
+    "handledBy": "by {name} ({role})",
+    "handledByNone": "by the customer or the system"
   },
   "print": {
     "statusError": "Couldn't check the printer",

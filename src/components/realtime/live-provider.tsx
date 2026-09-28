@@ -166,6 +166,9 @@ export function LiveProvider({ userId, displayName, branchId, children }: { user
             return
           }
           scheduleRefresh()
+          // R-077: a deposit / withdrawal / booking changed — its notifications may now read "done"
+          refreshUnread()
+          setNotificationTick((n) => n + 1)
         })
           .on('presence', { event: 'sync' }, () => {
             const state = ch.presenceState<PresenceMeta>()
@@ -203,7 +206,7 @@ export function LiveProvider({ userId, displayName, branchId, children }: { user
       clearTimeout(timer.current)
       for (const ch of channels) void sb.removeChannel(ch)
     }
-  }, [branchId, userId, displayName, scheduleRefresh, announce])
+  }, [branchId, userId, displayName, scheduleRefresh, announce, refreshUnread])
 
   const viewers = useMemo(() => {
     const out: Record<string, Viewer[]> = {}

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Bell, BellRing, CalendarCheck, CalendarClock, CalendarMinus, ClipboardCheck, GlassWater, Loader2, MessageSquarePlus, type LucideIcon } from 'lucide-react'
+import { Bell, BellRing, CalendarCheck, CalendarClock, CalendarMinus, ClipboardCheck, GlassWater, Loader2, MessageSquarePlus, type LucideIcon, Check } from 'lucide-react'
 import { ResponsiveDialog } from '@/components/booking/responsive-dialog'
 import { ErrorRetry } from '@/components/ui/error-retry'
 import { EmptyState, ListSkeleton } from '@/components/ui/states'
@@ -25,7 +25,19 @@ const LOOK: Record<string, { icon: LucideIcon; tone: string }> = {
 }
 const PLAIN = { icon: Bell, tone: 'bg-surface-2 text-ink-2' }
 
-type Row = { id: string; kind: string; payload: Record<string, unknown>; link: string | null; read_at: string | null; created_at: string }
+type Row = {
+  id: string
+  kind: string
+  payload: Record<string, unknown>
+  link: string | null
+  read_at: string | null
+  created_at: string
+  /** R-077: the work is done — what, and by whom */
+  handled_at: string | null
+  handled_action: string | null
+  handled_by_name: string | null
+  handled_by_role: string | null
+}
 
 const LIMIT = 30
 
@@ -81,7 +93,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
     setFailed(false)
     const { data, error } = await getSupabaseBrowser()
       .from('notifications')
-      .select('id, kind, payload, link, read_at, created_at')
+      .select('id, kind, payload, link, read_at, created_at, handled_at, handled_action, handled_by_name, handled_by_role')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .range(0, LIMIT - 1)
@@ -89,7 +101,11 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
       setFailed(true)
       return
     }
-    setRows((data ?? []) as Row[])
+    const list = (data ?? []) as Row[]
+    setRows(list)
+    // work done by someone else leaves this phone's notification shade too (R-077)
+    const done = list.filter((r) => r.handled_at).map((r) => r.id)
+    if (done.length) clearSystemNotifications(done)
   }, [userId])
 
   useEffect(() => {
@@ -172,7 +188,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
             <button
               type="button"
               onClick={() => void openRow(r)}
-              className="flex w-full items-start gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-2"
+              className={`flex w-full items-start gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-2 ${r.handled_at ? 'opacity-60' : ''}`}
               data-testid="bell-item"
               data-unread={r.read_at ? 'false' : 'true'}
               data-kind={r.kind}
@@ -202,6 +218,16 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
                     </>
                   )
                 })()}
+                {r.handled_at && (
+                  <span className="mt-0.5 flex items-center gap-1 text-[13px] font-semibold text-status-done" data-testid="bell-item-handled" data-action={r.handled_action ?? ''}>
+                    <Check className="size-3.5 shrink-0" strokeWidth={3} aria-hidden />
+                    <span className="truncate">
+                      {t.has(`handled.${r.handled_action}`) ? t(`handled.${r.handled_action}`) : t('handled.done')}
+                      {' · '}
+                      {r.handled_by_name ? t('handledBy', { name: r.handled_by_name, role: r.handled_by_role ?? '' }) : t('handledByNone')}
+                    </span>
+                  </span>
+                )}
                 <span className="mt-0.5 block text-xs text-muted-token tnum">
                   {formatShortDate(r.created_at)} {formatTime(r.created_at)}
                 </span>

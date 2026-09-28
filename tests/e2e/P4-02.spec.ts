@@ -130,3 +130,35 @@ test('P4-02-07 a test branch tells only the test accounts — never a real owner
   expect(whoErr, whoErr?.message).toBeNull()
   expect(who!.map((p) => p.username).filter((u) => !u.startsWith('e2e'))).toEqual([])
 })
+
+test.describe('settled notifications (bar)', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P4-02-10 when the work is done the notification says so, by whom, faded and read — live, for everyone who got it (R-077)', async ({ page }) => {
+    const { users } = fixtureIds()
+    const { data, error } = await createDeposit('staff', { qty: 1 })
+    expect(error, error?.message).toBeNull()
+    const depId = data!.id
+    await page.goto('/tonight')
+    await waitLive(page)
+    await page.getByTestId('bell-button').first().click()
+    const row = page.locator('[data-testid="bell-item"][data-kind="deposit_received"]').first()
+    await expect(row).toHaveAttribute('data-unread', 'true')
+    await expect(row.getByTestId('bell-item-handled')).toHaveCount(0)
+
+    // someone confirms it (here: the owner, through the database) — the open bell follows
+    const { data: bottles } = await adminDb().from('deposit_bottles').select('id').eq('deposit_id', depId)
+    const { data: pic } = await adminDb().from('deposits').select('photo_paths').eq('id', depId).single()
+    const { error: cErr } = await dbAs('owner').rpc('confirm_deposit', { p_deposit: depId, p_levels: (bottles ?? []).map(() => 100), p_photo_paths: pic!.photo_paths })
+    expect(cErr, cErr?.message).toBeNull()
+    const handled = page.locator(`[data-testid="bell-item"][data-kind="deposit_received"]`).first().getByTestId('bell-item-handled')
+    await expect(handled).toHaveText(/ยืนยันแล้ว · โดย E2E owner \(owner\)/, { timeout: 15_000 })
+
+    // every recipient's row is settled and read
+    const { data: rows } = await adminDb().from('notifications').select('user_id, handled_action, handled_by_name, read_at').eq('kind', 'deposit_received').eq('payload->>deposit_id', depId)
+    expect(rows!.length).toBeGreaterThan(0)
+    for (const r of rows!) expect(r).toMatchObject({ handled_action: 'confirmed', handled_by_name: 'E2E owner' })
+    expect(rows!.every((r) => r.read_at)).toBe(true)
+    expect(rows!.map((r) => r.user_id)).toContain(users.bar)
+  })
+})
