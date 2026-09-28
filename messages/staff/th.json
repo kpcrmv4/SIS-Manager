@@ -1804,6 +1804,41 @@
       "take_home": "กลับบ้าน",
       "on": "เปิด (ไม่หมดอายุ)",
       "off": "ปิด"
+    },
+    "openWaiting": "ผู้ช่วย AI · มีงานรออยู่",
+    "greet": {
+      "morning": "สวัสดีตอนเช้า {name}",
+      "afternoon": "สวัสดีตอนบ่าย {name}",
+      "evening": "สวัสดีตอนค่ำ {name}",
+      "night": "ดึกแล้ว สวัสดี {name}"
+    },
+    "greetSub": "ผู้ช่วยของ {role} · สาขา {branch} · อยากให้ช่วยอะไรดี",
+    "waitingTitle": "ตอนนี้ในสาขา",
+    "waiting": {
+      "withdrawWaiting": "คำขอเบิกรอยืนยัน",
+      "confirmWaiting": "เหล้ารอยืนยัน",
+      "lineRequests": "คำขอฝากจาก LINE",
+      "expiredWaiting": "หมดอายุรอจำหน่าย",
+      "bookingsPending": "จองรอยืนยัน",
+      "tonightBookings": "จองคืนนี้"
+    },
+    "capsTitle": "ให้ช่วยอะไรได้บ้าง",
+    "cap": {
+      "howto": {
+        "title": "ถามวิธีใช้งาน",
+        "sub": "อธิบายทีละขั้น",
+        "example": "ขั้นตอนเบิกเหล้าต้องทำยังไงบ้าง"
+      },
+      "lookup": {
+        "title": "ค้นข้อมูล",
+        "sub": "ลูกค้า ฝาก จอง",
+        "example": "คุณธนพลฝากอะไรไว้บ้าง"
+      },
+      "act": {
+        "title": "สั่งงานแทน",
+        "sub": "กดยืนยันก่อนเสมอ",
+        "example": "จองโต๊ะคืนพรุ่งนี้ 4 คน 21:00 ชื่อคุณเอ"
+      }
     }
   },
   "settingsAi": {
@@ -1839,7 +1874,7 @@
     "keyRemoved": "ลบ API key แล้ว · ผู้ช่วยปิดอยู่",
     "keyRemove": "ลบ key",
     "modelLabel": "ชื่อโมเดล",
-    "modelHelp": "claude-opus-5 ตอบละเอียดที่สุด · claude-sonnet-5 ถูกลง · claude-haiku-4-5 ถูกและเร็วที่สุด",
+    "modelHelp": "พิมพ์ชื่อโมเดลรุ่นใหม่ได้เองเมื่อ Anthropic ออกรุ่นใหม่ หรือแตะเลือกด้านล่าง · opus ตอบละเอียดที่สุด · sonnet ถูกลง · haiku ถูกและเร็วที่สุด",
     "modelSaved": "ใช้โมเดล {model} แล้ว",
     "test": "ทดสอบการเชื่อมต่อ",
     "testOk": "เชื่อมต่อได้ · {name}",
@@ -1857,6 +1892,9 @@
       "ai_unreachable": "ติดต่อ Anthropic ไม่ได้ ลองใหม่อีกครั้ง",
       "ai_not_configured": "ยังไม่ได้ใส่ API key",
       "model_invalid": "ชื่อโมเดลไม่ถูกต้อง"
-    }
+    },
+    "modelPlaceholder": "พิมพ์ชื่อโมเดล เช่น claude-opus-5",
+    "modelsFetch": "ดึงรายชื่อโมเดลจากบัญชี",
+    "modelsFetched": "พบ {count} โมเดลที่ key นี้ใช้ได้"
   }
 }

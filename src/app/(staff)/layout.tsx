@@ -26,7 +26,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
       <div className="flex min-h-dvh">
         <Sidebar role={actor.role} branches={actor.branches} branch={actor.branch} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar userId={actor.id} branches={actor.branches} branch={actor.branch} owner={actor.role === 'owner'} ai={ai} />
+          <TopBar userId={actor.id} branches={actor.branches} branch={actor.branch} owner={actor.role === 'owner'} ai={ai} me={{ displayName: actor.displayName, role: actor.role }} />
           <main className="min-w-0 flex-1 px-4 pb-[104px] pt-4 nav:px-7 nav:pb-10 nav:pt-0">{children}</main>
         </div>
         <BottomNav role={actor.role} branches={actor.branches} branch={actor.branch} />

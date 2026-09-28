@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import * as Dialog from '@radix-ui/react-dialog'
-import { ArrowUp, Loader2, RotateCcw, Sparkles, X } from 'lucide-react'
+import { ArrowUp, RotateCcw, Sparkles, X } from 'lucide-react'
 import { AiMarkdown } from './ai-markdown'
 import { AiProposalCard, type CardOutcome } from './ai-proposal-card'
+import { AiWelcome } from './ai-welcome'
 import type { Proposal } from '@/lib/ai/proposal-types'
 
 type Card = { proposal: Proposal; outcome: CardOutcome }
@@ -47,7 +48,7 @@ function keep(turns: Turn[]) {
  * side panel from `nav:` up). It knows the page it was opened on and offers quick questions
  * for that page and for what is waiting right now. Answers stream in.
  */
-export function AiAssistant({ className, branchName }: { className: string; branchName: string }) {
+export function AiAssistant({ className, branchName, displayName, role }: { className: string; branchName: string; displayName: string; role: string }) {
   const t = useTranslations('ai')
   const pathname = usePathname()
   const search = useSearchParams()
@@ -57,19 +58,23 @@ export function AiAssistant({ className, branchName }: { className: string; bran
   const [turns, setTurns] = useState<Turn[]>(() => (typeof window === 'undefined' ? [] : load()))
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState<'thinking' | 'looking' | null>(null)
-  const [fetched, setFetched] = useState<{ path: string; chips: Chip[] } | null>(null)
+  const [fetched, setFetched] = useState<{ path: string; chips: Chip[]; waiting: Chip[] } | null>(null)
   const chips = fetched?.path === path ? fetched.chips : null
+  const waiting = fetched?.waiting ?? null
+  // the dot on the button: something in the branch is waiting for someone (not just tonight's bookings)
+  const hasWork = (waiting ?? []).some((w) => w.key !== 'tonightBookings')
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
-  // the quick questions follow the page, and are fetched fresh each time the panel opens
+  // the quick questions follow the page and the welcome follows the branch: fetched when the page
+  // changes (the button's dot) and fresh each time the panel opens — counts only, never the model
   useEffect(() => {
-    if (!open) return
     let live = true
     fetch(`/api/ai/chips?path=${encodeURIComponent(path)}`)
-      .then((r) => (r.ok ? r.json() : { chips: [] }))
-      .then((d: { chips: Chip[] }) => live && setFetched({ path, chips: d.chips ?? [] }))
-      .catch(() => live && setFetched({ path, chips: [] }))
+      .then((r) => (r.ok ? r.json() : { chips: [], waiting: [] }))
+      .then((d: { chips?: Chip[]; waiting?: Chip[] }) => live && setFetched({ path, chips: d.chips ?? [], waiting: d.waiting ?? [] }))
+      .catch(() => live && setFetched({ path, chips: [], waiting: [] }))
     return () => {
       live = false
     }
@@ -168,8 +173,9 @@ export function AiAssistant({ className, branchName }: { className: string; bran
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <button type="button" className={className} aria-label={t('open')} title={t('open')} data-testid="ai-open">
+        <button type="button" className={`relative ${className}`} aria-label={hasWork ? t('openWaiting') : t('open')} title={t('open')} data-testid="ai-open">
           <Sparkles className="size-4.5" aria-hidden />
+          {hasWork && <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-brand ring-2 ring-card motion-safe:animate-pulse" aria-hidden data-testid="ai-dot" />}
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -200,19 +206,27 @@ export function AiAssistant({ className, branchName }: { className: string; bran
 
           <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-3" data-testid="ai-messages">
             {turns.length === 0 && (
-              <div className="mb-3 rounded-lg bg-surface-2 p-3 text-sm text-ink-2">
-                <p>{t('intro')}</p>
-                <p className="mt-1 text-xs text-muted-token">{t('readOnly')}</p>
-              </div>
+              <AiWelcome
+                displayName={displayName}
+                role={role}
+                branchName={branchName}
+                waiting={waiting}
+                chipText={chipText}
+                onAsk={(q) => void ask(q)}
+                onExample={(q) => {
+                  setInput(q)
+                  inputRef.current?.focus()
+                }}
+              />
             )}
             <div className="flex flex-col gap-3">
               {turns.map((m, i) =>
                 m.role === 'user' ? (
-                  <div key={i} className="ml-8 self-end rounded-2xl rounded-br-md bg-brand px-3 py-2 text-sm text-on-brand" data-testid="ai-user">
+                  <div key={i} className="ml-8 self-end rounded-2xl rounded-br-md bg-brand px-3 py-2 text-sm text-on-brand motion-safe:animate-[ai-in_180ms_ease-out]" data-testid="ai-user">
                     {m.text}
                   </div>
                 ) : (
-                  <div key={i} className="mr-4 rounded-2xl rounded-bl-md bg-surface-2 px-3 py-2" data-testid="ai-answer">
+                  <div key={i} className="mr-4 rounded-2xl rounded-bl-md bg-surface-2 px-3 py-2 motion-safe:animate-[ai-in_220ms_ease-out]" data-testid="ai-answer">
                     {m.text && <AiMarkdown text={m.text} onNavigate={() => setOpen(false)} />}
                     {m.cards?.map((c, j) => (
                       <div key={c.proposal.id} className="mt-2">
@@ -228,8 +242,12 @@ export function AiAssistant({ className, branchName }: { className: string; bran
                 ),
               )}
               {busy && (
-                <p className="flex items-center gap-2 text-xs text-muted-token" data-testid="ai-busy">
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                <p className="flex items-center gap-2 text-xs text-muted-token" data-testid="ai-busy" data-busy={busy}>
+                  <span className="flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-2" aria-hidden>
+                    {[0, 150, 300].map((d) => (
+                      <span key={d} className="size-1.5 rounded-full bg-muted-token motion-safe:animate-[ai-dot_1s_ease-in-out_infinite]" style={{ animationDelay: `${d}ms` }} />
+                    ))}
+                  </span>
                   {t(busy === 'looking' ? 'looking' : 'thinking')}
                 </p>
               )}
@@ -264,6 +282,7 @@ export function AiAssistant({ className, branchName }: { className: string; bran
               }}
             >
               <textarea
+                ref={inputRef}
                 className="input-base max-h-32 min-h-10 flex-1 resize-none py-2"
                 rows={1}
                 maxLength={1000}

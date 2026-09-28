@@ -169,6 +169,17 @@ test.describe('owner', () => {
     await page.getByTestId('ai-test').click()
     await expect(page.getByText('เชื่อมต่อได้ · Mock claude-sonnet-5')).toBeVisible({ timeout: 20_000 })
 
+    // R-072: the models this key can use, as shortcuts — and any new name can still be typed
+    await page.getByTestId('ai-models-fetch').click()
+    await expect(page.getByText('พบ 3 โมเดลที่ key นี้ใช้ได้')).toBeVisible()
+    await page.locator('[data-testid="ai-model-option"][data-model="claude-mock-next"]').click()
+    await expect(page.getByTestId('ai-model-input')).toHaveValue('claude-mock-next')
+    await page.getByTestId('ai-model-input').fill('claude-future-9-1')
+    await page.getByTestId('ai-model-save').click()
+    await expect(page.getByText('ใช้โมเดล claude-future-9-1 แล้ว')).toBeVisible()
+    const { data: m } = await adminDb().from('ai_settings').select('model').eq('id', true).single()
+    expect(m!.model).toBe('claude-future-9-1')
+
     await page.getByTestId('ai-key-remove').click()
     await expect(page.getByTestId('ai-key-state')).toContainText('ยังไม่ได้ตั้ง')
   })
@@ -314,5 +325,36 @@ test.describe('cards as bar', () => {
     await expect(card).toHaveAttribute('data-state', 'done')
     const { data } = await adminDb().from('deposits').select('status').eq('id', dep.id).single()
     expect(data!.status).toBe('withdrawn')
+  })
+})
+
+test.describe('welcome', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P4-13-12 the panel greets by name, lists what is waiting (each row asks), shows what it can do; the button has a dot while work waits', async ({ page }) => {
+    await setAi({ roles: ['staff', 'bar', 'owner'], key: GOOD_KEY, model: 'claude-opus-5' })
+    const dep = await mustCreate('staff', { qty: 1 })
+    await confirmAll(dep.id, [100])
+    await requestWithdrawal(dep.id, await bottleIds(dep.id), 'take_home')
+    await page.goto('/tonight')
+    await expect(page.getByTestId('ai-dot')).toBeVisible()
+    await page.getByTestId('ai-open').click()
+    const welcome = page.getByTestId('ai-welcome')
+    await expect(welcome).toContainText('E2E bar')
+    await expect(welcome).toContainText(/สวัสดี|ดึกแล้ว/)
+    const row = page.locator('[data-testid="ai-waiting"][data-key="withdrawWaiting"]')
+    await expect(row).toContainText('คำขอเบิกรอยืนยัน')
+    await expect(page.getByTestId('ai-cap')).toHaveCount(3)
+
+    // a capability card fills in its example to edit — it does not send
+    await page.locator('[data-testid="ai-cap"][data-key="act"]').click()
+    await expect(page.getByTestId('ai-input')).toHaveValue('จองโต๊ะคืนพรุ่งนี้ 4 คน 21:00 ชื่อคุณเอ')
+    await expect(page.getByTestId('ai-user')).toHaveCount(0)
+
+    // a waiting row asks about itself
+    await row.click()
+    await expect(page.getByTestId('ai-user')).toContainText('คำขอเบิกรอ')
+    await expect(page.getByTestId('ai-answer')).toContainText('MOCK:')
+    await expect(page.getByTestId('ai-welcome')).toHaveCount(0)
   })
 })

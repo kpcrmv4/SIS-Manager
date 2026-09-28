@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
-import { Check, KeyRound, Loader2, PlugZap, Sparkles, Trash2 } from 'lucide-react'
+import { Check, KeyRound, ListRestart, Loader2, PlugZap, Sparkles, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { removeAiKey, saveAiKey, saveAiSettings, testAi, type AiUsageMonth } from '@/lib/ai/settings-actions'
+import { listAiModels, removeAiKey, saveAiKey, saveAiSettings, testAi, type AiUsageMonth } from '@/lib/ai/settings-actions'
 import type { AiConfig } from '@/lib/ai/config'
 import type { Role } from '@/lib/auth/actor'
 
@@ -19,6 +19,9 @@ export function AiSettings({ initial, usage }: { initial: AiConfig; usage: AiUsa
   const [config, setConfig] = useState(initial)
   const [model, setModel] = useState(initial.model)
   const [key, setKey] = useState('')
+  // R-072: the ids this key can use, fetched from Anthropic on demand — models change often, so the
+  // field stays free text and these are only shortcuts
+  const [available, setAvailable] = useState<{ id: string; name: string }[] | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [, start] = useTransition()
 
@@ -70,6 +73,17 @@ export function AiSettings({ initial, usage }: { initial: AiConfig; usage: AiUsa
       if (!res.ok) return fail(res.error)
       setConfig(res.data)
       toast.success(t('keyRemoved'))
+    })
+  }
+
+  function fetchModels() {
+    setBusy('models')
+    start(async () => {
+      const res = await listAiModels()
+      setBusy(null)
+      if (!res.ok) return fail(res.error)
+      setAvailable(res.data)
+      toast.success(t('modelsFetched', { count: res.data.length }))
     })
   }
 
@@ -176,18 +190,42 @@ export function AiSettings({ initial, usage }: { initial: AiConfig; usage: AiUsa
             {t('modelLabel')}
           </label>
           <div className="flex gap-2">
-            <input id="ai-model" className="input-base min-w-0 flex-1 tnum" list="ai-models" value={model} onChange={(e) => setModel(e.target.value)} data-testid="ai-model-input" />
-            <datalist id="ai-models">
-              {MODELS.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
+            <input
+              id="ai-model"
+              className="input-base min-w-0 flex-1 tnum"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder={t('modelPlaceholder')}
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              data-testid="ai-model-input"
+            />
             <button type="button" className="btn-secondary" onClick={saveModel} disabled={busy !== null || model.trim() === config.model} data-testid="ai-model-save">
               {busy === 'model' && <Loader2 className="size-4 animate-spin" aria-hidden />}
               {tc('save')}
             </button>
           </div>
           <p className="help-text">{t('modelHelp')}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5" data-testid="ai-model-options">
+            {(available ?? MODELS.map((id) => ({ id, name: id }))).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setModel(m.id)}
+                title={m.name}
+                className={`rounded-full border px-2.5 py-1 text-xs tnum transition-colors ${model === m.id ? 'border-brand bg-brand-tint text-brand-on-tint' : 'border-line text-ink-2 hover:border-line-strong'}`}
+                data-testid="ai-model-option"
+                data-model={m.id}
+              >
+                {m.id}
+              </button>
+            ))}
+            <button type="button" className="btn-ghost btn-sm" onClick={fetchModels} disabled={busy !== null || !config.hasKey} data-testid="ai-models-fetch">
+              {busy === 'models' ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : <ListRestart className="size-3.5" aria-hidden />}
+              {t('modelsFetch')}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 border-t border-line-soft pt-3">

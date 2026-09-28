@@ -73,6 +73,19 @@ export async function testAi(): Promise<Result<{ model: string; name: string }>>
   }
 }
 
+/** R-072: the model ids this key can use, newest first (Models API) — the owner picks or types any. */
+export async function listAiModels(): Promise<Result<{ id: string; name: string }[]>> {
+  if (!(await ownerId())) return { ok: false, error: 'forbidden' }
+  const { data: k } = await getSupabaseAdmin().from('ai_secrets').select('api_key').eq('id', true).maybeSingle()
+  if (!k?.api_key) return { ok: false, error: 'ai_not_configured' }
+  try {
+    const page = await anthropicWith(k.api_key, { maxRetries: 0, timeout: 15_000 }).models.list({ limit: 50 })
+    return { ok: true, data: page.data.map((m) => ({ id: m.id, name: m.display_name })) }
+  } catch (err) {
+    return { ok: false, error: aiErrorCode(err) }
+  }
+}
+
 export type AiUsageMonth = { answers: number; people: number; input_tokens: number; output_tokens: number; cache_read_tokens: number; cache_write_tokens: number }
 
 export async function aiUsageMonth(): Promise<Result<AiUsageMonth>> {

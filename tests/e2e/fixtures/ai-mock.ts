@@ -63,6 +63,10 @@ export class MockAnthropic {
       }
       if (key.includes('reject')) return json(401, { type: 'error', error: { type: 'authentication_error', message: 'invalid x-api-key' } })
 
+      if (req.method === 'GET' && path === '/v1/models') {
+        const data = ['claude-opus-5', 'claude-sonnet-5', 'claude-mock-next'].map((id) => ({ type: 'model', id, display_name: `Mock ${id}`, created_at: '2026-01-01T00:00:00Z' }))
+        return json(200, { data, has_more: false, first_id: data[0].id, last_id: data[data.length - 1].id })
+      }
       const model = path.match(/^\/v1\/models\/(.+)$/)
       if (req.method === 'GET' && model) {
         const id = decodeURIComponent(model[1])

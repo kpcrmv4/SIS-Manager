@@ -18,7 +18,21 @@ const ICON_BTN =
  * status · notifications · theme on the right. On a phone it is a sticky bar in the card's colour with
  * a hairline, matching the bottom nav (owner, 2026-09-27 — a dark pair was too harsh on a light page).
  */
-export function TopBar({ userId, branches, branch, owner, ai = false }: { userId: string; branches: BranchRef[]; branch: BranchRef | null; owner: boolean; ai?: boolean }) {
+export function TopBar({
+  userId,
+  branches,
+  branch,
+  owner,
+  ai = false,
+  me,
+}: {
+  userId: string
+  branches: BranchRef[]
+  branch: BranchRef | null
+  owner: boolean
+  ai?: boolean
+  me: { displayName: string; role: string }
+}) {
   return (
     <div
       className="sticky top-0 z-20 flex h-14 items-center justify-between gap-2 border-b border-line bg-card px-3 pt-[env(safe-area-inset-top,0px)] nav:static nav:h-auto nav:justify-end nav:border-0 nav:bg-transparent nav:px-5 nav:pt-3"
@@ -29,7 +43,7 @@ export function TopBar({ userId, branches, branch, owner, ai = false }: { userId
         {/* R-070: the assistant, where the owner turned it on for this role */}
         {ai && branch && (
           <Suspense fallback={null}>
-            <AiAssistant className={ICON_BTN} branchName={branch.name} />
+            <AiAssistant className={ICON_BTN} branchName={branch.name} displayName={me.displayName} role={me.role} />
           </Suspense>
         )}
         {branch && <PrinterIndicator key={branch.id} branchId={branch.id} className={ICON_BTN} owner={owner} />}

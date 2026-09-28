@@ -40,7 +40,32 @@ export async function pageExtra(branchId: string, path: string): Promise<string 
   return null
 }
 
-export async function chipsFor(branchId: string, role: Role, path: string): Promise<Chip[]> {
+/** The branch's live numbers — read once per panel request and shared by the welcome and the chips. */
+export type Snapshot = { counts: Awaited<ReturnType<typeof depositTabCounts>>; pendingBookings: number; liveBookings: number }
+
+export async function snapshot(branchId: string): Promise<Snapshot> {
+  const [counts, { bookings }] = await Promise.all([depositTabCounts(branchId), nightBookings(branchId, businessNight())])
+  return {
+    counts,
+    pendingBookings: bookings.filter((b) => b.status === 'pending').length,
+    liveBookings: bookings.filter((b) => b.status === 'pending' || b.status === 'confirmed' || b.status === 'arrived').length,
+  }
+}
+
+/** R-072: what is waiting in the branch right now, for the welcome — each row asks about itself. */
+export function waitingFrom(s: Snapshot, role: Role): Chip[] {
+  const barOwner = isBarOrOwner(role)
+  const out: Chip[] = []
+  if (s.counts.withdraw) out.push({ key: 'withdrawWaiting', values: { count: s.counts.withdraw } })
+  if (barOwner && s.counts.toConfirm) out.push({ key: 'confirmWaiting', values: { count: s.counts.toConfirm } })
+  if (s.counts.requests) out.push({ key: 'lineRequests', values: { count: s.counts.requests } })
+  if (barOwner && s.counts.expired) out.push({ key: 'expiredWaiting', values: { count: s.counts.expired } })
+  if (s.pendingBookings) out.push({ key: 'bookingsPending', values: { count: s.pendingBookings } })
+  out.push({ key: 'tonightBookings', values: { count: s.liveBookings } })
+  return out
+}
+
+export async function chipsFor(branchId: string, role: Role, path: string, snap?: Snapshot): Promise<Chip[]> {
   const base = path.split('?')[0]
   const barOwner = isBarOrOwner(role)
   const out: Chip[] = []
@@ -62,10 +87,7 @@ export async function chipsFor(branchId: string, role: Role, path: string): Prom
   }
 
   if (base === '/tonight' || base === '/overview' || base === '/deposits' || base === '/bookings' || base === '/') {
-    const night = businessNight()
-    const [counts, { bookings }] = await Promise.all([depositTabCounts(branchId), nightBookings(branchId, night)])
-    const pendingBookings = bookings.filter((b) => b.status === 'pending').length
-    const live = bookings.filter((b) => b.status === 'pending' || b.status === 'confirmed' || b.status === 'arrived').length
+    const { counts, pendingBookings, liveBookings: live } = snap ?? (await snapshot(branchId))
     if (base === '/bookings') {
       add({ key: 'tonightBookings', values: { count: live } })
       if (pendingBookings) add({ key: 'bookingsPending', values: { count: pendingBookings } })

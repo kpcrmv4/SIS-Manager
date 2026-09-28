@@ -1804,6 +1804,41 @@
       "take_home": "Take home",
       "on": "On (never expires)",
       "off": "Off"
+    },
+    "openWaiting": "AI assistant · work is waiting",
+    "greet": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}",
+      "night": "Hi {name}, it’s late"
+    },
+    "greetSub": "Assistant for {role} · {branch} · what can I help with?",
+    "waitingTitle": "In the branch now",
+    "waiting": {
+      "withdrawWaiting": "Withdrawals to confirm",
+      "confirmWaiting": "Deposits to confirm",
+      "lineRequests": "LINE deposit requests",
+      "expiredWaiting": "Expired, to dispose of",
+      "bookingsPending": "Bookings to confirm",
+      "tonightBookings": "Tonight’s bookings"
+    },
+    "capsTitle": "What I can do",
+    "cap": {
+      "howto": {
+        "title": "How-to",
+        "sub": "Step by step",
+        "example": "How does a withdrawal work?"
+      },
+      "lookup": {
+        "title": "Look up",
+        "sub": "Customers, deposits, bookings",
+        "example": "What has Khun Thanapon deposited?"
+      },
+      "act": {
+        "title": "Do it for you",
+        "sub": "Always confirm first",
+        "example": "Book tomorrow night, 4 people at 21:00, name A"
+      }
     }
   },
   "settingsAi": {
@@ -1839,7 +1874,7 @@
     "keyRemoved": "API key removed · the assistant is off",
     "keyRemove": "Remove key",
     "modelLabel": "Model name",
-    "modelHelp": "claude-opus-5 answers best · claude-sonnet-5 costs less · claude-haiku-4-5 is cheapest and fastest",
+    "modelHelp": "Type any new model name when Anthropic releases one, or tap one below · opus answers best · sonnet costs less · haiku is cheapest and fastest",
     "modelSaved": "Now using {model}",
     "test": "Test the connection",
     "testOk": "Connected · {name}",
@@ -1857,6 +1892,9 @@
       "ai_unreachable": "Could not reach Anthropic — try again",
       "ai_not_configured": "No API key yet",
       "model_invalid": "That model name is not valid"
-    }
+    },
+    "modelPlaceholder": "Type a model name, e.g. claude-opus-5",
+    "modelsFetch": "Fetch models from the account",
+    "modelsFetched": "{count} models available to this key"
   }
 }
