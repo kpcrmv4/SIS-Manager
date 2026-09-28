@@ -338,7 +338,7 @@ async function seedBookings(c, branchIds, tables, customers) {
 
   // final rules: Monday closed, cutoff 18:00, a private-event blackout next week
   must('settings final', await admin.from('booking_settings').update({ ...open, cutoff_time: '18:00', advance_days: 14, max_bookings_per_night: 20, party_max: 12, closed_weekdays: [0] }).eq('branch_id', RMI))
-  must('blackout', await admin.from('booking_blackouts').insert({ branch_id: RMI, night: addDays(night, 5), reason: 'ปิดจัดงานส่วนตัว' }))
+  must('blackout', await admin.from('booking_blackouts').insert({ branch_id: RMI, night: addDays(night, 5), reason: 'ปิดจัดงานส่วนตัว', line_only: false }))
 }
 
 // ── run ─────────────────────────────────────────────────────────────────

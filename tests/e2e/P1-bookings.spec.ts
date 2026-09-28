@@ -117,10 +117,20 @@ test('P1-BK-04 closed weekday', async () => {
   await settings({})
 })
 
-test('P1-BK-05 blackout night', async () => {
+test('P1-BK-05 blackout night: ปิดร้าน refuses everyone; งดจองทาง LINE refuses LINE only (R-067)', async () => {
   const { branchA } = fixtureIds()
-  await admin().from('booking_blackouts').insert({ branch_id: branchA, night: NIGHT, reason: 'ปิดร้าน' })
+  await admin().from('booking_blackouts').insert({ branch_id: branchA, night: NIGHT, reason: 'ปิดร้าน', line_only: false })
   expect((await lineBook()).error?.message).toContain('blackout')
+  expect((await staffBook('staff', { p_night: NIGHT })).error?.message).toContain('blackout')
+
+  await admin().from('booking_blackouts').update({ line_only: true }).eq('branch_id', branchA).eq('night', NIGHT)
+  expect((await lineBook()).error?.message).toContain('blackout')
+  const b = ok(await staffBook('staff', { p_night: NIGHT, p_slot: '22:30' }))
+  expect(b.status).toBe('confirmed')
+  const { data: av } = await dbAs('staff').rpc('booking_availability', { p_branch: branchA, p_from: NIGHT, p_to: NIGHT })
+  expect((av as { nights: { closed: boolean; reason: string; blackout_line_only: boolean }[] }).nights[0]).toMatchObject({ closed: true, reason: 'blackout', blackout_line_only: true })
+
+  await admin().from('bookings').delete().eq('id', b.id)
   await admin().from('booking_blackouts').delete().eq('branch_id', branchA).eq('night', NIGHT)
 })
 

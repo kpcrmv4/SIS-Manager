@@ -663,7 +663,8 @@
     "statFree": "ว่าง",
     "statTables": "โต๊ะ",
     "zoneBooked": "จอง {count}",
-    "zoneFree": "ว่าง {count}"
+    "zoneFree": "ว่าง {count}",
+    "closedNightLineOnly": "งดรับจองทาง LINE · พนักงานลงจองให้ได้"
   },
   "booking": {
     "time": "เวลาจอง",
@@ -714,7 +715,8 @@
     "titleTable": "รับจองโต๊ะ {table}",
     "closeTable": "ปิดการจองโต๊ะนี้",
     "closeTableHint": "ไม่รับจองโต๊ะนี้ในคืนที่เลือก? ปิดได้เลย ไม่ต้องกรอกข้อมูลลูกค้า",
-    "closedDone": "ปิดการจองโต๊ะ {table} คืนวันที่ {date} แล้ว"
+    "closedDone": "ปิดการจองโต๊ะ {table} คืนวันที่ {date} แล้ว",
+    "nightClosed": "{reason} — เลือกวันอื่น"
   },
   "bookingErrors": {
     "closed_weekday": "วันนี้ร้านปิดรับจองประจำสัปดาห์",
@@ -769,12 +771,12 @@
     "calendarTitle": "วันปิดรับจอง · {month}",
     "prevMonth": "เดือนก่อน",
     "nextMonth": "เดือนถัดไป",
-    "legendBlackout": "ปิดรับจอง (กดเลือกได้)",
+    "legendBlackout": "ปิดร้าน",
     "legendWeekly": "ปิดประจำสัปดาห์",
     "legendFull": "จองเต็ม",
     "reason": "เหตุผลที่ปิด (แสดงให้ลูกค้าเห็น)",
     "reasonPlaceholder": "เช่น ปิดร้านวันหยุดนักขัตฤกษ์",
-    "blackoutAdded": "ปิดรับจอง {date} แล้ว",
+    "blackoutAdded": "ปิดร้าน {date} แล้ว · ไม่มีใครจองได้",
     "blackoutRemoved": "เปิดรับจอง {date} แล้ว",
     "weekdays": [
       "จ",
@@ -789,7 +791,14 @@
     "tableChoiceShop": "ร้านเลือกโต๊ะให้",
     "tableChoiceShopHelp": "ลูกค้าบอกได้แค่โซนที่อยากนั่ง พนักงานจัดโต๊ะตอนยืนยันการจอง",
     "tableChoiceCustomer": "ลูกค้าเลือกโต๊ะเอง",
-    "tableChoiceCustomerHelp": "ลูกค้าเห็นผังโต๊ะใน LINE และเลือกโต๊ะที่ว่างเอง ตั้งว่าโต๊ะไหนจองได้ที่หน้า ผังโต๊ะ"
+    "tableChoiceCustomerHelp": "ลูกค้าเห็นผังโต๊ะใน LINE และเลือกโต๊ะที่ว่างเอง ตั้งว่าโต๊ะไหนจองได้ที่หน้า ผังโต๊ะ",
+    "modeLabel": "แตะวันในปฏิทินเพื่อ",
+    "modeLine": "งดจองทาง LINE",
+    "modeLineHint": "ลูกค้าจองเองไม่ได้ · พนักงานลงจองให้ได้",
+    "modeShop": "ปิดร้าน",
+    "modeShopHint": "ไม่มีใครจองได้",
+    "legendLineOnly": "งดจองทาง LINE",
+    "blackoutAddedLine": "งดจองทาง LINE {date} แล้ว · พนักงานยังลงจองได้"
   },
   "settingsTables": {
     "title": "ผังโต๊ะ",

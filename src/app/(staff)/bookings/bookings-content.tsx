@@ -1,7 +1,7 @@
 import 'server-only'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, MessageCircleOff } from 'lucide-react'
 import { closedTables, nightBookings, nightStats } from '@/lib/booking/queries'
 import type { ZoneRow } from '@/lib/booking/queries'
 import { bookingAvailability } from '@/lib/booking/actions'
@@ -51,8 +51,10 @@ export async function BookingsContent({
   }
 
   const nightInfo = availabilityRes.data.nights[0]
-  // the shop may still take a booking on this night — the LINE-only rules (cutoff, too far) don't bind staff
-  const canBook = !(nightInfo?.closed && (nightInfo.reason === 'past' || nightInfo.reason === 'closed_weekday' || nightInfo.reason === 'blackout'))
+  // the shop may still take a booking on this night — the LINE-only rules (cutoff, too far, a LINE-only
+  // blackout, R-067) don't bind staff
+  const lineOnlyNight = nightInfo?.reason === 'blackout' && nightInfo.blackout_line_only === true
+  const canBook = !(nightInfo?.closed && (nightInfo.reason === 'past' || nightInfo.reason === 'closed_weekday' || (nightInfo.reason === 'blackout' && !lineOnlyNight)))
   const totalTables = zones.flatMap((z) => z.tables).length
   const stats = nightStats(bookings, totalTables)
 
@@ -85,8 +87,14 @@ export async function BookingsContent({
         ))}
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm empty:hidden">
-        {nightInfo?.closed && (
-          <span className="inline-flex items-center gap-1 text-status-progress" role="status" data-testid="closed-night-banner">
+        {lineOnlyNight ? (
+          <span className="inline-flex items-center gap-1 text-muted-token" role="status" data-testid="closed-night-banner" data-kind="line_only">
+            <MessageCircleOff className="size-3.5 shrink-0" aria-hidden />
+            {t('closedNightLineOnly')}
+            {nightInfo.blackout_reason ? ` · ${nightInfo.blackout_reason}` : ''}
+          </span>
+        ) : nightInfo?.closed && (
+          <span className="inline-flex items-center gap-1 text-status-progress" data-kind="closed" role="status" data-testid="closed-night-banner">
             <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
             {t('closedNight', {
               reason: nightInfo.reason === 'blackout' && nightInfo.blackout_reason ? nightInfo.blackout_reason : tErr(nightInfo.reason ?? 'past'),

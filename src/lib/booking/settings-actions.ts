@@ -66,7 +66,7 @@ export async function saveBookingSettings(input: BookingSettingsInput): Promise<
   return { ok: true, data: undefined }
 }
 
-export async function toggleBlackout(branchId: string, night: string, reason?: string): Promise<SettingsResult<{ action: 'added' | 'removed' }>> {
+export async function toggleBlackout(branchId: string, night: string, reason?: string, lineOnly = true): Promise<SettingsResult<{ action: 'added' | 'removed' }>> {
   if (!isUuid(branchId) || !/^\d{4}-\d{2}-\d{2}$/.test(night)) return { ok: false, error: 'invalid' }
   const sb = await getSupabaseServer()
   const { data: existing, error: findError } = await sb.from('booking_blackouts').select('id').eq('branch_id', branchId).eq('night', night).maybeSingle()
@@ -79,7 +79,7 @@ export async function toggleBlackout(branchId: string, night: string, reason?: s
     touched()
     return { ok: true, data: { action: 'removed' } }
   }
-  const { error } = await sb.from('booking_blackouts').insert({ branch_id: branchId, night, reason: cleanText(reason, 200) ?? null })
+  const { error } = await sb.from('booking_blackouts').insert({ branch_id: branchId, night, reason: cleanText(reason, 200) ?? null, line_only: lineOnly === true })
   if (error) return { ok: false, error: 'invalid' }
   touched()
   return { ok: true, data: { action: 'added' } }

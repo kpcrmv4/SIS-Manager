@@ -253,6 +253,7 @@
   .cal button:hover { border-color: var(--line-strong); }
   .cal button.wk { color: var(--muted); background: var(--disabled-bg); }
   .cal button.x { background: var(--urgent-bg); color: var(--urgent); font-weight: 700; border-color: var(--urgent); }
+  .cal button.xl { background: var(--status-info-bg); color: var(--status-info); font-weight: 700; border-color: var(--status-info); border-style: dashed; }
   .cal button.today { border-color: var(--brand); font-weight: 700; }
   .cal button.past { color: var(--disabled-fg); cursor: default; }
   .cal button.full { background: var(--status-progress-bg); color: var(--status-progress); font-weight: 600; }

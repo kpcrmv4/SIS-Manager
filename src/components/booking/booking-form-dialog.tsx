@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Loader2, Lock } from 'lucide-react'
+import { AlertTriangle, Loader2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { ResponsiveDialog } from './responsive-dialog'
-import { createStaffBooking, setTableClosed } from '@/lib/booking/actions'
+import { bookingAvailability, createStaffBooking, setTableClosed } from '@/lib/booking/actions'
 import { slotOptions } from '@/lib/booking/format'
 import type { ZoneRow } from '@/lib/booking/queries'
 import { formatShortDate, type AppLocale } from '@/lib/date'
@@ -50,6 +50,7 @@ export function BookingFormDialog({
   const t = useTranslations('bookingForm')
   const tc = useTranslations('common')
   const te = useTranslations('errors')
+  const tb = useTranslations('bookingErrors')
   const locale = useLocale() as AppLocale
 
   const slots = slotOptions(settings.slotStart, settings.slotEnd, settings.slotMinutes)
@@ -63,6 +64,23 @@ export function BookingFormDialog({
   const [note, setNote] = useState('')
   const [pending, start] = useTransition()
   const [closing, startClosing] = useTransition()
+  // the picked night closed to staff too (past · ปิดประจำสัปดาห์ · ปิดร้าน) — known before save (R-067)
+  const [closedFor, setClosedFor] = useState<{ night: string; reason: 'past' | 'closed_weekday' | 'blackout' } | null>(null)
+
+  useEffect(() => {
+    if (!open || !/^\d{4}-\d{2}-\d{2}$/.test(nightValue)) return
+    let live = true
+    void bookingAvailability(branchId, nightValue, nightValue).then((res) => {
+      if (!live) return
+      const n = res.ok ? res.data.nights[0] : undefined
+      const shut = n?.reason === 'past' || n?.reason === 'closed_weekday' || (n?.reason === 'blackout' && n.blackout_line_only !== true)
+      setClosedFor(shut && n ? { night: nightValue, reason: n.reason as 'past' | 'closed_weekday' | 'blackout' } : null)
+    })
+    return () => {
+      live = false
+    }
+  }, [open, branchId, nightValue])
+  const nightClosed = closedFor?.night === nightValue ? closedFor.reason : null
 
   const tables = zones.find((z) => z.id === zoneId)?.tables ?? []
   const tableLabel = tables.find((tbl) => tbl.id === tableId)?.label ?? null
@@ -150,7 +168,7 @@ export function BookingFormDialog({
             <label className="label-base" htmlFor="bf-night">
               {t('night')}
             </label>
-            <input id="bf-night" type="date" className="input-base" value={nightValue} onChange={(e) => setNightValue(e.target.value)} />
+            <input id="bf-night" type="date" className="input-base" value={nightValue} onChange={(e) => setNightValue(e.target.value)} aria-invalid={nightClosed ? true : undefined} />
           </div>
           <div>
             <label className="label-base" htmlFor="bf-slot">
@@ -165,6 +183,12 @@ export function BookingFormDialog({
             </select>
           </div>
         </div>
+        {nightClosed && (
+          <p className="-mt-1 flex items-start gap-1.5 text-sm text-status-progress" role="alert" data-testid="booking-form-night-closed" data-reason={nightClosed}>
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            {t('nightClosed', { reason: tb(nightClosed) })}
+          </p>
+        )}
         <div>
           <label className="label-base" htmlFor="bf-party">
             {t('party')}
@@ -226,7 +250,7 @@ export function BookingFormDialog({
         <button type="button" className="btn-secondary" onClick={() => onOpenChange(false)}>
           {tc('cancel')}
         </button>
-        <button type="button" className="btn-primary" disabled={pending} onClick={submit} data-testid="booking-form-submit">
+        <button type="button" className="btn-primary" disabled={pending || Boolean(nightClosed)} onClick={submit} data-testid="booking-form-submit">
           {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
           {t('submit')}
         </button>

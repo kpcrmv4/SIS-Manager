@@ -228,13 +228,43 @@ test.describe('plan + list', () => {
     await expect(page.locator('.t-cell:not([data-state="free"])')).toHaveCount(0)
   })
 
-  test('P2-B1-08 a closed night shows the banner', async ({ page }) => {
+  test('P2-B1-08 a closed night shows the banner; รับจอง on it warns and will not save', async ({ page }) => {
     const blackNight = addDays(NIGHT, 10)
-    await admin().from('booking_blackouts').insert({ branch_id: branchA, night: blackNight, reason: 'P2B ปิดร้าน' })
+    await admin().from('booking_blackouts').insert({ branch_id: branchA, night: blackNight, reason: 'P2B ปิดร้าน', line_only: false })
     await page.goto(`/bookings?night=${blackNight}&view=plan`)
     await expect(page.getByTestId('closed-night-banner')).toBeVisible()
+    await expect(page.getByTestId('closed-night-banner')).toHaveAttribute('data-kind', 'closed')
     await expect(page.getByTestId('closed-night-banner')).toContainText('P2B ปิดร้าน')
+    // the plan's free tables don't open รับจอง
+    await expect(page.locator('.t-cell[data-action="book"]')).toHaveCount(0)
+    // the header button still opens the form (another night can be picked) — this night says so at once
+    await page.getByRole('button', { name: 'รับจอง' }).first().click()
+    await expect(page.getByTestId('booking-form-night-closed')).toHaveAttribute('data-reason', 'blackout')
+    await expect(page.getByTestId('booking-form-submit')).toBeDisabled()
+    await page.locator('#bf-night').fill(addDays(blackNight, 1))
+    await expect(page.getByTestId('booking-form-night-closed')).toHaveCount(0)
+    await expect(page.getByTestId('booking-form-submit')).toBeEnabled()
     await admin().from('booking_blackouts').delete().eq('branch_id', branchA).eq('night', blackNight)
+  })
+
+  test('P2-B1-08b a LINE-only night: grey note, tables still open รับจอง, staff saves (R-067)', async ({ page }) => {
+    const lineNight = addDays(NIGHT, 11)
+    await admin().from('booking_blackouts').insert({ branch_id: branchA, night: lineNight, reason: 'P2B งานส่วนตัว', line_only: true })
+    await page.goto(`/bookings?night=${lineNight}&view=plan`)
+    const banner = page.getByTestId('closed-night-banner')
+    await expect(banner).toHaveAttribute('data-kind', 'line_only')
+    await expect(banner).toContainText('งดรับจองทาง LINE · พนักงานลงจองให้ได้')
+    await expect(banner).toContainText('P2B งานส่วนตัว')
+    await page.locator('.t-cell[data-action="book"]').first().click()
+    await expect(page.getByTestId('booking-form-submit')).toBeEnabled()
+    await expect(page.getByTestId('booking-form-night-closed')).toHaveCount(0)
+    await page.locator('#bf-name').fill('P2B โทรจอง')
+    await page.getByTestId('booking-form-submit').click()
+    await expect(page.getByText(/บันทึกการจองแล้ว · BK-/)).toBeVisible()
+    const { count } = await admin().from('bookings').select('id', { count: 'exact', head: true }).eq('branch_id', branchA).eq('night', lineNight).eq('name', 'P2B โทรจอง')
+    expect(count).toBe(1)
+    await admin().from('bookings').delete().eq('branch_id', branchA).eq('night', lineNight)
+    await admin().from('booking_blackouts').delete().eq('branch_id', branchA).eq('night', lineNight)
   })
 })
 

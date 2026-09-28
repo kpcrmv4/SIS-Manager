@@ -663,7 +663,8 @@
     "statFree": "Free",
     "statTables": "tables",
     "zoneBooked": "{count} booked",
-    "zoneFree": "{count} free"
+    "zoneFree": "{count} free",
+    "closedNightLineOnly": "No LINE bookings · staff can still book"
   },
   "booking": {
     "time": "Time",
@@ -714,7 +715,8 @@
     "titleTable": "Book table {table}",
     "closeTable": "Close this table",
     "closeTableHint": "Not taking bookings for this table on the chosen night? Close it — no customer details needed",
-    "closedDone": "Table {table} is closed on the night of {date}"
+    "closedDone": "Table {table} is closed on the night of {date}",
+    "nightClosed": "{reason} — pick another night"
   },
   "bookingErrors": {
     "closed_weekday": "Bookings are closed on this weekday",
@@ -769,12 +771,12 @@
     "calendarTitle": "Closed dates · {month}",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
-    "legendBlackout": "Closed (tap to toggle)",
+    "legendBlackout": "Shop closed",
     "legendWeekly": "Weekly closed",
     "legendFull": "Fully booked",
     "reason": "Reason (shown to customers)",
     "reasonPlaceholder": "e.g. Closed for the public holiday",
-    "blackoutAdded": "Closed {date}",
+    "blackoutAdded": "Closed {date} · nobody can book",
     "blackoutRemoved": "Reopened {date}",
     "weekdays": [
       "Mo",
@@ -789,7 +791,14 @@
     "tableChoiceShop": "The shop seats guests",
     "tableChoiceShopHelp": "Guests only say which zone they would like; staff pick the table when confirming",
     "tableChoiceCustomer": "Guests pick their table",
-    "tableChoiceCustomerHelp": "Guests see the floor plan in LINE and pick a free table; set which tables they may take on the Tables page"
+    "tableChoiceCustomerHelp": "Guests see the floor plan in LINE and pick a free table; set which tables they may take on the Tables page",
+    "modeLabel": "Tap a day to",
+    "modeLine": "Stop LINE bookings",
+    "modeLineHint": "Customers can't book · staff still can",
+    "modeShop": "Close the shop",
+    "modeShopHint": "Nobody can book",
+    "legendLineOnly": "No LINE bookings",
+    "blackoutAddedLine": "No LINE bookings on {date} · staff can still book"
   },
   "settingsTables": {
     "title": "Floor plan",

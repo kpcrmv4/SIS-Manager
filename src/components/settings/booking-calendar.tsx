@@ -20,7 +20,10 @@ function daysInMonth(y: number, m: number) {
   return new Date(Date.UTC(y, m + 1, 0)).getUTCDate()
 }
 
-/** วันปิดรับจอง · month calendar — tap a day to add/remove a blackout row. */
+/**
+ * วันปิดรับจอง · month calendar — tap a day to add/remove a blackout row. A new one is either
+ * งดจองทาง LINE (customers can't book, staff still can) or ปิดร้าน (nobody books) — R-067.
+ */
 export function BookingCalendar({ branchId, locale }: { branchId: string; locale: AppLocale }) {
   const t = useTranslations('settingsBooking')
   const te = useTranslations('errors')
@@ -30,6 +33,7 @@ export function BookingCalendar({ branchId, locale }: { branchId: string; locale
   const [nights, setNights] = useState<Record<string, NightInfo>>({})
   const [loading, setLoading] = useState(true)
   const [reason, setReason] = useState('')
+  const [lineOnly, setLineOnly] = useState(true)
   const [pending, start] = useTransition()
 
   async function load() {
@@ -63,12 +67,12 @@ export function BookingCalendar({ branchId, locale }: { branchId: string; locale
   function tap(night: string, info: NightInfo | undefined) {
     if (!info || info.reason === 'closed_weekday' || info.reason === 'past') return
     start(async () => {
-      const res = await toggleBlackout(branchId, night, reason)
+      const res = await toggleBlackout(branchId, night, reason, lineOnly)
       if (!res.ok) {
         toast.error(te('unknown'))
         return
       }
-      toast.success(t(res.data.action === 'added' ? 'blackoutAdded' : 'blackoutRemoved', { date: formatShortDate(night, locale) }))
+      toast.success(t(res.data.action === 'removed' ? 'blackoutRemoved' : lineOnly ? 'blackoutAddedLine' : 'blackoutAdded', { date: formatShortDate(night, locale) }))
       void load()
     })
   }
@@ -92,6 +96,27 @@ export function BookingCalendar({ branchId, locale }: { branchId: string; locale
         </span>
       </div>
 
+      <div className="mb-3">
+        <p className="label-base">{t('modeLabel')}</p>
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t('modeLabel')}>
+          {([true, false] as const).map((v) => (
+            <button
+              key={String(v)}
+              type="button"
+              role="radio"
+              aria-checked={lineOnly === v}
+              onClick={() => setLineOnly(v)}
+              data-testid="cal-mode"
+              data-mode={v ? 'line' : 'shop'}
+              className={`flex flex-col items-start rounded-lg border px-3 py-2 text-left transition-colors duration-100 ${lineOnly === v ? 'border-brand bg-surface-2' : 'border-line-soft hover:border-line-strong'}`}
+            >
+              <span className="text-sm font-semibold text-ink">{t(v ? 'modeLine' : 'modeShop')}</span>
+              <span className="text-xs text-muted-token">{t(v ? 'modeLineHint' : 'modeShopHint')}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="cal" aria-busy={loading || pending}>
         {weekdays.map((w) => (
           <div key={w} className="h">
@@ -105,11 +130,12 @@ export function BookingCalendar({ branchId, locale }: { branchId: string; locale
           const day = i + 1
           const night = ymd(y, m, day)
           const info = nights[night]
-          const cls = [info?.reason === 'closed_weekday' ? 'wk' : '', info?.reason === 'blackout' ? 'x' : '', info?.reason === 'past' ? 'past' : '', info?.full && !info.closed ? 'full' : '', night === today ? 'today' : '']
+          const lineDay = info?.reason === 'blackout' && info.blackout_line_only === true
+          const cls = [info?.reason === 'closed_weekday' ? 'wk' : '', info?.reason === 'blackout' ? (lineDay ? 'xl' : 'x') : '', info?.reason === 'past' ? 'past' : '', info?.full && !info.closed ? 'full' : '', night === today ? 'today' : '']
             .filter(Boolean)
             .join(' ')
           return (
-            <button key={night} type="button" className={cls} onClick={() => tap(night, info)} data-testid="cal-day" data-night={night} data-state={info?.reason ?? (info?.full ? 'full' : 'open')}>
+            <button key={night} type="button" className={cls} onClick={() => tap(night, info)} data-testid="cal-day" data-night={night} data-state={lineDay ? 'blackout_line' : info?.reason ?? (info?.full ? 'full' : 'open')}>
               {day}
             </button>
           )
@@ -120,6 +146,10 @@ export function BookingCalendar({ branchId, locale }: { branchId: string; locale
         <span>
           <i style={{ borderColor: 'var(--urgent)', background: 'var(--urgent-bg)' }} />
           {t('legendBlackout')}
+        </span>
+        <span>
+          <i style={{ borderColor: 'var(--status-info)', borderStyle: 'dashed', background: 'var(--status-info-bg)' }} />
+          {t('legendLineOnly')}
         </span>
         <span>
           <i style={{ borderColor: 'transparent', background: 'var(--disabled-bg)' }} />

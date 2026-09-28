@@ -62,6 +62,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          line_only: boolean
           night: string
           reason: string | null
         }
@@ -70,6 +71,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          line_only?: boolean
           night: string
           reason?: string | null
         }
@@ -78,6 +80,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          line_only?: boolean
           night?: string
           reason?: string | null
         }

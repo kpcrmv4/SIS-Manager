@@ -79,17 +79,27 @@ test.describe('owner settings', () => {
     await resetSettings(admin(), branchA)
   })
 
-  test('P2-B3-03 calendar: tap a day, add reason, save; tap again removes', async ({ page }) => {
+  test('P2-B3-03 calendar: tap a day (งดจองทาง LINE by default, or ปิดร้าน), add reason, save; tap again removes', async ({ page }) => {
     await page.goto('/settings/booking')
     await expect(page.locator('.cal[aria-busy="false"]')).toBeVisible()
     await page.getByTestId('cal-reason-input').fill(`${RUN} ปิดร้าน`)
     // the LAST open day of the month: near month-end is reliably in the future (today is the 23rd)
-    const openDay = page.locator('[data-testid="cal-day"]:not([data-state="closed_weekday"]):not([data-state="past"]):not([data-state="blackout"])').last()
+    const openDay = page.locator('[data-testid="cal-day"]:not([data-state="closed_weekday"]):not([data-state="past"]):not([data-state="blackout"]):not([data-state="blackout_line"])').last()
     const night = await openDay.getAttribute('data-night')
+    await expect(page.locator('[data-testid="cal-mode"][data-mode="line"]')).toHaveAttribute('aria-checked', 'true')
     await openDay.click()
+    await expect(page.locator(`[data-night="${night}"]`)).toHaveAttribute('data-state', 'blackout_line')
+    const { data: lineRow } = await admin().from('booking_blackouts').select('line_only').eq('branch_id', branchA).eq('night', night!).maybeSingle()
+    expect(lineRow?.line_only).toBe(true)
+    await page.locator(`[data-night="${night}"]`).click()
+    await expect(page.locator(`[data-night="${night}"]`)).toHaveAttribute('data-state', 'open')
+
+    await page.locator('[data-testid="cal-mode"][data-mode="shop"]').click()
+    await page.locator(`[data-night="${night}"]`).click()
     await expect(page.locator(`[data-night="${night}"]`)).toHaveAttribute('data-state', 'blackout')
-    const { data: added } = await admin().from('booking_blackouts').select('id, reason').eq('branch_id', branchA).eq('night', night!).maybeSingle()
+    const { data: added } = await admin().from('booking_blackouts').select('id, reason, line_only').eq('branch_id', branchA).eq('night', night!).maybeSingle()
     expect(added?.reason).toContain(RUN)
+    expect(added?.line_only).toBe(false)
 
     await page.locator(`[data-night="${night}"]`).click()
     await expect(page.locator(`[data-night="${night}"]`)).toHaveAttribute('data-state', 'open')

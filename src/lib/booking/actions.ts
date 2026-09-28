@@ -137,6 +137,8 @@ export type Availability = {
     closed: boolean
     reason: 'closed_weekday' | 'blackout' | 'past' | 'too_far' | 'cutoff' | null
     blackout_reason: string | null
+    /** R-067: this blackout stops LINE bookings only — staff may still book the night */
+    blackout_line_only: boolean | null
     booked: number
     capacity: number | null
     full: boolean
