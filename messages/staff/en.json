@@ -293,7 +293,6 @@
     "setupAll": "All steps ({count})",
     "setupDone": "Setup complete",
     "actionsTotal": "{count} jobs",
-    "actionsUrgent": "{count} urgent",
     "actionHint": {
       "to_confirm": "bar confirms the % and shelves them",
       "requests": "LINE requests waiting for the bottle",
@@ -314,7 +313,9 @@
     "rateOther": "Waiting/cancelled {count}",
     "otherBranches": "Other branches {count}",
     "groupLiquor": "Deposits",
-    "tileBooked": "Booked"
+    "tileBooked": "Booked",
+    "actionsUrgentGroup": "URGENT",
+    "actionsWaitingGroup": "WAITING"
   },
   "deposits": {
     "title": "Deposits",

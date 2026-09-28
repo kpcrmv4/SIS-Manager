@@ -293,7 +293,6 @@
     "setupAll": "ดูทุกขั้นตอน ({count})",
     "setupDone": "ตั้งค่าครบแล้ว",
     "actionsTotal": "{count} งาน",
-    "actionsUrgent": "เร่งด่วน {count}",
     "actionHint": {
       "to_confirm": "bar ยืนยัน % แล้วเก็บเข้าชั้น",
       "requests": "ลูกค้าขอฝากผ่าน LINE รอรับเหล้า",
@@ -314,7 +313,9 @@
     "rateOther": "รอ/ยกเลิก {count}",
     "otherBranches": "สาขาอื่น {count}",
     "groupLiquor": "เหล้าฝาก",
-    "tileBooked": "จอง"
+    "tileBooked": "จอง",
+    "actionsUrgentGroup": "ด่วน",
+    "actionsWaitingGroup": "รอดำเนินการ"
   },
   "deposits": {
     "title": "ฝากเหล้า",

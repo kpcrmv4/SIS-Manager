@@ -106,7 +106,6 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
   const actionLabels = Object.fromEntries(ACTION_KEYS.map((key) => [key, t(`action.${key}`)])) as Record<(typeof ACTION_KEYS)[number], string>
   const actionHints = Object.fromEntries(ACTION_KEYS.map((key) => [key, t(`actionHint.${key}`)])) as Record<(typeof ACTION_KEYS)[number], string>
   const jobs = actions.reduce((n, a) => n + a.count, 0)
-  const urgentJobs = actions.filter((a) => a.tone === 'urgent').reduce((n, a) => n + a.count, 0)
 
   return (
     <>
@@ -136,7 +135,8 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
         items={actions}
         labels={actionLabels}
         hints={actionHints}
-        summary={{ total: t('actionsTotal', { count: jobs }), urgent: urgentJobs ? t('actionsUrgent', { count: urgentJobs }) : null }}
+        summary={{ total: t('actionsTotal', { count: jobs }) }}
+        groups={{ urgent: t('actionsUrgentGroup'), waiting: t('actionsWaitingGroup') }}
       />
 
       <FiguresPanel

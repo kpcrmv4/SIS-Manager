@@ -346,6 +346,14 @@ test.describe('owner', () => {
     if (firstCalm >= 0) expect(tones.slice(firstCalm)).not.toContain('urgent')
     const counts = await rows.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-count'))))
     if (counts.length) await expect(page.getByTestId('actions-summary')).toContainText(`${counts.reduce((n, c) => n + c, 0)} งาน`)
+    // (owner, 2026-09-28) no red "เร่งด่วน N" in the header — the urgent rows sit under their own ด่วน heading
+    await expect(page.getByTestId('actions-summary')).not.toContainText('ด่วน')
+    for (const g of await page.getByTestId('action-group').all()) {
+      const group = await g.getAttribute('data-group')
+      await expect(g.locator('h3')).toHaveText(group === 'urgent' ? 'ด่วน' : 'รอดำเนินการ')
+      const groupTones = await g.getByTestId('action-chip').evaluateAll((els) => els.map((e) => e.getAttribute('data-tone')))
+      for (const t of groupTones) expect(group === 'urgent' ? t === 'urgent' : t !== 'urgent').toBe(true)
+    }
     // the stock split adds up to the bottles in store; the show-rate split to came + no-show + the rest
     const inStore = Number(await page.locator('[data-testid="kpi-value"][data-kpi="in_store"]').textContent())
     const split = page.getByTestId('stock-split')

@@ -40,13 +40,16 @@ export function ActionStrip({
   labels,
   hints,
   summary,
+  groups,
 }: {
   title: string
   none: string
   items: ActionItem[]
   labels: Record<ActionKey, string>
   hints: Record<ActionKey, string>
-  summary: { total: string; urgent: string | null }
+  summary: { total: string }
+  /** the two groups' headings: ด่วน · รอดำเนินการ */
+  groups: { urgent: string; waiting: string }
 }) {
   return (
     <section aria-label={title} className="mb-4 rounded-lg border border-line bg-card px-4 pb-1 pt-3.5 shadow-e1" data-testid="overview-actions">
@@ -55,12 +58,6 @@ export function ActionStrip({
         {items.length > 0 && (
           <span className="text-sm text-muted-token tnum" data-testid="actions-summary">
             {summary.total}
-            {summary.urgent && (
-              <>
-                {' · '}
-                <span className="font-semibold text-urgent">{summary.urgent}</span>
-              </>
-            )}
           </span>
         )}
       </div>
@@ -69,33 +66,50 @@ export function ActionStrip({
           <StatusDot tone="done">{none}</StatusDot>
         </div>
       ) : (
-        <ul className="lg:grid lg:grid-cols-2 lg:gap-x-6">
-          {items.map((a) => {
-            const Icon = ICON[a.key]
-            return (
-              <li key={a.key} className="border-t border-line-soft">
-                <Link
-                  href={a.href}
-                  className="-mx-1 flex min-h-14 items-center gap-3 rounded-md px-1 py-2 transition-colors duration-100 hover:bg-surface-2"
-                  data-testid="action-chip"
-                  data-key={a.key}
-                  data-count={a.count}
-                  data-tone={a.tone}
-                >
-                  <span className={`flex size-9.5 shrink-0 items-center justify-center rounded-[11px] ${BOX[a.tone]}`} aria-hidden>
-                    <Icon className="size-4.5" />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="text-[15px] font-semibold leading-snug text-ink">{labels[a.key]}</span>
-                    <span className="truncate text-xs text-muted-token">{a.branch ? `${a.branch} · ${hints[a.key]}` : hints[a.key]}</span>
-                  </span>
-                  <span className={`text-[22px] font-bold tnum ${COUNT[a.tone]}`}>{a.count}</span>
-                  <ChevronRight className="size-4.5 shrink-0 text-muted-token" aria-hidden />
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+        <div className="flex flex-col">
+          {/* two groups, each under a small heading: what can't wait, then what is waiting */}
+          {(
+            [
+              ['urgent', items.filter((a) => a.tone === 'urgent')],
+              ['waiting', items.filter((a) => a.tone !== 'urgent')],
+            ] as const
+          )
+            .filter(([, list]) => list.length > 0)
+            .map(([group, list]) => (
+              <div key={group} data-testid="action-group" data-group={group}>
+                <h3 className={`border-t border-line-soft pb-0.5 pt-2.5 text-[11px] font-bold tracking-wide ${group === 'urgent' ? 'text-urgent' : 'text-muted-token'}`}>
+                  {groups[group]}
+                </h3>
+                <ul className="lg:grid lg:grid-cols-2 lg:gap-x-6">
+                  {list.map((a) => {
+                    const Icon = ICON[a.key]
+                    return (
+                      <li key={a.key} className="border-t border-line-soft first:border-t-0 lg:[&:nth-child(2)]:border-t-0">
+                        <Link
+                          href={a.href}
+                          className="-mx-1 flex min-h-14 items-center gap-3 rounded-md px-1 py-2 transition-colors duration-100 hover:bg-surface-2"
+                          data-testid="action-chip"
+                          data-key={a.key}
+                          data-count={a.count}
+                          data-tone={a.tone}
+                        >
+                          <span className={`flex size-9.5 shrink-0 items-center justify-center rounded-[11px] ${BOX[a.tone]}`} aria-hidden>
+                            <Icon className="size-4.5" />
+                          </span>
+                          <span className="flex min-w-0 flex-1 flex-col">
+                            <span className="text-[15px] font-semibold leading-snug text-ink">{labels[a.key]}</span>
+                            <span className="truncate text-xs text-muted-token">{a.branch ? `${a.branch} · ${hints[a.key]}` : hints[a.key]}</span>
+                          </span>
+                          <span className={`text-[22px] font-bold tnum ${COUNT[a.tone]}`}>{a.count}</span>
+                          <ChevronRight className="size-4.5 shrink-0 text-muted-token" aria-hidden />
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
+        </div>
       )}
     </section>
   )
