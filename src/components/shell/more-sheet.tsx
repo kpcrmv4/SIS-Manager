@@ -65,8 +65,14 @@ export function MoreSheet({
                 <div className="px-1 pb-2 pt-2.5 text-[11px] tracking-wide text-muted-token">{t(HEADING[section] ?? section)}</div>
                 <div className="grid grid-cols-3 gap-2 min-[420px]:grid-cols-4">
                   {group.map((item) => (
-                    <Link key={item.key} href={item.href} className={TILE} onClick={() => onOpenChange(false)}>
-                      <item.icon className="size-6 text-muted-token" aria-hidden />
+                    <Link
+                      key={item.key}
+                      href={item.href}
+                      className={item.tone === 'line' ? `${TILE} border-transparent! bg-line-green! font-semibold text-on-line-green! active:opacity-90` : TILE}
+                      onClick={() => onOpenChange(false)}
+                      data-testid={`more-${item.key}`}
+                    >
+                      <item.icon className={`size-6 ${item.tone === 'line' ? 'text-on-line-green' : 'text-muted-token'}`} aria-hidden />
                       <span>{t(item.label)}</span>
                     </Link>
                   ))}

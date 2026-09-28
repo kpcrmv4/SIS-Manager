@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { UsersTab, type UserRow } from './users-tab'
 import { BranchesTab, type BranchListRow } from './branches-tab'
 
-export function SettingsUsersClient({ meId, users, branches }: { meId: string; users: UserRow[]; branches: BranchListRow[] }) {
+export function SettingsUsersClient({ meId, users, branches, loginUrl }: { meId: string; users: UserRow[]; branches: BranchListRow[]; loginUrl?: string }) {
   const t = useTranslations('settingsUsers')
   const [tab, setTab] = useState<'users' | 'branches'>('users')
 
@@ -20,7 +20,7 @@ export function SettingsUsersClient({ meId, users, branches }: { meId: string; u
         </button>
       </div>
       {tab === 'users' ? (
-        <UsersTab meId={meId} users={users} branches={branches.map((b) => ({ id: b.id, name: b.name }))} />
+        <UsersTab meId={meId} users={users} branches={branches.map((b) => ({ id: b.id, name: b.name }))} loginUrl={loginUrl} />
       ) : (
         <BranchesTab branches={branches} />
       )}

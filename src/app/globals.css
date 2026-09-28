@@ -22,6 +22,9 @@
   --muted: #6E6466;
   --brand: #9A1F2A;
   --on-brand: #FFFFFF;
+  /* R-081: LINE green for the add-friend QR tile — a shade darker than #06C755 so white text passes AA */
+  --line-green: #05853E;
+  --on-line-green: #FFFFFF;
   --brand-soft: #F6E4E6;
   --brand-sidebar: #221619;
   --accent: #D9A94E;
@@ -109,6 +112,8 @@
   --muted: #A99EA0;
   --brand: #E0717C;
   --on-brand: #230A0E;
+  --line-green: #05853E;
+  --on-line-green: #FFFFFF;
   --brand-soft: #3A1C20;
   --brand-sidebar: #0D0A0B;
   --accent: #E2B865;
@@ -230,6 +235,8 @@
   --color-line-strong: var(--line-strong);
   --color-brand: var(--brand);
   --color-on-brand: var(--on-brand);
+  --color-line-green: var(--line-green);
+  --color-on-line-green: var(--on-line-green);
   --color-brand-soft: var(--brand-soft);
   --color-brand-tint: var(--brand-tint);
   --color-brand-tint-strong: var(--brand-tint-strong);

@@ -38,6 +38,8 @@ export type NavItem = {
   slot?: 1 | 2 | 4
   /** routes that should light this item too */
   match?: readonly string[]
+  /** R-081: a tile in LINE's green (the add-friend QR) */
+  tone?: 'line'
   /** routes under this item's href that belong to another item */
   except?: readonly string[]
 }
@@ -57,7 +59,7 @@ export const NAV: readonly NavItem[] = [
   // R-061 — every role, their branch's deposit and withdrawal events
   { key: 'depositHistory', href: '/deposits/history', label: 'depositHistory', icon: ClipboardList, roles: ALL, section: 'catReports' },
   // R-080 — every role: the branch's LINE OA QR for a customer to add the shop
-  { key: 'lineQr', href: '/line-qr', label: 'lineQr', icon: QrCode, roles: ALL, section: 'catDaily' },
+  { key: 'lineQr', href: '/line-qr', label: 'lineQr', icon: QrCode, roles: ALL, section: 'catReports', tone: 'line' },
   { key: 'reports', href: '/reports', label: 'reports', icon: BarChart3, roles: OWNER, section: 'catReports' },
   { key: 'audit', href: '/audit', label: 'audit', icon: History, roles: OWNER, section: 'catReports' },
   { key: 'settingsBooking', href: '/settings/booking', label: 'settingsBooking', icon: CalendarCheck2, roles: OWNER, section: 'catSettings' },

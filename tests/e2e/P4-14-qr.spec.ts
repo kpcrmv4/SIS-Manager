@@ -61,3 +61,19 @@ test.describe('staff B', () => {
     await expect(page.getByTestId('line-qr')).toHaveCount(0)
   })
 })
+
+test.describe('phone menu', () => {
+  test.use({ storageState: as('staff'), viewport: { width: 390, height: 844 } })
+
+  test('P4-14-04 the LINE QR tile sits under ภาพรวมและรายงาน in LINE green (R-081)', async ({ page }) => {
+    await page.goto('/tonight')
+    await page.getByText('เพิ่มเติม', { exact: true }).last().click()
+    const tile = page.getByTestId('more-lineQr')
+    await expect(tile).toBeVisible()
+    await expect(tile).toHaveClass(/bg-line-green/)
+    const section = tile.locator('xpath=ancestor::div[contains(@class,"pb-2")][1]')
+    await expect(section).toContainText('ภาพรวมและรายงาน')
+    await tile.click()
+    await page.waitForURL(/\/line-qr$/)
+  })
+})

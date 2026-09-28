@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ResponsiveDialog } from '@/components/booking/responsive-dialog'
+import { CopyButton } from '@/components/ui/copy-button'
 import { createStaffUser, updateStaffUser } from '@/lib/settings/users-api'
 import type { UsersApiError } from '@/lib/settings/users-api'
 
@@ -26,6 +27,7 @@ export function UserDialog({
   initial,
   isSelf,
   onSaved,
+  loginUrl = '',
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
@@ -33,6 +35,8 @@ export function UserDialog({
   initial: UserDialogValue
   isSelf: boolean
   onSaved: () => void
+  /** R-081: the sign-in address, for the summary handed to the new person */
+  loginUrl?: string
 }) {
   const t = useTranslations('settingsUsers')
   const tc = useTranslations('common')
@@ -40,6 +44,8 @@ export function UserDialog({
   const [v, setV] = useState(initial)
   const [password, setPassword] = useState('')
   const [pending, start] = useTransition()
+  // R-081: after creating — username, password and the sign-in link, ready to copy and send
+  const [created, setCreated] = useState<string | null>(null)
 
   function errorText(code: UsersApiError) {
     switch (code) {
@@ -70,9 +76,28 @@ export function UserDialog({
         return
       }
       toast.success(initial.id ? tc('saved') : t('created'))
-      onOpenChange(false)
       onSaved()
+      if (!initial.id) {
+        setCreated(t('summaryText', { name: v.displayName.trim(), username: v.username.trim().toLowerCase(), password, url: loginUrl || '—' }))
+        return
+      }
+      onOpenChange(false)
     })
+  }
+
+  if (created) {
+    return (
+      <ResponsiveDialog open={open} onOpenChange={onOpenChange} title={t('summaryTitle')} width={480}>
+        <p className="mb-2 text-sm text-muted-token">{t('summaryBody')}</p>
+        <textarea readOnly className="input-base min-h-32 font-medium tnum" value={created} onFocus={(e) => e.currentTarget.select()} data-testid="user-created-summary" />
+        <div className="mt-4 flex justify-end gap-2">
+          <button type="button" className="btn-secondary" onClick={() => onOpenChange(false)} data-testid="user-created-close">
+            {tc('close')}
+          </button>
+          <CopyButton text={created} label={t('summaryCopy')} done={t('summaryCopied')} testId="user-created-copy" />
+        </div>
+      </ResponsiveDialog>
+    )
   }
 
   return (

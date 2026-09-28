@@ -87,7 +87,7 @@ export default async function SettingsUsersPage() {
     <>
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
       {base && <LoginLinkCard baseUrl={base} />}
-      <SettingsUsersClient meId={state.actor.id} users={users} branches={branchRows} />
+      <SettingsUsersClient loginUrl={base ? `${base}/login` : undefined} meId={state.actor.id} users={users} branches={branchRows} />
     </>
   )
 }

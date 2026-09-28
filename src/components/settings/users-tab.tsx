@@ -12,7 +12,7 @@ import { ResetPasswordDialog } from './reset-password-dialog'
 
 export type UserRow = { id: string; username: string; displayName: string; role: 'staff' | 'bar' | 'owner'; active: boolean; branchIds: string[] }
 
-export function UsersTab({ meId, users, branches }: { meId: string; users: UserRow[]; branches: { id: string; name: string }[] }) {
+export function UsersTab({ meId, users, branches, loginUrl }: { meId: string; users: UserRow[]; branches: { id: string; name: string }[]; loginUrl?: string }) {
   const t = useTranslations('settingsUsers')
   const tr = useTranslations('roles')
   const tc = useTranslations('common')
@@ -118,6 +118,7 @@ export function UsersTab({ meId, users, branches }: { meId: string; users: UserR
           isSelf={dialog.isSelf}
           onOpenChange={(v) => !v && setDialog(null)}
           onSaved={refresh}
+          loginUrl={loginUrl}
         />
       )}
       {resetId && <ResetPasswordDialog open userId={resetId} onOpenChange={(v) => !v && setResetId(null)} onDone={refresh} />}

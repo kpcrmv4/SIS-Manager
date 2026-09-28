@@ -200,7 +200,15 @@ test.describe('owner settings', () => {
     await page.getByRole('checkbox').first().check() // first branch checkbox
     await page.getByLabel('รหัสผ่านเริ่มต้น').fill('Passw0rd123')
     await page.getByTestId('user-dialog-submit').click()
-    await expect(page.getByText('สร้างผู้ใช้แล้ว')).toBeVisible()
+    // R-081: the dialog turns into a summary to copy and send — username, password, sign-in link
+    const summary = page.getByTestId('user-created-summary')
+    await expect(summary).toBeVisible()
+    await expect(summary).toHaveValue(new RegExp(`ชื่อผู้ใช้: ${username}\\nรหัสผ่าน: Passw0rd123\\nเข้าสู่ระบบ: https?://\\S+/login`))
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.getByTestId('user-created-copy').click()
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(`รหัสผ่าน: Passw0rd123`)
+    await page.getByTestId('user-created-close').click()
+    await expect(summary).toHaveCount(0)
 
     const { data: created } = await admin().from('profiles').select('id, role, active').eq('username', username).single()
     expect(created?.role).toBe('staff')

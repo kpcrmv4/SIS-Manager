@@ -932,7 +932,12 @@
     "errorCannotChangeSelf": "You can't change your own role or disable your own account",
     "errorUnavailable": "Couldn't save — try again",
     "errorNotFound": "That user wasn't found",
-    "codeTaken": "That branch code is already taken"
+    "codeTaken": "That branch code is already taken",
+    "summaryTitle": "User created",
+    "summaryBody": "Copy this and send it to the new person — the password is not shown again once this closes.",
+    "summaryText": "SIS Manager account for {name}\nUsername: {username}\nPassword: {password}\nSign in: {url}\nChange the password under My account after signing in",
+    "summaryCopy": "Copy text",
+    "summaryCopied": "Copied — send it to them"
   },
   "settingsBranch": {
     "title": "Branch details",
