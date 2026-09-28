@@ -52,3 +52,20 @@ export function chime(): void {
     // audio unavailable: the toast and the vibration still say it
   }
 }
+
+/**
+ * Android counts a web app's icon badge from its notifications still in the shade, so read ones
+ * must leave it too (owner, 2026-09-28): close the system notifications of these rows (their tag is
+ * the row id), or all of this app's when no ids are given.
+ */
+export function clearSystemNotifications(ids?: string[]): void {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+  void navigator.serviceWorker
+    .getRegistration()
+    .then(async (reg) => {
+      if (!reg) return
+      const shown = await reg.getNotifications()
+      for (const n of shown) if (!ids || ids.includes(n.tag)) n.close()
+    })
+    .catch(() => undefined)
+}

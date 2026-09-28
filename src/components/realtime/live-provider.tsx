@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { toast } from 'sonner'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
-import { alertSoundOn, chime, notificationText } from '@/components/shell/notification-text'
+import { alertSoundOn, chime, clearSystemNotifications, notificationText } from '@/components/shell/notification-text'
 
 /**
  * P4-02 — one realtime connection per staff tab.
@@ -134,6 +134,8 @@ export function LiveProvider({ userId, displayName, branchId, children }: { user
 
   useEffect(() => {
     if (unread !== null) setIconCount(unread)
+    // nothing unread: nothing of ours left in the shade either — Android's icon count follows it
+    if (unread === 0) clearSystemNotifications()
   }, [unread])
 
   // presence follows the page this tab is on

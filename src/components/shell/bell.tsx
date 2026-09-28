@@ -12,7 +12,7 @@ import { appEnv, noSubscribe } from '@/components/pwa/platform'
 import { usePush } from '@/components/pwa/use-push'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { formatShortDate, formatTime } from '@/lib/date'
-import { alertSoundOn, chime, notificationText, setAlertSound } from './notification-text'
+import { alertSoundOn, chime, clearSystemNotifications, notificationText, setAlertSound } from './notification-text'
 
 // each kind wears its work's icon and hue — the same as the LINE switches and the /deposits filter cards (R-047)
 const LOOK: Record<string, { icon: LucideIcon; tone: string }> = {
@@ -102,7 +102,10 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
   async function openRow(r: Row) {
     if (!r.read_at) {
       const { error } = await getSupabaseBrowser().from('notifications').update({ read_at: new Date().toISOString() }).eq('id', r.id)
-      if (!error) onChanged()
+      if (!error) {
+        clearSystemNotifications([r.id])
+        onChanged()
+      }
     }
     onNavigate()
     // in-app paths only — '//host' is protocol-relative and would leave the app
@@ -115,6 +118,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
       setFailed(true)
       return
     }
+    clearSystemNotifications()
     onChanged()
     void load()
   }
