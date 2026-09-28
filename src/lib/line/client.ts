@@ -62,6 +62,19 @@ export async function getBotProfile(token: string, userId: string): Promise<Line
   return { displayName: str(p.displayName, 120), pictureUrl: str(p.pictureUrl, 500), language: str(p.language, 20) }
 }
 
+export type BotInfo = { basicId: string; premiumId: string | null; displayName: string | null; pictureUrl: string | null }
+
+/** GET /v2/bot/info — the OA's own id (@xxxx) and name, for its add-friend link. Free: not a message. */
+export async function getBotInfo(token: string): Promise<BotInfo | null> {
+  const r = await lineFetch('/v2/bot/info', token, { method: 'GET' })
+  if (!r.ok || !r.body || typeof r.body !== 'object') return null
+  const b = r.body as { basicId?: unknown; premiumId?: unknown; displayName?: unknown; pictureUrl?: unknown }
+  const str = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null)
+  const basicId = str(b.basicId, 40)
+  if (!basicId) return null
+  return { basicId, premiumId: str(b.premiumId, 40), displayName: str(b.displayName, 120), pictureUrl: str(b.pictureUrl, 500) }
+}
+
 /** The OA's push allowance this month and what it has used (R-063). limit null = no cap on the plan. */
 export async function getMessageQuota(token: string): Promise<{ limit: number | null; used: number } | null> {
   const [q, c] = await Promise.all([

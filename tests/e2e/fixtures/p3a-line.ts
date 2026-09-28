@@ -63,6 +63,7 @@ export class MockLine {
         return send(status, status === 200 ? { sentMessages: [{ id: '1' }] } : { message: `mock ${status}` })
       }
       if (req.method === 'POST' && path === '/v2/bot/message/reply') return send(200, { sentMessages: [{ id: '2' }] })
+      if (req.method === 'GET' && path === '/v2/bot/info') return send(200, { userId: 'Ue2e', basicId: '@e2eshop', displayName: `${RUN} OA`, chatMode: 'bot' })
       return send(404, { message: 'mock: not found' })
     })
   }

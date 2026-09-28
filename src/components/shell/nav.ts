@@ -11,6 +11,7 @@ import {
   ListChecks,
   MessageCircle,
   Moon,
+  QrCode,
   ScanLine,
   Sparkles,
   Store,
@@ -55,6 +56,8 @@ export const NAV: readonly NavItem[] = [
   { key: 'customers', href: '/customers', label: 'customers', icon: ContactRound, roles: ALL, section: 'catReports' },
   // R-061 — every role, their branch's deposit and withdrawal events
   { key: 'depositHistory', href: '/deposits/history', label: 'depositHistory', icon: ClipboardList, roles: ALL, section: 'catReports' },
+  // R-080 — every role: the branch's LINE OA QR for a customer to add the shop
+  { key: 'lineQr', href: '/line-qr', label: 'lineQr', icon: QrCode, roles: ALL, section: 'catDaily' },
   { key: 'reports', href: '/reports', label: 'reports', icon: BarChart3, roles: OWNER, section: 'catReports' },
   { key: 'audit', href: '/audit', label: 'audit', icon: History, roles: OWNER, section: 'catReports' },
   { key: 'settingsBooking', href: '/settings/booking', label: 'settingsBooking', icon: CalendarCheck2, roles: OWNER, section: 'catSettings' },

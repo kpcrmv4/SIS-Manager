@@ -1,4 +1,6 @@
+import { headers } from 'next/headers'
 import { getTranslations } from 'next-intl/server'
+import { LoginLinkCard } from '@/components/settings/login-link-card'
 import { PageHeader } from '@/components/shell/page-header'
 import { RefreshRetry } from '@/components/booking/refresh-retry'
 import { getActorState } from '@/lib/auth/actor'
@@ -75,9 +77,16 @@ export default async function SettingsUsersPage() {
     }
   })
 
+  // the address staff open: APP_BASE_URL when set, else the host this page was asked on
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host') ?? ''
+  const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') || host.startsWith('127.0.0.1') ? 'http' : 'https')
+  const base = (process.env.APP_BASE_URL || (host ? `${proto}://${host}` : '')).replace(/\/+$/, '')
+
   return (
     <>
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
+      {base && <LoginLinkCard baseUrl={base} />}
       <SettingsUsersClient meId={state.actor.id} users={users} branches={branchRows} />
     </>
   )

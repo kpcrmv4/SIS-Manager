@@ -81,7 +81,8 @@
     "audit": "Audit log",
     "customers": "Customers",
     "depositHistory": "Deposit history",
-    "settingsAi": "AI assistant"
+    "settingsAi": "AI assistant",
+    "lineQr": "LINE friend QR"
   },
   "login": {
     "title": "Log in",
@@ -1954,5 +1955,25 @@
     "dismiss": "Dismiss",
     "more": "+{count} more",
     "clearAll": "Dismiss all"
+  },
+  "lineQr": {
+    "title": "LINE friend QR",
+    "subtitle": "Let a customer scan it to add the shop on LINE",
+    "scan": "Scan with the camera or LINE to add as a friend",
+    "qrAlt": "LINE add-friend QR of {name}",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "open": "Open link",
+    "notSetUp": "This branch has no LINE OA connected yet",
+    "unreachable": "Could not reach LINE — try again",
+    "toSettings": "Go to LINE settings"
+  },
+  "loginLink": {
+    "title": "Sign-in link for staff",
+    "body": "Send the link or let staff scan the QR to open the sign-in page, then use the username and password you created",
+    "qrAlt": "QR to the sign-in page",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "download": "Download QR"
   }
 }
