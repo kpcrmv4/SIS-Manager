@@ -8,6 +8,7 @@ import { PORT } from './env'
  *
  * Scripted by the question text:
  *   "TOOL <name> <json>"  → one tool_use of that tool with that input; after its result, a short text
+ *   "ECHO <text>"          → exactly that text as the answer (for rendering checks)
  *   anything else          → a text answer echoing the question
  * A key containing "reject" gets 401, as Anthropic answers a bad key.
  */
@@ -94,7 +95,8 @@ export class MockAnthropic {
         ev('content_block_stop', { index: 0 })
         stop = 'tool_use'
       } else {
-        const text = hasResult ? 'MOCK: เตรียมการ์ดให้แล้ว' : `MOCK: ${question.slice(0, 60)}`
+        const echo = /^ECHO ([\s\S]*)$/.exec(question.trim())
+        const text = hasResult ? 'MOCK: เตรียมการ์ดให้แล้ว' : echo ? echo[1] : `MOCK: ${question.slice(0, 60)}`
         ev('content_block_start', { index: 0, content_block: { type: 'text', text: '' } })
         ev('content_block_delta', { index: 0, delta: { type: 'text_delta', text } })
         ev('content_block_stop', { index: 0 })

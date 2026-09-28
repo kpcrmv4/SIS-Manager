@@ -4,8 +4,8 @@ import { Fragment, type ReactNode } from 'react'
 import Link from 'next/link'
 
 /**
- * The little markdown the assistant writes: paragraphs, headings, - and 1. lists, **bold**,
- * `code` and [links](/app/path). Only in-app paths become links — anything else stays text.
+ * The little markdown the assistant writes: paragraphs, headings, - and 1. lists, tables, rules,
+ * **bold**, `code` and [links](/app/path). Only in-app paths become links — anything else stays text.
  */
 function inline(text: string, onNavigate: () => void, key: string): ReactNode[] {
   const out: ReactNode[] = []
@@ -31,11 +31,78 @@ function inline(text: string, onNavigate: () => void, key: string): ReactNode[] 
   return out
 }
 
+const cells = (row: string) =>
+  row
+    .trim()
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split('|')
+    .map((c) => c.trim())
+const isRule = (row: string) => cells(row).every((c) => /^:?-{2,}:?$/.test(c))
+
+/**
+ * R-073: a markdown table. Up to three columns fit a phone as a table; wider ones become a card per
+ * row — the first cell as its title (usually the DEP / BK code), the rest as label: value.
+ */
+function Table({ rows, onNavigate, k }: { rows: string[]; onNavigate: () => void; k: string }) {
+  const [head, ...rest] = rows
+  const header = cells(head)
+  const body = rest.filter((r) => !isRule(r)).map(cells)
+  if (header.length <= 3) {
+    return (
+      <div className="-mx-1 overflow-x-auto" data-testid="ai-table">
+        <table className="w-full border-collapse text-[13px]">
+          <thead>
+            <tr>
+              {header.map((h, i) => (
+                <th key={i} className="border-b border-line px-1.5 py-1 text-left font-semibold text-muted-token">
+                  {inline(h, onNavigate, `${k}h${i}`)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {body.map((r, i) => (
+              <tr key={i} className="border-b border-line-soft last:border-0">
+                {header.map((_, j) => (
+                  <td key={j} className="px-1.5 py-1 align-top tnum">
+                    {inline(r[j] ?? '', onNavigate, `${k}${i}-${j}`)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-col gap-1.5" data-testid="ai-table-cards">
+      {body.map((r, i) => (
+        <div key={i} className="rounded-lg border border-line-soft bg-card px-2.5 py-2" data-testid="ai-table-card">
+          <p className="mb-1 text-[13px] font-semibold text-ink">{inline(r[0] ?? '', onNavigate, `${k}${i}t`)}</p>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-0.5 text-[13px]">
+            {header.slice(1).map((h, j) =>
+              r[j + 1] ? (
+                <div key={j} className="contents">
+                  <dt className="text-muted-token">{h}</dt>
+                  <dd className="min-w-0 break-words text-ink tnum">{inline(r[j + 1], onNavigate, `${k}${i}-${j}`)}</dd>
+                </div>
+              ) : null,
+            )}
+          </dl>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () => void }) {
   const lines = text.replace(/\r/g, '').split('\n')
   const blocks: ReactNode[] = []
   let list: { ordered: boolean; items: string[] } | null = null
   let para: string[] = []
+  let table: string[] | null = null
 
   const flushPara = () => {
     if (para.length) blocks.push(<p key={`p${blocks.length}`}>{inline(para.join(' '), onNavigate, `p${blocks.length}`)}</p>)
@@ -59,8 +126,30 @@ export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () 
     list = null
   }
 
+  const flushTable = () => {
+    if (!table) return
+    const k = `t${blocks.length}`
+    // a header and at least one row, else it was just a line with bars in it
+    if (table.length >= 2) blocks.push(<Table key={k} k={k} rows={table} onNavigate={onNavigate} />)
+    else para.push(...table)
+    table = null
+  }
+
   for (const raw of lines) {
     const line = raw.trimEnd()
+    if (/^\s*\|.*\|\s*$/.test(line)) {
+      flushPara()
+      flushList()
+      ;(table ??= []).push(line)
+      continue
+    }
+    flushTable()
+    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+      flushPara()
+      flushList()
+      blocks.push(<hr key={`r${blocks.length}`} className="border-line-soft" />)
+      continue
+    }
     const bullet = /^\s*[-*•]\s+(.*)$/.exec(line)
     const num = /^\s*\d+[.)]\s+(.*)$/.exec(line)
     const head = /^#{1,4}\s+(.*)$/.exec(line)
@@ -88,6 +177,7 @@ export function AiMarkdown({ text, onNavigate }: { text: string; onNavigate: () 
       para.push(line.trim())
     }
   }
+  flushTable()
   flushPara()
   flushList()
   return <div className="space-y-2 text-sm leading-relaxed">{blocks.map((b, i) => <Fragment key={i}>{b}</Fragment>)}</div>

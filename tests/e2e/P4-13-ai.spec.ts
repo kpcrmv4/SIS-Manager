@@ -358,3 +358,40 @@ test.describe('welcome', () => {
     await expect(page.getByTestId('ai-welcome')).toHaveCount(0)
   })
 })
+
+test.describe('answers', () => {
+  test.use({ storageState: as('staff') })
+
+  test('P4-13-14 a wide table becomes a card per row with its code linked; a narrow one stays a table; --- is a rule', async ({ page }) => {
+    await setAi({ roles: ['staff', 'bar', 'owner'], key: GOOD_KEY })
+    await page.goto('/deposits')
+    await page.getByTestId('ai-open').click()
+    const wide = [
+      'เหล้าที่หมดอายุแล้ว: 2 รายการ',
+      '',
+      '| DEP Code | ลูกค้า | เหล้า | จำนวน | % ที่เหลือ | หมดอายุเมื่อ |',
+      '|---|---|---|---|---|---|',
+      '| [DEP-SRC-E4TTW](/deposits/00000000-0000-4000-8000-000000000001) | คุณเอกชัย | Absolut Vodka | 1/1 | 20% | 9 ก.ย. 2026 |',
+      '| [DEP-SRC-22PD6](/deposits/00000000-0000-4000-8000-000000000002) | คุณสุภาวดี | Hennessy VSOP | 1/1 | 40% | 25 ก.ย. 2026 |',
+      '',
+      '---',
+      '',
+      '| โต๊ะ | จอง |',
+      '|---|---|',
+      '| A1 | 2 |',
+    ].join('\n')
+    await page.getByTestId('ai-input').fill(`ECHO ${wide}`)
+    await page.getByTestId('ai-send').click()
+    const answer = page.getByTestId('ai-answer')
+    await expect(answer.getByTestId('ai-table-card')).toHaveCount(2)
+    const first = answer.getByTestId('ai-table-card').first()
+    await expect(first.getByRole('link', { name: 'DEP-SRC-E4TTW' })).toHaveAttribute('href', '/deposits/00000000-0000-4000-8000-000000000001')
+    await expect(first).toContainText('ลูกค้า')
+    await expect(first).toContainText('คุณเอกชัย')
+    await expect(first).toContainText('20%')
+    await expect(answer.getByTestId('ai-table')).toHaveCount(1)
+    await expect(answer.locator('hr')).toHaveCount(1)
+    await expect(answer).not.toContainText('|---')
+  })
+})
+
