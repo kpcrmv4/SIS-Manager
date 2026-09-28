@@ -4,7 +4,7 @@ import { expect, test, request as pwRequest } from '@playwright/test'
 import { adminDb, dbAs, fixtureIds, sql } from './fixtures/db'
 import { AUTH_DIR, BASE_URL } from './fixtures/env'
 import { BRANCH_A_CODE } from './fixtures/users'
-import { RUN, cleanupRun, confirmAll, mustCreate } from './fixtures/deposits'
+import { RUN, cleanupRun, confirmAll, mustCreate, photo } from './fixtures/deposits'
 import { bangkokDate } from '../../src/lib/date'
 import { periodRange } from '../../src/lib/reports/period'
 
@@ -55,7 +55,7 @@ test.beforeAll(async () => {
   disposedItem = `${RUN} Disposed`
   const { error: upErr } = await adminDb().from('deposits').update({ status: 'expired', item_name: disposedItem }).eq('id', d3.id)
   expect(upErr, upErr?.message).toBeNull()
-  const { error: dispErr } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: [d3.id], p_reason: 'E2E' })
+  const { error: dispErr } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: [d3.id], p_reason: 'E2E', p_photo_paths: [await photo()] })
   expect(dispErr, dispErr?.message).toBeNull()
 
   // > 1,000 rows in a closed 2020 range, to prove the Excel export pages past PostgREST's cap.

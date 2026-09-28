@@ -5,7 +5,7 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import { isUuid } from '@/lib/action'
 
 const KINDS = [
-  'deposit_confirmed', 'deposit_rejected', 'withdraw_completed', 'withdraw_rejected', 'disposed',
+  'deposit_confirmed', 'deposit_rejected', 'withdraw_completed', 'withdraw_rejected',
   'booking_pending', 'booking_confirmed', 'booking_rejected', 'booking_cancelled', 'booking_reminder',
   'deposit_requested', 'withdrawal_requested', 'booking_new',
 ]

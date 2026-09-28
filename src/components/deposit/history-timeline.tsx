@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { EmptyState } from '@/components/ui/states'
 import { eventText } from '@/lib/deposit/format'
@@ -27,6 +28,11 @@ export async function HistoryTimeline({ events, locale }: { events: DepositEvent
                 <span className="dot" aria-hidden />
                 <div>
                   <div>{eventText(t, e, locale)}</div>
+                  {e.action === 'disposed' && typeof e.payload.disposal_code === 'string' && (
+                    <Link href={`/deposits/disposals/${e.payload.disposal_code}`} className="code text-brand hover:underline">
+                      {e.payload.disposal_code}
+                    </Link>
+                  )}
                   <div className="s num">{meta}</div>
                 </div>
               </div>

@@ -254,9 +254,12 @@ export async function setCustomerReminders(depositId: string, enabled: boolean):
   return res
 }
 
-export async function disposeDeposits(depositIds: string[], reason?: string): Promise<ActionResult<{ count: number }>> {
-  if (!depositIds.length || !depositIds.every(isUuid)) return { ok: false, error: 'invalid' }
-  const res = await callRpc<{ count: number }>((sb) => sb.rpc('dispose_deposits', { p_deposit_ids: depositIds, p_reason: cleanText(reason, 200) }))
+/** R-076: one disposal record (DSP-…) with its photos; the customer is not messaged. */
+export async function disposeDeposits(depositIds: string[], reason: string | undefined, photoPaths: string[]): Promise<ActionResult<{ count: number; id: string; code: string; bottles: number }>> {
+  if (!depositIds.length || !depositIds.every(isUuid) || !photoPaths.length) return { ok: false, error: 'invalid' }
+  const res = await callRpc<{ count: number; id: string; code: string; bottles: number }>((sb) =>
+    sb.rpc('dispose_deposits', { p_deposit_ids: depositIds, p_reason: cleanText(reason, 200), p_photo_paths: photoPaths.slice(0, 10) }),
+  )
   if (res.ok) {
     touched()
     after(() => dispatchSoon())

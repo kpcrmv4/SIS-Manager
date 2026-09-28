@@ -339,13 +339,13 @@
     "remaining": "{count} btl · {percent}%",
     "expiresOn": "Expires {date}",
     "noExpiry": "Never expires",
-    "expiredHelp": "These are past their collection deadline. Tick the bottles you have actually taken off the shelf and press \"Dispose\" — the customer is told on LINE right away",
+    "expiredHelp": "Past their collection deadline. Select the ones actually taken off the shelf and tap \"Dispose\".",
     "expiredMeta": "{code} · expired {date} · {left} left · {notified}",
     "expiredNotified": "expiry sent on LINE",
     "expiredNotNotified": "LINE not sent",
     "selected": "{count} selected",
     "select": "Select",
-    "disposeCount": "Dispose {count}",
+    "disposeCount": "Dispose of {count}",
     "disposeOnlyBar": "Only bar and owner can dispose",
     "emptyInStore": "No bottles in store yet",
     "emptyInStoreBody": "Press \"New deposit\" when a customer brings a bottle",
@@ -644,12 +644,17 @@
     "done": "Updated"
   },
   "disposeDialog": {
-    "title": "Dispose {count}",
-    "body": "Have these bottles really been taken off the shelf? The customer is told on LINE. This can't be undone",
+    "title": "Dispose of {count, plural, one {# deposit} other {# deposits}}",
+    "body": "Have the bottles really left the shelf? This cannot be undone.",
     "reason": "Reason",
     "reasonDefault": "Past collection deadline",
     "submit": "Dispose",
-    "done": "Disposed {count}"
+    "done": "Disposed of {count} · {code}",
+    "photo": "Photo of the bottles removed",
+    "photoAdd": "Add photo",
+    "photoHelp": "Photograph the bottles taken off the shelf (at least one)",
+    "total": "Disposing of {bottles, plural, one {# bottle} other {# bottles}} in all · {count} deposits",
+    "bottles": "{count, plural, one {# bottle} other {# bottles}}"
   },
   "bookings": {
     "title": "Bookings",
@@ -1916,5 +1921,19 @@
     "modelPlaceholder": "Type a model name, e.g. claude-opus-5",
     "modelsFetch": "Fetch models from the account",
     "modelsFetched": "{count} models available to this key"
+  },
+  "disposal": {
+    "title": "Disposal {code}",
+    "back": "Deposit history",
+    "by": "Disposed by",
+    "at": "When",
+    "reason": "Reason",
+    "count": "Count",
+    "countValue": "{deposits} deposits · {bottles} bottles",
+    "items": "Deposits disposed of",
+    "bottles": "{count, plural, one {# bottle} other {# bottles}}",
+    "photos": "Photos",
+    "notFound": "No such disposal in this branch",
+    "total": "{bottles, plural, one {# bottle} other {# bottles}} disposed of · {deposits} deposits"
   }
 }

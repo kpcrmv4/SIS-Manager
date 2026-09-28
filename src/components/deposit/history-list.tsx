@@ -13,6 +13,10 @@ const DOT: Record<HistoryGroup, string> = {
   other: 'bg-muted',
 }
 
+// R-076: a disposal row opens its DSP record, every other row its deposit
+const hrefOf = (r: HistoryRow) => (r.action === 'disposed' && typeof r.payload.disposal_code === 'string' ? `/deposits/disposals/${r.payload.disposal_code}` : `/deposits/${r.deposit_id}`)
+const dspOf = (r: HistoryRow) => (r.action === 'disposed' && typeof r.payload.disposal_code === 'string' ? r.payload.disposal_code : null)
+
 /** R-061 · the events: a table from `nav:` up, cards on a phone; each opens its deposit. */
 export function HistoryList({ rows, text, locale, cols }: { rows: HistoryRow[]; text: HistoryText; locale: AppLocale; cols: { time: string; what: string; deposit: string; who: string } }) {
   const when = (r: HistoryRow) => `${formatShortDate(r.at, locale)} · ${formatTime(r.at, locale)}`
@@ -37,6 +41,11 @@ export function HistoryList({ rows, text, locale, cols }: { rows: HistoryRow[]; 
                     <span className={`size-2 flex-none rounded-full ${DOT[r.group]}`} aria-hidden />
                     {text.what(r)}
                   </span>
+                  {dspOf(r) && (
+                    <Link href={hrefOf(r)} className="code ml-4 text-brand hover:underline" data-testid="history-disposal">
+                      {dspOf(r)}
+                    </Link>
+                  )}
                 </td>
                 <td>
                   <Link href={`/deposits/${r.deposit_id}`} className="hover:underline">
@@ -59,10 +68,11 @@ export function HistoryList({ rows, text, locale, cols }: { rows: HistoryRow[]; 
       <ul className="panel nav:hidden" data-testid="history-cards">
         {rows.map((r) => (
           <li key={r.id} className="border-b border-line-soft last:border-b-0">
-            <Link href={`/deposits/${r.deposit_id}`} className="flex items-center gap-3 px-4 py-3" data-testid="history-row" data-action={r.action} data-group={r.group}>
+            <Link href={hrefOf(r)} className="flex items-center gap-3 px-4 py-3" data-testid="history-row" data-action={r.action} data-group={r.group}>
               <span className={`size-2 flex-none rounded-full ${DOT[r.group]}`} aria-hidden />
               <span className="min-w-0 flex-1">
                 <span className="block text-[15px] font-semibold text-ink">{text.what(r)}</span>
+                {dspOf(r) && <span className="code block text-brand">{dspOf(r)}</span>}
                 <span className="block truncate text-sm text-ink-2">
                   <span className="code">{r.code}</span> · {r.customer} · {r.item}
                 </span>

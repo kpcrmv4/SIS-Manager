@@ -142,7 +142,7 @@ export default async function DepositsPage({ searchParams }: { searchParams: Pro
       </div>
 
       {tab === 'expired' ? (
-        <ExpiredSelectList rows={rows} role={actor.role} locale={actor.locale} emptyTitle={emptyTitle} emptyBody={emptyBody} />
+        <ExpiredSelectList rows={rows} role={actor.role} branchId={branch.id} locale={actor.locale} emptyTitle={emptyTitle} emptyBody={emptyBody} />
       ) : rows.length === 0 ? (
         <EmptyTab title={emptyTitle} body={emptyBody} />
       ) : (

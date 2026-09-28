@@ -257,21 +257,37 @@ test('P1-DEP-19 P1-DEP-20 expiry job: in_store past deadline expires; one with a
 test('P1-DEP-22 dispose is all-or-nothing: one in_store in the batch refuses the whole batch', async () => {
   const live = await mustCreate('staff', { qty: 1 })
   await confirmAll(live.id, [100])
-  const { error } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: [expired[0], live.id] })
+  const { error } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: [expired[0], live.id], p_photo_paths: [await photo()] })
   expect(error?.message).toContain('NOT_EXPIRED')
   expect((await deposit(expired[0])).status).toBe('expired')
   expect((await deposit(live.id)).status).toBe('in_store')
 })
 
-test('P1-DEP-21 bar disposes two expired deposits', async () => {
-  const { data, error } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: expired, p_reason: 'เลยกำหนดรับคืน' })
+test('P1-DEP-21 bar disposes two expired deposits: one DSP record with photo, items and bottles; no LINE message (R-076)', async () => {
+  // a photo is required
+  const { error: noPhoto } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: expired, p_reason: 'x' })
+  expect(noPhoto?.message).toContain('PHOTO_REQUIRED')
+  const pic = await photo()
+  const { data, error } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: expired, p_reason: 'เลยกำหนดรับคืน', p_photo_paths: [pic] })
   expect(error, error?.message).toBeNull()
-  expect(data).toEqual({ count: 2 })
+  const out = data as { count: number; id: string; code: string; bottles: number }
+  expect(out.count).toBe(2)
+  expect(out.code).toMatch(/^DSP-[A-Z]+-[A-Z0-9]{5}$/)
+  const { data: rec } = await dbAs('staff').from('disposals').select('code, reason, photo_paths, deposit_count, bottle_count, disposed_by').eq('id', out.id).single()
+  expect(rec).toMatchObject({ code: out.code, reason: 'เลยกำหนดรับคืน', photo_paths: [pic], deposit_count: 2, disposed_by: fixtureIds().users.bar })
+  const { data: items } = await dbAs('staff').from('disposal_items').select('deposit_id, bottles').eq('disposal_id', out.id)
+  expect((items ?? []).map((i) => i.deposit_id).sort()).toEqual([...expired].sort())
+  expect(rec!.bottle_count).toBe((items ?? []).reduce((n, i) => n + i.bottles, 0))
   for (const id of expired) {
     const row = await deposit(id)
     expect(row.status).toBe('disposed')
     expect(row.disposed_by).toBe(fixtureIds().users.bar)
+    const { count } = await admin().from('line_outbox').select('id', { count: 'exact', head: true }).eq('dedupe_key', `disposed:${id}`)
+    expect(count).toBe(0)
   }
+  // branch B cannot read branch A's record
+  const { data: other } = await dbAs('staffB').from('disposals').select('id').eq('id', out.id)
+  expect(other ?? []).toEqual([])
 })
 
 test('P1-DEP-23 no direct writes: bar update/insert/delete on deposits is refused', async () => {

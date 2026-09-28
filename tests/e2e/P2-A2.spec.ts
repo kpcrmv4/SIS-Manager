@@ -430,10 +430,30 @@ test.describe('detail dialogs', () => {
       await page.getByTestId(`expired-select-${d1.id}`).check()
       await page.getByTestId(`expired-select-${d2.id}`).check()
       await page.getByTestId('dispose-open').click()
+      await expect(page.getByTestId('dispose-dialog-body')).not.toContainText('LINE')
+      // what goes: each code, liquor and bottles, and the total on top
+      await expect(page.getByTestId('dispose-total')).toHaveText('จำหน่ายออกทั้งหมด 2 ขวด · 2 รายการ')
+      await expect(page.getByTestId('dispose-summary-row')).toHaveCount(2)
+      await expect(page.getByTestId('dispose-summary-row').first()).toContainText('Johnnie Walker Black Label')
+      await expect(page.getByTestId('dispose-summary-row').first()).toContainText('1 ขวด')
+      // R-076: a photo first, then a DSP number that opens the record
+      await expect(page.getByTestId('dispose-submit')).toBeDisabled()
+      await attachPhoto(page, 'dispose-photo-add')
       await page.getByTestId('dispose-submit').click()
-      await expect(page.getByText('จำหน่ายออกแล้ว', { exact: false })).toBeVisible()
+      await page.waitForURL(/\/deposits\/disposals\/DSP-/)
+      const dsp = decodeURIComponent(page.url().split('/').pop()!)
       expect((await deposit(d1.id)).status).toBe('disposed')
       expect((await deposit(d2.id)).status).toBe('disposed')
+      const record = page.getByTestId('disposal-page')
+      await expect(record).toContainText(dsp)
+      await expect(record.getByTestId('disposal-total')).toHaveText('จำหน่ายออกทั้งหมด 2 ขวด · 2 รายการ')
+      await expect(record).toContainText('E2E bar')
+      await expect(record.getByTestId('disposal-item')).toHaveCount(2)
+      await expect(record.getByTestId('disposal-photo')).toHaveCount(1)
+      // the deposit's own history links to it
+      await page.goto(`/deposits/${d1.id}`)
+      await page.getByRole('link', { name: dsp }).first().click()
+      await page.waitForURL((u) => u.pathname === `/deposits/disposals/${dsp}`)
     })
 
     test('P2-A2-15 an action error toasts the catalog text and leaves the dialog open', async ({ page }) => {

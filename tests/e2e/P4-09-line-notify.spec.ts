@@ -56,7 +56,7 @@ test.describe('P4-09-02 the settings card', () => {
     const card = page.getByTestId('line-notify')
     await expect(card).toBeVisible()
     await expect(page.getByTestId('line-quota')).toHaveAttribute('data-state', 'no_token')
-    await expect(card.getByTestId('notify-row')).toHaveCount(13)
+    await expect(card.getByTestId('notify-row')).toHaveCount(12)
 
     const row = card.locator('[data-testid="notify-row"][data-kind="booking_confirmed"]')
     await expect(row).toHaveAttribute('data-on', 'true')

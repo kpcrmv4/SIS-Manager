@@ -4,7 +4,7 @@ import { getMessageQuota } from '@/lib/line/client'
 
 /** R-063 · the automatic LINE messages the owner can switch, grouped by who receives them. */
 export const LINE_NOTIFY_KINDS = {
-  customer: ['deposit_confirmed', 'deposit_rejected', 'withdraw_completed', 'withdraw_rejected', 'disposed', 'booking_pending', 'booking_confirmed', 'booking_rejected', 'booking_cancelled', 'booking_reminder'],
+  customer: ['deposit_confirmed', 'deposit_rejected', 'withdraw_completed', 'withdraw_rejected', 'booking_pending', 'booking_confirmed', 'booking_rejected', 'booking_cancelled', 'booking_reminder'],
   group: ['deposit_requested', 'withdrawal_requested', 'booking_new'],
 } as const
 export type LineNotifyKind = (typeof LINE_NOTIFY_KINDS)['customer'][number] | (typeof LINE_NOTIFY_KINDS)['group'][number]

@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
 import { adminDb, dbAs, fixtureIds, sql } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
-import { RUN, bottles, cleanupRun, confirmAll, mustCreate } from './fixtures/deposits'
+import { RUN, bottles, cleanupRun, confirmAll, mustCreate, photo } from './fixtures/deposits'
 import { requestWithdrawal } from './fixtures/p2a-flows'
 import { addDays, bangkokDate } from '../../src/lib/date'
 import { periodRange, previousRange, showRate } from '../../src/lib/reports/period'
@@ -62,7 +62,7 @@ test.beforeAll(async () => {
   await confirmAll(c.id, [30])
   const { error: upErr } = await adminDb().from('deposits').update({ status: 'expired', item_name: `${RUN} Disposed` }).eq('id', c.id)
   expect(upErr, upErr?.message).toBeNull()
-  const { error: dispErr } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: [c.id], p_reason: 'E2E' })
+  const { error: dispErr } = await dbAs('bar').rpc('dispose_deposits', { p_deposit_ids: [c.id], p_reason: 'E2E', p_photo_paths: [await photo()] })
   expect(dispErr, dispErr?.message).toBeNull()
   disposedId = c.id
 })

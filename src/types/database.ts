@@ -785,6 +785,7 @@ export type Database = {
           customer_id: string | null
           customer_name: string
           customer_phone: string | null
+          disposal_id: string | null
           dispose_reason: string | null
           disposed_at: string | null
           disposed_by: string | null
@@ -829,6 +830,7 @@ export type Database = {
           customer_id?: string | null
           customer_name: string
           customer_phone?: string | null
+          disposal_id?: string | null
           dispose_reason?: string | null
           disposed_at?: string | null
           disposed_by?: string | null
@@ -873,6 +875,7 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string
           customer_phone?: string | null
+          disposal_id?: string | null
           dispose_reason?: string | null
           disposed_at?: string | null
           disposed_by?: string | null
@@ -932,6 +935,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "deposits_disposal_id_fkey"
+            columns: ["disposal_id"]
+            isOneToOne: false
+            referencedRelation: "disposals"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "deposits_disposed_by_fkey"
             columns: ["disposed_by"]
             isOneToOne: false
@@ -950,6 +960,83 @@ export type Database = {
             columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_items: {
+        Row: {
+          bottles: number
+          deposit_id: string
+          disposal_id: string
+        }
+        Insert: {
+          bottles: number
+          deposit_id: string
+          disposal_id: string
+        }
+        Update: {
+          bottles?: number
+          deposit_id?: string
+          disposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_items_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_items_disposal_id_fkey"
+            columns: ["disposal_id"]
+            isOneToOne: false
+            referencedRelation: "disposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposals: {
+        Row: {
+          bottle_count: number
+          branch_id: string
+          code: string
+          created_at: string
+          deposit_count: number
+          disposed_by: string | null
+          id: string
+          photo_paths: string[]
+          reason: string | null
+        }
+        Insert: {
+          bottle_count: number
+          branch_id: string
+          code: string
+          created_at?: string
+          deposit_count: number
+          disposed_by?: string | null
+          id?: string
+          photo_paths?: string[]
+          reason?: string | null
+        }
+        Update: {
+          bottle_count?: number
+          branch_id?: string
+          code?: string
+          created_at?: string
+          deposit_count?: number
+          disposed_by?: string | null
+          id?: string
+          photo_paths?: string[]
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposals_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
@@ -1859,7 +1946,11 @@ export type Database = {
       }
       deposit_line_history: { Args: { p_deposit: string }; Returns: Json }
       dispose_deposits: {
-        Args: { p_deposit_ids: string[]; p_reason?: string }
+        Args: {
+          p_deposit_ids: string[]
+          p_photo_paths?: string[]
+          p_reason?: string
+        }
         Returns: Json
       }
       expire_due_deposits: { Args: never; Returns: number }

@@ -13,12 +13,14 @@ import type { DepositListRow } from '@/lib/deposit/list'
 export function ExpiredSelectList({
   rows,
   role,
+  branchId,
   locale,
   emptyTitle,
   emptyBody,
 }: {
   rows: DepositListRow[]
   role: 'staff' | 'bar' | 'owner'
+  branchId: string
   locale: 'th' | 'en'
   emptyTitle: string
   emptyBody?: string
@@ -80,7 +82,14 @@ export function ExpiredSelectList({
           <span className="note">{t('disposeOnlyBar')}</span>
         )}
       </div>
-      {barOrOwner && <DisposeDialog open={open} onOpenChange={setOpen} depositIds={selected} onDone={() => setSelected([])} />}
+      {barOrOwner && <DisposeDialog
+          open={open}
+          onOpenChange={setOpen}
+          depositIds={selected}
+          summary={rows.filter((r) => selected.includes(r.id)).map((r) => ({ id: r.id, code: r.code, item: r.itemName, bottles: r.remainingQty }))}
+          branchId={branchId}
+          onDone={() => setSelected([])}
+        />}
     </div>
   )
 }

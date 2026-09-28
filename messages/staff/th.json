@@ -339,13 +339,13 @@
     "remaining": "{count} ขวด · {percent}%",
     "expiresOn": "หมดอายุ {date}",
     "noExpiry": "ไม่หมดอายุ",
-    "expiredHelp": "เหล้าที่เลยกำหนดรับคืนแล้ว เลือกเหล้าที่นำออกจากชั้นจริงแล้วกด \"จำหน่ายออก\" ระบบจะแจ้ง LINE ลูกค้าให้ทันที",
+    "expiredHelp": "เหล้าที่เลยกำหนดรับคืนแล้ว เลือกเหล้าที่นำออกจากชั้นจริงแล้วกด \"จำหน่ายออก\"",
     "expiredMeta": "{code} · หมดอายุ {date} · เหลือ {left} · {notified}",
     "expiredNotified": "แจ้งหมดอายุทาง LINE แล้ว",
     "expiredNotNotified": "ยังไม่ได้แจ้ง LINE",
-    "selected": "เลือกแล้ว {count} ขวด",
+    "selected": "เลือกแล้ว {count} รายการ",
     "select": "เลือก",
-    "disposeCount": "จำหน่ายออก {count} ขวด",
+    "disposeCount": "จำหน่ายออก {count} รายการ",
     "disposeOnlyBar": "เฉพาะ bar และ owner จำหน่ายออกได้",
     "emptyInStore": "ยังไม่มีเหล้าฝากในร้าน",
     "emptyInStoreBody": "กด \"รับฝากเหล้า\" เมื่อลูกค้านำเหล้ามาฝาก",
@@ -644,12 +644,17 @@
     "done": "อัปเดตแล้ว"
   },
   "disposeDialog": {
-    "title": "จำหน่ายออก {count} ขวด",
-    "body": "นำเหล้าออกจากชั้นแล้วจริงใช่ไหม ระบบจะแจ้ง LINE ลูกค้า ย้อนกลับไม่ได้",
+    "title": "จำหน่ายออก {count} รายการ",
+    "body": "นำเหล้าออกจากชั้นแล้วจริงใช่ไหม ย้อนกลับไม่ได้",
     "reason": "เหตุผล",
     "reasonDefault": "เลยกำหนดรับคืน",
     "submit": "จำหน่ายออก",
-    "done": "จำหน่ายออกแล้ว {count} ขวด"
+    "done": "จำหน่ายออก {count} รายการ · {code}",
+    "photo": "รูปเหล้าที่นำออก",
+    "photoAdd": "เพิ่มรูป",
+    "photoHelp": "ถ่ายรูปขวดที่นำออกจากชั้น (ต้องมีอย่างน้อย 1 รูป)",
+    "total": "จำหน่ายออกทั้งหมด {bottles} ขวด · {count} รายการ",
+    "bottles": "{count} ขวด"
   },
   "bookings": {
     "title": "จองโต๊ะ",
@@ -1916,5 +1921,19 @@
     "modelPlaceholder": "พิมพ์ชื่อโมเดล เช่น claude-opus-5",
     "modelsFetch": "ดึงรายชื่อโมเดลจากบัญชี",
     "modelsFetched": "พบ {count} โมเดลที่ key นี้ใช้ได้"
+  },
+  "disposal": {
+    "title": "ใบจำหน่ายออก {code}",
+    "back": "ประวัติฝาก/เบิก",
+    "by": "จำหน่ายออกโดย",
+    "at": "เมื่อ",
+    "reason": "เหตุผล",
+    "count": "จำนวน",
+    "countValue": "{deposits} รายการ · {bottles} ขวด",
+    "items": "รายการที่จำหน่ายออก",
+    "bottles": "{count} ขวด",
+    "photos": "รูป",
+    "notFound": "ไม่พบใบจำหน่ายออกนี้ในสาขานี้",
+    "total": "จำหน่ายออกทั้งหมด {bottles} ขวด · {deposits} รายการ"
   }
 }

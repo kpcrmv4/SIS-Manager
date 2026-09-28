@@ -272,7 +272,7 @@ async function seedDeposits(c, branchIds, photos, customers) {
   const disp = await create(c.staff, RMI, 'คุณมานพ ทองดี', '087-555-0101', 'Johnnie Walker Black Label', 1, 'A6')
   await confirm(disp.id, [10])
   must('age', await admin.from('deposits').update({ status: 'expired', expires_at: daysFromNow(-14), collect_deadline_at: daysFromNow(-13), expired_notice_sent_at: daysFromNow(-13) }).in('id', [exp.id, disp.id]))
-  await rpc(c.bar, 'dispose_deposits', { p_deposit_ids: [disp.id], p_reason: 'เลยกำหนดรับคืน' })
+  await rpc(c.bar, 'dispose_deposits', { p_deposit_ids: [disp.id], p_reason: 'เลยกำหนดรับคืน', p_photo_paths: [photos[RMI]] })
 
   // bar rejected a received deposit → cancelled
   const rej = await create(c.staff, RMI, 'คุณนภา ใจงาม', '080-111-2222', 'Regency', 1, 'B3')
