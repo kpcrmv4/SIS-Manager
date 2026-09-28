@@ -1927,6 +1927,16 @@ export type Database = {
         Args: { p_copies?: number; p_deposit: string; p_type: string }
         Returns: Json
       }
+      receive_and_confirm: {
+        Args: {
+          p_deposit: string
+          p_item_id?: string
+          p_levels: number[]
+          p_photo_paths: string[]
+          p_table?: string
+        }
+        Returns: Json
+      }
       reject_booking: {
         Args: { p_booking: string; p_reason: string }
         Returns: Json

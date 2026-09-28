@@ -71,7 +71,10 @@ export function DetailActions({
   const canWithdraw = (status === 'in_store' || status === 'pending_withdrawal') && freeBottles > 0
   const searchParams = useSearchParams()
   // the scan result card's "withdraw" button deep-links here with ?open=withdraw
-  const [dialog, setDialog] = useState<DialogKind>(() => (canWithdraw && searchParams.get('open') === 'withdraw' ? 'withdraw' : null))
+  // ?open=withdraw from the scan card; ?open=confirm after bar saves a new deposit (R-075)
+  const [dialog, setDialog] = useState<DialogKind>(() =>
+    canWithdraw && searchParams.get('open') === 'withdraw' ? 'withdraw' : barOrOwner && status === 'pending_confirm' && searchParams.get('open') === 'confirm' ? 'confirm' : null,
+  )
   const canPrint = status !== 'requested' && status !== 'cancelled'
   const canReceive = status === 'requested'
   const canConfirm = barOrOwner && status === 'pending_confirm'
@@ -109,8 +112,8 @@ export function DetailActions({
       {primary > 0 && (
         <div className={`grid gap-2 ${primary > 1 ? 'grid-cols-2' : 'grid-cols-1'} sm:flex sm:flex-wrap`}>
           {canReceive && (
-            <button type="button" className="btn-primary" onClick={() => setDialog('receive')} data-testid="action-receive">
-              {t('actionReceive')}
+            <button type="button" className="btn-primary" onClick={() => setDialog('receive')} data-testid="action-receive" data-one-step={barOrOwner}>
+              {barOrOwner ? t('actionReceiveConfirm') : t('actionReceive')}
             </button>
           )}
           {canConfirm && (
@@ -179,7 +182,21 @@ export function DetailActions({
         </p>
       )}
 
-      {canReceive && <ReceiveDialog open={dialog === 'receive'} onOpenChange={(v) => setDialog(v ? 'receive' : null)} depositId={deposit.id} branchId={branchId} defaultQuantity={deposit.quantity} />}
+      {/* R-075: bar / owner receive and confirm in one step; staff receive and hand over to bar */}
+      {canReceive && barOrOwner && (
+        <ConfirmDialog
+          receive
+          open={dialog === 'receive'}
+          onOpenChange={(v) => setDialog(v ? 'receive' : null)}
+          depositId={deposit.id}
+          branchId={branchId}
+          quantity={deposit.quantity}
+          items={items}
+          itemId={deposit.itemId}
+          itemName={deposit.itemName}
+        />
+      )}
+      {canReceive && !barOrOwner && <ReceiveDialog open={dialog === 'receive'} onOpenChange={(v) => setDialog(v ? 'receive' : null)} depositId={deposit.id} branchId={branchId} defaultQuantity={deposit.quantity} />}
       {canConfirm && (
         <ConfirmDialog
           open={dialog === 'confirm'}

@@ -36,7 +36,8 @@ export default async function DepositDetailPage({ params }: { params: Promise<{ 
   const t = await getTranslations('deposit')
   const tRoot = await getTranslations()
   // bar / owner confirm the bottle against the shop's list (R-060)
-  const items = detail.status === 'pending_confirm' && actor.role !== 'staff' ? await listLiquorItems(branch.id) : []
+  // bar / owner confirm against the list — also when they receive a LINE request in one step (R-075)
+  const items = (detail.status === 'pending_confirm' || detail.status === 'requested') && actor.role !== 'staff' ? await listLiquorItems(branch.id) : []
 
   const photoUrls = await signedPhotoUrls([...detail.photoPaths, ...detail.confirmPhotoPaths])
   const spec = depositBadgeSpec(detail)

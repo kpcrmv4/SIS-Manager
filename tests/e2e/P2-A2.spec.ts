@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { expect, test } from '@playwright/test'
 import { adminDb, dbAs, fixtureIds } from './fixtures/db'
 import { AUTH_DIR } from './fixtures/env'
-import { RUN, cleanupRun, confirmAll, deposit, mustCreate, photo } from './fixtures/deposits'
+import { RUN, bottles, cleanupRun, confirmAll, deposit, mustCreate, photo } from './fixtures/deposits'
 import { bottleIds, createLineRequest, forceExpired, requestWithdrawal } from './fixtures/p2a-flows'
 import { cleanupCustomers, makeCustomer } from './fixtures/p2c-customers'
 import { addDays, bangkokDate, businessNight, weekdayIndex } from '../../src/lib/date'
@@ -125,8 +125,10 @@ test.describe('new deposit form', () => {
       await page.getByTestId('deposit-quantity').fill('1')
       await attachPhoto(page, 'deposit-photo-add')
       await page.getByTestId('deposit-submit').click()
-      await page.waitForURL(/\/deposits\/[0-9a-f-]{36}$/)
-      const id = page.url().split('/').pop()!
+      // R-075: bar goes straight on to confirming it
+      await page.waitForURL(/\/deposits\/[0-9a-f-]{36}\?open=confirm$/)
+      await expect(page.getByTestId('confirm-submit')).toBeVisible()
+      const id = new URL(page.url()).pathname.split('/').pop()!
       const row = await deposit(id)
       expect(row.expires_at!.slice(0, 10)).toBe(chosen)
     })
@@ -308,6 +310,37 @@ test.describe('detail dialogs', () => {
       await expect(level).toHaveText('2 ขวด · 100%')
       await expect(level.locator('.level-bar > i')).toHaveAttribute('style', /width: ?100%/)
       await expect(page.getByText('ยังไม่เปิด')).toHaveCount(0)
+    })
+
+    test('P2-A2-22 bar receives a LINE request and confirms it in one step (R-075)', async ({ page }) => {
+      const { branchA } = fixtureIds()
+      const req = await createLineRequest(branchA, { qty: 2, item: `${RUN} Johnnie Walker Black Label` })
+      const { users } = fixtureIds()
+      const { count: noticesBefore } = await adminDb().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', users.bar).eq('kind', 'deposit_received').eq('payload->>deposit_id', req.id)
+      await page.goto(`/deposits/${req.id}`)
+      await expect(page.getByTestId('deposit-next')).toContainText('กด รับและยืนยันเหล้า')
+      const btn = page.getByTestId('action-receive')
+      await expect(btn).toHaveText('รับและยืนยันเหล้า')
+      await btn.click()
+      await expect(page.getByTestId('confirm-count')).toHaveValue('2')
+      await page.getByTestId('confirm-count').fill('3')
+      await expect(page.getByTestId('confirm-level-3')).toBeVisible()
+      await page.getByTestId('confirm-level-2').fill('40')
+      await page.getByTestId('confirm-print-receipt').uncheck()
+      await page.getByTestId('confirm-print-label').uncheck()
+      await attachPhoto(page, 'confirm-photo-add')
+      await page.getByTestId('confirm-submit').click()
+      await expect.poll(async () => (await deposit(req.id)).status).toBe('in_store')
+      const row = await deposit(req.id)
+      expect(row.quantity).toBe(3)
+      const levels = (await bottles(req.id)).map((b) => Number(b.remaining_percent))
+      expect(levels).toEqual([100, 40, 100])
+      // no "bottles to confirm" notice — the one receiving is the one confirming
+      const { count: noticesAfter } = await adminDb().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', users.bar).eq('kind', 'deposit_received').eq('payload->>deposit_id', req.id)
+      expect(noticesAfter).toBe(noticesBefore)
+      // staff cannot call it
+      const { error } = await dbAs('staff').rpc('receive_and_confirm', { p_deposit: req.id, p_levels: [100], p_photo_paths: ['x'] })
+      expect(error?.message).toMatch(/FORBIDDEN|BAR_ONLY|42501|permission/i)
     })
 
     test('P2-A2-06 reject a deposit with a reason → cancelled, reason in history', async ({ page }) => {

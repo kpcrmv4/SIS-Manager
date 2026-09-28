@@ -125,7 +125,8 @@ export function NewDepositForm({
       const made = res.data.deposits
       if (made.length === 1) {
         toast.success(t('created', { code: made[0].code }))
-        router.push(`/deposits/${made[0].id}`)
+        // bar / owner go straight on to confirming it (R-075)
+        router.push(barOrOwner ? `/deposits/${made[0].id}?open=confirm` : `/deposits/${made[0].id}`)
         return
       }
       toast.success(t('createdMany', { count: made.length }))

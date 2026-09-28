@@ -448,7 +448,7 @@
       "cancelled": "Cancelled"
     },
     "nextHint": {
-      "requested": "When the customer hands the bottle over, press Receive and take a photo",
+      "requested": "If the customer hands the bottles to bar, tap Receive and confirm — or wait for staff to bring them",
       "pending_confirm": "Enter the % left in every bottle with a photo, then press Confirm",
       "pending_confirm_staff": "Waiting for the bar or the owner to confirm",
       "in_store": "The customer can ask on LINE, or press Withdraw",
@@ -516,7 +516,8 @@
     "actionWithdrawMore": "Withdraw another bottle",
     "bottlePendingWithdraw": "Requested",
     "withdrawNewTitle": "New withdrawal",
-    "withdrawNewLeft": "{count, plural, one {# bottle} other {# bottles}} still free"
+    "withdrawNewLeft": "{count, plural, one {# bottle} other {# bottles}} still free",
+    "actionReceiveConfirm": "Receive and confirm"
   },
   "depositForm": {
     "title": "New deposit",
@@ -601,7 +602,10 @@
     "addHelp": "Adds it to this branch's liquor list and picks it for this deposit",
     "addSave": "Add and pick",
     "addDone": "{name} added",
-    "addExisted": "{name} is already on the list · picked"
+    "addExisted": "{name} is already on the list · picked",
+    "titleReceive": "Receive and confirm",
+    "bodyReceive": "The customer handed the bottles to bar. Enter the bottle count, each bottle’s level and a photo — one tap puts them on the shelf.",
+    "count": "Bottles received"
   },
   "rejectDialog": {
     "title": "Reject deposit",

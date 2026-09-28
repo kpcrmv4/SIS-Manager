@@ -148,6 +148,24 @@ export async function confirmDeposit(depositId: string, levels: number[], photoP
   return res
 }
 
+/** R-075: bar / owner receive a LINE request and confirm it in one step (one transaction). */
+export async function receiveAndConfirm(depositId: string, levels: number[], photoPaths: string[], itemId?: string): Promise<ActionResult<{ id: string; status: string }>> {
+  if (!isUuid(depositId) || !levels.length || levels.length > 50) return { ok: false, error: 'invalid' }
+  const res = await callRpc<{ id: string; status: string }>((sb) =>
+    sb.rpc('receive_and_confirm', {
+      p_deposit: depositId,
+      p_levels: levels.map((l) => Math.round(l)),
+      p_photo_paths: photoPaths.slice(0, 10),
+      p_item_id: isUuid(itemId) ? itemId : undefined,
+    }),
+  )
+  if (res.ok) {
+    touched(depositId)
+    after(() => dispatchSoon())
+  }
+  return res
+}
+
 export async function rejectDeposit(depositId: string, reason: string): Promise<ActionResult<{ id: string; status: string }>> {
   if (!isUuid(depositId)) return { ok: false, error: 'invalid' }
   const res = await callRpc<{ id: string; status: string }>((sb) => sb.rpc('reject_deposit', { p_deposit: depositId, p_reason: cleanText(reason, 200) ?? '' }))

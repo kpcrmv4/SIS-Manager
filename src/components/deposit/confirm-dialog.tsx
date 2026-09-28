@@ -6,7 +6,7 @@ import { Loader2, Printer } from 'lucide-react'
 import { toast } from 'sonner'
 import { ActionDialog } from './action-dialog'
 import { PhotoPicker } from './photo-picker'
-import { confirmDeposit } from '@/lib/deposit/actions'
+import { confirmDeposit, receiveAndConfirm } from '@/lib/deposit/actions'
 import { queuePrint, type PrintJobType } from '@/lib/deposit/print'
 import { getPrintStatus, type PrintStatusView } from '@/lib/print/actions'
 import type { LiquorItem } from '@/lib/deposit/items'
@@ -25,6 +25,7 @@ export function ConfirmDialog({
   items,
   itemId,
   itemName,
+  receive = false,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
@@ -35,6 +36,8 @@ export function ConfirmDialog({
   items: LiquorItem[]
   itemId: string | null
   itemName: string
+  /** R-075: a LINE request that bar received straight from the customer — the bottle count is set here too */
+  receive?: boolean
 }) {
   const t = useTranslations('confirmDialog')
   const td = useTranslations('deposit')
@@ -63,6 +66,11 @@ export function ConfirmDialog({
     }
   }, [open, branchId])
 
+  const setCount = (raw: string) => {
+    const n = Math.min(50, Math.max(1, Math.round(Number(raw) || 1)))
+    setLevels((prev) => Array.from({ length: n }, (_, i) => prev[i] ?? 100))
+  }
+
   const setLevel = (i: number, raw: string) => {
     const n = Math.min(100, Math.max(0, Math.round(Number(raw) || 0)))
     setLevels((prev) => prev.map((v, j) => (j === i ? n : v)))
@@ -74,7 +82,7 @@ export function ConfirmDialog({
       return
     }
     start(async () => {
-      const res = await confirmDeposit(depositId, levels, photos, item.id)
+      const res = receive ? await receiveAndConfirm(depositId, levels, photos, item.id) : await confirmDeposit(depositId, levels, photos, item.id)
       if (!res.ok) {
         toast.error(te(res.error))
         return
@@ -91,8 +99,8 @@ export function ConfirmDialog({
     <ActionDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={t('title')}
-      description={t('body')}
+      title={receive ? t('titleReceive') : t('title')}
+      description={receive ? t('bodyReceive') : t('body')}
       footer={
         <>
           <button type="button" className="btn-ghost" onClick={() => onOpenChange(false)} disabled={pending}>
@@ -117,6 +125,24 @@ export function ConfirmDialog({
           }}
           error={itemError}
         />
+        {receive && (
+          <div className="flex items-center justify-between gap-2.5 text-sm">
+            <label htmlFor="confirm-count" className="font-semibold text-ink">
+              {t('count')}
+            </label>
+            <input
+              id="confirm-count"
+              type="number"
+              min={1}
+              max={50}
+              inputMode="numeric"
+              value={levels.length}
+              onChange={(e) => setCount(e.target.value)}
+              className="input-base w-20 text-right tnum"
+              data-testid="confirm-count"
+            />
+          </div>
+        )}
         {/* type the % or drag the bar — both edit the same number */}
         {levels.map((lvl, i) => (
           <div key={i} className="text-sm">
