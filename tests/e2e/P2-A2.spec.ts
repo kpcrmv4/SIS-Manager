@@ -561,3 +561,22 @@ test.describe('detail dialogs', () => {
     })
   })
 })
+
+test.describe('dialog focus', () => {
+  test.use({ storageState: as('bar') })
+
+  test('P2-A2-23 opening a dialog does not focus a field (no keyboard pops up on a phone); Esc still closes it', async ({ page }) => {
+    const dep = await mustCreate('staff', { qty: 1 })
+    await confirmAll(dep.id, [100])
+    await requestWithdrawal(dep.id, await bottleIds(dep.id), 'take_home')
+    await page.goto(`/deposits/${dep.id}`)
+    await page.getByTestId('withdrawal-reject-open').click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    const focused = await page.evaluate(() => document.activeElement?.tagName ?? '')
+    expect(['INPUT', 'TEXTAREA', 'SELECT']).not.toContain(focused)
+    expect(await page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'))).toBe(true)
+    await page.keyboard.press('Escape')
+    await expect(dialog).toHaveCount(0)
+  })
+})

@@ -8,6 +8,7 @@ import { errorText } from './error-text'
 import type { Deposit } from './my-bottles-client'
 import { useCxPortal } from './portal'
 import { customerFetch, useCxSession } from './session-context'
+import { focusDialogItself } from '@/lib/dialog-focus'
 
 /** "ขอเบิกเหล้า" bottom sheet (P2-C2): pick bottles, in-store/take-home, an optional table. */
 export function WithdrawSheet({
@@ -61,7 +62,7 @@ export function WithdrawSheet({
     <Dialog.Root open onOpenChange={(v) => !v && onClose()}>
       <Dialog.Portal container={portal}>
         <Dialog.Overlay className="fixed inset-0 z-30 bg-cx-scrim" />
-        <Dialog.Content
+        <Dialog.Content onOpenAutoFocus={focusDialogItself}
           aria-describedby={undefined}
           className="fixed inset-x-0 bottom-0 z-31 mx-auto max-h-[85dvh] max-w-120 overflow-auto rounded-t-[20px] border-t border-cx-line-strong bg-cx-sheet px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-2 text-cx-ink shadow-[0_-8px_30px_rgba(0,0,0,.35)]"
           data-testid="cx-withdraw-sheet"

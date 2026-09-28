@@ -9,6 +9,7 @@ import { AiMarkdown } from './ai-markdown'
 import { AiProposalCard, type CardOutcome } from './ai-proposal-card'
 import { AiWelcome } from './ai-welcome'
 import type { Proposal } from '@/lib/ai/proposal-types'
+import { focusDialogItself } from '@/lib/dialog-focus'
 
 type Card = { proposal: Proposal; outcome: CardOutcome }
 type Turn = { role: 'user' | 'assistant'; text: string; error?: string; cards?: Card[] }
@@ -180,7 +181,7 @@ export function AiAssistant({ className, branchName, displayName, role }: { clas
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-30 bg-black/40" />
-        <Dialog.Content
+        <Dialog.Content onOpenAutoFocus={focusDialogItself}
           aria-describedby={undefined}
           className="fixed inset-x-0 bottom-0 z-31 flex h-[88dvh] flex-col rounded-t-[20px] bg-card text-ink shadow-[0_-8px_30px_rgba(0,0,0,.25)] nav:inset-y-0 nav:left-auto nav:right-0 nav:h-dvh nav:w-[420px] nav:rounded-none nav:rounded-l-[16px]"
           data-testid="ai-panel"

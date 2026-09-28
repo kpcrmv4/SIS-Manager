@@ -13,6 +13,7 @@ import { PrintStatusBadge } from '@/components/print/print-status-badge'
 import { useLive } from '@/components/realtime/live-provider'
 import { getPrintStatus, requeuePrintJob, type PrintJobRow } from '@/lib/print/actions'
 import { formatShortDate, formatTime, type AppLocale } from '@/lib/date'
+import { focusDialogItself } from '@/lib/dialog-focus'
 
 const JOB_TONE: Record<PrintJobRow['status'], BadgeTone> = { pending: 'pending', printing: 'progress', completed: 'done', failed: 'urgent' }
 
@@ -198,7 +199,7 @@ export function PrintStatusPanel({ branchId, branchCode, initialJobs }: { branch
       <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-30 bg-black/45" />
-          <Dialog.Content
+          <Dialog.Content onOpenAutoFocus={focusDialogItself}
             aria-describedby="print-setup-confirm-desc"
             className="fixed left-1/2 top-1/2 z-31 w-[92vw] max-w-105 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card p-5 text-ink shadow-e2"
           >

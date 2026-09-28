@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
+import { focusDialogItself } from '@/lib/dialog-focus'
 
 /**
  * The one dialog shell every deposit action (confirm / reject / withdraw / extend / VIP /
@@ -29,7 +30,7 @@ export function ActionDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/45" />
-        <Dialog.Content
+        <Dialog.Content onOpenAutoFocus={focusDialogItself}
           {...(!description && { 'aria-describedby': undefined })}
           className="fixed inset-x-0 bottom-0 z-41 flex max-h-[88vh] flex-col overflow-hidden rounded-t-[20px] bg-card text-ink shadow-[0_-8px_30px_rgba(0,0,0,.25)] nav:inset-x-auto nav:bottom-auto nav:left-1/2 nav:top-1/2 nav:w-full nav:max-w-[440px] nav:-translate-x-1/2 nav:-translate-y-1/2 nav:rounded-[16px] nav:shadow-e2"
         >

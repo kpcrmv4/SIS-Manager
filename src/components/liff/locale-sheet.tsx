@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { CUSTOMER_LOCALES, type CustomerLocale } from '@/lib/i18n/config'
 import { useCxPortal } from './portal'
 import { customerFetch, type CxSession } from './session-context'
+import { focusDialogItself } from '@/lib/dialog-focus'
 
 /** Native names on purpose — a language picker names each language in itself, not in the current UI language. */
 const NATIVE_NAME: Record<CustomerLocale, string> = { th: 'ไทย', en: 'English', zh: '中文', ko: '한국어' }
@@ -53,7 +54,7 @@ export function LocaleSheet({ session, current }: { session: CxSession; current:
       </Dialog.Trigger>
       <Dialog.Portal container={portal}>
         <Dialog.Overlay className="fixed inset-0 z-30 bg-cx-scrim" />
-        <Dialog.Content
+        <Dialog.Content onOpenAutoFocus={focusDialogItself}
           aria-describedby={undefined}
           className="fixed inset-x-0 bottom-0 z-31 mx-auto max-w-120 rounded-t-[20px] border-t border-cx-line-strong bg-cx-sheet px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-2 text-cx-ink shadow-[0_-8px_30px_rgba(0,0,0,.35)]"
           data-testid="cx-locale-sheet"

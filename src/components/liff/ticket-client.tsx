@@ -11,6 +11,7 @@ import { CxEmpty, CxErrorRetry, CxLoader } from './cx-states'
 import { errorText } from './error-text'
 import { useCxPortal } from './portal'
 import { customerFetch, useCxSession } from './session-context'
+import { focusDialogItself } from '@/lib/dialog-focus'
 
 type Booking = {
   id: string
@@ -175,7 +176,7 @@ export function TicketClient({ code }: { code: string }) {
       <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
         <Dialog.Portal container={portal}>
           <Dialog.Overlay className="fixed inset-0 z-30 bg-cx-scrim" />
-          <Dialog.Content
+          <Dialog.Content onOpenAutoFocus={focusDialogItself}
             aria-describedby={undefined}
             className="fixed left-1/2 top-1/2 z-31 w-[calc(100%-2rem)] max-w-85 -translate-x-1/2 -translate-y-1/2 rounded-[18px] border border-cx-line-strong bg-cx-sheet p-4 text-cx-ink shadow-[0_20px_50px_rgba(0,0,0,.45)]"
             data-testid="cx-ticket-cancel-dialog"
