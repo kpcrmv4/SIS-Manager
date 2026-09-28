@@ -1258,7 +1258,22 @@
       "other": "Something new needs you"
     },
     "open": "Open",
-    "sound": "Chime for new jobs (this device)"
+    "sound": "Chime for new jobs (this device)",
+    "titles": {
+      "deposit_received": "Bottles to confirm",
+      "deposit_withdrawal_requested": "Withdrawal request",
+      "deposit_requested": "LINE deposit request",
+      "booking_pending": "New booking to confirm",
+      "booking_new": "New booking, confirmed",
+      "booking_cancelled": "Customer cancelled a booking",
+      "test": "Test notification",
+      "other": "Something new is waiting"
+    },
+    "detail": {
+      "table": "Table {table}",
+      "party": "{party} people",
+      "test": "This device can receive notifications"
+    }
   },
   "print": {
     "statusError": "Couldn't check the printer",

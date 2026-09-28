@@ -9,6 +9,32 @@ export function notificationText(t: T, kind: string, payload: Record<string, unk
   return t(`kinds.${textKind(kind)}`, { item: v('item'), customer: v('customer'), table: v('table') || '—', name: v('name'), party: v('party'), time: v('time'), code: v('code') })
 }
 
+/**
+ * The bell's row (owner, 2026-09-28 — one truncated line lost the customer and the table): a title,
+ * then up to two short detail lines. Deposits: liquor · code, then customer · table; bookings:
+ * name · party, then night · time. A missing value is left out, never shown as "—".
+ */
+export function notificationParts(t: T, kind: string, payload: Record<string, unknown> | null, fmtNight: (ymd: string) => string): { title: string; lines: string[] } {
+  const p = payload ?? {}
+  const v = (k: string) => (p[k] == null || p[k] === '' ? '' : String(p[k]))
+  const k = textKind(kind)
+  const join = (...xs: string[]) => xs.filter(Boolean).join(' · ')
+  const title = t(`titles.${k}`)
+  if (k.startsWith('deposit_')) {
+    return {
+      title,
+      lines: [join(v('item'), v('code')), join(v('customer'), v('table') ? t('detail.table', { table: v('table') }) : '')].filter(Boolean),
+    }
+  }
+  if (k.startsWith('booking_')) {
+    return {
+      title,
+      lines: [join(v('name'), v('party') ? t('detail.party', { party: v('party') }) : ''), join(v('night') ? fmtNight(v('night')) : '', v('time'), v('code'))].filter(Boolean),
+    }
+  }
+  return { title, lines: k === 'test' ? [t('detail.test')] : [] }
+}
+
 const SOUND_KEY = 'sis_alert_sound'
 
 /** The alert sound for a new job is this device's choice, off until turned on. */

@@ -86,6 +86,10 @@ test.describe('bar (branch A)', () => {
     // (owner, 2026-09-27) a deposit waiting for bar wears its work's icon box in the "to confirm" hue
     await expect(first).toHaveAttribute('data-kind', 'deposit_received')
     await expect(first.locator('.bg-status-progress-bg svg')).toHaveCount(1)
+    // (owner, 2026-09-28) title, then liquor · code, then customer · table — each on its own line
+    await expect(first.getByTestId('bell-item-title')).toHaveText('เหล้ารอยืนยัน')
+    await expect(first.getByTestId('bell-item-line').first()).toContainText(/Johnnie Walker Black Label · DEP-/)
+    await expect(first.getByTestId('bell-item-line').nth(1)).toContainText(/ลูกค้า · โต๊ะ A3$/)
     const barId = fixtureIds().users.bar
     const { data: newest } = await adminDb().from('notifications').select('id, link').eq('user_id', barId).order('created_at', { ascending: false }).limit(1).single()
     await first.click()

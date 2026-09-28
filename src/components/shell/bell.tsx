@@ -12,7 +12,7 @@ import { appEnv, noSubscribe } from '@/components/pwa/platform'
 import { usePush } from '@/components/pwa/use-push'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { formatShortDate, formatTime } from '@/lib/date'
-import { alertSoundOn, chime, clearSystemNotifications, notificationText, setAlertSound } from './notification-text'
+import { alertSoundOn, chime, clearSystemNotifications, notificationParts, setAlertSound } from './notification-text'
 
 // each kind wears its work's icon and hue — the same as the LINE switches and the /deposits filter cards (R-047)
 const LOOK: Record<string, { icon: LucideIcon; tone: string }> = {
@@ -161,7 +161,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
       </>
     )
 
-  const text = (r: Row) => notificationText(t as never, r.kind, r.payload)
+  const parts = (r: Row) => notificationParts(t as never, r.kind, r.payload, (ymd) => formatShortDate(`${ymd}T00:00:00+07:00`))
 
   return (
     <div data-testid="bell-list">
@@ -172,7 +172,7 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
             <button
               type="button"
               onClick={() => void openRow(r)}
-              className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-2"
+              className="flex w-full items-start gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-2"
               data-testid="bell-item"
               data-unread={r.read_at ? 'false' : 'true'}
               data-kind={r.kind}
@@ -187,8 +187,22 @@ function BellList({ userId, tick, onChanged, onNavigate }: { userId: string; tic
                 )
               })()}
               <span className="min-w-0 flex-1">
-                <span className={`block truncate text-sm leading-5 ${r.read_at ? 'text-ink-2' : 'font-semibold text-ink'}`}>{text(r)}</span>
-                <span className="block text-xs text-muted-token tnum">
+                {(() => {
+                  const { title, lines } = parts(r)
+                  return (
+                    <>
+                      <span className={`block truncate text-sm leading-5 ${r.read_at ? 'text-ink-2' : 'font-semibold text-ink'}`} data-testid="bell-item-title">
+                        {title}
+                      </span>
+                      {lines.map((l, i) => (
+                        <span key={i} className={`block truncate text-[13px] leading-5 ${r.read_at ? 'text-muted-token' : 'text-ink-2'}`} data-testid="bell-item-line">
+                          {l}
+                        </span>
+                      ))}
+                    </>
+                  )
+                })()}
+                <span className="mt-0.5 block text-xs text-muted-token tnum">
                   {formatShortDate(r.created_at)} {formatTime(r.created_at)}
                 </span>
               </span>
